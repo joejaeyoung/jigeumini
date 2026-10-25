@@ -16,7 +16,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Configuration
 @Profile("pipeline")
 class ObservationConfiguration {
-    record ObservationTopic(String name) { }
     @Bean ObservationTopic observationTopic(PipelineProperties pipeline,
             @Value("${observations.topic:broadcast.observed.v1}") String topic,
             @Value("${notifications.topic:}") String notificationTopic) {

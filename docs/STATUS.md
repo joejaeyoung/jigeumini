@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `feat/viewer-observations`
+2026-10-25 · 브랜치 `feat/category-reactions`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -38,6 +38,10 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 관측은 기존 수집기 파일 잠금 이후 채널 start에서 활성화하고 stopped 이후 새 조회를 멈춘다. 다른 호스트 간 lease는 없다. 비압축 이력을 보장하기 위해 공통 토픽 초기화에서 cleanup.policy=delete를 명시·검사한다. 기존 compact 토픽은 설정을 바꾸지 않고 거부한다. 원천 시각/시청자 수를 추정하거나 현재값을 과거로 채우지 않는다. 기존 replay CLI는 관측 토픽을 지원하지 않는다. 사용자가 확인한 live PoC는 내려둔 상태를 유지한다.
 
+### 카테고리 반응 #6
+
+`feat/category-reactions`, F05 → T02/T06/T07/T08. [계약](api/CATEGORIES.md)의 독립 채팅/관측 소비와 시각 결합·원자 보정·품질 조회·웹을 구현했다. [집중 검증](api/CATEGORIES_VERIFICATION.md) 실제 Kafka/DB6개와 Chromium28개가 통과했고 최종 회귀를 준비한다. 채팅 이전 최신 관측의 허용 나이는 min(120초, 표본TTL), 미상/만료는 unknown으로 분리한다. 늦은 관측은 해당 시각부터120초 범위의 보존된 배정만 원자적으로 정정한다. 별도 작업 폴더에서 #5 최종 검증과 빌드를 분리하며 선행 병합 뒤 PR을 만든다. 부하 편향·다중 소비자 수치는 #11 실험 전까지 완료로 주장하지 않는다.
+
 ## 오류 격리·복구 진단 #10
 
 `feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. [격리·진단 계약](pipeline/DLQ.md)대로 ranking/trend의 영구 계약 오류만 격리하고, DLQ ACK 후 정상 ledger/bucket·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DB commit 후 Kafka BATCH offset commit을 유지한다. 같은 배치의 eventId 충돌 후보는 모두 제외하고 기존 ledger는 보존한다.
@@ -74,7 +78,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T04 | 검증됨 | [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변 | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
 | T05 | 검증됨 | [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 미착수 | — | channelId·3 partition 설정 구현, 키별 순서 실험 미실행 | #11 동일 키 분포·다중 producer·증설 영향 실험 |
-| T07 | 미착수 | — | hot key 분포·shard 비교 근거 없음 | #11 균등/80% 편향과 키 분산 후보 비용 비교 |
+| T07 | 부분 검증 | [카테고리 동시 합산](api/CATEGORIES_VERIFICATION.md) | 두 채널의 동일 카테고리100건·중복100건에서 합계100 유지. 채널별 bucket 저장 후 조회 합산 | #11 균등/80% 편향과 키 분산 후보 비용·처리량 비교 |
 | T08 | 부분 검증 | [알림60초 중단·복구](pipeline/NOTIFICATIONS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리; 두 group의 partition lag·첫 미처리 offset 시각·격리/만료 진단; 알림60초 중단 중 ranking 진행·feed 회복 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
 | T09 | 미착수 | — | timeout 설정 구현, 제한별 장애 실험 미실행 | #11 poll 초과·heartbeat 단절·consumer 추가/종료를 각각 재현 |
 | T10 | 부분 검증 | [알림 ACK·거부·DB 대조](pipeline/NOTIFICATIONS_VERIFICATION.md), [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조; 알림 broker 거부·ACK 뒤 재발행2/feed1 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |

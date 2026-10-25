@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-26 · 브랜치 `feat/kafka-ha`
+2026-10-26 · 브랜치 `technicaltest/ack-commit`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -87,7 +87,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 <!-- tech-status:start -->
 | 기술 ID | 상태 | 검증 근거 | 확인한 범위 | 남은 문제·다음 행동 |
 |---|---|---|---|---|
-| T01 | 부분 검증 | [DLQ ACK·commit 경계](pipeline/DLQ_VERIFICATION.md), [M1 자동 검사](pipeline/VERIFICATION.md#자동-검사), [재처리 격리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | BATCH의 DB 성공 이후 커밋·DB 실패 시 진행 차단; DLQ ACK 전 원본 offset 차단; replay는 Kafka commit 없이 별도 DB progress 사용 | F11에서 Auto/BATCH/MANUAL 비교, 직접 ACK와 컨테이너 커밋 구분 |
+| T01 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md) | 실제 AUTO/BATCH/MANUAL 각3개 종료 경계·재시작 대조, 정상9건 누락0/중복0, 잘못된 다음 poll 순서에서누락1 재현 | 합성 단일 입력·지정 client/container 버전 범위, 제품BATCH 유지 |
 | T02 | 부분 검증 | [리포트 귀속·중복·rollback](api/REPORTS_VERIFICATION.md), [관측 중복·역순·rollback](api/OBSERVATIONS_VERIFICATION.md), [알림 멱등·rollback](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ 멱등·충돌](pipeline/DLQ_VERIFICATION.md), [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위), [재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영; replay 배치 내부/간 중복·충돌·SQL rollback; 알림 spikeId 중복·충돌·SQL rollback | 신규 trend의 SQL rollback 전용 장애 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
 | T03 | 검증됨 | [Outbox commit·ACK 직후 종료](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ ACK·DB commit 직후 종료](pipeline/DLQ_VERIFICATION.md), [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사), [replay worker 종료](pipeline/REPLAY_VERIFICATION.md) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건; replay commit 후 JVM 종료·watchdog 실패·새 run 재실행; DLQ ACK 후 halt(93)·DB commit 후 halt(94), 재전달 격리 1건·집계 2건; F07 outbox commit halt(95)·ACK halt(96) 후 물리2/feed1 | 모든 장애·고부하 복구로 확대 해석하지 않음 |
 | T04 | 검증됨 | [재처리 후속 진단](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md), [리포트 active 보호·정리](api/REPORTS_VERIFICATION.md), [관측7일 보존](api/OBSERVATIONS_VERIFICATION.md), [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변 | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
@@ -96,7 +96,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T07 | 검증됨 | [균등/80% 편향·shard 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 동일입력30000/물리30300, channelId/shard3의 partition·lag·p95/p99·DB/replay 대조; 현재 제품키 channelId 유지 결정 | 단일호스트·단회 측정. shard는 품질/offset 계약 이행 전 제품 채택 안 함 |
 | T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | full 제품 projection 동시 비용·자동확장 운영은 #29/#30. 표본 사이 순간 최대치 미확인 |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
-| T10 | 부분 검증 | [알림 ACK·거부·DB 대조](pipeline/NOTIFICATIONS_VERIFICATION.md), [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조; 알림 broker 거부·ACK 뒤 재발행2/feed1 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
+| T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절 | 원래디스크복귀범위; 유일replica디스크영구손실·AZ내구성미검증 |
 | T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
@@ -206,3 +206,7 @@ F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/
 ### Kafka HA #29 실제 검증
 
 F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA_HA_VERIFICATION.md)·[정제근거](poc/evidence/kafka-ha-2026-10-26/summary.json). 01e943e에서실제6노드의broker1/2대손실·controller1/2대손실·복구·RF1→3이행·최종ACK/broker/DB대조10단계통과. main172시도/171ACK=broker=DB,이행20일치,정리완료. 처음3실패와보완도보존했다. a68011e에서 trend DLQ의 LOCAL 기본값 호출을 수정하고 전체 Spring 분석기·네 HA topic·10건 ranking/trend를 추가한11단계가 통과했다. 최종 Claude·CI 후 병합하며 실제AZ/디스크손상/외부배포는 미검증이다.
+
+### ACK·commit 경계 #31
+
+F11 → T01/T10. 472908f의 실제6노드/별도JVM commit10사례·ACK3수준 대조가 통과했다. [검증·결정](pipeline/ACK_COMMIT.md)과 [원본2회](poc/evidence/ack-commit-2026-10-26/summary.json)에 첫 실패와 보완, 위험한 AUTO poll 순서의 누락1·정상9사례누락0·복구broker/DB차이0을 기록했다. 제품BATCH/acks=all 설정은 유지한다. 최신49a3834 clean tree 재실행도13사례·정리 통과했고 물리/고유/DB 및 실제 설정을 기록했다. 최종 Claude·CI를 진행한다.

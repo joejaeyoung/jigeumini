@@ -286,6 +286,7 @@ class ReplayIntegrationTest {
         }
     }
     @Test void missingBuildResourceReturnsOnlyAFixedCodeAndDoesNotCreateARun() throws Exception {
+        Path originalJar=executableJar;
         var manifest=Path.of("../work/replay-build-manifest-"+UUID.randomUUID()+".json").toAbsolutePath();Files.createDirectories(manifest.getParent());Files.writeString(manifest,capture(null,null).json());
         var altered=Files.createTempFile(manifest.getParent(),"replay-build-missing-",".jar");Files.copy(executableJar,altered,StandardCopyOption.REPLACE_EXISTING);
         try {
@@ -293,6 +294,6 @@ class ReplayIntegrationTest {
             executableJar=altered;
             assertThat(commandExpected(2,"create",manifest.toString()).path("error").asText()).isEqualTo("BUILD_UNAVAILABLE");
             assertThat(jdbc.queryForObject("SELECT count(*) FROM replay_run",Long.class)).isZero();
-        } finally { Files.deleteIfExists(altered);Files.deleteIfExists(manifest); }
+        } finally { executableJar=originalJar;Files.deleteIfExists(altered);Files.deleteIfExists(manifest); }
     }
 }

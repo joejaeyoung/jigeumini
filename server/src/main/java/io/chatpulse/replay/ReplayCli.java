@@ -33,7 +33,8 @@ public final class ReplayCli {
                 }
             }
             if(args[0].equals("migrate")) {
-                require(args,1);try(var ds=PostgresSupport.openMigrated(env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"),env("PIPELINE_DB_USER","chatpulse"),env("PIPELINE_DB_PASSWORD","local-chatpulse"))) {print(Map.of("state","MIGRATED","buildId",ReplayBuild.id()));return 0;}
+                require(args,1);String buildId=ReplayBuild.id();
+                try(var ds=PostgresSupport.openMigrated(env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"),env("PIPELINE_DB_USER","chatpulse"),env("PIPELINE_DB_PASSWORD","local-chatpulse"))) {print(Map.of("state","MIGRATED","buildId",buildId));return 0;}
             }
             try(var ds=dataSource(Set.of("status","compare").contains(args[0]))) {
                 var store=new ReplayStore(ds);

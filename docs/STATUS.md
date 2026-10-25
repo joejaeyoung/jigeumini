@@ -97,7 +97,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T08 | 부분 검증 | [독립 report 중단·재시작](api/REPORTS_VERIFICATION.md), [알림60초 중단·복구](pipeline/NOTIFICATIONS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리; 두 group의 partition lag·첫 미처리 offset 시각·격리/만료 진단; 알림60초 중단 중 ranking 진행·feed 회복 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
 | T09 | 미착수 | — | timeout 설정 구현, 제한별 장애 실험 미실행 | #11 poll 초과·heartbeat 단절·consumer 추가/종료를 각각 재현 |
 | T10 | 부분 검증 | [알림 ACK·거부·DB 대조](pipeline/NOTIFICATIONS_VERIFICATION.md), [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조; 알림 broker 거부·ACK 뒤 재발행2/feed1 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
-| T11 | 부분 검증 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |
+| T11 | 검증됨 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |
 | T12 | 미착수 | — | 직렬 ACK worker 기준선만 존재 | #11 bounded async 후보와 처리량·메모리·실패 추적 비교 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
 | T14 | 미착수 | — | 수집기별 파일 잠금만 존재 | #28 DB 임대·인계·오래된 소유자 차단 |
@@ -203,3 +203,7 @@ F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)의 고정 입
 ### 유한 비동기 발행 #27
 
 F14 → T02/T06/T10/T11/T12. #11의 직렬 ACK 대기 병목과 bounded async 후보를 바탕으로 제품 발행기를 변경 중이다. 전체1,000·채널별500·앱 발행 중64 상한, 채널 순환 배분, frame 전량 수락, 채널 초과의 해당 채널 중단과 전역/전달 장애의 전체 중단, 종료 후 불변 계수를 구현했다. 발행 단위13개와 #11 통합 후 서버 전체102개·하네스16·JAR가 통과했다. 실제 broker/DB·성능 대조와 Claude·최종 CI는 남아 있다. #11 계측 재검증이 끝난 뒤 같은 broker에서 순차 실행한다.
+
+### 유한 비동기 발행 #27 검증
+
+F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/PUBLISHER_VERIFICATION.md)·[정제 근거](poc/evidence/publisher-2026-10-26/summary.json). 로컬단위120·하네스16·JAR,실제KafkaDB81,실제입력6회+소유broker장애6경우를 통과했다. 제품500/s15,000·2,000/s120,000·편중/중복30300→DB30000, replay차이0. 채널별공정성은 합성단위범위이며 소스복원/HA는 포함하지 않는다. #11병합과최종HEAD Claude/CI 후 PR33을 병합한다.

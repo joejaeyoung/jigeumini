@@ -74,7 +74,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
             List<Pending> frame;
             try { frame = events.stream().map(e -> new Pending(++sequence, e, codec.encode(e))).toList(); }
             catch (RuntimeException invalid) { reject(events, "PUBLISH_INVALID_EVENT", true); return; }
-            var counts = new HashMap<String, Integer>();
+            var counts = new LinkedHashMap<String, Integer>();
             frame.forEach(p -> counts.merge(p.event.channelId(), 1, Integer::sum));
             long newChannels = counts.keySet().stream().filter(id -> !channels.containsKey(id)).count();
             if (newChannels + channels.size() > MAX_TRACKED_CHANNELS) reject(events, "PUBLISH_CHANNELS_LIMIT", true);
@@ -130,11 +130,13 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 try {
                     kafka.send(new ProducerRecord<>(topic, null, p.event.receivedAt().toEpochMilli(),
                             p.event.channelId(), p.bytes)).whenComplete((result, error) -> delivered(p, error));
-                } catch (RuntimeException error) { delivered(p, error); }
+                } catch (RuntimeException | Error error) { delivered(p, error); }
             }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
-            synchronized (lock) { if (!finished) fail("PUBLISH_INTERRUPTED"); }
+            synchronized (lock) { if (!finished) { dispatchFailed = true; fail("PUBLISH_INTERRUPTED"); } }
+        } catch (RuntimeException | Error unexpected) {
+            synchronized (lock) { if (!finished) { dispatchFailed = true; fail("PUBLISH_WORKER_FAILED"); } }
         }
     }
     private void delivered(Pending p, Throwable error) {

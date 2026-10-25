@@ -30,6 +30,7 @@
 | 전역 한도 초과 | frame 전부 거절, `PUBLISH_BUFFER_REJECTED`로 전체 수집 중단. broker가 정상이면 기존 수락 큐는 drain |
 | 잘못된 이벤트 | frame 전부 거절, `PUBLISH_INVALID_EVENT`로 전체 중단. 원문/예외 세부정보 출력 없음 |
 | broker callback·동기 send 실패 | `KAFKA_DELIVERY_FAILED`, 이후 발행·수락 중단. 실패 입력과 미발행 큐는 미확인으로 남김 |
+| dispatcher 내부의 예상하지 못한 종료 | `PUBLISH_WORKER_FAILED`, 건강 상태 실패·입력 중단·미확인 보존 |
 | 진단 채널 수1000 초과 | `PUBLISH_CHANNELS_LIMIT` 전체 중단. 진단 map도 유한, 추가 거절은 untrackedRejected에 합산 |
 | 종료 | 새 수락 중단, 최대10초 drain. timeout은 `PUBLISH_DRAIN_TIMEOUT`; 인터럽트는 `PUBLISH_INTERRUPTED` |
 
@@ -72,3 +73,5 @@
 ```
 
 통제 입력100/s·15초는 양쪽 모두 완료하는 범위에서 지연/요청/배치를 비교한다.500/s·30초의 미달 여부와2,000/s 순간 입력,80% hot 채널·중복, 실제 별도 broker PAUSE/STOP을 구분한다. broker-fault는 직렬 기준선/실험 후보/제품 비동기6경우며 공유 broker를 멈추지 않는다. 실제 결과와 검증 범위는 STATUS의 근거를 따른다.
+
+프레임 안 여러 채널이 동시에 한도를 넘으면 입력의 첫 채널 순서로 중단 대상을 정한다. send의 RuntimeException/Error와 dispatcher의 예상하지 못한 종료 모두 고정 코드만 기록하고 원인 문자열은 출력하지 않는다.

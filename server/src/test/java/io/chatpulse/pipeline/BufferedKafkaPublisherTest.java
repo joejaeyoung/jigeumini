@@ -83,6 +83,18 @@ class BufferedKafkaPublisherTest {
             assertTrue(p.deliveryFailed()); verify(b.kafka, times(1)).send(any(ProducerRecord.class));
         }
     }
+    @Test void fatalSendFailureStopsWorkerAndPreservesUnconfirmedWithoutLeakingCause() {
+        var b = new Broker(); when(b.kafka.send(any(ProducerRecord.class))).thenThrow(new AssertionError("PRIVATE_CANARY"));
+        try (var p = publisher(b, 4, 4, 1)) {
+            p.accept(List.of(event(HOT), event(COLD)));
+            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).until(p::deliveryFailed);
+            assertThrows(SourceFailure.class, p::checkHealthy);
+            var result = p.finish(); balances(result, 2, 0, 0);
+            assertEquals("KAFKA_DELIVERY_FAILED", result.get("failureCode"));
+            assertEquals(1, result.get("queued")); assertEquals(1, result.get("failedUnconfirmed"));
+            assertFalse(result.toString().contains("PRIVATE_CANARY")); verify(b.kafka, times(1)).send(any(ProducerRecord.class));
+        }
+    }
     @Test void asynchronousWindowAndPhysicalDuplicatesRemainBounded() throws Exception {
         var b = new Broker(); var e = event(HOT);
         try (var p = publisher(b, 4, 4, 2)) {

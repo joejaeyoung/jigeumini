@@ -1,0 +1,91 @@
+{
+  "source": "SYNTHETIC",
+  "startedAt": "2026-10-26T00:00:00Z",
+  "finishedAt": "2026-10-26T00:00:00Z",
+  "result": "COMPLETE",
+  "pages": 1,
+  "requests": 2,
+  "duplicateRows": 0,
+  "candidates": [
+    {
+      "channelId": "00000000000000000000000000000001",
+      "liveId": 1,
+      "followerCount": 999,
+      "viewerCount": 100,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000002",
+      "liveId": 2,
+      "followerCount": 1000,
+      "viewerCount": 50,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000003",
+      "liveId": 3,
+      "followerCount": 5000,
+      "viewerCount": 50,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000004",
+      "liveId": 4,
+      "followerCount": null,
+      "viewerCount": 30,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000005",
+      "liveId": 5,
+      "followerCount": 10000,
+      "viewerCount": 200,
+      "adult": true,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000006",
+      "liveId": 6,
+      "followerCount": 20000,
+      "viewerCount": 400,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000007",
+      "liveId": 7,
+      "followerCount": 100000,
+      "viewerCount": 500,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    },
+    {
+      "channelId": "00000000000000000000000000000008",
+      "liveId": 8,
+      "followerCount": 500,
+      "viewerCount": 20,
+      "adult": false,
+      "live": true,
+      "observedAt": "2026-10-26T00:00:00Z",
+      "ambiguousBroadcast": false
+    }
+  ]
+}

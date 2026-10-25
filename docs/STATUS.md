@@ -99,6 +99,10 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T10 | 부분 검증 | [알림 ACK·거부·DB 대조](pipeline/NOTIFICATIONS_VERIFICATION.md), [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조; 알림 broker 거부·ACK 뒤 재발행2/feed1 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
 | T11 | 부분 검증 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |
 | T12 | 미착수 | — | 직렬 ACK worker 기준선만 존재 | #11 bounded async 후보와 처리량·메모리·실패 추적 비교 |
+| T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
+| T14 | 미착수 | — | 수집기별 파일 잠금만 존재 | #28 DB 임대·인계·오래된 소유자 차단 |
+| T15 | 미착수 | [HA 조사](research/KAFKA_DEPLOYMENT.md) | 복제/ISR/quorum 운영 후보 조사; RF1 로컬 검증과 구분 | #29 격리 복제 클러스터 장애 시험 |
+| T16 | 미착수 | [배포 조사](research/KAFKA_DEPLOYMENT.md) | 외부 배포 미실행; 컨테이너/복구 리허설 설계 | #30 이미지·rollback·DB/offset 복원 대조 |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.
@@ -180,6 +184,16 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 - 시안의 가상 방송·건수·카테고리·썸네일을 실제 서버 데이터로 오인하게 제품에 옮기지 않는다. 실제 이미지와 반응 배수는 후속 API 구현 후 연결한다.
 
 - #12 리뷰 보완(2026-10-25): 메타데이터만 먼저 도착해도 미확인 집계를 기록 없음으로 표시하지 않는다. 집계 실패와 기간 전환 지연을 포함한 웹 e2e 19개 및 웹 check 통과.
+
+## 운영 확장 후속 이슈
+
+2026-10-26 사용자 요청에 따라 [#26](https://github.com/joejaeyoung/jigeumini/issues/26) 발견·선정 → [#27](https://github.com/joejaeyoung/jigeumini/issues/27) 비동기 발행 → [#28](https://github.com/joejaeyoung/jigeumini/issues/28) 수집기 인계, [#29](https://github.com/joejaeyoung/jigeumini/issues/29) Kafka HA → [#31](https://github.com/joejaeyoung/jigeumini/issues/31) ACK/커밋 실험과 [#30](https://github.com/joejaeyoung/jigeumini/issues/30) 배포/복구 리허설을 등록했다. 공식 자료는 [치지직](research/CHZZK_SCALE.md)·[Kafka/배포](research/KAFKA_DEPLOYMENT.md)에 사실/제안/미확인을 구분했다.  #26의 공식 목록 어댑터·결정적 선정 미리보기는 develop에 병합했다. 외부 배포·main 릴리스는 기존 요청의 별도 실행 경계를 유지한다.
+
+### 방송 선정 #26
+
+F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff5종을 검증했다. [선정 계약](discovery/README.md)·[검증](discovery/VERIFICATION.md)·[정제 근거](poc/evidence/selection-2026-10-26.json). Client 인증 목록 어댑터는 기본 비활성이며 page/request/time/body 상한·부분 결과·안전한 필드만 남긴다. 선정은 순수 정책으로 분리하고 공식/합성의 실제 두 adapter를 검토했다. 원문/비밀 헤더를 저장하지 않으며 assigned/connected/healthy는미관측null이다. 최종f9db520 Claude APPROVE·push40209813744/PR40209816956 SUCCESS 후 PR32를1089522로 develop에 병합했고 #26/보드를 완료했다. CI는 단위101·실제KafkaDB77·하네스16·웹29/31이다. 공개live와 외부배포는 실행하지 않았다.
+
+#26 a31eebe Claude APPROVE·push40209024613/PR40209027685 성공 이후 비차단 리뷰6개를 반영했다. b200134에서 단위101·하네스16·JAR·정책5종 CLI 재실행이 통과했으며 최종 HEAD 리뷰/CI와 develop 병합도 완료했다.
 
 ### 부하·편향·복구 실험 #11
 

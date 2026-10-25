@@ -57,6 +57,8 @@ public final class ObservationCollector implements AutoCloseable, io.chatpulse.p
         Instant at = clock.instant();
         try {
             if (!closed && active.contains(channel)) publisher.accept(BroadcastObserved.observed(run, channel, at, ttl, data));
+        } catch (IllegalArgumentException invalid) {
+            org.slf4j.LoggerFactory.getLogger(ObservationCollector.class).warn("OBSERVATION_CONTRACT_INVALID");
         } catch (RuntimeException ignored) {
             // ACK를 확인하지 못한 관측을 완료로 간주하거나 과거로 채우지 않는다. 이력 공백은 TTL로 드러난다.
             org.slf4j.LoggerFactory.getLogger(ObservationCollector.class).warn("OBSERVATION_PUBLISH_UNCONFIRMED");

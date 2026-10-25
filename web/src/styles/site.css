@@ -80,3 +80,6 @@ dialog { border: 1px solid var(--color-rule); padding: 0; border-radius: 16px; c
 .observation-selection, .observation-empty { color: #5a6b63; font-size: .85rem; }
 .chart-times { margin-top: .4rem; color: #65756e; }
 @media (max-width: 480px) { .observation-timeline { padding: .8rem; } .chart-heading { font-size: .72rem; gap: .4rem; } }
+
+.observation-picker { display: grid; gap: .4rem; margin-top: 1rem; font-size: .8rem; }
+.observation-picker select { width: 100%; min-height: 44px; font: inherit; padding: .5rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-surface); }

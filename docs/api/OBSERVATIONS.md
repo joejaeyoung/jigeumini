@@ -4,7 +4,7 @@
 
 ## 원천과 시각
 
-공개 `GET /service/v2/channels/{channelId}/live-detail`의 `concurrentUserCount`는 현재 시청자 수(명), `liveId`는 원천 방송 식별자다. [공개 비성인3채널의 정제 표본](../poc/evidence/observation-source-2026-10-25.json)에서 각 한 번 실제 정수 필드를 확인했다. 이 표본이 전체 채널·장기 가용성을 보장하지 않는다. 원천 `openDate`는 시간대가 없어서 해석·저장하지 않는다. `observedAt`은 새 응답을 받은 수집기 UTC 시각이며 실제 방송 시작이나 카테고리 전환 시각이 아니다.
+공개 `GET /service/v2/channels/{channelId}/live-detail`의 `concurrentUserCount`는 현재 시청자 수(명), `liveId`는 원천 방송 식별자다. [공개 비성인3채널의 정제 표본](../poc/evidence/observation-source-2026-10-25.json)에서 각 한 번 실제 정수 필드를 확인했다. 이 표본이 전체 채널·장기 가용성을 보장하지 않는다. 원천 `openDate`는 시간대가 없어서 해석·저장하지 않는다. `observedAt`은 새 응답을 받은 수집기 UTC 시각을 마이크로초로 내림한 값이며 실제 방송 시작이나 카테고리 전환 시각이 아니다.
 
 원천 계약 검토는 [기존 메타데이터 계약](BROADCAST_METADATA.md), [공식 방송 API](https://chzzk.gitbook.io/chzzk/chzzk-api/live), [공개 구현의 필드](https://github.com/kimcore/chzzk/blob/main/src/api/live.ts)를 참고했다. 공식 인증 API와 익명 공개 조회의 이용 범위를 같다고 주장하지 않는다. 소프트콘을 데이터 공급원으로 쓰지 않는다.
 
@@ -21,7 +21,7 @@
 
 ## 이벤트와 저장
 
-`broadcast.observed.v1`은 key=channelId, CreateTime=observedAt, 3 partitions/RF=1의 **비압축 이력** 토픽이다. `observations.topic`으로 별도 이름을 지정한다. 채팅/알림 토픽과 같은 이름은 거부한다. 공통 초기화는 cleanup.policy=delete를 명시·검사하고 compact 기존 토픽을 변경 없이 거부한다. 생성·기존 설정 확인은 [공통 기동 계약](../pipeline/TOPIC_READINESS.md)을 따른다.
+`broadcast.observed.v1`은 key=channelId, CreateTime=observedAt, 3 partitions/RF=1의 **비압축 이력** 토픽이다. `observations.topic`으로 별도 이름을 지정한다. 채팅/알림/DLQ 토픽과 같은 이름은 거부한다. 공통 초기화는 cleanup.policy=delete를 명시·검사하고 compact 기존 토픽을 변경 없이 거부한다. 생성·기존 설정 확인은 [공통 기동 계약](../pipeline/TOPIC_READINESS.md)을 따른다.
 
 이벤트는 schemaVersion=1, UUID eventId, runId, channelId, observedAt, ttlSeconds, nullable viewerCount, liveStatus, quality, nullable sourceBroadcastId, broadcastIdentity, nullable categoryId/categoryName이다. 최대4KiB, 정수 문자열·소수 건수·음수·JS 안전 정수 초과를 거부한다. 실제0명은 OBSERVED/0, 없는 수치는 MISSING_VIEWER_COUNT/null이다. 실패·제한·오프라인에서는 이전 수치를 복사하지 않는다. 방송 ID가 없으면 UNAVAILABLE이며 내부 ID를 원천 ID처럼 꾸미지 않는다.
 

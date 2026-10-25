@@ -52,6 +52,15 @@ class ObservationIntegrationTest {
     private long count() { return jdbc.queryForObject("SELECT count(*) FROM broadcast_observation", Long.class); }
     private long progress() { return jdbc.queryForObject("SELECT max(next_offset) FROM observation_progress", Long.class); }
     private ObservationStore.History history() { return store.history(CHANNEL, Instant.now().minusSeconds(3600), Instant.now().plusSeconds(1)); }
+    @Test void observationAtNanosecondMinuteBoundaryStaysInItsOriginalWindow() {
+        var boundary = Instant.parse("2026-10-25T12:00:00Z");
+        store = store(schema, Clock.fixed(boundary.plusSeconds(10), ZoneOffset.UTC));
+        var before = BroadcastObservedTest.sample(boundary.minusNanos(1), 10L);
+        var after = BroadcastObservedTest.sample(boundary.plusNanos(1), 20L);
+        store.apply(List.of(record(before,0),record(after,1)));
+        assertEquals(List.of(before), store.history(CHANNEL,boundary.minusSeconds(60),boundary).samples());
+        assertEquals(List.of(after), store.history(CHANNEL,boundary,boundary.plusSeconds(60)).samples());
+    }
     @Test void reorderedDuplicateAndNullObservationsRemainActualPointsAndConflictRollsBackBatch() {
         var now = Instant.now().minusSeconds(1);
         var first = BroadcastObservedTest.sample(now.minusSeconds(120), 0L);

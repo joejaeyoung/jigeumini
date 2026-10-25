@@ -22,6 +22,8 @@ class BroadcastObservedTest {
             assertEquals(event, BroadcastObserved.decode(CHANNEL, event.encode()));
             assertFalse(new String(event.encode(), StandardCharsets.UTF_8).contains("channelName"));
         }
+        assertEquals(Instant.parse("2026-10-25T11:59:59.999999Z"),
+                sample(Instant.parse("2026-10-25T11:59:59.999999999Z"), 0L).observedAt());
         var unavailable = BroadcastObserved.observed("test-v1", CHANNEL, Instant.now(), 120,
                 new PublicBroadcastObservation(LiveStatus.UNKNOWN, null, null, null, null, Quality.RATE_LIMITED));
         assertEquals(BroadcastObserved.BroadcastIdentity.UNAVAILABLE, unavailable.broadcastIdentity());

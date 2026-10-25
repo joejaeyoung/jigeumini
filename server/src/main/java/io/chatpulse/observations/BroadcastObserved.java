@@ -14,6 +14,8 @@ public record BroadcastObserved(int schemaVersion, UUID eventId, String runId, S
     public enum BroadcastIdentity { SOURCE_PROVIDED, UNAVAILABLE }
     private static final JsonMapper JSON = JsonMapper.builder().build();
     public BroadcastObserved {
+        // PostgreSQL의 마이크로초 정밀도로 먼저 내림해 분 경계에서 다음 창으로 반올림되지 않게 한다.
+        observedAt = observedAt == null ? null : observedAt.truncatedTo(java.time.temporal.ChronoUnit.MICROS);
         if (schemaVersion != 1 || eventId == null || runId == null || !runId.matches("[a-zA-Z0-9_-]{1,80}")
                 || channelId == null || !channelId.matches("[a-f0-9]{32}") || observedAt == null
                 || observedAt.isBefore(Instant.parse("2000-01-01T00:00:00Z")) || observedAt.isAfter(Instant.parse("2100-01-01T00:00:00Z"))

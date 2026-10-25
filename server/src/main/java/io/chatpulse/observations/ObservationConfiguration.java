@@ -21,7 +21,7 @@ class ObservationConfiguration {
             @Value("${observations.topic:broadcast.observed.v1}") String topic,
             @Value("${notifications.topic:}") String notificationTopic) {
         if (!topic.matches("[a-zA-Z0-9._-]{1,240}") || topic.equals(pipeline.topic()) || topic.equals(pipeline.topic()+".spikes")
-                || topic.equals(notificationTopic)) throw new IllegalArgumentException("OBSERVATION_TOPIC");
+                || topic.equals(pipeline.topic()+".dlq") || topic.equals(notificationTopic)) throw new IllegalArgumentException("OBSERVATION_TOPIC");
         KafkaSupport.ensureTopic(pipeline.bootstrapServers(), topic);
         return new ObservationTopic(topic);
     }

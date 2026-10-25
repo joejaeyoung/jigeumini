@@ -111,7 +111,7 @@ class ObservationIntegrationTest {
                     Map.of("OBSERVATIONS_ENABLED","true","OBSERVATIONS_INTERVAL_SECONDS","90","OBSERVATIONS_TTL_SECONDS","240")));
             context.registerBean(io.chatpulse.pipeline.PipelineProperties.class,()->pipeline);
             context.registerBean(io.chatpulse.poc.PocProperties.class,()->new io.chatpulse.poc.PocProperties(List.of(CHANNEL),Duration.ofSeconds(3),Duration.ZERO,Path.of("build","synthetic-poc.json")));
-            context.registerBean(ObservationConfiguration.ObservationTopic.class,()->new ObservationConfiguration.ObservationTopic(topic));
+            context.registerBean(ObservationTopic.class,()->new ObservationTopic(topic));
             context.registerBean(io.chatpulse.metadata.PublicObservationSource.class,http::source);
             context.registerBean(io.chatpulse.poc.ChatSource.class,()->org.mockito.Mockito.mock(io.chatpulse.poc.ChatSource.class));
             var telemetry=org.mockito.Mockito.mock(io.chatpulse.poc.CollectionObserver.class);

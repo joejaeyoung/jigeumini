@@ -46,7 +46,7 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 ### 방송 요약 #7
 
-`feat/broadcast-reports`, F06 → T02/T04/T08. #5 병합98fe3a3에서 시작했고 승인된 #6/PR #22 병합5a419e3을 통합했다. [계약](api/REPORTS.md)·[검증 기록](api/REPORTS_VERIFICATION.md): 독립 관측 세션/귀속/별칭/집계, DB 원자 보정과 BATCH commit, 품질 완료 분/피크, API/웹 목록→요약, 종료7일 정리와 active/작업 보호를 구현했다. 순수정책4개·report실제Kafka/DB7개·category회귀8개를 확인했고 최신 전체 회귀·Claude 리뷰·CI를 진행한다. 최근 Java84·하네스16·웹29/빌드가 통과했으며 동일 SQL snapshot 보완 뒤 최종 검사로 다시 확인한다. 채팅 침묵/HTTP실패/TTL만료로 종료하지 않으며 원문·닉네임·사용자 ID·토큰을 저장하지 않는다. #16은 별도 작업 폴더의61784de Claude APPROVE·기존base67/16/53 검증까지 마쳤고 이 변경 통합 뒤 최종 검증한다.
+`feat/broadcast-reports`, F06 → T02/T04/T08. #5 병합98fe3a3에서 시작했고 승인된 #6/PR #22 병합5a419e3을 통합했다. [계약](api/REPORTS.md)·[검증 기록](api/REPORTS_VERIFICATION.md): 독립 관측 세션/귀속/별칭/집계, DB 원자 보정과 BATCH commit, 품질 완료 분/피크, API/웹 목록→요약, 종료7일 정리와 active/작업 보호를 구현했다. 최종구현55726f0에서 Java84·하네스16·실제Kafka/DB68·웹29·Chromium31과 JAR/웹 빌드가 통과했다. 순수정책4개·report실제검사7개·category회귀8개·같은SQLsnapshot 품질 조회·320/1440px 화면을 확인했다. [정제 근거](poc/evidence/reports-2026-10-25.json)를 고정했고 Claude 리뷰·최종CI를 진행한다. 채팅 침묵/HTTP실패/TTL만료로 종료하지 않으며 원문·닉네임·사용자 ID·토큰을 저장하지 않는다. #16은 별도 작업 폴더의61784de Claude APPROVE·기존base67/16/53 검증까지 마쳤고 이 변경 통합 뒤 최종 검증한다.
 
 ## 오류 격리·복구 진단 #10
 

@@ -12,7 +12,7 @@
 - `QualityHistory`의 구간 품질을 기존 activity와 대조한다. 실제 DB 조회 직렬화 JSON을 `server/src/test/resources/broadcast-report.json`으로 공유해 웹의0/null/시각/품질 계약을 검사한다.
 - 웹은 목록→상세, 부분/미확정, 내부 관측 세션, 조회 지연, 빈 목록, 피크, 정상0과음영공백, 갱신 실패의 이전 결과를 확인한다.
 
-최초 저장 집중검사5개와 category 회귀8개가 통과했고, API/요약까지 report7개가 통과했다. 이후 동일 SQL snapshot의 품질 조회와 최종 웹을 포함한 전체 회귀·정제 근거·Claude 리뷰·CI 결과는 완료 후 STATUS에서 갱신한다. 실행 중인 시험을 통과 기록으로 계산하지 않는다.
+최종 구현 `55726f0`에서 `./scripts/check` Java84·하네스16·JAR, `./scripts/integration` 실제 Kafka/DB68(리포트7·공통 소비자 추출의category회귀8 포함), `./scripts/web check` 타입·단위29·빌드, `./scripts/web test:e2e` Chromium31이 통과했다. [정제 근거](../poc/evidence/reports-2026-10-25.json)에 코드/JAR/XML/공유JSON hash를 기록했다. 합성320/1440px 화면을 확인하고 작은 화면의 표를 내부 가로 스크롤로 보완했다. SQL private canary 노출0이다. Claude 승인·CI·병합은 STATUS에서 추적한다.
 
 ## 미검증 범위
 

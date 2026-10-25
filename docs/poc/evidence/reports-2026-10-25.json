@@ -1,0 +1,128 @@
+{
+  "feature": "F06",
+  "issue": 7,
+  "technicalGoals": [
+    "T02",
+    "T04",
+    "T08"
+  ],
+  "implementationCommit": "55726f0300ab613720704e5acb84bbf4a535fc32",
+  "baseCommit": "5a419e3f593d37ca817cae3a2646174053c6daf2",
+  "recordedAt": "2026-10-25T14:56:05.447123+00:00",
+  "environment": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "java": "21",
+    "kafka": "4.1.2",
+    "postgresql": "16.14",
+    "brokers": 1,
+    "replicationFactor": 1,
+    "input": "synthetic isolated UUID topic/group/schema"
+  },
+  "jarSha256": "ef4f18e35847b4ee58f150b71608cb0f02b965a8d4460635c761f31290814047",
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration",
+    "./scripts/web check",
+    "./scripts/web test:e2e"
+  ],
+  "suites": {
+    "test": {
+      "tests": 84,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": {
+        "TEST-io.chatpulse.categories.CategoryQueriesTest.xml": "e1104892d9fb5c0fabeb6b0836d7bcc108bfbad86019ce18ccf2cd6e00409bc7",
+        "TEST-io.chatpulse.metadata.ChzzkMetadataSourceTest.xml": "95e5d43c3a9c6292e62f0d7d84760f13343a5b5a3290b697cd79b660a95cd3e7",
+        "TEST-io.chatpulse.metadata.MetadataControllerTest.xml": "1ba1afacf8e07372bcbdd06d3c26ac07e83c6024ec10888ff2082d4b31eb7a92",
+        "TEST-io.chatpulse.metadata.MetadataServiceTest.xml": "bf0aceef6eec8e76b2d68bc1a6d602fc270e8834756e890dd68e79e6ebe1f41f",
+        "TEST-io.chatpulse.notifications.NotificationControllerTest.xml": "36cf1215ed863e604f8c6128f39d23aef59bc0817e316c2514e0cee6b5a94444",
+        "TEST-io.chatpulse.notifications.SpikeDetectedTest.xml": "1717212b736b617346aa50658dab7c4dda01f39097c24cdee7103f0b49f46644",
+        "TEST-io.chatpulse.observations.BroadcastObservedTest.xml": "9e0ae5ee6035243a4f33eef358f41a68d46668a8ab73cecf84fc34f00a9d5efb",
+        "TEST-io.chatpulse.observations.ObservationCollectorTest.xml": "7c55aa79b6882f7c7c1a512e2ca287e40d53e318792b5db6fef2db1ed31af483",
+        "TEST-io.chatpulse.observations.ObservationControllerTest.xml": "a287342e86ad34f41f0c11af346628d615d79caae69936e652d492581afb35d5",
+        "TEST-io.chatpulse.pipeline.BufferedKafkaPublisherTest.xml": "f7a398a1777c641c585e3c2bc69a6e940adde3d5f5bbc081819e094b389d0351",
+        "TEST-io.chatpulse.pipeline.DeadLetterTest.xml": "445eee812045fb4ced577f7809bc55bd93eadfc42e2a45df44ffac8dc059856a",
+        "TEST-io.chatpulse.pipeline.EventCodecTest.xml": "7c774bb9198d5073cdce747940ddd3c5f1d07e7873df265c962e4517d43b6e8f",
+        "TEST-io.chatpulse.pipeline.KafkaSupportTest.xml": "49917c4e8d57bdf1d2c28145f48b4d7580d4de9604116570ef4841bbfed90dde",
+        "TEST-io.chatpulse.poc.ChannelProbeTest.xml": "47e62849983b78d099911e5cd77f9765f9b005345384ef0f3c45d2877c893d4c",
+        "TEST-io.chatpulse.poc.ChatProtocolTest.xml": "50bb47c3b0524377d34d210e33a023918436432c05a70ec38235a8982d69685b",
+        "TEST-io.chatpulse.poc.ChzzkHttpSourceTest.xml": "989b86cd71db29d239bbaf84d8bf9b6688f48f8ab24947fbcf55c8ab11d976e9",
+        "TEST-io.chatpulse.quality.QualityPolicyTest.xml": "55bb8e8a5c98750d38048a68aebf0517368b5b6ebcbf9b58bf7803fddcb3e588",
+        "TEST-io.chatpulse.quality.QualityScheduleTest.xml": "380baae2d70e771d753d238d59e216661f50b5f5c31d7e39859a88887b7561a5",
+        "TEST-io.chatpulse.quality.RankingControllerTest.xml": "dcf637ab9567c5919aeb1dfd4333fd0e1881bfab9b7862fa6e76ddcb21d86944",
+        "TEST-io.chatpulse.quality.TrendPolicyTest.xml": "b4ad3353479f45ea9a4c52097537081940f35f55f6acaa73d200e967c91bb023",
+        "TEST-io.chatpulse.replay.ReplayManifestTest.xml": "ae1f498ca30bd3f07b521453d0d353b052acfef380d9be4929c48caf13177cbf",
+        "TEST-io.chatpulse.reports.ReportPolicyTest.xml": "881c50b1980209ffbd13bfbe15f43aa80055c99d0f9ea50277dfbb153b699e29"
+      },
+      "syntheticPrivateSqlOccurrences": 0
+    },
+    "integrationTest": {
+      "tests": 68,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": {
+        "TEST-io.chatpulse.categories.CategoryIntegrationTest.xml": "b00aa1d8b2a1cbd1d841c5fd8db4370626fba86bb15aaee0c6d084e1af5cdd15",
+        "TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml": "c1d03690e441925201e45c642c13bcd56c65ce21bda7a01b028b9fd5939ea900",
+        "TEST-io.chatpulse.observations.ObservationIntegrationTest.xml": "41011f77277eeff2c33c47ee2ab964463b00555646d2708226a4ece52d2e0177",
+        "TEST-io.chatpulse.pipeline.DeadLetterIntegrationTest.xml": "40fd0fd830237b60833eabb8afae5c40f043d3da01b381be5d10b9bff4ddeafe",
+        "TEST-io.chatpulse.pipeline.KafkaSupportIntegrationTest.xml": "3b569af9bd79d3cfb88100507550d9190ac670b6de92f8855a26ea405a62b044",
+        "TEST-io.chatpulse.pipeline.PipelineIntegrationTest.xml": "ac5fb8730960f16eb6388650303e1c1d2cffd2c2fc77449c494d1cdcb0e1bee9",
+        "TEST-io.chatpulse.pipeline.RankingIntegrationTest.xml": "191638577941d9d5b3c2131530a85b309ac0c3cafe9f3d047f317985fa985c17",
+        "TEST-io.chatpulse.replay.ReplayIntegrationTest.xml": "17a1659db409e0ada59e3e9557de4f9ec5bc257bed6513746974a5b7648492a0",
+        "TEST-io.chatpulse.reports.ReportIntegrationTest.xml": "8f896bc6bbc58be8f69e1b76971c9f6e983ec45420984e223418631a7fea9d94"
+      },
+      "syntheticPrivateSqlOccurrences": 0
+    }
+  },
+  "harnessTests": 16,
+  "webUnitTests": 29,
+  "chromiumTests": 31,
+  "sharedContractSha256": "c68235173ee38af6127fdd0e0745f253391faf8fdea408d993ed637861a9cbbc",
+  "expectedAndObserved": {
+    "minutes": [
+      0,
+      null,
+      3
+    ],
+    "referenceCount": 14,
+    "qualifiedCount": 3,
+    "maximumPerMinute": 3,
+    "viewerMaximum": 0,
+    "peaks": 1,
+    "lateCorrection": {
+      "referenceCount": 15,
+      "qualifiedCount": 4,
+      "lateCount": 1,
+      "duplicateChanges": 0
+    },
+    "qualityCorrection": {
+      "qualifiedCount": 0,
+      "maximumPerMinute": 0,
+      "peaks": 0
+    },
+    "blocked": {
+      "qualifiedCount": null,
+      "maximumPerMinute": null
+    },
+    "outboxRows": 0
+  },
+  "coverage": [
+    "session identity/aliases/midnight/reconnection",
+    "DB rollback and persistent duplicates",
+    "active and in-flight cleanup protection",
+    "independent report restart while ranking proceeds",
+    "executable JAR nonempty HTTP JSON and six assignments",
+    "same SQL snapshot quality; shared server/web JSON",
+    "320px/1440px synthetic web; no horizontal page overflow"
+  ],
+  "notVerified": [
+    "new live broadcasts",
+    "long-lived unresolved sessions",
+    "high load/shared pool multi-user cost",
+    "HA/multi-host",
+    "report-specific forced JVM crash or fixed offset replay"
+  ]
+}

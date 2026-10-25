@@ -198,5 +198,55 @@
       "unit": 140,
       "integration": 91
     }
-  ]
+  ],
+  "finalGate": {
+    "issue": 30,
+    "pr": 37,
+    "head": "3b6d66275fbb4f7274e25b56318c7119cb75f9b1",
+    "runs": [
+      {
+        "id": 40218491808,
+        "conclusion": "success",
+        "headSha": "3b6d66275fbb4f7274e25b56318c7119cb75f9b1",
+        "status": "completed",
+        "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40218491808"
+      },
+      {
+        "id": 40218495927,
+        "conclusion": "success",
+        "headSha": "3b6d66275fbb4f7274e25b56318c7119cb75f9b1",
+        "status": "completed",
+        "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40218495927"
+      }
+    ],
+    "reviewSession": "6ca20c20-6a0c-492b-b9f8-4c2560c81298",
+    "review": "APPROVE",
+    "tests": {
+      "test": {
+        "tests": 142,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sortedXmlSha256": "937f35bd3acf72ac4f80c034d97d9ca029c0d78d00be7cae1525430c72478ea0"
+      },
+      "integrationTest": {
+        "tests": 92,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "sortedXmlSha256": "b642ee70a575a38689072faf065f392ac348802c3f08f1e0e39936575c47bf08"
+      }
+    },
+    "merge": {
+      "headRefOid": "3b6d66275fbb4f7274e25b56318c7119cb75f9b1",
+      "mergeCommit": {
+        "oid": "d8b864d3bc4af48f49bb62b54018d468314d95ec"
+      },
+      "mergedAt": "2026-10-25T18:02:23Z",
+      "state": "MERGED"
+    },
+    "harnessTests": 16,
+    "webUnitTests": 29,
+    "chromiumTests": 31
+  }
 }

@@ -21,3 +21,9 @@
 ## PR CI의 기존 heartbeat fixture 보완
 
 최초 PR CI40204570648은 ChannelProbeTest의 pong 미응답 검사에서 실패했다. artifact에10.046초 실행·WS_CLOSED가 남았고 heartbeat timeout은 없었다. 그 연결 종료의 원인은 미확정이다. 별도1.2초 승인 지연으로 기존1초 예산의 DURATION_COMPLETE 조기 종료를 재현했다. [프로토콜 검증](../poc/PROTOCOL.md#heartbeat-회귀-시험의-관측-대기)에 따라 실제 채팅/ping/미응답/timeout 관측까지 유한 대기하도록 시험만 바꿨고 ChannelProbeTest7개가 통과했다. 최종단위/CI는 수정HEAD에서 다시 확인한다.
+
+## 리뷰·CI 보완
+
+Claude 초기 리뷰55726f0은 부분 보존 정리와 재계산의 충돌, earliest 안내와48시간 차단의 충돌로 REQUEST_CHANGES였다. 재계산에서 정리 대상 세션의 잔여 관측을 제외하고 리포트에7일 eventTime 계약을 적용했다. 새 회귀는10,005이벤트·10,006관측 중 각각1만행 삭제 후 새 내부 방송 입력,3일 지난 입력 재개,8일 입력 제외/offset 진행, 미래receivedAt 거부를 검사한다. TTL240에서도 리포트 구분은120초로 통일하고 모든 리포트 읽기SQL에5초 한도를 적용했다.
+
+09b5a03의 push/PR CI40205131666·40205136741은 시각 기대값의 나노초와 관측의 마이크로초 내림 차이로 동일 시험에서 실패했다. 원격 XML은070074210ns 대070074000ns를 기록했다. 해당 기대 시각을 계약 정밀도로 고정했다. heartbeat 시험은 두 실행 모두 통과했다.

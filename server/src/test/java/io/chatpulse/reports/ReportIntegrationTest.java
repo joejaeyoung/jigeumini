@@ -69,7 +69,7 @@ class ReportIntegrationTest {
         assertEquals(2L,jdbc.queryForObject("SELECT sum(message_count) FROM report_bucket",Long.class));assertEquals(3L,jdbc.queryForObject("SELECT count(*) FROM report_event",Long.class));
     }
     @Test void internalAnchorSurvivesEarlierSamplesAndOldLinkResolvesAfterKnownIdentityArrives() {
-        Instant at=Instant.now().minusSeconds(240);var original=live(at.plusSeconds(60),null);store.apply(List.of(record(original,0),record(event(at.plusSeconds(65),at.plusSeconds(66)),0)));UUID id=source(null);
+        Instant at=Instant.now().minusSeconds(240).truncatedTo(java.time.temporal.ChronoUnit.MICROS);var original=live(at.plusSeconds(60),null);store.apply(List.of(record(original,0),record(event(at.plusSeconds(65),at.plusSeconds(66)),0)));UUID id=source(null);
         store.apply(List.of(record(live(at,null),1)));assertEquals(id,source(null));assertEquals(at,store.detail(id).stored().session().observedFrom());
         store.apply(List.of(record(live(at.plusSeconds(30),"123"),2)));UUID known=source("123");assertEquals(known,store.detail(id).stored().session().id());assertEquals(1,total(known));
         assertEquals(1L,jdbc.queryForObject("SELECT sum(message_count) FROM report_bucket",Long.class));
@@ -93,6 +93,38 @@ class ReportIntegrationTest {
         }
         store.cleanup();assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_session",Long.class));assertEquals(1,total(active));assertEquals(0L,jdbc.queryForObject("SELECT count(*) FROM processed_event",Long.class));
         store.apply(List.of(record(event(at.plusSeconds(10),at.plusSeconds(11)),10)));assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_event",Long.class));
+    }
+    @Test void partialCleanupNeverRebuildsExpiredSessionFromRemainingChildren() {
+        Instant at=Instant.parse("2026-10-10T12:00:00Z"),now=at.plusSeconds(8*86400);store=store(Clock.fixed(at.plusSeconds(60),ZoneOffset.UTC));
+        var first=live(at,null);var message=event(at.plusSeconds(1),at.plusSeconds(2));
+        store.apply(List.of(record(first,0),record(message,0),record(sample(at.plusSeconds(20),null,BroadcastMetadata.LiveStatus.OFFLINE,null),1)));
+        UUID old=source(null);
+        jdbc.update("""
+                INSERT INTO report_observation SELECT run_id,id,channel_id,observed_at,ttl_seconds,live,
+                  jsonb_set(payload,'{eventId}',to_jsonb(id::text)),payload_hash,report_id
+                FROM report_observation CROSS JOIN (SELECT gen_random_uuid() id FROM generate_series(1,10004)) copies WHERE event_id=?
+                """,first.eventId());
+        jdbc.update("""
+                INSERT INTO report_event SELECT run_id,gen_random_uuid(),channel_id,event_time,received_at,payload_hash,late,observation_id,report_id
+                FROM report_event CROSS JOIN generate_series(1,10004) WHERE event_id=?
+                """,message.eventId());
+        jdbc.update("UPDATE report_bucket SET message_count=10005");
+        store=store(Clock.fixed(now,ZoneOffset.UTC));store.cleanup();
+        assertEquals(5L,jdbc.queryForObject("SELECT count(*) FROM report_event WHERE report_id=?",Long.class,old));
+        assertEquals(6L,jdbc.queryForObject("SELECT count(*) FROM report_observation WHERE report_id=?",Long.class,old));
+        assertNull(store.detail(old));
+        store.apply(List.of(record(live(now.minusSeconds(30),null),2),record(event(now.minusSeconds(20),now.minusSeconds(19)),1)));
+        UUID current=source(null);assertNotEquals(old,current);assertEquals(1,total(current));assertEquals(now.minusSeconds(30),store.detail(current).stored().session().observedFrom());
+        assertEquals(at.plusSeconds(20),jdbc.queryForObject("SELECT ended_at FROM report_session WHERE report_id=?",java.sql.Timestamp.class,old).toInstant());
+        store.cleanup();assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_session",Long.class));assertEquals(1,total(current));
+    }
+    @Test void retainedReportInputsOlderThanLiveWindowResumeAndExpiredInputsOnlyAdvanceProgress() {
+        Instant now=Instant.parse("2026-10-25T12:00:00Z"),at=now.minusSeconds(3*86400);store=store(Clock.fixed(now,ZoneOffset.UTC));
+        store.apply(List.of(record(live(at,"123"),0),record(event(at.plusSeconds(1),at.plusSeconds(2)),0)));
+        assertEquals(1,total(source("123")));
+        store.apply(List.of(record(event(now.minusSeconds(8*86400),now.minusSeconds(8*86400)),1)));
+        assertEquals(1,total(source("123")));assertEquals(2L,jdbc.queryForObject("SELECT next_offset FROM report_progress WHERE topic=?",Long.class,chat));
+        assertEquals("REPORT_FUTURE_TIME",assertThrows(IllegalArgumentException.class,()->store.apply(List.of(record(event(now,now.plusSeconds(6)),2)))).getMessage());
     }
     @Test void independentReportConsumerRestartsWithoutDuplicationWhileRankingContinues() throws Exception {
         var ranking=new ProjectionStore(jdbc,tx(),codec,"ranking","test-v1");var factory=KafkaSupport.producerFactory(BOOTSTRAP);var kafka=new KafkaTemplate<>(factory);
@@ -134,7 +166,8 @@ class ReportIntegrationTest {
         assertEquals("OFFLINE",result.header().state());assertTrue(result.partialObservation());assertEquals(result.header().reportVersion(),queries.detail(id).header().reportVersion());
         var legacy=new io.chatpulse.quality.RankingStore(jdbc,tx(),"ranking","ranking-trend","test-v1",chat,clock).activity(CHANNEL,at,at.plusSeconds(180));
         assertEquals(legacy.points().stream().map(p->p.status().equals("HEALTHY")).toList(),history.minutes(CHANNEL,at,at.plusSeconds(180)).stream().map(io.chatpulse.quality.QualityHistory.Minute::healthy).toList());
-        var json=tools.jackson.databind.json.JsonMapper.builder().build();var file=java.nio.file.Path.of("../work/reports-contract.json");java.nio.file.Files.createDirectories(file.toAbsolutePath().getParent());java.nio.file.Files.writeString(file,json.writeValueAsString(result));
+        var json=tools.jackson.databind.json.JsonMapper.builder().build();
+        try(var fixture=getClass().getResourceAsStream("/broadcast-report.json")){assertNotNull(fixture);assertEquals(json.readTree(fixture),json.readTree(json.writeValueAsString(result)));}
         var late=record(event(at.plusSeconds(121),at.plusSeconds(241)),14);store.apply(List.of(late));var revised=queries.detail(id);
         assertEquals(15,revised.referenceCount());assertEquals(4L,revised.qualifiedCount());assertEquals(1,revised.lateCount());assertNotEquals(result.header().reportVersion(),revised.header().reportVersion());
         store.apply(List.of(late));assertEquals(revised.header().reportVersion(),queries.detail(id).header().reportVersion());

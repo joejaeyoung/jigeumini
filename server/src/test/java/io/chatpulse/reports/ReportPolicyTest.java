@@ -35,6 +35,12 @@ class ReportPolicyTest {
         var known=sample(30,"123",BroadcastMetadata.LiveStatus.LIVE,20L);var revised=ReportSessions.derive(List.of(first,known,earlier),anchors,AT.plusSeconds(61));
         var source=revised.sessions().stream().filter(s->"123".equals(s.sourceBroadcastId())).findFirst().orElseThrow();assertEquals(source.id(),revised.aliases().get(initial.id()));
     }
+    @Test void reportIdentityExpiresAtTwoMinutesEvenWhenSourceTtlIsLonger() {
+        var source=sample(0,"123",BroadcastMetadata.LiveStatus.LIVE,0L);
+        var longTtl=new BroadcastObserved(source.schemaVersion(),source.eventId(),source.runId(),source.channelId(),source.observedAt(),240,source.viewerCount(),source.liveStatus(),source.quality(),source.sourceBroadcastId(),source.broadcastIdentity(),source.categoryId(),source.categoryName());
+        var session=ReportSessions.derive(List.of(longTtl),Map.of(),AT.plusSeconds(120)).sessions().getFirst();
+        assertEquals("UNKNOWN",session.state());assertEquals(120,session.lastTtlSeconds());assertNull(session.endedAt());
+    }
     @Test void peaksExcludeGapsMergeOverlapAndOrderTiesByTime() {
         long[] counts={1,10,2,9,1,0,100,1,10,1,0,1,8,1};var minutes=new ArrayList<ReportPeaks.Minute>();
         for(int i=0;i<counts.length;i++)minutes.add(new ReportPeaks.Minute(AT.plusSeconds(i*60L),AT.plusSeconds((i+1)*60L),counts[i],i!=6));

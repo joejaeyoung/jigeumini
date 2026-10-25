@@ -214,7 +214,7 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 채널 상세의 **방송별 요약 기록 보기**에서 최근7일 관측과 미종료 기록을 조회한다. 누적 참고 채팅·품질 충족 완료 분·분당 최대·시청자 관측 최고값·상위3개 피크를 구분한다. 실제 방송 시작/종료를 추정하지 않으며 내부 관측 세션과 미확정 상태를 표시한다. [리포트 계약](docs/api/REPORTS.md)을 따른다.
 
-새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.
+새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. 잔존 입력 중 eventTime 최근7일만 반영하며 더 오래된 입력은 진행 위치만 갱신한다. 리포트에는 receivedAt48시간 차단을 적용하지 않는다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.
 
 ## 격리된 합성 부하 실험
 
@@ -225,3 +225,4 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 기본 로컬 Kafka19092/DB15432의 UUID 전용 topic/group/schema만 만들고 종료 시 정리한다. host·Kafka/DB 파일시스템 각각2GiB 여유를 확인하고 실험 토픽+DB2GiB 상한을5초마다 관측한다. 생성 최대600초/400,000개·drain180초·replay300초, client heap768MiB이다. 삭제는 이 실행의 자원만 대상이며 다른 worktree나 live ledger를 수정하지 않는다. 강제종료로 cleanupComplete가false이면 결과의 정확한 UUID 자원만 확인해 정리한다.
 
 합성 실험의 전체 프로필·자원 상한·계수/지연 정의는 [실험 계약](docs/pipeline/EXPERIMENTS.md), 실제 수치와 한계는 [검증 기록](docs/pipeline/EXPERIMENTS_VERIFICATION.md)을 따른다. `python3 scripts/summarize-experiments.py work/report <완료 결과.json>...`으로 표·정제 JSON·독립 HTML을 만든다.
+

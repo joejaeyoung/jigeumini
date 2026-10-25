@@ -42,7 +42,7 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 ### 카테고리 반응 #6
 
-`feat/category-reactions`, F05 → T02/T06/T07/T08. [계약](api/CATEGORIES.md)의 독립 채팅/관측 소비와 시각 결합·원자 보정·품질 조회·웹을 구현했다. [집중 검증](api/CATEGORIES_VERIFICATION.md) 실제 Kafka/DB6개와 Chromium28개가 통과했고 최종 회귀를 준비한다. 채팅 이전 최신 관측의 허용 나이는 min(120초, 표본TTL), 미상/만료는 unknown으로 분리한다. 늦은 관측은 해당 시각부터120초 범위의 보존된 배정만 원자적으로 정정한다. 별도 작업 폴더에서 #5 최종 검증과 빌드를 분리하며 선행 병합 뒤 PR을 만든다. 부하 편향·다중 소비자 수치는 #11 실험 전까지 완료로 주장하지 않는다.
+`feat/category-reactions`, F05 → T02/T06/T07/T08. [계약](api/CATEGORIES.md)의 독립 채팅/관측 소비와 시각 결합·원자 보정·품질 조회·웹을 구현했다. [검증 기록](api/CATEGORIES_VERIFICATION.md)·[정제 근거](poc/evidence/categories-2026-10-25.json): 선행 #5를 통합한 `9cedeff`에서 Java79·하네스16·실제 Kafka/DB60·웹27·Chromium28과 JAR/웹 빌드가 통과했다. Claude 리뷰 후 최종 PR/CI를 확인한다. 채팅 이전 최신 관측의 허용 나이는 min(120초, 표본TTL), 미상/만료는 unknown으로 분리한다. 늦은 관측은 해당 시각부터120초 범위의 보존된 배정만 원자적으로 정정한다. 별도 작업 폴더에서 개발했고 승인된 #5의 `98fe3a3`을 통합했다. 실제 JAR의6개 partition·비어 있지 않은 JSON과 모바일 그래프·기여 방송을 확인했다. 부하 편향·다중 소비자 수치는 #11 실험 전까지 완료로 주장하지 않는다.
 
 ## 오류 격리·복구 진단 #10
 

@@ -25,12 +25,12 @@ public final class RankingStore {
     public record ActivityResponse(String channelId, String asOf, String from, String to, List<ActivityPoint> points) { }
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
-    private final String ranking, trend, run;
+    private final String ranking, trend, run, topic;
     private final CollectionQuality quality;
     private final Clock clock;
     private final JsonMapper json = JsonMapper.builder().build();
     public RankingStore(JdbcTemplate jdbc, TransactionTemplate tx, String ranking, String trend, String run, String topic, Clock clock) {
-        this.jdbc = jdbc; this.tx = tx; this.ranking = ranking; this.trend = trend; this.run = run; this.clock = clock;
+        this.jdbc = jdbc; this.tx = tx; this.ranking = ranking; this.trend = trend; this.run = run; this.topic = topic; this.clock = clock;
         this.quality = new CollectionQuality(jdbc, run, topic, clock);
         tx.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
         tx.setTimeout(20);
@@ -106,6 +106,23 @@ public final class RankingStore {
     }
     private void reviseQuality(List<Channel> channels) {
         Instant now=clock.instant();
+        // 뒤늦게 격리한 입력도 이미 공개된 순위·급상승의 완전성을 무효화한다. 건수는 재계산하지 않는다.
+        jdbc.update("""
+                INSERT INTO snapshot_quality_revision(snapshot_id,channel_id,reason,revised_at)
+                SELECT s.snapshot_id,e.channel_id,'COLLECTION_REVISED',? FROM ranking_snapshot s JOIN ranking_entry e USING(snapshot_id)
+                WHERE s.run_id=? AND s.projection=? AND e.status='HEALTHY' AND s.evaluated_at>=?
+                  AND EXISTS(SELECT 1 FROM projection_failure f WHERE f.run_id=s.run_id AND f.source_topic=?
+                    AND (f.channel_id IS NULL OR f.channel_id=e.channel_id) AND f.affected_from<s.evaluated_at
+                    AND f.affected_to>s.evaluated_at-make_interval(secs=>s.window_sec))
+                ON CONFLICT DO NOTHING
+                """,ts(now),run,ranking,ts(now.minusSeconds(7*86400)),topic);
+        jdbc.update("""
+                UPDATE spike_event s SET quality_warning='COLLECTION_REVISED'
+                WHERE s.run_id=? AND s.quality_warning IS NULL AND s.evaluated_at>=?
+                  AND EXISTS(SELECT 1 FROM projection_failure f WHERE f.run_id=s.run_id AND f.source_topic=?
+                    AND (f.channel_id IS NULL OR f.channel_id=s.channel_id) AND f.affected_from<s.evaluated_at
+                    AND f.affected_to>s.evaluated_at-interval '360 seconds')
+                """,run,ts(now.minusSeconds(7*86400)),topic);
         for (var c:channels) {
             var candidates=jdbc.query("""
                     SELECT s.snapshot_id,s.evaluated_at,s.window_sec FROM ranking_snapshot s JOIN ranking_entry e USING(snapshot_id)

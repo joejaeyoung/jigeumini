@@ -3,9 +3,9 @@ package io.chatpulse.pipeline;
 import io.chatpulse.poc.ChatEvent;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public final class ProjectionStore {
-    private record Input(ChatEvent event, String hash, ConsumerRecord<String, byte[]> record) { }
+    private record Input(ConsumerRecord<String,byte[]> record, ChatEvent event, String hash, EventContractException error) { }
     private record Bucket(String channel, Instant time) { }
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
@@ -34,50 +34,72 @@ public final class ProjectionStore {
         jdbc.update("INSERT INTO projection_progress(projection,run_id,topic,partition,next_resolved_offset) VALUES (?,?,?,?,?) ON CONFLICT DO NOTHING",
                 projection, runId, topic, partition, position);
     }
-    public long apply(List<ConsumerRecord<String, byte[]>> records) { return apply(records,true); }
+    public long apply(List<ConsumerRecord<String, byte[]>> records) { return apply(records,true,null); }
+    public long applyRecovering(List<ConsumerRecord<String, byte[]>> records, DeadLetterRecovery recovery) {
+        if ("replay".equals(projection)) throw new IllegalArgumentException("LIVE_NAMESPACE_REQUIRED");
+        recovery.checkSource();
+        return apply(records,true,recovery);
+    }
     public long applyReplay(List<ConsumerRecord<String, byte[]>> records) {
         if (!"replay".equals(projection)) throw new IllegalArgumentException("REPLAY_NAMESPACE_REQUIRED");
         UUID.fromString(runId);
-        return apply(records,false);
+        return apply(records,false,null);
     }
-    private long apply(List<ConsumerRecord<String, byte[]>> records, boolean live) {
-        var unique = new LinkedHashMap<UUID, Input>();
-        var offsets = new HashMap<TopicPartition, Long>();
+    private long apply(List<ConsumerRecord<String, byte[]>> records, boolean live, DeadLetterRecovery recovery) {
         Instant now = Instant.now();
-        for (var r : records) {
-            var event = codec.decode(r.value(), r.key());
-            if (live) codec.validateLiveAge(event, now);
-            var input = new Input(event, codec.hash(event), r);
-            var previous = unique.putIfAbsent(event.eventId(), input);
-            if (previous != null && !previous.hash.equals(input.hash)) throw new EventContractException("EVENT_ID_CONFLICT");
-            offsets.merge(new TopicPartition(r.topic(), r.partition()), r.offset() + 1, Math::max);
+        var inputs = new ArrayList<Input>();
+        var hashes = new HashMap<UUID,String>();
+        var conflicts = new HashSet<UUID>();
+        for (var record : records) {
+            ChatEvent event = null;
+            try {
+                event = codec.decode(record.value(),record.key());
+                if (live) codec.validateLiveAge(event,now);
+                String hash = codec.hash(event);
+                String previous = hashes.putIfAbsent(event.eventId(),hash);
+                if (previous != null && !previous.equals(hash)) {
+                    if (recovery == null) throw new EventContractException("EVENT_ID_CONFLICT");
+                    conflicts.add(event.eventId());
+                }
+                inputs.add(new Input(record,event,hash,null));
+            } catch (EventContractException error) {
+                if (recovery == null) throw error;
+                inputs.add(new Input(record,event,null,error));
+            }
         }
+        long ackDeadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
         Long inserted = tx.execute(status -> {
             jdbc.execute("SET LOCAL lock_timeout = '3s'");
             jdbc.execute("SET LOCAL statement_timeout = '5s'");
+            if (recovery != null) recovery.bindSource();
             var buckets = new HashMap<Bucket, Long>();
+            var offsets = new HashMap<TopicPartition, Long>();
+            var unique = new HashMap<UUID, String>();
             long count = 0;
-            // 동일 배치 ID는 위에서 제거. DB conflict는 concurrent consumer/replay에도 원자적으로 검사한다.
-            for (var input : unique.values()) {
-                var e = input.event;
+            for (var input : inputs) {
                 var r = input.record;
-                var ids = jdbc.query("""
-                        INSERT INTO processed_event(projection, run_id, event_id, channel_id, collection_session_id,
-                            event_time, received_at, source_topic, source_partition, source_offset, payload_hash)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ON CONFLICT (projection, run_id, event_id) DO NOTHING RETURNING event_id
-                        """, (rs, n) -> rs.getObject(1, UUID.class), projection, runId, e.eventId(), e.channelId(),
-                        e.collectionSessionId(), Timestamp.from(e.eventTime()), Timestamp.from(e.receivedAt()),
-                        r.topic(), r.partition(), r.offset(), input.hash);
-                if (ids.isEmpty()) {
-                    String old = jdbc.queryForObject("SELECT payload_hash FROM processed_event WHERE projection=? AND run_id=? AND event_id=?",
-                            String.class, projection, runId, e.eventId());
-                    if (!input.hash.equals(old)) throw new EventContractException("EVENT_ID_CONFLICT");
-                } else {
-                    count++;
-                    var bucket = new Bucket(e.channelId(), Instant.ofEpochSecond(Math.floorDiv(e.eventTime().getEpochSecond(), 10) * 10));
-                    buckets.merge(bucket, 1L, Long::sum);
+                ChatEvent event = input.event;
+                try {
+                    // DB commit 후 재전달된 격리 입력은 다시 판정하거나 발행하지 않는다.
+                    if (recovery == null || !recovery.alreadyResolved(r)) {
+                        if (input.error != null) throw input.error;
+                        if (conflicts.contains(event.eventId())) throw new EventContractException("EVENT_ID_CONFLICT");
+                        String hash = input.hash;
+                        String previous = unique.putIfAbsent(event.eventId(), hash);
+                        if (previous != null && !previous.equals(hash)) throw new EventContractException("EVENT_ID_CONFLICT");
+                        if (previous == null && insert(event, hash, r)) {
+                            count++;
+                            var bucket = new Bucket(event.channelId(), Instant.ofEpochSecond(Math.floorDiv(event.eventTime().getEpochSecond(), 10) * 10));
+                            buckets.merge(bucket, 1L, Long::sum);
+                        }
+                    }
+                } catch (EventContractException error) {
+                    if (recovery == null) throw error;
+                    // DB/네트워크 예외는 여기서 잡지 않는다. ACK 실패도 전체 트랜잭션을 되돌린다.
+                    if (event != null) unique.remove(event.eventId());
+                    recovery.resolve(r, event, error, ackDeadline);
                 }
+                offsets.merge(new TopicPartition(r.topic(), r.partition()), r.offset() + 1, Math::max);
             }
             for (var b : buckets.entrySet()) {
                 jdbc.update("""
@@ -96,6 +118,21 @@ public final class ProjectionStore {
             return count;
         });
         return inserted == null ? 0 : inserted;
+    }
+    private boolean insert(ChatEvent event, String hash, ConsumerRecord<String, byte[]> record) {
+        var ids = jdbc.query("""
+                INSERT INTO processed_event(projection, run_id, event_id, channel_id, collection_session_id,
+                    event_time, received_at, source_topic, source_partition, source_offset, payload_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (projection, run_id, event_id) DO NOTHING RETURNING event_id
+                """, (rs, n) -> rs.getObject(1, UUID.class), projection, runId, event.eventId(), event.channelId(),
+                event.collectionSessionId(), Timestamp.from(event.eventTime()), Timestamp.from(event.receivedAt()),
+                record.topic(), record.partition(), record.offset(), hash);
+        if (!ids.isEmpty()) return true;
+        String old = jdbc.queryForObject("SELECT payload_hash FROM processed_event WHERE projection=? AND run_id=? AND event_id=?",
+                String.class, projection, runId, event.eventId());
+        if (!hash.equals(old)) throw new EventContractException("EVENT_ID_CONFLICT");
+        return false;
     }
     public Map<String, Object> totals() {
         return jdbc.queryForObject("""

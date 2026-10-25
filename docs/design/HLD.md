@@ -108,9 +108,7 @@ stateDiagram-v2
 
 ### 4.2 실패 이벤트
 
-DLQ envelope: `failureId`, `projection`, `sourceTopic`, `sourcePartition`, `sourceOffset`, `eventId?`, `schemaVersion?`, `reasonCode`, `firstFailedAt`, `attemptCount`, `safePayload`.
-
-failureId는 projection과 원본 Kafka 위치로 결정한다. 로그·DLQ에 토큰이나 로그인 쿠키를 넣지 않는다. `safePayload`는 정규화 이벤트의 허용 필드로 제한한다. 역직렬화 불가 원본은 제한된 byte 크기·민감정보 제거 후 보관하거나 hash와 오류 정보만 남긴다.
+DLQ envelope와 확정한 오류 격리 정책은 [M3 DLQ 계약](../pipeline/DLQ.md)을 따른다. failureId는 원본 topic ID/partition/offset으로 결정하며 projection별 중복은 DB namespace로 구분한다. 원본 bytes/key/headers·예외 본문·원문 hash는 저장하지 않는다. 허용된 코드·좌표·품질 영향 범위만 기록한다.
 
 ## 5. PostgreSQL 논리 모델
 
@@ -146,7 +144,7 @@ failureId는 projection과 원본 Kafka 위치로 결정한다. 로그·DLQ에 �
 | processed_event | 기본 72시간, 소비 지연·DLQ·작업 상태 확인 후 정리 |
 | 10초 bucket | 7일 |
 | 순위 snapshot·급증·연결 상태 | 7일 |
-| DLQ | 7일 + 크기 한도 |
+| DLQ | 현재 개발 설정 24시간·partition당 256MiB, commit된 진단은 DB에 보존. 정리 정책은 별도 |
 | 완료된 replay 결과 | 확인 후 7일, active run은 삭제하지 않음 |
 
 ledger를 지운 뒤 오래된 입력을 운영 run에 다시 넣으면 중복될 수 있다. **MVP는 DLQ·관리자 입력을 live run으로 재투입하지 않는다.** live 소비자는 receivedAt이 현재보다 48시간 이상 과거인 입력을 격리한다. ledger 보존 나이는 processed_at 기준 72시간으로 계산한다. 보존기간을 넘긴 입력 검증은 새 replay run에서 처리한다. 정리 작업은 가장 오래된 pending offset/active job을 확인하고 필요한 ledger 삭제를 보류한다. 저장량이 한도를 넘으면 수집 규모를 줄이고 운영 상태를 알린다.
@@ -175,17 +173,17 @@ sequenceDiagram
 
 - batch listener, `enable.auto.commit=false`, `AckMode.BATCH`로 고정한다. consumer thread에서 동기 처리하며, 별도 DB transactional service 호출이 commit까지 끝난 뒤 listener가 반환한다. 비동기 worker에서 ack하지 않는다.
 - `ByteArrayDeserializer`로 받고 listener 안에서 계약 검증을 수행해, 파싱 불가 record도 위치를 식별해 격리할 수 있게 한다.
-- poll 배치를 유효·제외(historical 등)·영구 오류로 먼저 분류한다. 영구 오류의 DLQ 발행 ack를 모두 확인한 뒤, 유효 이벤트 ledger·bucket·진행 정보와 격리 오류에 따른 품질 저하를 한 DB 트랜잭션에 반영한다. 알 수 있는 채널/시간은 그 구간을 불완전 처리한다. 채널/시각조차 불명인 오류는 영향 범위를 알 수 없다는 projection 경고를 남기고, 해소 전 해당 projection 결과를 정상으로 표시하지 않는다.
+- poll 배치를 유효·영구 오류로 먼저 분류한다. historical 입력도 계약 위반으로 격리한다. 정상 ledger 처리와 DLQ ACK를 수행하고, bucket·진행 정보·격리 오류를 같은 DB 트랜잭션에 저장한다. 완전히 검증된 충돌의 채널/시간은 해당 구간을 불완전 처리한다. 나머지는 감지 시각 -7일~+5초의 전체 수집 범위를 불완전 처리한다. 이는 live 입력이 기여할 수 있는 시간 범위이며 해당 범위 밖 새 창에서도 정상 관측 조건을 다시 충족해야 한다. 상세 정책·한계는 M3 계약에 둔다.
 - 모든 단계가 성공한 경우에만 listener가 정상 반환한다. 하나라도 실패하면 **poll 배치 전체를 재시도**한다. 부분 성공 offset commit은 MVP에서 사용하지 않는다. DLQ 중복은 failureId로 식별한다.
 - ledger INSERT의 `ON CONFLICT DO NOTHING RETURNING` 결과에 포함된 신규 ID만 채널/bucket별 합산 UPSERT한다. batch 내부 ID도 먼저 중복 제거한다. 같은 eventId에 다른 핵심 필드(channelId/eventTime 등)가 들어오는 경우 입력 계약 위반으로 격리한다. 같은 배치 안에서 충돌하는 ID는 어느 payload도 임의 선택하지 않는다. 기존 ledger와 충돌하면 기존 집계를 유지하고 새 입력을 격리한다. 이를 검사할 정규화 payload hash를 ledger에 저장한다. [PostgreSQL INSERT](https://www.postgresql.org/docs/current/sql-insert.html)
 - DB commit 전 실패는 rollback한다. DB commit 후 Kafka commit 전 실패는 재수신되지만 ledger로 중복 증가를 막는다. `next_resolved_offset`은 해당 파티션에서 유효 반영·명시 제외·DLQ 확인까지 끝난 마지막 연속 record offset + 1이다. 모든 record가 무효여도 진행 정보는 DB에 반영한다.
-- 일시 DB/Kafka 장애는 무제한 재시도 대상으로 삼고, 기본 recoverer가 몇 회 후 로그만 남기고 건너뛰지 않게 한다. Spring Kafka batch fallback 재시도와 pause 중 poll 유지 동작을 고정 버전에서 통합 시험한다. 예기치 않은 프로그래밍 오류는 container를 중지하고 경고하며 미완료 offset을 commit하지 않는다. [오류 처리](https://docs.spring.io/spring-kafka/reference/kafka/annotation-error-handling.html)
+- 일시 DB/Kafka 장애는 무제한 재시도 대상으로 삼고, 기본 recoverer가 몇 회 후 로그만 남기고 건너뛰지 않게 한다. Spring Kafka batch fallback 재시도와 pause 중 poll 유지 동작을 고정 버전에서 통합 시험한다. 현재 구현은 미분류 실행 오류도 고정 코드로 표시하고 배치를 재시도한다. 자동 중지·관리자 재개는 후속 운영 정책이며 미완료 offset을 commit하지 않는다. [오류 처리](https://docs.spring.io/spring-kafka/reference/kafka/annotation-error-handling.html)
 
 ### 6.2 초기 설정과 제한
 
 `max.poll.records=200`, `max.poll.interval.ms=300000`, container `pollTimeout=1000ms`, `fetch.max.wait.ms=100`을 초기값으로 둔다. 100ms는 broker fetch 대기 상한 설정이며, 정확히 100ms마다 200건을 모으는 앱 타이머가 아니다. **한 번 받은 poll 배치가 한 DB 트랜잭션 경계**다. consumer concurrency는 프로필당 1로 시작해 측정 후 늘린다.
 
-DLQ 발행 ack 대기는 배치 전체 합계 10초, DB statement timeout은 5초로 시작한다. 연결·lock·transaction에도 유한 timeout을 적용하고, 실패 시 listener 밖으로 예외를 전달한다. statement timeout만으로 전체 배치 소요 시간이 제한된다고 가정하지 않는다. 재시도 중 poll을 유지해 `max.poll.interval.ms`를 넘기지 않는지 장애 시험한다. 자동 offset 초기화는 `none`으로 두고, 최초 설치만 관리 절차로 명시한 start offset을 설정한다. retention 만료를 자동 latest 이동으로 숨기지 않는다.
+DLQ 발행 ack 대기는 배치의 DB 처리 진입 기준 10초의 공통 기한을 사용하며 동기 send 진입은 max.block.ms=2000만큼 추가 지연될 수 있다. DB statement timeout은 5초다. 연결·lock·transaction에도 유한 timeout을 적용하고, 실패 시 listener 밖으로 고정 오류 코드를 전달한다. statement timeout만으로 전체 배치 소요 시간이 제한된다고 가정하지 않는다. 재시도 중 poll을 유지해 `max.poll.interval.ms`를 넘기지 않는지 장애 시험한다. 자동 offset 초기화는 `none`으로 두고, 최초 설치만 관리 절차로 명시한 start offset을 설정한다. retention 만료를 자동 latest 이동으로 숨기지 않는다.
 
 ranking/trend는 서로 다른 ledger namespace를 사용한다. 설정과 예외 분류는 실제 채택할 Spring Kafka 버전에서 확인한다. [컨테이너 문서](https://docs.spring.io/spring-kafka/reference/kafka/receiving-messages/message-listener-container.html)
 
@@ -252,13 +250,13 @@ snapshot 생성 시 품질 판정은 다음 우선순위를 따른다. API는 �
 | 접근 제한 방송 | UNAVAILABLE, 자동 우회 없음 | 해당 채널 제외 |
 | Kafka 발행 실패 | 같은 ID로 제한된 retry, bounded buffer | ack 전 성공 취급 금지. 버퍼 소진 시 gap |
 | PostgreSQL 일시 장애 | consumer partition pause/backoff, poll 유지 가능한 방식 | offset 미진행. 정상 복구 후 재처리 |
-| 유효하지 않은 스키마/영구 변환 오류 | 분석별 DLQ에 전송 | DLQ publish 확인 후에만 원본 offset 진행 |
+| 유효하지 않은 스키마/영구 변환 오류 | 공통 DLQ 발행·분석 namespace별 DB 격리 | DLQ publish 확인·DB commit 후에만 원본 offset 진행 |
 | DLQ 전송 실패 | 해당 처리를 성공 처리하지 않고 재시도 | 원본 offset 미진행 |
 | DB commit 직후 프로세스 종료 | 재수신 후 ledger 확인 | 같은 ID의 count 증가 없음 |
 | Kafka retention 만료 | 진행 불가능한 offset을 감지하고 작업 실패 표시 | 조용히 latest로 넘어가 정상으로 표시하지 않음 |
 | collector 중복 실행 | 단일 호스트의 공유 OS 파일 잠금; 잠금 획득 실패 시 시작 거부 | 자동 active-active 지원하지 않음 |
 
-원본 offset commit과 DLQ publish는 두 동작이라 DLQ에 중복이 생길 수 있다. failureId로 운영 화면에서 합친다. MVP에서는 DLQ를 live 토픽으로 재투입하지 않는다. 오류 수정 검증은 원본 토픽의 보존된 범위를 새 run으로 replay하며 eventId를 유지한다. 원본이 만료되고 safePayload만으로 복원할 수 없으면 복구 불가로 표시한다. 일시 DB 장애를 모든 메시지의 영구 오류로 취급해 DLQ로 흘리지 않는다.
+원본 offset commit과 DLQ publish는 두 동작이라 DLQ에 중복이 생길 수 있다. failureId로 운영 화면에서 합친다. MVP에서는 DLQ를 live 토픽으로 재투입하지 않는다. 오류 수정 검증은 원본 토픽의 보존된 범위를 새 run으로 replay하며 eventId를 유지한다. 원본이 만료되면 안전한 진단 envelope만으로 이벤트를 복원할 수 없으므로 복구 불가로 표시한다. 일시 DB 장애를 모든 메시지의 영구 오류로 취급해 DLQ로 흘리지 않는다.
 
 ## 9. 재처리 설계
 

@@ -1,18 +1,24 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `refactor/module-boundaries`
+2026-10-25 · 브랜치 `feat/dlq-recovery`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
-| M3 장애·재처리 | #9 replay CLI의 PR #15 Claude 승인·CI 통과 후 develop 병합 완료, DLQ 미착수 | #10 DLQ·복구 진단, #16 replay 후속 보완 |
+| M3 장애·재처리 | #9·PR #15 병합 완료, #10 DLQ·소비 복구 진단 구현 중 | DLQ ACK/DB/offset 장애 검증·Claude 리뷰·CI, #16 replay 후속 보완 |
 | M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
+
+## 오류 격리·복구 진단 #10
+
+`feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. 영구 계약 오류만 안전한 DLQ로 격리하고 정상 이벤트·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DLQ ACK 실패와 DB 오류는 배치를 재시도한다. ranking/trend 양쪽에 적용하고 수집 불완전 품질·로컬 운영 진단을 연결한다. 실제 broker/DB 장애 시험 전이며 완료 판정은 검증 후 갱신한다.
+
+PR #18 push CI의 `describeConfigs` 단계 `UnknownTopicOrPartitionException`은 같은 HEAD 재실행에서 통과했으나 원인은 미확정이다. 이번 구현의 결과와 구분해 추적한다.
 
 ## 코드 구조 리팩토링
 

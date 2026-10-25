@@ -15,12 +15,20 @@ public record PipelineProperties(
         @DefaultValue("chatpulse") String dbUser,
         @DefaultValue("local-chatpulse") String dbPassword,
         @DefaultValue("none") String offsetReset,
-        @DefaultValue("1000") int bufferCapacity) {
+        @DefaultValue("1000") int bufferCapacity,
+        @DefaultValue("500") int channelBufferCapacity,
+        @DefaultValue("64") int publisherInFlight) {
+    public BufferedKafkaPublisher.Limits publisherLimits() {
+        return new BufferedKafkaPublisher.Limits(bufferCapacity, Math.min(bufferCapacity, channelBufferCapacity),
+                Math.min(bufferCapacity, publisherInFlight));
+    }
     public void validate() {
         if (!role.equals("collector") && !role.equals("analyzer")) throw new IllegalArgumentException("pipeline.role");
         if (!topic.matches("[a-zA-Z0-9._-]{1,200}") || !group.matches("[a-zA-Z0-9._-]{1,100}")
                 || !projection.matches("[a-zA-Z0-9_-]{1,40}") || !runId.matches("[a-zA-Z0-9_-]{1,80}")
                 || bufferCapacity < 1 || bufferCapacity > 1000
+                || channelBufferCapacity < 1 || channelBufferCapacity > 1000
+                || publisherInFlight < 1 || publisherInFlight > 1000
                 || (!offsetReset.equals("none") && !offsetReset.equals("earliest"))) {
             throw new IllegalArgumentException("pipeline configuration");
         }

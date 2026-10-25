@@ -42,9 +42,9 @@ heartbeat는 루프에서 5초마다 및 DB 배치 commit 때 갱신한다. poll
 
 `./scripts/replay migrate`만 명시적으로 Flyway를 실행한다. 최초 create/worker 전에 실행한다. 서버 기동의 기존 migration은 유지하지만 replay의 create/cancel/worker/reap도 자동 migration을 하지 않는다. `status/compare`는 Hikari 읽기 전용 연결과 읽기 트랜잭션으로 조회만 수행한다. schema가 없거나 이전 버전이면 조회가 실패하며 새 테이블을 만들지 않는다.
 
-생성 빌드 `created_build`와 실행을 claim한 빌드 `worker_build`를 V10에 기록한다. 빌드 ID는 정렬한 서버 main 소스/리소스·server build.gradle·settings.gradle·실제 runtime 의존 JAR들의 이름과 바이트를 SHA-256으로 계산해 JAR 리소스에 포함한다. 시각·로컬 절대 경로는 제외한다. 실행 JAR 파일 자체의 hash나 서명 검증을 대신하지 않으며 JVM/OS 차이까지 동일성을 보장하지 않는다. 정제 실행 근거에는 별도 JAR hash를 기록한다. 같은 algorithmVersion이어도 빌드 ID가 다르면 의미적 동일성을 자동 승인하지 않는다. 새 빌드에서 같은 manifest로 두 run을 다시 실행해야 한다. V10 이전 완료 run은 worker_build가null이라 비교하지 않으며 상태 조회는 가능하다.
+생성 빌드 `created_build`와 실행을 claim한 빌드 `worker_build`를 V10에 기록한다. 선행 V7/V8/V9를 포함한 develop 순서로 적용하며 V10만 앞서 공유 DB에 적용하지 않는다. 이번 검증은 UUID 임시 스키마만 사용했다. 빌드 ID 리소스가 없거나 잘못되면 BUILD_UNAVAILABLE 고정 코드로 거부한다. 빌드 ID는 정렬한 서버 main 소스/리소스·server build.gradle·settings.gradle·실제 runtime 의존 JAR들의 이름과 바이트를 SHA-256으로 계산해 JAR 리소스에 포함한다. 시각·로컬 절대 경로는 제외한다. 실행 JAR 파일 자체의 hash나 서명 검증을 대신하지 않으며 JVM/OS 차이까지 동일성을 보장하지 않는다. 정제 실행 근거에는 별도 JAR hash를 기록한다. 같은 algorithmVersion이어도 빌드 ID가 다르면 의미적 동일성을 자동 승인하지 않는다. 새 빌드에서 같은 manifest로 두 run을 다시 실행해야 한다. V10 이전 완료 run은 worker_build가null이라 비교하지 않으며 상태 조회는 가능하다.
 
-`./scripts/replay`의 실행용 JAR 복사본은 정상 종료·오류 반환 및 INT/TERM 처리 뒤 지운다. JVM이 쓰는 동안 지우지 않고 종료를 기다린다. 강제 SIGKILL/호스트 종료로 남은 `work/runtime/replay.*`는 해당 replay 프로세스가 모두 종료됐음을 확인한 뒤 로컬에서 정리한다. 실행 중 JAR나 다른 pipeline 복사본을 자동 청소하지 않는다.
+`./scripts/replay`의 실행용 JAR 복사본은 정상 종료·오류 반환 및 INT/TERM/HUP 처리 뒤 지운다. JVM이 쓰는 동안 지우지 않고 종료를 기다린다. 강제 SIGKILL/호스트 종료로 남은 `work/runtime/replay.*`는 해당 replay 프로세스가 모두 종료됐음을 확인한 뒤 로컬에서 정리한다. 실행 중 JAR나 다른 pipeline 복사본을 자동 청소하지 않는다.
 
 ## 보존 상태를 수치로 확인
 

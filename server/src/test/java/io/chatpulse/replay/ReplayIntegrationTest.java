@@ -28,6 +28,7 @@ class ReplayIntegrationTest {
     private KafkaProducer<String,byte[]> producer;
     private final EventCodec codec=new EventCodec();
     private Instant t;
+    private Path executableJar=Path.of("build/libs/chat-pulse-poc.jar").toAbsolutePath();
     @BeforeEach void setup() throws Exception {
         schema="it_"+UUID.randomUUID().toString().replace("-","");topic="it.replay."+UUID.randomUUID();liveGroup=topic+"-live";
         new JdbcTemplate(ds("public")).execute("CREATE SCHEMA "+schema);
@@ -58,7 +59,7 @@ class ReplayIntegrationTest {
     private long value(UUID id,String name) {return jdbc.queryForObject("SELECT "+name+" FROM replay_run WHERE run_id=?",Long.class,id);}
     private tools.jackson.databind.JsonNode command(String... arguments) throws Exception {return commandExpected(0,arguments);}
     private tools.jackson.databind.JsonNode commandExpected(int exitCode,String... arguments) throws Exception {
-        var cmd=new ArrayList<String>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-jar",Path.of("build/libs/chat-pulse-poc.jar").toAbsolutePath().toString(),"replay"));
+        var cmd=new ArrayList<String>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-jar",executableJar.toString(),"replay"));
         cmd.addAll(List.of(arguments));
         var output=Path.of("../work/replay-cli-"+UUID.randomUUID()+".json").toAbsolutePath();Files.createDirectories(output.getParent());
         var builder=new ProcessBuilder(cmd).redirectErrorStream(true).redirectOutput(output.toFile());
@@ -283,5 +284,15 @@ class ReplayIntegrationTest {
         try(var source=new ReplaySource("127.0.0.1:"+port,topic,UUID.randomUUID())) {
             assertThatThrownBy(()->source.capture(null,null)).hasMessage("SOURCE_UNAVAILABLE");
         }
+    }
+    @Test void missingBuildResourceReturnsOnlyAFixedCodeAndDoesNotCreateARun() throws Exception {
+        var manifest=Path.of("../work/replay-build-manifest-"+UUID.randomUUID()+".json").toAbsolutePath();Files.createDirectories(manifest.getParent());Files.writeString(manifest,capture(null,null).json());
+        var altered=Files.createTempFile(manifest.getParent(),"replay-build-missing-",".jar");Files.copy(executableJar,altered,StandardCopyOption.REPLACE_EXISTING);
+        try {
+            try(var zip=FileSystems.newFileSystem(altered)) { Files.delete(zip.getPath("/BOOT-INF/classes/replay-build-id.txt")); }
+            executableJar=altered;
+            assertThat(commandExpected(2,"create",manifest.toString()).path("error").asText()).isEqualTo("BUILD_UNAVAILABLE");
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM replay_run",Long.class)).isZero();
+        } finally { Files.deleteIfExists(altered);Files.deleteIfExists(manifest); }
     }
 }

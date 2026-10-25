@@ -57,7 +57,7 @@ public final class ReplayCli {
             }
             return 0;
         } catch(ReplayFailure e) {print(Map.of("error",e.code().name()));return 2;}
-          catch(java.time.format.DateTimeParseException e) {print(Map.of("error","INVALID_DATE"));return 2;}
+          catch(java.time.format.DateTimeParseException e) {print(Map.of("error",INVALID_DATE.name()));return 2;}
           catch(java.io.IOException | IllegalArgumentException e) {print(Map.of("error","INVALID_COMMAND_OR_FILE"));return 2;}
           catch(Exception e) {print(Map.of("error","REPLAY_UNAVAILABLE"));return 2;}
     }

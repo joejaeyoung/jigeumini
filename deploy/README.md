@@ -15,6 +15,8 @@
 
 ```bash
 ./scripts/deploy-images work/images.json
+# 서로 다른 두 clean commit에서 만든 manifest를 사용한다.
+./scripts/deploy-rehearsal work/images-baseline.json work/images-candidate.json work/deploy-result
 ```
 
 Dockerfile의 Java/NGINX base는 digest로 고정했다. 빌드 manifest는 로컬 image ID를 기록하며 registry push를 하지 않는다. 실제 배포는 동일 이미지를 registry digest로 고정해야 한다. Compose 환경에는 SERVER_IMAGE/WEB_IMAGE, UUID DEPLOYMENT_OWNER, KAFKA_CLUSTER_ID, 비밀 파일 경로를 지정한다. 기본 DB는chatpulse, group은deploy-live다.

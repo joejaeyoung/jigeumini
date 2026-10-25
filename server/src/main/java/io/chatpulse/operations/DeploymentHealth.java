@@ -36,8 +36,12 @@ public final class DeploymentHealth implements AutoCloseable {
             }
             processing&=pollFresh.get();
         }catch(RuntimeException ignored){processing=false;}
+        Map<String,Object> pool=Map.of();
+        if(ds instanceof com.zaxxer.hikari.HikariDataSource hikari && hikari.getHikariPoolMXBean()!=null) {
+            var bean=hikari.getHikariPoolMXBean();pool=Map.of("active",bean.getActiveConnections(),"idle",bean.getIdleConnections(),"waiting",bean.getThreadsAwaitingConnection(),"maximum",hikari.getMaximumPoolSize());
+        }
         boolean ready=database&&kafka&&processing&&!draining;
-        snapshot=Map.of("ready",ready,"database",database,"kafka",kafka,"consumers",states,"processing",processing,
+        snapshot=Map.of("ready",ready,"database",database,"pool",pool,"kafka",kafka,"consumers",states,"processing",processing,
                 "observedAt",Instant.now().toString(),"code",ready?"READY":"DEPENDENCY_OR_CONSUMER_UNAVAILABLE");sampled=System.nanoTime();
     }
     public Map<String,Object> status() {

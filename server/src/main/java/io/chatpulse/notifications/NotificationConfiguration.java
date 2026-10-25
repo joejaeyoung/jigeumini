@@ -16,10 +16,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
 class NotificationConfiguration {
     private TransactionTemplate tx(HikariDataSource ds){var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);return tx;}
-    @Bean String notificationTopic(PipelineProperties p,@Value("${notifications.topic:}") String configured){
+    @Bean String notificationTopic(PipelineProperties p,KafkaTopicPolicy policy,@Value("${notifications.topic:}") String configured){
         String topic=configured.isEmpty()?p.topic()+".spikes":configured;
         if(!topic.matches("[a-zA-Z0-9._-]{1,240}")||topic.equals(p.topic()))throw new IllegalArgumentException("NOTIFICATION_TOPIC");
-        KafkaSupport.ensureTopic(p.bootstrapServers(),topic);return topic;
+        KafkaSupport.ensureTopic(p.bootstrapServers(),topic,policy);return topic;
     }
     @Bean NotificationStore notificationStore(HikariDataSource ds,PipelineProperties p){return new NotificationStore(new JdbcTemplate(ds),tx(ds),p.runId(),Clock.systemUTC());}
     @Bean(initMethod="start",destroyMethod="close")

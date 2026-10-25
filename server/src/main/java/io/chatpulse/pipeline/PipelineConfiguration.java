@@ -15,12 +15,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration
 @Profile("pipeline")
-@EnableConfigurationProperties(PipelineProperties.class)
+@EnableConfigurationProperties({PipelineProperties.class, KafkaTopicPolicy.class})
 public class PipelineConfiguration {
     @Bean EventCodec eventCodec(PipelineProperties p) { p.validate(); return new EventCodec(); }
-    @Bean String readyTopic(PipelineProperties p) {
+    @Bean String readyTopic(PipelineProperties p, KafkaTopicPolicy policy) {
         p.validate();
-        KafkaSupport.ensureTopic(p.bootstrapServers(), p.topic());
+        KafkaSupport.ensureTopic(p.bootstrapServers(), p.topic(), policy);
         return p.topic();
     }
     @Bean(destroyMethod = "destroy")
@@ -52,7 +52,7 @@ public class PipelineConfiguration {
     }
     @Bean(destroyMethod = "close")
     @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
-    DeadLetterRecovery deadLetterRecovery(PipelineProperties p, HikariDataSource ds, String readyTopic) {
-        return new DeadLetterRecovery(p.bootstrapServers(), readyTopic, new JdbcTemplate(ds), p.projection(), p.runId());
+    DeadLetterRecovery deadLetterRecovery(PipelineProperties p, HikariDataSource ds, String readyTopic, KafkaTopicPolicy policy) {
+        return new DeadLetterRecovery(p.bootstrapServers(), readyTopic, new JdbcTemplate(ds), p.projection(), p.runId(), policy);
     }
 }

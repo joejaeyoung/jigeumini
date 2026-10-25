@@ -79,6 +79,11 @@ class ReplayIntegrationTest {
         assertThat(command("status",a).path("metrics").path("unique_count").asLong()).isEqualTo(1);
         var b=command("create",file.toString()).path("runId").asText();command("worker");
         assertThat(command("compare",a,b).path("summary").path("mismatched_buckets").asLong()).isZero();
+        assertThat(commandExpected(2,"compare",a,a).path("error").asText()).isEqualTo("INCOMPATIBLE_RUNS");
+        assertThat(command("status",a).path("metrics").path("worker_build").asText()).matches("[a-f0-9]{64}");
+        var retained=command("retention",file.toString());
+        assertThat(retained.path("timestampMeaning").asText()).isEqualTo("KAFKA_RECEIVED_AT_NOT_EVENT_TIME");
+        assertThat(retained.path("partitions").get(0).path("availableCapturedOffsetSpan").asLong()).isEqualTo(1);
         jdbc.update("UPDATE chat_bucket_10s SET chat_count=chat_count+1 WHERE projection='replay' AND run_id=?",b);
         assertThat(commandExpected(2,"compare",a,b).path("equal").asBoolean()).isFalse();
         var c=command("create",file.toString()).path("runId").asText();
@@ -214,5 +219,69 @@ class ReplayIntegrationTest {
         jdbc.update("UPDATE replay_run SET heartbeat_at=now()-interval '31 seconds' WHERE run_id=?",id);
         try(var lock=store.tryWorkerLock()) {assertThat(lock).isNotNull();assertThat(store.reap()).isZero();assertThatThrownBy(()->new ReplayWorker(store,BOOTSTRAP,topic).runOne()).hasMessage("WORKER_BUSY");assertThat(store.get(id).state()).isEqualTo("RUNNING");}
         assertThat(store.reap()).isEqualTo(1);assertThatThrownBy(()->store.complete(claimed)).hasMessage("OWNER_LOST");
+    }
+    @Test void readonlyCliDoesNotMigrateOrReapAndDifferentExecutionBuildsCannotCompare() throws Exception {
+        var first=execute(capture(null,null));var second=execute(capture(null,null));
+        jdbc.update("UPDATE replay_run SET worker_build=? WHERE run_id=?","b".repeat(64),second);
+        assertThatThrownBy(()->store.compare(first,second)).hasMessage("INCOMPATIBLE_RUNS");
+        var stale=store.create(capture(null,null));store.claim(UUID.randomUUID());
+        jdbc.update("UPDATE replay_run SET heartbeat_at=now()-interval '60 seconds' WHERE run_id=?",stale);
+        jdbc.execute("CREATE FUNCTION reject_replay() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'SYNTHETIC_PRIVATE_SQL'; END $$");
+        jdbc.execute("CREATE TRIGGER reject_replay BEFORE UPDATE ON replay_run FOR EACH ROW EXECUTE FUNCTION reject_replay()");
+        assertThat(command("status",stale.toString()).path("state").asText()).isEqualTo("RUNNING");
+        jdbc.execute("DROP TRIGGER reject_replay ON replay_run");
+        jdbc.execute("DROP TABLE flyway_schema_history");
+        assertThat(command("status",first.toString()).path("state").asText()).isEqualTo("COMPLETED");
+        assertThat(jdbc.queryForObject("SELECT to_regclass('flyway_schema_history')",String.class)).isNull();
+        assertThat(commandExpected(2,"compare",first.toString(),first.toString()).path("error").asText()).isEqualTo("INCOMPATIBLE_RUNS");
+    }
+    @Test void tailControlRecordTimesOutButAnIntermediateControlOffsetIsAGap() throws Exception {
+        var settings=new HashMap<String,Object>();settings.put("bootstrap.servers",BOOTSTRAP);settings.put("transactional.id","it-replay-"+UUID.randomUUID());settings.put("acks","all");
+        try(var transactional=new KafkaProducer<String,byte[]>(settings,new StringSerializer(),new ByteArraySerializer())) {
+            transactional.initTransactions();transactional.beginTransaction();
+            transactional.send(new ProducerRecord<>(topic,0,t.toEpochMilli(),CHANNEL,codec.encode(event(700,t.minusSeconds(10),t)))).get(10,TimeUnit.SECONDS);
+            transactional.commitTransaction();
+        }
+        org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(10)).untilAsserted(()->
+                assertThat(admin.listOffsets(Map.of(new TopicPartition(topic,0),OffsetSpec.latest())).all().get(5,TimeUnit.SECONDS).get(new TopicPartition(topic,0)).offset()).isEqualTo(2));
+        var manifest=capture(null,null);assertThat(manifest.partitions().getFirst().end()).isEqualTo(2);
+        var tail=store.create(manifest);new ReplayWorker(store,BOOTSTRAP,topic,job->{},Duration.ofSeconds(10),Duration.ofSeconds(1)).runOne();
+        assertThat(jdbc.queryForObject("SELECT reason FROM replay_run WHERE run_id=?",String.class,tail)).isEqualTo("NO_PROGRESS");
+        send(0,event(701,t.minusSeconds(9),t));var middle=execute(capture(null,null));
+        assertThat(jdbc.queryForObject("SELECT reason FROM replay_run WHERE run_id=?",String.class,middle)).isEqualTo("OFFSET_GAP");
+    }
+    @Test void anotherActiveWorkerDefersReapingADeadRunUntilTheGlobalLockIsReleased() throws Exception {
+        var manifest=capture(null,null);var stale=store.create(manifest);store.claim(UUID.randomUUID());
+        jdbc.update("UPDATE replay_run SET heartbeat_at=now()-interval '60 seconds' WHERE run_id=?",stale);
+        var active=store.create(manifest);
+        try(var lock=store.tryWorkerLock()) {
+            assertThat(lock).isNotNull();var claimed=store.claim(UUID.randomUUID());assertThat(claimed.id()).isEqualTo(active);
+            assertThat(store.reap()).isZero();assertThat(store.get(stale).state()).isEqualTo("RUNNING");store.complete(claimed);
+        }
+        assertThat(store.reap()).isEqualTo(1);assertThat(store.get(stale).state()).isEqualTo("FAILED");assertThat(store.get(active).state()).isEqualTo("COMPLETED");
+    }
+    @Test void retentionReportsOffsetLossAndKafkaTimestampSamplesWithoutInferringEventTimeCompleteness() throws Exception {
+        send(0,event(801,t.minusSeconds(600),t));send(0,event(802,t.minusSeconds(900),t.minusSeconds(30)));
+        var manifest=capture(null,null);
+        try(var source=new ReplaySource(BOOTSTRAP,topic,UUID.randomUUID())) {
+            var json=tools.jackson.databind.json.JsonMapper.builder().build().valueToTree(source.retention(manifest));var partition=json.path("partitions").get(0);
+            assertThat(partition.path("capturedOffsetSpan").asLong()).isEqualTo(2);
+            assertThat(partition.path("firstProbe").path("kafkaTimestamp").asText()).isEqualTo(t.toString());
+            assertThat(partition.path("lastProbe").path("kafkaTimestamp").asText()).isEqualTo(t.minusSeconds(30).toString());
+            admin.deleteRecords(Map.of(new TopicPartition(topic,0),RecordsToDelete.beforeOffset(1))).all().get(10,TimeUnit.SECONDS);
+            json=tools.jackson.databind.json.JsonMapper.builder().build().valueToTree(source.retention(manifest));partition=json.path("partitions").get(0);
+            assertThat(partition.path("state").asText()).isEqualTo("RETENTION_EXPIRED");assertThat(partition.path("missingPrefixOffsetSpan").asLong()).isEqualTo(1);
+            assertThat(partition.path("availableCapturedOffsetSpan").asLong()).isEqualTo(1);
+        }
+    }
+    @Test void invalidDatesMissingTopicsAndUnavailableBrokersHaveDistinctCodes() throws Exception {
+        assertThat(commandExpected(2,"capture","unused.json","not-a-date",t.toString()).path("error").asText()).isEqualTo("INVALID_DATE");
+        try(var source=new ReplaySource(BOOTSTRAP,"it.absent."+UUID.randomUUID(),UUID.randomUUID())) {
+            assertThatThrownBy(()->source.capture(null,null)).hasMessage("TOPIC_NOT_FOUND");
+        }
+        int port;try(var socket=new java.net.ServerSocket(0)){port=socket.getLocalPort();}
+        try(var source=new ReplaySource("127.0.0.1:"+port,topic,UUID.randomUUID())) {
+            assertThatThrownBy(()->source.capture(null,null)).hasMessage("SOURCE_UNAVAILABLE");
+        }
     }
 }

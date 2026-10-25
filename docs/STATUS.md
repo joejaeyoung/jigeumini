@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `feat/spike-notifications`
+2026-10-25 · 브랜치 `fix/replay-diagnostics`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -33,6 +33,10 @@ Claude 초기 리뷰는 `8f23629` APPROVE다. 비차단 지적 중 웹의 600초
 PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `40196842128`에서 `DeadLetterIntegrationTest.setup → ensureTopic.describeConfigs`의 UnknownTopicOrPartitionException으로 실패했다. PR #18과 같은 위치다. 실제 로컬 생성/조회200회에서는 재현0회이며 broker 내부 원인은 미확정이다. 생성·토픽 조회 성공 뒤 설정 조회가 한 번 실패하는 Admin 응답을 주입해 기존 시작 실패를 재현했고, 해당 오류만 공통10초 기한 안에서 재조회하도록 보완했다. 권한/설정 오류 즉시 거부, 중단 신호 복원, 종료 한도의 단위 회귀4개와 실제 새 토픽20개의 최초/기존 초기화·잘못된 설정 거부가 통과했다. `d8f3955`의 전체 단위67·하네스16·실제 Kafka/DB47 통과와 Claude APPROVE를 확인했다. [처리 계약](pipeline/TOPIC_READINESS.md)·[정제 근거](poc/evidence/topic-readiness-2026-10-25.json)에 원인 미확정과 API 응답 회귀의 범위를 구분한다. 최종 원격 CI는 PR에서 확인한다.
 
 #5 시청자 관측 기반은 별도 `feat/viewer-observations` 브랜치의 진행분으로 보관했다. 원천 수치 어댑터·이벤트 계약·독립 소비/이력 기반을 시작했으며 #8 기동 회귀 해결 후 이어서 검증한다.
+
+## 재처리 CLI 후속 보완 #16
+
+`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. #5/#6 최종 CI·리뷰를 기다리는 동안 독립 범위를 진행한다. 조회의 migration/watchdog 제거·명시적migrate, 동일 run 및 다른 worker 빌드 비교 거부, 보존 offset 폭과 경계 Kafka timestamp 표본, 잘못된 날짜/없는 토픽/접속 실패 구분, runtime JAR 종료 정리를 구현했다. 실제 control record 꼬리/중간과 전역 worker lock의 watchdog 지연을 합성 Kafka/DB에서 검증 중이다. 최종 근거·검증·Claude 승인·CI는 아직 완료하지 않았다.
 
 ## 오류 격리·복구 진단 #10
 

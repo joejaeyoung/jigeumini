@@ -110,6 +110,7 @@ curl --fail http://127.0.0.1:18080/api/operations/notifications
 ```bash
 ./scripts/infra up
 # 현재 보존된 전체 partition의 시작·끝 offset 고정. 파일은 새 경로여야 한다.
+./scripts/replay migrate
 ./scripts/replay capture work/replay-input.json
 # eventTime 필터를 쓸 경우 두 UTC 시각을 함께 지정한다. offset 범위는 보존 로그 전체다.
 # ./scripts/replay capture work/replay-filtered.json 2026-10-25T00:00:00Z 2026-10-25T01:00:00Z
@@ -186,3 +187,6 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 
 `gromo/phone`의 문서 인덱스, Gradle wrapper, 로컬 검증과 live 스모크 분리 방식을 참고했다.
 Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포함하지 않았다.
+
+
+재처리 조회의 후속 진단(#16): `./scripts/replay retention <manifest.json>`으로 현재 가용 offset 폭과 receivedAt 경계 표본을 확인한다. `status/compare`는 migration/watchdog을 수행하지 않으며 watchdog은 `reap`으로 실행한다. 생성/실행 빌드를 기록하고 다른 실행 빌드나 같은 run끼리의 비교를 거부한다. [진단 계약](docs/pipeline/REPLAY.md#조회와-migration빌드-이력-16)을 따른다.

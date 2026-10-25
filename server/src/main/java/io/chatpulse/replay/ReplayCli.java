@@ -19,25 +19,31 @@ public final class ReplayCli {
         try {
             if(args.length<1) throw new ReplayFailure(INVALID_COMMAND);
             String bootstrap=env("PIPELINE_BOOTSTRAP_SERVERS","127.0.0.1:19092"),topic=env("PIPELINE_TOPIC","chat.received.v1");
-            if(args[0].equals("capture")) {
+            if(args[0].equals("capture") || args[0].equals("retention")) {
+                if(args[0].equals("retention")) {
+                    require(args,2);var manifest=manifest(args[1]);
+                    try(var source=new ReplaySource(bootstrap,topic,UUID.randomUUID())) {print(source.retention(manifest));return 0;}
+                }
                 if(args.length!=2 && args.length!=4) throw new ReplayFailure(INVALID_COMMAND);
+                Instant from=args.length==4?Instant.parse(args[2]):null,to=args.length==4?Instant.parse(args[3]):null;
                 try(var source=new ReplaySource(bootstrap,topic,UUID.randomUUID())) {
-                    var manifest=source.capture(args.length==4?Instant.parse(args[2]):null,args.length==4?Instant.parse(args[3]):null);
+                    var manifest=source.capture(from,to);
                     Files.writeString(Path.of(args[1]),manifest.json()+"\n",StandardOpenOption.CREATE_NEW);
                     print(manifest);return 0;
                 }
             }
-            try(var ds=dataSource()) {
+            if(args[0].equals("migrate")) {
+                require(args,1);try(var ds=PostgresSupport.openMigrated(env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"),env("PIPELINE_DB_USER","chatpulse"),env("PIPELINE_DB_PASSWORD","local-chatpulse"))) {print(Map.of("state","MIGRATED","buildId",ReplayBuild.id()));return 0;}
+            }
+            try(var ds=dataSource(Set.of("status","compare").contains(args[0]))) {
                 var store=new ReplayStore(ds);
                 switch(args[0]) {
                     case "create" -> {
-                        require(args,2);var path=Path.of(args[1]);
-                        if(Files.size(path)>65536) throw new ReplayFailure(INVALID_MANIFEST);
-                        var manifest=ReplayManifest.parse(Files.readString(path));
+                        require(args,2);var manifest=manifest(args[1]);
                         try(var source=new ReplaySource(bootstrap,topic,UUID.randomUUID())) {source.validate(manifest);}
                         print(store.status(store.create(manifest)));
                     }
-                    case "status" -> {require(args,2);store.reap();print(store.status(UUID.fromString(args[1])));}
+                    case "status" -> {require(args,2);print(store.status(UUID.fromString(args[1])));}
                     case "cancel" -> {require(args,2);UUID id=UUID.fromString(args[1]);store.cancel(id);store.reap();print(store.status(id));}
                     case "worker" -> {
                         require(args,1);var id=new ReplayWorker(store,bootstrap,topic).runOne();
@@ -51,15 +57,19 @@ public final class ReplayCli {
             }
             return 0;
         } catch(ReplayFailure e) {print(Map.of("error",e.code().name()));return 2;}
+          catch(java.time.format.DateTimeParseException e) {print(Map.of("error","INVALID_DATE"));return 2;}
           catch(java.io.IOException | IllegalArgumentException e) {print(Map.of("error","INVALID_COMMAND_OR_FILE"));return 2;}
           catch(Exception e) {print(Map.of("error","REPLAY_UNAVAILABLE"));return 2;}
     }
     private static void require(String[] args,int count) {if(args.length!=count) throw new ReplayFailure(INVALID_COMMAND);}
     private static void print(Object value) {System.out.println(JSON.writeValueAsString(value));}
     private static String env(String name,String fallback) {return System.getenv().getOrDefault(name,fallback);}
-    private static HikariDataSource dataSource() {
-        return PostgresSupport.openMigrated(
+    private static ReplayManifest manifest(String file) throws java.io.IOException {
+        var path=Path.of(file);if(Files.size(path)>65536)throw new ReplayFailure(INVALID_MANIFEST);return ReplayManifest.parse(Files.readString(path));
+    }
+    private static HikariDataSource dataSource(boolean readOnly) {
+        return PostgresSupport.open(
                 env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"),
-                env("PIPELINE_DB_USER","chatpulse"), env("PIPELINE_DB_PASSWORD","local-chatpulse"));
+                env("PIPELINE_DB_USER","chatpulse"), env("PIPELINE_DB_PASSWORD","local-chatpulse"),readOnly);
     }
 }

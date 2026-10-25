@@ -50,6 +50,8 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 #7 [PR #23](https://github.com/joejaeyoung/jigeumini/pull/23) 최초 PR CI40204570648은 기존 pong 미응답 fixture에서 WS_CLOSED 뒤 timeout 관측이 없어 실패했다. 연결 종료의 내부 원인은 미확정이다. 별도1.2초 승인 지연으로 기존1초 시험 예산 결함을 재현했고 실제 채팅/ping/pong0/timeout을 기다리도록 보완했다. 운영 수집 코드는 바꾸지 않았으며 ChannelProbeTest7개 통과 뒤 최종단위/CI를 다시 진행한다.
 
+#7 초기 Claude REQUEST_CHANGES의 두 항목을 보완 중이다. 부분 보존 정리 뒤 잔여 관측을 재계산에서 제외하고, 리포트 입력에7일 eventTime 기준을 적용해48시간 이상 중단 뒤에도 이어간다. CI40205131666·40205136741의 관측 시각 정밀도 기대값도 마이크로초 계약에 맞췄다. 수정HEAD에서 실제 DB 회귀·Claude·CI를 확인한다.
+
 ## 오류 격리·복구 진단 #10
 
 `feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. [격리·진단 계약](pipeline/DLQ.md)대로 ranking/trend의 영구 계약 오류만 격리하고, DLQ ACK 후 정상 ledger/bucket·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DB commit 후 Kafka BATCH offset commit을 유지한다. 같은 배치의 eventId 충돌 후보는 모두 제외하고 기존 ledger는 보존한다.

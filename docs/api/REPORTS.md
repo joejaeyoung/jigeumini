@@ -18,7 +18,7 @@ V9의 `report_*` namespace는 live ledger·순위·알림을 수정하지 않는
 
 한 배치의 새 입력·세션 계산·관측 귀속·채팅 재배정·bucket 증감·버전·진행 위치는 같은 DB 트랜잭션이다. 채널 잠금을 정렬해 획득하고 bucket 증감도 정렬한다. 같은 ID의 동일 payload는 재증가하지 않으며 충돌/SQL 실패는 전체 rollback이다. 관측이 늦게 도착하면 `[observedAt, observedAt+120초)`와 변경된 관측 ID에 붙은 보존 이벤트를 다시 배정한다. 긴 ID 목록은 PostgreSQL uuid 배열 한 개로 전달한다.
 
-`receivedAt-eventTime>=120초`를 late로 센다. 최근7일 eventTime의 과거 bucket과 리포트를 고치지만 실시간 spike/outbox를 생성하지 않는다. 공통 live-age 계약은 유지하므로 receivedAt이48시간보다 오래된 미처리 입력은 차단된다. eventTime7일 밖 입력은 결과 부활 방지를 위해 배정하지 않고 진행 위치만 반영한다. 이미 삭제된 입력/관측·Kafka 만료분을 재생성할 수 있다는 뜻이 아니다.
+`receivedAt-eventTime>=120초`를 late로 센다. 최근7일 eventTime의 과거 bucket과 리포트를 고치지만 실시간 spike/outbox를 생성하지 않는다. 리포트는 최근7일 eventTime을 기준으로 미처리 입력을 반영하며 receivedAt의48시간 live-age 제한을 적용하지 않는다. 따라서48시간 이상 중단 뒤에도 잔존 입력을 이어갈 수 있다. receivedAt이현재보다5초 초과인 입력은 차단한다. 운영 ranking/trend의48시간 계약은 그대로다. eventTime7일 밖 입력은 결과 부활 방지를 위해 배정하지 않고 진행 위치만 반영한다. 이미 삭제된 입력/관측·Kafka 만료분을 재생성할 수 있다는 뜻이 아니다.
 
 ## 독립 소비와 품질
 
@@ -40,7 +40,7 @@ group은 `${pipeline.group}-reports`, 시작 위치는 `reports.offset-reset` �
 | lateCount | 배정된 채팅 중120초 이상 지연 입력 수 |
 | unassignedChannelCount | 이 채널 최근7일의 미배정 채팅. 특정 방송에 임의 가산하지 않음 |
 
-분 경계는 UTC 정각이다. metricsFrom은 최초 관측 분 시작, metricsTo는 `floor((now-8초)/1분)`과 종료 관측 시각(미종료는 마지막 표본+TTL) 중 이른 분 경계다. 첫/마지막의 부분 분은 방송 구분 coverage가1이 아니면 제외한다. 수집 관측률≥95%, 알려진 loss/격리 없음, 당시 HEALTHY ranking snapshot·사후 정정 없음, 방송 구분 coverage=100%, report freshness를 모두 요구한다. 당시 snapshot이 없는 과거는 정상0으로 만들지 않는다.
+분 경계는 UTC 정각이다. metricsFrom은 최초 관측 분 시작, metricsTo는 `floor((now-8초)/1분)`과 종료 관측 시각(미종료는 마지막 표본+min(120초,TTL)) 중 이른 분 경계다. 첫/마지막의 부분 분은 방송 구분 coverage가1이 아니면 제외한다. 수집 관측률≥95%, 알려진 loss/격리 없음, 당시 HEALTHY ranking snapshot·사후 정정 없음, 방송 구분 coverage=100%, report freshness를 모두 요구한다. 당시 snapshot이 없는 과거는 정상0으로 만들지 않는다.
 
 리포트 데이터와 품질 조회는 같은 REPEATABLE READ DB snapshot에서 수행한다. `QualityHistory`는 세션·loss/격리·snapshot을 각 한 번 읽고 구간 합집합을 분별로 나눈다. 분마다 SQL을 반복하지 않는다. 정상 품질 판단은 기존 activity 조회와 대조한다.
 
@@ -51,13 +51,15 @@ group은 `${pipeline.group}-reports`, 시작 위치는 `reports.offset-reset` �
 - `GET /api/v1/channels/{channelId}/reports`: 최근7일에 관측/종료 근거가 있는 기록과 미종료 기록, 최근순100개. 더 있으면truncated. source ID 자체 대신 identity 구분을 반환한다.
 - `GET /api/v1/reports/{UUID}`: 요약·피크·분별 품질. 별칭은 canonical reportId로 응답한다. 없거나 만료된 종료 기록은404, 잘못된 ID는400, 조회 실패는원문 없는503. 응답은no-store다.
 - 목록의 `data-N`은 저장 revision이다. 상세 `report-v1-<SHA256>`는 입력 버전과 실제 계산한 품질/상태/요약 내용의 digest이며 조회 시각은 제외한다. 지연 입력·품질 정정·TTL 만료로 표시 내용이 바뀌면 버전도 바뀐다.
-- `updatedAt`은 마지막 **저장 집계 반영 시각**, `asOf`는 조회/품질 판정 시각이다. 품질만 바뀌면 reportVersion은 바뀌고 updatedAt은 그대로일 수 있다.
+- `updatedAt`은 마지막 **저장 데이터 반영 시각**(입력 처리 중 세션 상태 변화 포함), `asOf`는 조회/품질 판정 시각이다. 품질만 바뀌면 reportVersion은 바뀌고 updatedAt은 그대로일 수 있다.
 - `/channels/:id` → `/channels/:id/reports` → `/reports/:id`로 연결한다. 내부 세션·종료 미확정·부분 관측·품질 미확인·이전 조회 결과를 구분한다. 요약은 전체 보존 관측 범위이며 그래프/표는 마지막360분으로 제한하고 잘림을 명시한다. 시청자 수를 선형 보간하거나 누락을0으로 채우지 않는다.
 
 ## 보존과 한계
 
 매60초 현재 run의 종료 근거가7일보다 오래된 세션을 자식부터 정리한다. event/observation/bucket은각10,000행까지 삭제한 후 자식이 없는 세션을 삭제한다. 미배정 입력의7일 보존과 관측 결합의120초 여유도 적용한다. 별칭으로 대체된 빈 세션·0건 bucket·연결 대상이 사라진 별칭을 정리한다. 별칭 대상이 남아 있으면 이전 URL을 유지한다.
 
-입력 트랜잭션은 cleanup 공유 잠금, 정리는 배타 try-lock을 사용해 진행 중 작업이 있으면 건너뛴다. active/UNKNOWN 미종료 세션과 그 입력은 침묵만으로 삭제하지 않는다. live ledger를 삭제하지 않는다. 보존 삭제량보다 입력이 많으면 물리 삭제가7일보다 늦어질 수 있다. 다른 run 정리, 오래된 미종료 세션의 운영 종료 정책은 별도다.
+입력 트랜잭션은 cleanup 공유 잠금, 정리는 배타 try-lock을 사용해 진행 중 작업이 있으면 건너뛴다. 종료가7일 지난 세션의 잔여 관측은 재계산에서 제외한다. 부분 삭제된 LIVE 표본으로 새 세션을 만들거나 다음 내부 세션을 흡수하지 않는다. active/UNKNOWN 미종료 세션과 그 입력은 침묵만으로 삭제하지 않는다. live ledger를 삭제하지 않는다. 보존 삭제량보다 입력이 많으면 물리 삭제가7일보다 늦어질 수 있다. 다른 run 정리, 오래된 미종료 세션의 운영 종료 정책은 별도다.
 
 세션 재계산은 해당 채널의 보존 관측을 읽는다. 미종료 이력이 길면 입력 처리·상세 전체 요약의 CPU/메모리·조회 비용도 늘어난다. SQL5초·transaction20초 한도와 공유 pool을 사용하며 장시간/다중 사용자 비용은 #11 등 실측 전까지 성능 보장으로 주장하지 않는다. 세션/정제 이벤트의 JSON schema와 algorithm 변경에는 명시적 데이터 이행이 필요하다.
+
+원천 ID를 받기 전의 LIVE 표본은 별도 내부 관측 세션으로 남는다. 이후 알려진 원천 ID가 앞선 시각까지 소급 관측된 경우에만 기존 anchor를 포함하는 범위가 별칭으로 합쳐진다. 같은 시각의 서로 다른 표본은 eventId 순서로 결정하며 길이0인 내부 세션이 생길 수 있다. categoryId/categoryName은 허용된 공개 카테고리 분류값이고 제목·채널명·이미지 필드가 아니다. RankingStore는10초 경계마다 snapshot을 저장한다. 정상 분은 그중 UTC 정각 evaluatedAt만 결합하고 해당 tick이 빠지면 미확인으로 남긴다.

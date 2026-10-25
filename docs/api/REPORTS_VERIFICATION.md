@@ -17,3 +17,7 @@
 ## 미검증 범위
 
 새 live·실제 원천 방송 ID 변경·장시간 미종료 세션·고부하·복제 HA·다중 호스트·report 전용 강제 JVM 종료/고정 범위 replay는 미검증이다. 실제JAR 시험은메타데이터 외부조회 disabled이며 합성 Kafka 입력이다. 세션/별칭 SQL rollback은 검사했지만 모든 DB/broker 장애 지점의 무손실을 주장하지 않는다. 공유 pool의 논리적 소비 독립성은 자원 격리가 아니다.
+
+## PR CI의 기존 heartbeat fixture 보완
+
+최초 PR CI40204570648은 ChannelProbeTest의 pong 미응답 검사에서 실패했다. artifact에10.046초 실행·WS_CLOSED가 남았고 heartbeat timeout은 없었다. 그 연결 종료의 원인은 미확정이다. 별도1.2초 승인 지연으로 기존1초 예산의 DURATION_COMPLETE 조기 종료를 재현했다. [프로토콜 검증](../poc/PROTOCOL.md#heartbeat-회귀-시험의-관측-대기)에 따라 실제 채팅/ping/미응답/timeout 관측까지 유한 대기하도록 시험만 바꿨고 ChannelProbeTest7개가 통과했다. 최종단위/CI는 수정HEAD에서 다시 확인한다.

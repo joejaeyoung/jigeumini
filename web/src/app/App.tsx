@@ -3,6 +3,7 @@ import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-ro
 import { BrowsePage } from '../features/broadcasts/BrowsePage';
 import { NotificationsPage } from '../features/notifications/NotificationsPage';
 import { CategoriesPage } from '../features/categories/CategoriesPage';
+import { ReportsPage } from '../features/reports/ReportsPage';
 import { SurgesPage } from '../features/broadcasts/SurgesPage';
 import { ChannelPage } from '../features/broadcasts/ChannelPage';
 import { useSavedChannels } from '../features/saved/useSavedChannels';
@@ -20,7 +21,7 @@ export function App() {
   const navigate = useNavigate();
   useEffect(() => {
     setSearch(new URLSearchParams(location.search).get('q') ?? '');
-    const title = navigation.find(item => item.to === location.pathname)?.label ?? (location.pathname === '/search' ? '방송 검색' : location.pathname.startsWith('/categories/') ? '카테고리 상세' : '방송 상세');
+    const title = navigation.find(item => item.to === location.pathname)?.label ?? (location.pathname === '/search' ? '방송 검색' : location.pathname.startsWith('/categories/') ? '카테고리 상세' : location.pathname.startsWith('/reports/') || location.pathname.endsWith('/reports') ? '방송 요약' : '방송 상세');
     document.title = `${title} · 지금이니`;
     if (firstRoute.current) firstRoute.current = false;
     else if (!new URLSearchParams(location.search).has('window')) { window.scrollTo(0, 0); mainRef.current?.focus({ preventScroll: true }); }
@@ -51,6 +52,8 @@ export function App() {
         <Route path="/categories/:categoryKey" element={<CategoriesPage/>}/>
         <Route path="/surges" element={<SurgesPage saved={saved} toggle={toggle}/>}/>
         <Route path="/channels/:channelId" element={<ChannelPage saved={saved} toggle={toggle}/>}/>
+        <Route path="/channels/:channelId/reports" element={<ReportsPage/>}/>
+        <Route path="/reports/:reportId" element={<ReportsPage/>}/>
         <Route path="*" element={<section className="empty-state"><h1>페이지를 찾을 수 없어요</h1><p>주소를 확인하거나 홈으로 돌아가주세요.</p><Link className="primary-button" to="/">홈으로 돌아가기</Link></section>}/>
       </Routes>
       <footer><Link className="wordmark" to="/">지금이니</Link><button onClick={() => setInfo(true)}>서비스와 집계 기준</button><span>채팅으로 발견하는 새로운 방송</span></footer>

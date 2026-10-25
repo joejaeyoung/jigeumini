@@ -7,6 +7,11 @@ import static org.assertj.core.api.Assertions.*;
 
 class QualityPolicyTest {
     private final Instant t=Instant.parse("2026-10-25T12:01:00Z"),from=t.minusSeconds(60);
+    @Test void minuteCoverageMergesClipsAndKeepsBoundaryGaps() {
+        var spans=List.of(new QualityPolicy.Interval(from.minusSeconds(5),from.plusSeconds(40)),new QualityPolicy.Interval(from.plusSeconds(20),t.plusSeconds(57)),new QualityPolicy.Interval(t.plusSeconds(120),t.plusSeconds(200)));
+        var actual=QualityPolicy.minuteCoverage(from,t.plusSeconds(180),spans);
+        assertThat(actual.get(from)).isEqualTo(1d);assertThat(actual.get(t)).isEqualTo(.95);assertThat(actual.getOrDefault(t.plusSeconds(60),0d)).isZero();assertThat(actual.get(t.plusSeconds(120))).isEqualTo(1d);
+    }
     private QualityPolicy.Result result(List<QualityPolicy.Interval> sessions,boolean loss,Instant since) {
         return QualityPolicy.evaluate(true,"CONNECTED",since,from,t,sessions,loss,true,true,true,false,true,true,false);
     }

@@ -11,6 +11,7 @@
   "input": "synthetic HTTP/normalized catalog; no official credentials or live calls",
   "command": [
     "./scripts/check",
+    "mkdir -p work/selection-reviewed",
     "for floor in none 0 1000 5000 10000; do ./scripts/selection fixture docs/discovery/policies/followers-$floor.json docs/discovery/synthetic-catalog.json work/selection-reviewed/$floor.json; done"
   ],
   "javaUnit": {
@@ -239,5 +240,30 @@
     },
     "xmlSha256": "be27240b1f5d741d22e22a69a2093d232c5f15ba0d2a71f020ceb1913a81cf1c",
     "jarSha256": "c5918642bda1954c7aefdebc1b7c1a8e02bc45bbc399ed5b181ef775f36f7786"
-  }
+  },
+  "finalReview": {
+    "head": "f9db520b746ee76e93d07cd0821af527c79cf41e",
+    "verdict": "APPROVE",
+    "session": "b4b8376c-69b1-4f1d-807d-cfdf9c6abdea"
+  },
+  "finalCi": {
+    "push": 40209813744,
+    "pullRequest": 40209816956,
+    "conclusion": "SUCCESS",
+    "suites": {
+      "test": {
+        "tests": 101,
+        "errors": 0,
+        "failures": 0,
+        "sha256": "4750f319cf754971349983d8dc9f38a31790241d66d10e0879619a4226f6ce7a"
+      },
+      "integrationTest": {
+        "tests": 77,
+        "errors": 0,
+        "failures": 0,
+        "sha256": "83f03a1ab26966ddfe3c6546e83bcf85e7ef75497fc07da84973e64dd95e032b"
+      }
+    }
+  },
+  "mergeCommit": "1089522b55905ad876ea6282d0ace525ed9be6f8"
 }

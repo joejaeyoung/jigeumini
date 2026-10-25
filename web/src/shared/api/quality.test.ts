@@ -10,10 +10,10 @@ it('정상 관측된 0건만 순위에 포함하고 품질 불량의 수치를 �
   expect(rankingsSchema.safeParse({ ...response, entries: [{ ...entry, status: 'INCOMPLETE' }] }).success).toBe(false);
   expect(rankingsSchema.safeParse({ ...response, evaluatedAt: null }).success).toBe(false);
 });
-it('20초 경계부터 갱신이 중단된 스냅샷을 최신 순위로 취급하지 않는다', () => {
+it('30초 경계부터 갱신이 중단된 스냅샷을 최신 순위로 취급하지 않는다', () => {
   const data = rankingsSchema.parse(response);
-  expect(rankingStale(data, Date.parse(at) + 19999)).toBe(false);
-  expect(rankingStale(data, Date.parse(at) + 20000)).toBe(true);
+  expect(rankingStale(data, Date.parse(at) + 29999)).toBe(false);
+  expect(rankingStale(data, Date.parse(at) + 30000)).toBe(true);
   expect(rankedChannels({ ...data, status: 'STALE' } as Rankings)[0].chatCount).toBeNull();
 });
 it('급상승 임계값·비율이 맞지 않거나 품질 경고가 있는 유효 리본을 거부한다', () => {

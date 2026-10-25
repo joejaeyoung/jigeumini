@@ -49,7 +49,7 @@ export async function fetchActivity(id: string, seconds: number, signal: AbortSi
     || data.points.length !== seconds / 60 || data.points.some((point, i) => Date.parse(point.from) !== from + i * 60000 || Date.parse(point.to) !== from + (i + 1) * 60000)) throw new ApiError('contract');
   return data;
 }
-export function rankingStale(data: Rankings, now = Date.now()) { return data.status === 'STALE' || Boolean(data.evaluatedAt && now >= Date.parse(data.evaluatedAt) + 20000); }
+export function rankingStale(data: Rankings, now = Date.now()) { return data.status === 'STALE' || Boolean(data.evaluatedAt && now >= Date.parse(data.evaluatedAt) + 30000); }
 export const qualityLabel: Record<RankingEntry['status'], string> = {
   HEALTHY: '수집 품질 확인', DISABLED: '수집 중지', OFFLINE: '방송 종료', INCOMPLETE: '수집 불완전', WARMING_UP: '집계 준비 중', LAGGING: '반영 지연', UNKNOWN: '수집 상태 미확인',
 };

@@ -211,7 +211,7 @@ public final class RankingStore {
             var healthy=rows.stream().filter(e->e.status.equals("HEALTHY")).limit(limit).toList();
             var excluded=rows.stream().filter(e->!e.status.equals("HEALTHY")).limit(limit).toList();
             return new RankingResponse(now.toString(),header.at.toString(),header.id.toString(),window,VERSION,
-                    !now.isBefore(header.at.plusSeconds(20))?"STALE":rows.stream().anyMatch(e->e.status.equals("HEALTHY"))?"READY":"WARMING_UP",healthy,excluded);
+                    !now.isBefore(header.at.plusSeconds(30))?"STALE":rows.stream().anyMatch(e->e.status.equals("HEALTHY"))?"READY":"WARMING_UP",healthy,excluded);
         });
     }
     private Entry entry(ResultSet rs) throws SQLException {
@@ -238,7 +238,7 @@ public final class RankingStore {
         var last=page.isEmpty()?null:page.getLast();
         String cursor=more?last.evaluatedAt+"|"+last.spikeId:null;
         var lastTick=jdbc.queryForObject("SELECT max(last_evaluated_at) FROM channel_alert_state WHERE run_id=? AND algorithm_version=?", java.sql.Timestamp.class,run,TrendPolicy.VERSION);
-        String status=lastTick==null?"WARMING_UP":!clock.instant().isBefore(lastTick.toInstant().plusSeconds(20))?"STALE":"READY";
+        String status=lastTick==null?"WARMING_UP":!clock.instant().isBefore(lastTick.toInstant().plusSeconds(30))?"STALE":"READY";
         return new SpikeResponse(clock.instant().toString(),status,page,cursor);
     }
     public ActivityResponse activity(String channel,Instant from,Instant to) {

@@ -11,7 +11,7 @@ export function SurgesPage({ saved, toggle }: { saved: string[]; toggle: (id: st
   const result = usePolling(`spikes:${cursor}`, signal => fetchSpikes(signal, cursor));
   const ids = [...new Set(result.data?.events.map(event => event.channelId) ?? [])];
   const metadata = usePolling(`spike-metadata:${ids.join(',')}`, signal => fetchChannels(signal, ids));
-  const stale = result.error || Boolean(result.data && (result.data.status === 'STALE' || Date.now() >= Date.parse(result.data.asOf) + 20000));
+  const stale = result.error || Boolean(result.data && (result.data.status === 'STALE' || Date.now() >= Date.parse(result.data.asOf) + 30000));
   return <>
     <div className="page-heading"><div><h1>지금, 반응이 모이는 순간</h1><p>평소보다 반응이 늘어난 방송, 확인된 순간만 모았어요.</p></div><span className="scope-label">수집 대상 내 급상승</span></div>
     <p className="surge-explainer">최근 1분과 앞선 5분의 평균을 비교해요. 수집 품질을 확인하고 10초 간격으로 두 번 연속 조건을 만족하면 기록해요.</p>

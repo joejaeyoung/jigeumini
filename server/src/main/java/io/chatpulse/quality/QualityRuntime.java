@@ -25,10 +25,24 @@ public final class QualityRuntime implements AutoCloseable {
         scheduleEvaluation(evaluator, java.time.Clock.systemUTC(), () -> { try { ranking.evaluate(); } catch (RuntimeException ignored) { /* 저장 실패 시 기존 snapshot의 age가 STALE로 내려간다. */ } });
     }
     static void scheduleEvaluation(ScheduledExecutorService scheduler, java.time.Clock clock, Runnable task) {
-        long now = clock.millis();
-        long next = (Math.floorDiv(now - 8000, 10000) + 1) * 10000 + 8000;
-        // 완료 경계 8초 뒤, 실행 소요 시간과 무관한 고정 주기. 10초 초과 지연은 STALE로 남긴다.
-        scheduler.scheduleAtFixedRate(task, next - now, 10000, TimeUnit.MILLISECONDS);
+        class Tick implements Runnable {
+            long due;
+            void plan() {
+                if (scheduler.isShutdown()) return;
+                long now = clock.millis();
+                due = (Math.floorDiv(now - 8000, 10000) + 1) * 10000 + 8000;
+                scheduler.schedule(this, due - now, TimeUnit.MILLISECONDS);
+            }
+            public void run() {
+                if (scheduler.isShutdown()) return;
+                long remaining = due - clock.millis();
+                if (remaining > 0) { // 예약 후 벽시계가 뒤로 이동했다면 예정 경계를 다시 기다린다.
+                    scheduler.schedule(this, remaining, TimeUnit.MILLISECONDS); return;
+                }
+                try { task.run(); } finally { plan(); }
+            }
+        }
+        new Tick().plan(); // 실행 비용과 벽시계 보정이 다음 회차의 위상에 누적되지 않는다.
     }
     @Override public void close() {
         evaluator.shutdownNow(); rankingObserver.close(); trendObserver.close(); trendConsumer.close();

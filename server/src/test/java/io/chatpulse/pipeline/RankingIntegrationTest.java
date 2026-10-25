@@ -70,7 +70,19 @@ class RankingIntegrationTest {
                 assertThat(dense.get(i).to()).isEqualTo(t.minusSeconds(seconds).plusSeconds((i+1)*60L).toString());
             }
         }
-        clock.now=t.plusSeconds(21);assertThat(store.rankings(60,20).status()).isEqualTo("STALE");
+        clock.now=t.plusSeconds(23);assertThat(store.rankings(60,20).status()).isEqualTo("READY"); // 유예 8초 + 평가 비용 5초 동안 이전 창 유지
+        clock.now=t.plusSeconds(30);assertThat(store.rankings(60,20).status()).isEqualTo("STALE");
+    }
+    @Test void unsafeFirstBufferSampleCannotStandInForLaterDrain() {
+        clock.now=t.plusSeconds(8);healthy(a);healthy(b);
+        jdbc.update("DELETE FROM collector_buffer_observation");
+        jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,?)",a,collector,ts(t),ts(t.minusSeconds(1)));
+        jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,NULL)",a,collector,ts(t.plusSeconds(4)));
+        jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,NULL)",b,collector,ts(t.plusSeconds(2)));
+        jdbc.update("UPDATE projection_observation SET last_caught_up_at=?",ts(t.plusSeconds(3)));
+        store.evaluate();
+        assertThat(store.rankings(60,20).entries()).extracting(RankingStore.Entry::channelId).containsExactly(b);
+        assertThat(store.rankings(60,20).excludedChannels().getFirst().reasons()).contains("ANALYSIS_LAG");
     }
     @Test void independentObservationPhasesKeepNormalTicksHealthyWithGrace() {
         // collector는 5초 간격(위상 0~4), observer는 1초 간격·소비 지연 2초, 평가 유예 8초.
@@ -149,9 +161,12 @@ class RankingIntegrationTest {
         org.mockito.Mockito.when(publisher.bufferSnapshot()).thenReturn(Map.of());
         var ds=IntegrationSupport.ds(schema);var session=UUID.randomUUID();
         try(var telemetry=new CollectionTelemetry(jdbc,new TransactionTemplate(new DataSourceTransactionManager(ds)),publisher)) {
+            jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,NULL)",a,UUID.randomUUID(),ts(t.minusSeconds(121)));
             telemetry.start(a);telemetry.connected(a,session,t.minusSeconds(40));telemetry.alive(session,t.minusSeconds(1));
             telemetry.loss(a,t.minusSeconds(5),t.minusSeconds(4),"SYNTHETIC_DROP");telemetry.flush(t);
             assertThat(jdbc.queryForObject("SELECT count(*) FROM collection_loss",Long.class)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM collector_buffer_observation",Long.class)).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT min(observed_at) FROM collector_buffer_observation",Timestamp.class).toInstant()).isEqualTo(t);
             assertThat(jdbc.queryForObject("SELECT source_alive_at FROM collection_session",Timestamp.class).toInstant()).isEqualTo(t.minusSeconds(1));
             telemetry.ended(session,t,"HEARTBEAT_TIMEOUT");telemetry.stopped(a);telemetry.flush(t);
             assertThat(jdbc.queryForObject("SELECT ended_at FROM collection_session",Timestamp.class).toInstant()).isEqualTo(t.minusSeconds(1));

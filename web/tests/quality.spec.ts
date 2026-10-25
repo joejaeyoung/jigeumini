@@ -23,7 +23,7 @@ test('관측 정상 0건과 품질 불량 참고 건수를 구분하고 만료 �
   await expect(page.locator('.broadcast-card').last()).toContainText('수집 불완전');
   await expect(page.locator('.broadcast-card').last()).toContainText('참고 수집 38건');
   await page.route('**/api/v1/rankings?**', route => route.fulfill({ status: 503, body: '' }));
-  await page.clock.fastForward(20000);
+  await page.clock.fastForward(30000);
   await expect(page.getByText('순위 갱신이 늦어지고 있어요.', { exact: false })).toBeVisible();
   await expect(page.locator('.broadcast-card').first().locator('.card-bottom strong')).toHaveText('—');
 });

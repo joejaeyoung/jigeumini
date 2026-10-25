@@ -29,7 +29,7 @@
 
 ## 완료 구간과 순위
 
-평가 scheduler는 각 10초 경계의 8초 뒤에 고정 주기로 실행하고, `floor((now−7초)/10초)`의 창 끝 T를 평가한다. collector는 5초, Kafka observer는 1초 간격이다. 최근 2분 버퍼 표본에서 창 이후 첫 안전한 drain을 고정해 최신 표본을 끝없이 쫓지 않는다. 창 끝 T 이후의 버퍼 표본이 있어야 하며, 창 이전 receivedAt의 미확인 발행이 있으면 LAGGING이다. Kafka 처리 완료 표본은 그 drain 표본 시각 이상이어야 한다. 표본 시각은 broker RPC 요청 전에 기록한다. 이 조건이 확인되지 않으면 참고 건수만 남기고 순위·급상승에서 제외한다. 관측·DB 처리 지연이 유예를 초과하면 정상 연결도 보수적으로 제외될 수 있다. collector/analyzer는 동일 호스트 시계를 사용하는 로컬 실행이며 다중 호스트 시계 동기화는 미검증이다. ACK 전제는 현재 producer의 acks=all이다.
+평가 scheduler는 각 10초 경계의 8초 뒤에 벽시계 경계를 매번 다시 예약하며, `floor((now−7초)/10초)`의 창 끝 T를 평가한다. collector는 5초, Kafka observer는 1초 간격이다. 최근 2분 버퍼 표본에서 창 이후 첫 안전한 drain을 고정해 최신 표본을 끝없이 쫓지 않는다. 창 끝 T 이후의 버퍼 표본이 있어야 하며, 창 이전 receivedAt의 미확인 발행이 있으면 LAGGING이다. Kafka 처리 완료 표본은 그 drain 표본 시각 이상이어야 한다. 표본 시각은 broker RPC 요청 전에 기록한다. 이 조건이 확인되지 않으면 참고 건수만 남기고 순위·급상승에서 제외한다. 관측·DB 처리 지연이 유예를 초과하면 정상 연결도 보수적으로 제외될 수 있다. collector/analyzer는 동일 호스트 시계를 사용하는 로컬 실행이며 다중 호스트 시계 동기화는 미검증이다. ACK 전제는 현재 producer의 acks=all이다.
 
 이는 관측한 입력의 처리 완료 조건이며 eventTime watermark나 원천 전체 입력의 완전성을 보장하지 않는다. 이후 도착하는 과거 eventTime 입력은 bucket·추이만 보정한다. 무한 지연 입력까지 불변 순위에 반영하려면 별도 watermark·정정 설계가 필요하다.
 
@@ -71,9 +71,9 @@ trend 전용 bucket에서 C=`[T−60,T)` 합계, B=`[T−360,T−60)` 합계/5�
 | `GET /api/v1/channels/{id}/activity?seconds=1800` | seconds=1800 또는 3600. 서버 시계로 완료된 분 범위를 정한다. 생략 시 30분. 명시적 from/to는 최근 1시간·UTC 분 경계만 허용하며 seconds와 함께 쓰지 않는다. 각 point의 from/to/count/referenceCount/coverage/status/reasons |
 | `GET /api/v1/collection-status` | 1분 snapshot의 전체 상태와 채널 상태별 개수. 공개 ID 외 내부 진단/원문은 노출하지 않음 |
 
-순위 entry에는 channelId/rank/count/referenceCount/coverage/status/reasons/previousRank/previousReason을 둔다. snapshot이 없으면 WARMING_UP과 빈 결과다. 평가 시각이 20초 이상 오래되면 STALE이다. 웹도 이 경계에서 최신 순위·건수를 보류한다.
+순위 entry에는 channelId/rank/count/referenceCount/coverage/status/reasons/previousRank/previousReason을 둔다. snapshot이 없으면 WARMING_UP과 빈 결과다. 평가 시각이 30초 이상 오래되면 STALE이다. 웹도 이 경계에서 최신 순위·건수를 보류한다.
 
-급상승 event에는 spikeId/channelId/evaluatedAt/count/baseline/ratio/algorithmVersion/valid/qualityWarning을 둔다. 피드는 평가가 없으면 WARMING_UP, 마지막 trend 평가가 20초 이상 오래되면 STALE이다. 이전 이벤트를 현재 방송의 채팅 건수로 표시하지 않고 기록 시각과 당시 기준선을 함께 표시한다.
+급상승 event에는 spikeId/channelId/evaluatedAt/count/baseline/ratio/algorithmVersion/valid/qualityWarning을 둔다. 피드는 평가가 없으면 WARMING_UP, 마지막 trend 평가가 30초 이상 오래되면 STALE이다. 이전 이벤트를 현재 방송의 채팅 건수로 표시하지 않고 기록 시각과 당시 기준선을 함께 표시한다.
 
 ## 검증 범위
 
@@ -82,6 +82,6 @@ trend 전용 bucket에서 C=`[T−60,T)` 합계, B=`[T−360,T−60)` 합계/5�
 - 고정 시간 단위 시험: 57/60과 56.999/60 경계, 세션 합집합, warmup·손실·지연, 250/5와 251/5 기준선, 세 임계값, 연속/누락 tick, cooldown 경계.
 - 실제 Kafka/PostgreSQL: 완료 창 경계, 정상 0건·동률, snapshot 멱등성과 지연 bucket 보정 분리, 제외 조건, heartbeat 사후 정정, 독립 trend 판정, 중복 알림 방지, collector 관측 저장, 이전 순위·cursor·즉시 disable, 조용한 partition poll·end offset, ranking 소비 중지 중 trend 계속 처리.
 - 합성 HTTP/WS: 읽기 전용 프로토콜 유지, 관측 callback, invalid 메시지의 품질 손실, API 범위·cursor·503 비노출.
-- 웹: 품질과 숫자의 런타임 계약, 정상 0건/공백 구분, 20초 만료, 두 리본 색상, 피드 페이지 이동·사후 정정·갱신 실패, 상세 구간 표시.
+- 웹: 품질과 숫자의 런타임 계약, 정상 0건/공백 구분, 30초 만료, 두 리본 색상, 피드 페이지 이동·사후 정정·갱신 실패, 상세 구간 표시.
 
 실방송의 6분 급상승 발생을 강제로 유도하거나 검증했다고 주장하지 않는다. 자동 테스트는 합성 데이터와 격리한 topic/group/schema를 사용한다. 보존 자료 자동 삭제·관리자 UI·DLQ·재처리·장시간 부하·다중 호스트 수집은 후속 범위다.

@@ -21,6 +21,9 @@ def summarize(path):
            'runtimeClassesSha256': data.get('runtimeClassesSha256'), 'startedAt': data['startedAt'],
            'finishedAt': data['finishedAt'], 'environment': data.get('environment'), 'outcome': data['outcome'],
            'correct': data['correct'], 'cleanupComplete': data.get('cleanupComplete')}
+    row['measurementIssueCodes'] = sorted({event['code'] for event in data.get('events', [])
+                                          if event['code'] == 'RESOURCE_OR_SAMPLE_FAILED' or event['code'].endswith('_EXPERIMENT_FAILED')})
+    row['verificationComplete'] = bool(data['correct'] and data.get('cleanupComplete') and not row['measurementIssueCodes'])
     if data.get('profile') == 'broker-fault':
         return row | {'profile': 'broker-fault', 'cases': data['cases'], 'scope': data['scope']}
     profile = data['profile']
@@ -95,7 +98,8 @@ def main():
             continue
         latency = row.get('metricsA', {}).get('receivedToDbMillis', {})
         db_a, db_b = row.get('databaseA') or {}, row.get('databaseB') or {}
-        table.append([row['profile'], labels.get(row['outcome'], row['outcome']), f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
+        outcome_label = '계측 확인 필요' if row['measurementIssueCodes'] else labels.get(row['outcome'], row['outcome'])
+        table.append([row['profile'], outcome_label, f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
                       str(row['producer'].get('acknowledged', '—')), f"{db_a.get('processedEvents', '—')}/{db_b.get('processedEvents', '—')}",
                       f"{number(latency.get('p95'))}/{number(latency.get('p99'))}",
                       str(row['groupMeasurements'].get('groupA', {}).get('maximumLagTotal', '—')),
@@ -103,6 +107,7 @@ def main():
     notes = [
         '단일 로컬 broker·RF1·공유 PostgreSQL의 합성 실험이다. 공개 플랫폼에 부하를 주지 않았다.',
         '목표 입력 완료, 수락/ACK/거절/미확인 보존, DB 정합성, 자원 정리를 각각 판정한다. 실패도 결과에 포함한다.',
+        '이전 하네스는 입력 종료 후 계측 실패를 correct에 반영하지 못했다. 해당 원본을 보존하고 계측 확인 필요로 별도 판정한다.',
         '지연은 receivedAt부터 실제 DB commit 뒤 계측 시각까지다. heartbeat 실험의 A 지연은 부모 JVM 표본만 포함한다.',
         '입력률/commit률은 표본 차분이다. Kafka·DB 조회는 원자적 snapshot이 아니며 표본 간 비용과 오차가 있다.',
         '회복 시간은 재개 뒤 최초 0 lag 표본까지의 관측 상한이다. 표본 사이 순간 최대 lag/정확한 회복 시각은 모른다.',
@@ -110,7 +115,7 @@ def main():
         '균등 채널이 균등 partition을 뜻하지 않는다. 3 partitions에서 4번째 consumer의 유휴 할당을 실제 표본으로 확인한다.',
         '복제 HA·외부 네트워크·다중 호스트·실방송·장기 디스크 보존·전체 제품 projection의 동시 비용은 검증하지 않았다.',
     ]
-    totals = f"전체 {len(rows)}회 · 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회"
+    totals = f"전체 {len(rows)}회 · 원본 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 대조 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회 · 계측 확인 필요 {sum(bool(r['measurementIssueCodes']) for r in rows)}회"
     markdown = '# 지금이니 합성 부하·복구 실험\n\n' + totals + '\n\n' + '\n'.join('- '+n for n in notes) + '\n\n'
     markdown += '| '+' | '.join(header)+' |\n|'+ '|'.join(['---']*len(header))+'|\n'
     markdown += '\n'.join('| '+' | '.join(line)+' |' for line in table)+'\n\n'

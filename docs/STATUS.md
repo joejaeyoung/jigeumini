@@ -54,7 +54,7 @@ CI40204570648의 pong 미응답 fixture는 WS_CLOSED 뒤 timeout 관측이 없�
 
 ## 재처리 CLI 후속 보완 #16
 
-`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 선행#7의heartbeat fixture 보완을 통합한63ff05d에서도 Java84·하네스16이 통과했으며 a8ef43a(63ff05d 이후 문서 변경만)의 Claude 최종 APPROVE를 받았다. CI40205388582·40205422320은 선행리포트의 시각 정밀도 시험에서 실패했다. #7의976f88e 수정과791ff1a 근거를 통합한 c222ee6 push40206443045/PR40206447239가 성공했다. 승인·병합된 최종#7(e1980f6/a69760a)을537b3cc에서 통합했고 [작업 로그](WORK_LOG.md)에 리팩토링 점검을 기록했다. 이 최종 통합의 Claude·CI 뒤 병합한다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
+`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 선행#7의heartbeat fixture 보완을 통합한63ff05d에서도 Java84·하네스16이 통과했으며 a8ef43a(63ff05d 이후 문서 변경만)의 Claude 최종 APPROVE를 받았다. CI40205388582·40205422320은 선행리포트의 시각 정밀도 시험에서 실패했다. #7의976f88e 수정과791ff1a 근거를 통합한 c222ee6 push40206443045/PR40206447239가 성공했다. 승인·병합된 최종#7(e1980f6/a69760a)을537b3cc에서 통합했고 [작업 로그](WORK_LOG.md)에 리팩토링 점검을 기록했다. 최종7863093 Claude APPROVE·push40207808425/PR40207811784 성공 후 PR#24를cf4049e로develop에병합했다. 최종CI Java85/실제KafkaDB77이며 #16·보드는완료다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
 
 
 ## 오류 격리·복구 진단 #10
@@ -183,4 +183,4 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 
 ### 부하·편향·복구 실험 #11
 
-F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)의 고정 입력·실험전용 topic/group/schema·자원 상한·HTML/정제 비교 보고서를 구현했다. [첫 steady 근거](pipeline/EXPERIMENTS_VERIFICATION.md): d13fa6f에서500/s·600.004초·300,000건을 두 독립 group 모두 반영하고 fixed offset replay bucket차이0·정리true다. 목표 수치는 해당 실행 범위에서만 달성했고, 나머지 분포/장애/키분산/발행 비교와 최종회귀·리뷰·CI는 진행 중이다. live는 종료 상태다.
+F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)의 고정 입력·실험전용 topic/group/schema·자원 상한·HTML/정제 비교 보고서를 구현했다. [첫 steady 근거](pipeline/EXPERIMENTS_VERIFICATION.md): d13fa6f에서500/s·600.004초·300,000건을 두 독립 group 모두 반영하고 fixed offset replay bucket차이0·정리true다. 27개 원본의 분포/장애/발행/키분산 비교를 보존했다. broker 시험 초기2실패와 종료계측 이슈9개를 별도 표시하고 원인을 확정하지 않은 채 숨기지 않는다. 계측 수명과 실패 판정을 보완하고 최종steady·영향받은 비교를 재실행한다. Java88/하네스16/실제KafkaDB79가 첫 통합에서 통과했으며 계측 보완 뒤 최종회귀·Claude·CI를 진행한다. live는 종료 상태다.

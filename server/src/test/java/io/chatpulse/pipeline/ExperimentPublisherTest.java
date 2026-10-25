@@ -30,4 +30,14 @@ class ExperimentPublisherTest {
         assertThatThrownBy(()->ExperimentPlan.named("unbounded")).hasMessage("EXPERIMENT_PROFILE");
         assertThatThrownBy(()->new ExperimentPlan("invalid",2001,60,1,false,false,false,false,0,"none",false,false,false,false)).hasMessage("EXPERIMENT_PLAN");
     }
+    @SuppressWarnings("unchecked") @Test void failedCallbackRejectsTheNextWholeFrameEvenBeforeCapacityIsFull() {
+        var kafka=(KafkaTemplate<String,byte[]>)mock(KafkaTemplate.class);
+        when(kafka.send(any(ProducerRecord.class))).thenReturn(CompletableFuture.failedFuture(new IllegalStateException("synthetic")));
+        var event=new ChatEvent(1,UUID.randomUUID(),"CHZZK_UNOFFICIAL","a".repeat(32),"synthetic",UUID.randomUUID(),null,"CHAT",Instant.now(),Instant.now(),false,"test");
+        try(var publisher=new ExperimentPublisher(kafka,"synthetic",3,false)) {
+            publisher.accept(List.of(event),0);assertThat(publisher.pending()).isEqualTo(1);
+            assertThatThrownBy(()->publisher.accept(List.of(event,event),1)).hasMessage("EXPERIMENT_REJECTED");
+            assertThat(publisher.stats()).containsEntry("accepted",1L).containsEntry("acknowledged",0L).containsEntry("unconfirmed",1L).containsEntry("rejected",2L);
+        }
+    }
 }

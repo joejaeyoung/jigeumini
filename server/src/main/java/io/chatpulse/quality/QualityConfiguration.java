@@ -26,9 +26,9 @@ class QualityConfiguration {
     }
     @Bean(initMethod="start",destroyMethod="close")
     @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
-    QualityRuntime qualityRuntime(HikariDataSource ds,PipelineProperties p,ProjectionConsumer consumer,RankingStore ranking,
+    QualityRuntime qualityRuntime(HikariDataSource ds,PipelineProperties p,ProjectionConsumer consumer,RankingStore ranking,KafkaTopicPolicy policy,
             @Value("${quality.trend-offset-reset:${pipeline.offset-reset:none}}") String reset) {
-        return new QualityRuntime(p,new JdbcTemplate(ds),transaction(ds),consumer,ranking,reset);
+        return new QualityRuntime(p,new JdbcTemplate(ds),transaction(ds),consumer,ranking,reset,policy);
     }
     @Bean(initMethod="start",destroyMethod="close")
     @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")

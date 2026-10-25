@@ -68,11 +68,19 @@ class BufferedKafkaPublisherTest {
         var b = new Broker();
         try (var p = publisher(b, 10, 10, 1)) {
             p.accept(List.of(event(HOT), event(COLD))); b.next().future.completeExceptionally(new RuntimeException("PRIVATE_CANARY"));
+            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).until(p::deliveryFailed);
             assertThrows(SourceFailure.class, p::checkHealthy);
             assertThrows(SourceFailure.class, () -> p.accept(List.of(event(HOT))));
             var result = p.finish(); balances(result, 2, 0, 1); assertEquals(1L, result.get("failedCallbacks"));
             verify(b.kafka, times(1)).send(any(ProducerRecord.class));
             assertFalse(result.toString().contains("PRIVATE_CANARY"));
+        }
+    }
+    @Test void callbackAlreadyFailedBeforeSendReturnsStillStopsTheNextDispatch() {
+        var b = new Broker(); when(b.kafka.send(any(ProducerRecord.class))).thenReturn(CompletableFuture.failedFuture(new RuntimeException("synthetic")));
+        try (var p = publisher(b, 4, 4, 1)) {
+            p.accept(List.of(event(HOT), event(COLD))); balances(p.finish(), 2, 0, 0);
+            assertTrue(p.deliveryFailed()); verify(b.kafka, times(1)).send(any(ProducerRecord.class));
         }
     }
     @Test void asynchronousWindowAndPhysicalDuplicatesRemainBounded() throws Exception {

@@ -1,0 +1,180 @@
+{
+  "startedAt" : "2026-10-25T16:27:57.577549Z",
+  "codeCommit" : "c564f5245cb7dc227e7f530f643922404a4274ca",
+  "scope" : "LOCAL_SIX_NODES_RF3_MINISR2_ELR1_NO_AZ_OR_DISK_CORRUPTION_CLAIM",
+  "cluster" : {
+    "scope" : "ONE_HOST_SYNTHETIC_NO_AZ_GUARANTEE",
+    "controllers" : 3,
+    "brokers" : 3,
+    "maximumContainerMemoryBytes" : 2818572288,
+    "owner" : "8569d6e7301c4d5ea547c09325e5d64d",
+    "clusterId" : "BykYl5KvQlOJZMD2ekEoTA",
+    "bootstrap" : "localhost:56551,localhost:56552,localhost:56553",
+    "image" : "apache/kafka:4.1.2",
+    "project" : "jigeumini-ha-8569d6e7301c4d5ea547c09325e5d64d"
+  },
+  "schema" : "ha_762afac56108479d9f9ac5f4d9c9f968",
+  "topic" : "ha.chat.762afac56108479d9f9ac5f4d9c9f968",
+  "policy" : {
+    "durability" : "HA",
+    "retentionMs" : 86400000,
+    "retentionBytes" : 268435456,
+    "segmentBytes" : 33554432
+  },
+  "phases" : [ {
+    "name" : "HEALTHY_RF3",
+    "startedAt" : "2026-10-25T16:28:07.390666Z",
+    "delivery" : {
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT",
+      "unconfirmed" : 0,
+      "acknowledged" : 100,
+      "attempted" : 100,
+      "requested" : 100
+    },
+    "partitions" : [ {
+      "partition" : 0,
+      "leader" : 3,
+      "isr" : [ 3, 1, 2 ],
+      "replicas" : [ 3, 1, 2 ]
+    }, {
+      "partition" : 1,
+      "leader" : 1,
+      "isr" : [ 1, 2, 3 ],
+      "replicas" : [ 1, 2, 3 ]
+    }, {
+      "partition" : 2,
+      "leader" : 2,
+      "isr" : [ 2, 3, 1 ],
+      "replicas" : [ 2, 3, 1 ]
+    } ],
+    "database" : {
+      "bucketTotal" : 100,
+      "processedEvents" : 100,
+      "projection" : "ha-main",
+      "runId" : "762afac56108479d9f9ac5f4d9c9f968"
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 15,
+      "committed" : 15,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 40,
+      "committed" : 40,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 45,
+      "committed" : 45,
+      "lag" : 0
+    } ],
+    "passed" : true,
+    "seconds" : 1.557285959
+  }, {
+    "name" : "ONE_BROKER_DOWN",
+    "startedAt" : "2026-10-25T16:28:08.957502Z",
+    "delivery" : {
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT",
+      "unconfirmed" : 0,
+      "acknowledged" : 20,
+      "attempted" : 20,
+      "requested" : 20
+    },
+    "partitions" : [ {
+      "partition" : 0,
+      "leader" : 1,
+      "isr" : [ 1, 2 ],
+      "replicas" : [ 3, 1, 2 ]
+    }, {
+      "partition" : 1,
+      "leader" : 1,
+      "isr" : [ 1, 2 ],
+      "replicas" : [ 1, 2, 3 ]
+    }, {
+      "partition" : 2,
+      "leader" : 2,
+      "isr" : [ 2, 1 ],
+      "replicas" : [ 2, 3, 1 ]
+    } ],
+    "database" : {
+      "bucketTotal" : 120,
+      "processedEvents" : 120,
+      "projection" : "ha-main",
+      "runId" : "762afac56108479d9f9ac5f4d9c9f968"
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 18,
+      "committed" : 18,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 48,
+      "committed" : 48,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 54,
+      "committed" : 54,
+      "lag" : 0
+    } ],
+    "passed" : true,
+    "seconds" : 8.989155666
+  }, {
+    "name" : "BROKER_REJOIN",
+    "startedAt" : "2026-10-25T16:28:17.947083Z",
+    "delivery" : { },
+    "partitions" : [ {
+      "partition" : 0,
+      "leader" : 1,
+      "isr" : [ 1, 2, 3 ],
+      "replicas" : [ 3, 1, 2 ]
+    }, {
+      "partition" : 1,
+      "leader" : 1,
+      "isr" : [ 1, 2, 3 ],
+      "replicas" : [ 1, 2, 3 ]
+    }, {
+      "partition" : 2,
+      "leader" : 2,
+      "isr" : [ 2, 1, 3 ],
+      "replicas" : [ 2, 3, 1 ]
+    } ],
+    "database" : {
+      "bucketTotal" : 120,
+      "processedEvents" : 120,
+      "projection" : "ha-main",
+      "runId" : "762afac56108479d9f9ac5f4d9c9f968"
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 18,
+      "committed" : 18,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 48,
+      "committed" : 48,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 54,
+      "committed" : 54,
+      "lag" : 0
+    } ],
+    "passed" : true,
+    "seconds" : 6.8455225
+  }, {
+    "name" : "ISR_ONE_WITH_CONTROLLER_QUORUM",
+    "startedAt" : "2026-10-25T16:28:24.796662Z",
+    "passed" : false,
+    "seconds" : 29.183503458
+  } ],
+  "correct" : false,
+  "failureCode" : "HA_SCENARIO_FAILED",
+  "failureType" : "ExecutionException",
+  "failedPhase" : "ISR_ONE_WITH_CONTROLLER_QUORUM",
+  "cleanupComplete" : true,
+  "finishedAt" : "2026-10-25T16:28:56.675247Z"
+}

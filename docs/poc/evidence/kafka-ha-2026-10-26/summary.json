@@ -1,0 +1,93 @@
+{
+  "issue": 29,
+  "technicalGoals": [
+    "T04",
+    "T08",
+    "T10",
+    "T15"
+  ],
+  "recordedAt": "2026-10-25T16:37:27.764529+00:00",
+  "successfulRun": {
+    "file": "fourth.json",
+    "codeCommit": "01e943e285ac9c910ab1c66098671f221338625b",
+    "passedPhases": 10,
+    "correct": true,
+    "cleanupComplete": true,
+    "reconciliation": {
+      "name": "FINAL_BROKER_AND_DATABASE_RECONCILIATION",
+      "startedAt": "2026-10-25T16:35:47.465675Z",
+      "migration": {
+        "brokerUnique": 20,
+        "acknowledged": 20,
+        "attempted": 20,
+        "databaseUnique": 20,
+        "missingAcknowledged": 0,
+        "brokerDatabaseDifferences": 0,
+        "brokerPhysical": 20
+      },
+      "main": {
+        "brokerUnique": 171,
+        "acknowledged": 171,
+        "attempted": 172,
+        "databaseUnique": 171,
+        "missingAcknowledged": 0,
+        "brokerDatabaseDifferences": 0,
+        "brokerPhysical": 171
+      },
+      "passed": true,
+      "seconds": 0.472561458
+    }
+  },
+  "historicalFailures": [
+    {
+      "file": "first.json",
+      "codeCommit": "c564f5245cb7dc227e7f530f643922404a4274ca",
+      "failedPhase": "ISR_ONE_WITH_CONTROLLER_QUORUM",
+      "failedOperation": null,
+      "failureType": "ExecutionException",
+      "failureTypes": null,
+      "cleanupComplete": true
+    },
+    {
+      "file": "second.json",
+      "codeCommit": "25dbbbb3f79d93c4d02443614e15179157f3d0a9",
+      "failedPhase": "ONE_CONTROLLER_DOWN",
+      "failedOperation": "SCENARIO",
+      "failureType": "IllegalStateException",
+      "failureTypes": null,
+      "cleanupComplete": true
+    },
+    {
+      "file": "third.json",
+      "codeCommit": "b1884567cf1cda99952f6c53041ffe5e0db19129",
+      "failedPhase": "RF1_TO_RF3_MIGRATION",
+      "failedOperation": "SCENARIO",
+      "failureType": "ExecutionException",
+      "failureTypes": [
+        "ExecutionException",
+        "UnknownTopicOrPartitionException"
+      ],
+      "cleanupComplete": true
+    }
+  ],
+  "resourceAudit": {
+    "remainingOwnedContainers": 0,
+    "remainingOwnedVolumes": 0,
+    "unrelatedContainersStopped": false
+  },
+  "notVerified": [
+    "real AZ or host failure",
+    "disk corruption or data loss",
+    "long term saturation",
+    "paid infrastructure",
+    "ACK0/1 or commit alternatives"
+  ],
+  "integrationBeforeLoadMerge": {
+    "sourceCommit": "01e943e",
+    "command": "./scripts/integration",
+    "tests": 77,
+    "failures": 0,
+    "errors": 0,
+    "xmlSha256": "a658dc2f829f68c25489fcaca14208f17c102179e3b36b75bde688995cfdb11c"
+  }
+}

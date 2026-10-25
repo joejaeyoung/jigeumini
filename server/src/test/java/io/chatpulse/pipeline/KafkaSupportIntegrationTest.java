@@ -27,20 +27,26 @@ class KafkaSupportIntegrationTest {
     }
     @Test void existingInvalidTopicsAreRejectedWithoutChangingTheirSettings() throws Exception {
         try (var admin = Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))) {
-            for (String wrong : List.of("partitions","timestamp","compaction")) {
+            for (String wrong : List.of("partitions","timestamp","compaction","retention","min-isr","unclean")) {
                 boolean wrongPartitions=wrong.equals("partitions");
                 String cleanup=wrong.equals("compaction")?"compact":"delete";
                 String topic="it.readiness."+UUID.randomUUID();
                 String timestamp=wrong.equals("timestamp")?"LogAppendTime":"CreateTime";
+                var settings=new HashMap<>(KafkaTopicPolicy.local().configurations());
+                settings.put(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,timestamp);settings.put(TopicConfig.CLEANUP_POLICY_CONFIG,cleanup);
+                if(wrong.equals("retention"))settings.put(TopicConfig.RETENTION_MS_CONFIG,"3600000");
+                if(wrong.equals("min-isr"))settings.put(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG,"2");
+                if(wrong.equals("unclean"))settings.put(TopicConfig.UNCLEAN_LEADER_ELECTION_ENABLE_CONFIG,"true");
                 try {
-                    admin.createTopics(List.of(new NewTopic(topic,wrongPartitions?2:3,(short)1).configs(Map.of(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,timestamp,TopicConfig.CLEANUP_POLICY_CONFIG,cleanup))))
+                    admin.createTopics(List.of(new NewTopic(topic,wrongPartitions?2:3,(short)1).configs(settings)))
                             .all().get(10,TimeUnit.SECONDS);
                     assertThatThrownBy(() -> KafkaSupport.ensureTopic(BOOTSTRAP,topic)).hasMessage("KAFKA_TOPIC_INIT_FAILED")
-                            .hasRootCauseMessage(wrongPartitions?"M1 requires 3 partitions":wrong.equals("timestamp")?"M1 requires CreateTime timestamps":"History requires delete cleanup policy");
+                            .hasRootCauseMessage(wrongPartitions?"M1 requires 3 partitions":wrong.equals("timestamp")?"M1 requires CreateTime timestamps":wrong.equals("compaction")?"History requires delete cleanup policy":"KAFKA_TOPIC_CONFIG_MISMATCH");
                     assertThat(admin.describeTopics(List.of(topic)).allTopicNames().get(10,TimeUnit.SECONDS).get(topic).partitions()).hasSize(wrongPartitions?2:3);
                     var resource=new ConfigResource(ConfigResource.Type.TOPIC,topic);
                     assertThat(admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource).get(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG).value()).isEqualTo(timestamp);
-                    assertThat(admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource).get(TopicConfig.CLEANUP_POLICY_CONFIG).value()).isEqualTo(cleanup);
+                    var actual=admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource);
+                    for(var entry:settings.entrySet())assertThat(actual.get(entry.getKey()).value()).isEqualTo(entry.getValue());
                 } finally { admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS); }
             }
         }

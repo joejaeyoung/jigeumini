@@ -18,12 +18,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Configuration
 @Profile("pipeline")
 class ObservationConfiguration {
-    @Bean ObservationTopic observationTopic(PipelineProperties pipeline,
+    @Bean ObservationTopic observationTopic(PipelineProperties pipeline, KafkaTopicPolicy policy,
             @Value("${observations.topic:broadcast.observed.v1}") String topic,
             @Value("${notifications.topic:}") String notificationTopic) {
         if (!topic.matches("[a-zA-Z0-9._-]{1,240}") || topic.equals(pipeline.topic()) || topic.equals(pipeline.topic()+".spikes")
                 || topic.equals(pipeline.topic()+".dlq") || topic.equals(notificationTopic)) throw new IllegalArgumentException("OBSERVATION_TOPIC");
-        KafkaSupport.ensureTopic(pipeline.bootstrapServers(), topic);
+        KafkaSupport.ensureTopic(pipeline.bootstrapServers(), topic, policy);
         return new ObservationTopic(topic);
     }
     @Configuration

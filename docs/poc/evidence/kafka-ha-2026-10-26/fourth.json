@@ -1,0 +1,466 @@
+{
+  "startedAt" : "2026-10-25T16:34:34.167042Z",
+  "codeCommit" : "01e943e285ac9c910ab1c66098671f221338625b",
+  "scope" : "LOCAL_SIX_NODES_RF3_MINISR2_ELR1_NO_AZ_OR_DISK_CORRUPTION_CLAIM",
+  "cluster" : {
+    "project" : "jigeumini-ha-fc5cd12db8174484bf1a8e410c3665fc",
+    "image" : "apache/kafka:4.1.2",
+    "bootstrap" : "localhost:59016,localhost:59017,localhost:59018",
+    "clusterId" : "1f2sXfDyQnqQV6PKw227HQ",
+    "owner" : "fc5cd12db8174484bf1a8e410c3665fc",
+    "maximumContainerMemoryBytes" : 2818572288,
+    "brokers" : 3,
+    "controllers" : 3,
+    "scope" : "ONE_HOST_SYNTHETIC_NO_AZ_GUARANTEE"
+  },
+  "schema" : "ha_35c4b439ac3f4c7090c1ad5fd224bf07",
+  "topic" : "ha.chat.35c4b439ac3f4c7090c1ad5fd224bf07",
+  "policy" : {
+    "durability" : "HA",
+    "retentionMs" : 86400000,
+    "retentionBytes" : 268435456,
+    "segmentBytes" : 33554432
+  },
+  "phases" : [ {
+    "name" : "HEALTHY_RF3",
+    "startedAt" : "2026-10-25T16:34:43.882733Z",
+    "delivery" : {
+      "requested" : 100,
+      "attempted" : 100,
+      "acknowledged" : 100,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 3, 1, 2 ],
+      "leader" : 3,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 2, 3, 1 ],
+      "leader" : 2,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 100,
+      "bucketTotal" : 100
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 15,
+      "committed" : 15,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 40,
+      "committed" : 40,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 45,
+      "committed" : 45,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 1.457262792
+  }, {
+    "name" : "ONE_BROKER_DOWN",
+    "startedAt" : "2026-10-25T16:34:45.349332Z",
+    "delivery" : {
+      "requested" : 20,
+      "attempted" : 20,
+      "acknowledged" : 20,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 2, 1 ],
+      "leader" : 2,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 120,
+      "bucketTotal" : 120
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 18,
+      "committed" : 18,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 48,
+      "committed" : 48,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 54,
+      "committed" : 54,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 9.001607
+  }, {
+    "name" : "BROKER_REJOIN",
+    "startedAt" : "2026-10-25T16:34:54.351471Z",
+    "delivery" : { },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 2, 1, 3 ],
+      "leader" : 2,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 120,
+      "bucketTotal" : 120
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 18,
+      "committed" : 18,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 48,
+      "committed" : 48,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 54,
+      "committed" : 54,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 3.436761542
+  }, {
+    "name" : "ISR_ONE_WITH_CONTROLLER_QUORUM",
+    "startedAt" : "2026-10-25T16:34:57.791835Z",
+    "delivery" : {
+      "requested" : 1,
+      "attempted" : 1,
+      "acknowledged" : 0,
+      "unconfirmed" : 1,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 120,
+      "bucketTotal" : 120
+    },
+    "offsetsAvailable" : false,
+    "offsetFailureOperation" : "END_OFFSETS_READ",
+    "offsetFailureType" : "ExecutionException",
+    "offsetFailureCauseType" : "TimeoutException",
+    "startupRejected" : true,
+    "quorumLeader" : 1001,
+    "passed" : true,
+    "seconds" : 29.49452175
+  }, {
+    "name" : "ISR_RECOVERY",
+    "startedAt" : "2026-10-25T16:35:27.286390Z",
+    "delivery" : {
+      "requested" : 20,
+      "attempted" : 20,
+      "acknowledged" : 20,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 140,
+      "bucketTotal" : 140
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 21,
+      "committed" : 21,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 56,
+      "committed" : 56,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 63,
+      "committed" : 63,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 4.756801
+  }, {
+    "name" : "ONE_CONTROLLER_DOWN",
+    "startedAt" : "2026-10-25T16:35:32.046200Z",
+    "metadataTransientFailures" : [ ],
+    "delivery" : {
+      "requested" : 10,
+      "attempted" : 10,
+      "acknowledged" : 10,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 146,
+      "bucketTotal" : 146
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 22,
+      "committed" : 21,
+      "lag" : 1
+    }, {
+      "partition" : 1,
+      "end" : 59,
+      "committed" : 59,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 69,
+      "committed" : 66,
+      "lag" : 3
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 4.457520041
+  }, {
+    "name" : "CONTROLLER_QUORUM_LOST",
+    "startedAt" : "2026-10-25T16:35:36.506796Z",
+    "metadataWriteAcknowledged" : false,
+    "existingTopicDeliveryObserved" : {
+      "requested" : 1,
+      "attempted" : 1,
+      "acknowledged" : 1,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "passed" : true,
+    "seconds" : 5.617442208
+  }, {
+    "name" : "QUORUM_RECOVERY",
+    "startedAt" : "2026-10-25T16:35:42.124814Z",
+    "metadataTransientFailures" : [ ],
+    "delivery" : {
+      "requested" : 20,
+      "attempted" : 20,
+      "acknowledged" : 20,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-main",
+      "processedEvents" : 171,
+      "bucketTotal" : 171
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 25,
+      "committed" : 25,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 68,
+      "committed" : 68,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 78,
+      "committed" : 78,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "passed" : true,
+    "seconds" : 3.479075
+  }, {
+    "name" : "RF1_TO_RF3_MIGRATION",
+    "startedAt" : "2026-10-25T16:35:45.604453Z",
+    "delivery" : {
+      "requested" : 10,
+      "attempted" : 10,
+      "acknowledged" : 10,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "partitions" : [ {
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 3, 2, 1 ],
+      "leader" : 3,
+      "partition" : 0
+    }, {
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "partition" : 1
+    }, {
+      "replicas" : [ 2, 1, 3 ],
+      "isr" : [ 2, 3, 1 ],
+      "leader" : 2,
+      "partition" : 2
+    } ],
+    "database" : {
+      "runId" : "35c4b439ac3f4c7090c1ad5fd224bf07",
+      "projection" : "ha-migration",
+      "processedEvents" : 20,
+      "bucketTotal" : 20
+    },
+    "offsets" : [ {
+      "partition" : 0,
+      "end" : 2,
+      "committed" : 2,
+      "lag" : 0
+    }, {
+      "partition" : 1,
+      "end" : 6,
+      "committed" : 6,
+      "lag" : 0
+    }, {
+      "partition" : 2,
+      "end" : 12,
+      "committed" : 12,
+      "lag" : 0
+    } ],
+    "offsetsAvailable" : true,
+    "before" : {
+      "requested" : 10,
+      "attempted" : 10,
+      "acknowledged" : 10,
+      "unconfirmed" : 0,
+      "ackMeaning" : "BROKER_ACK_NOT_DB_COMMIT"
+    },
+    "topicIdPreserved" : true,
+    "haStartupRejectedBeforeMigration" : true,
+    "passed" : true,
+    "seconds" : 1.86068675
+  }, {
+    "name" : "FINAL_BROKER_AND_DATABASE_RECONCILIATION",
+    "startedAt" : "2026-10-25T16:35:47.465675Z",
+    "migration" : {
+      "brokerUnique" : 20,
+      "acknowledged" : 20,
+      "attempted" : 20,
+      "databaseUnique" : 20,
+      "missingAcknowledged" : 0,
+      "brokerDatabaseDifferences" : 0,
+      "brokerPhysical" : 20
+    },
+    "main" : {
+      "brokerUnique" : 171,
+      "acknowledged" : 171,
+      "attempted" : 172,
+      "databaseUnique" : 171,
+      "missingAcknowledged" : 0,
+      "brokerDatabaseDifferences" : 0,
+      "brokerPhysical" : 171
+    },
+    "passed" : true,
+    "seconds" : 0.472561458
+  } ],
+  "correct" : true,
+  "cleanupComplete" : true,
+  "finishedAt" : "2026-10-25T16:35:50.892160Z"
+}

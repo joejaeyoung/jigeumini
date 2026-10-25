@@ -1,0 +1,526 @@
+{
+  "codeCommit" : "472908f43a4735ba85bb1d207771a80385a9cbeb",
+  "startedAt" : "2026-10-25T16:49:04.845582Z",
+  "seed" : 20261026,
+  "eventTimeBase" : "2026-10-25T16:48:54.720237Z",
+  "phase" : "ACK_LEVELS",
+  "cluster" : {
+    "brokers" : 3,
+    "controllers" : 3,
+    "scope" : "ONE_HOST_SYNTHETIC_NO_AZ_GUARANTEE",
+    "project" : "jigeumini-ha-34bd8ed498ec48f58109c4a92f1d08a5",
+    "image" : "apache/kafka:4.1.2",
+    "bootstrap" : "localhost:53131,localhost:53132,localhost:53133",
+    "clusterId" : "PqG8vwX-Qg6yE6oKmjHAhA",
+    "owner" : "34bd8ed498ec48f58109c4a92f1d08a5",
+    "maximumContainerMemoryBytes" : 2818572288
+  },
+  "schema" : "ack_8b3697a4e42e46ed894885152ab8b720",
+  "policy" : {
+    "durability" : "HA",
+    "retentionMs" : 86400000,
+    "retentionBytes" : 268435456,
+    "segmentBytes" : 33554432
+  },
+  "commitCases" : [ {
+    "mode" : "AUTO",
+    "boundary" : "BEFORE_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-auto_before_db",
+    "exitCode" : 71,
+    "trace" : {
+      "phase" : "BEFORE_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : false,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 0,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "AUTO",
+    "boundary" : "AFTER_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-auto_after_db",
+    "exitCode" : 72,
+    "trace" : {
+      "phase" : "AFTER_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "AUTO",
+    "boundary" : "AFTER_OFFSET",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-auto_after_offset",
+    "exitCode" : 73,
+    "trace" : {
+      "phase" : "AFTER_OFFSET",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 3,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : false,
+      "committedMaximum" : 1
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 1,
+    "successfulBatchesAfterRestart" : 0,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "BATCH",
+    "boundary" : "BEFORE_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-batch_before_db",
+    "exitCode" : 71,
+    "trace" : {
+      "phase" : "BEFORE_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : false,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 0,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "BATCH",
+    "boundary" : "AFTER_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-batch_after_db",
+    "exitCode" : 72,
+    "trace" : {
+      "phase" : "AFTER_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "BATCH",
+    "boundary" : "AFTER_OFFSET",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-batch_after_offset",
+    "exitCode" : 73,
+    "trace" : {
+      "phase" : "AFTER_OFFSET",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : false,
+      "committedMaximum" : 1
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 1,
+    "successfulBatchesAfterRestart" : 0,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "MANUAL",
+    "boundary" : "BEFORE_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-manual_before_db",
+    "exitCode" : 71,
+    "trace" : {
+      "phase" : "BEFORE_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : false,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 0,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "MANUAL",
+    "boundary" : "AFTER_DB",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-manual_after_db",
+    "exitCode" : 72,
+    "trace" : {
+      "phase" : "AFTER_DB",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : false
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 0,
+    "successfulBatchesAfterRestart" : 1,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "MANUAL",
+    "boundary" : "AFTER_OFFSET",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-manual_after_offset",
+    "exitCode" : 73,
+    "trace" : {
+      "phase" : "AFTER_OFFSET",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 2,
+      "delivered" : 1,
+      "databaseCommitted" : true,
+      "manualAcknowledgmentRequested" : true,
+      "committedMaximum" : 1
+    },
+    "databaseBeforeRestart" : 1,
+    "offsetBeforeRestart" : 1,
+    "successfulBatchesAfterRestart" : 0,
+    "databaseAfterRestart" : 1,
+    "missingAfterRestart" : 0,
+    "intentionalUnsafeOrdering" : false,
+    "passed" : true
+  }, {
+    "mode" : "AUTO_POLL_AHEAD",
+    "boundary" : "AFTER_OFFSET",
+    "group" : "ack-group-8b3697a4e42e46ed894885152ab8b720-auto_poll_ahead_after_offset",
+    "exitCode" : 73,
+    "trace" : {
+      "phase" : "AFTER_OFFSET",
+      "pollCallsReturned" : 2,
+      "pollCallsStarted" : 3,
+      "delivered" : 1,
+      "databaseCommitted" : false,
+      "manualAcknowledgmentRequested" : false,
+      "committedMaximum" : 1
+    },
+    "databaseBeforeRestart" : 0,
+    "offsetBeforeRestart" : 1,
+    "successfulBatchesAfterRestart" : 0,
+    "databaseAfterRestart" : 0,
+    "missingAfterRestart" : 1,
+    "intentionalUnsafeOrdering" : true,
+    "passed" : true
+  } ],
+  "ackCases" : [ {
+    "acks" : "0",
+    "topic" : "ack.level.0.8b3697a4e42e46ed894885152ab8b720",
+    "idempotence" : false,
+    "retries" : 0,
+    "healthy" : {
+      "apiSuccess" : 20,
+      "brokerConfirmationMeaning" : "NONE",
+      "seconds" : 0.012338708,
+      "attempted" : 20,
+      "apiFailureOrTimeout" : 0,
+      "brokerAcknowledged" : 0,
+      "returnedOffsets" : [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ]
+    },
+    "healthyBrokerRecords" : 20,
+    "beforeFaultPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    } ],
+    "isrOne" : {
+      "apiSuccess" : 5,
+      "brokerConfirmationMeaning" : "NONE",
+      "seconds" : 0.118396833,
+      "attempted" : 5,
+      "apiFailureOrTimeout" : 0,
+      "brokerAcknowledged" : 0,
+      "returnedOffsets" : [ -1, -1, -1, -1, -1 ]
+    },
+    "whileOriginalLeaderAbsent" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    } ],
+    "faultRecordsRetained" : 5,
+    "healthyRecordsLost" : 0,
+    "brokerUnique" : 25,
+    "databaseUnique" : 25,
+    "brokerDatabaseDifferences" : 0,
+    "afterRecoveryPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    } ],
+    "apiSuccessButAbsentLowerBound" : 0,
+    "passed" : true
+  }, {
+    "acks" : "1",
+    "topic" : "ack.level.1.8b3697a4e42e46ed894885152ab8b720",
+    "idempotence" : false,
+    "retries" : 0,
+    "healthy" : {
+      "apiSuccess" : 20,
+      "brokerConfirmationMeaning" : "BROKER_RESPONSE_NOT_REPLICA_LOSS_IMMUNITY",
+      "seconds" : 0.024829167,
+      "attempted" : 20,
+      "apiFailureOrTimeout" : 0,
+      "brokerAcknowledged" : 20,
+      "returnedOffsets" : [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ]
+    },
+    "healthyBrokerRecords" : 20,
+    "beforeFaultPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    } ],
+    "isrOne" : {
+      "apiSuccess" : 5,
+      "brokerConfirmationMeaning" : "BROKER_RESPONSE_NOT_REPLICA_LOSS_IMMUNITY",
+      "seconds" : 0.009821875,
+      "attempted" : 5,
+      "apiFailureOrTimeout" : 0,
+      "brokerAcknowledged" : 5,
+      "returnedOffsets" : [ 20, 21, 22, 23, 24 ]
+    },
+    "whileOriginalLeaderAbsent" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    } ],
+    "faultRecordsRetained" : 5,
+    "healthyRecordsLost" : 0,
+    "brokerUnique" : 25,
+    "databaseUnique" : 25,
+    "brokerDatabaseDifferences" : 0,
+    "afterRecoveryPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    } ],
+    "apiSuccessButAbsentLowerBound" : 0,
+    "passed" : true
+  }, {
+    "acks" : "all",
+    "topic" : "ack.level.all.8b3697a4e42e46ed894885152ab8b720",
+    "idempotence" : false,
+    "retries" : 0,
+    "healthy" : {
+      "apiSuccess" : 20,
+      "brokerConfirmationMeaning" : "BROKER_RESPONSE_NOT_REPLICA_LOSS_IMMUNITY",
+      "seconds" : 0.285141958,
+      "attempted" : 20,
+      "apiFailureOrTimeout" : 0,
+      "brokerAcknowledged" : 20,
+      "returnedOffsets" : [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ]
+    },
+    "healthyBrokerRecords" : 20,
+    "beforeFaultPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ 3 ]
+    } ],
+    "isrOne" : {
+      "apiSuccess" : 0,
+      "brokerConfirmationMeaning" : "BROKER_RESPONSE_NOT_REPLICA_LOSS_IMMUNITY",
+      "seconds" : 0.132040667,
+      "attempted" : 5,
+      "apiFailureOrTimeout" : 5,
+      "brokerAcknowledged" : 0,
+      "returnedOffsets" : [ ]
+    },
+    "whileOriginalLeaderAbsent" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ ],
+      "leader" : -1,
+      "lastKnownElr" : [ 1 ],
+      "eligibleLeaderReplicas" : [ 1 ]
+    } ],
+    "faultRecordsRetained" : 0,
+    "healthyRecordsLost" : 0,
+    "brokerUnique" : 20,
+    "databaseUnique" : 20,
+    "brokerDatabaseDifferences" : 0,
+    "afterRecoveryPartitions" : [ {
+      "partition" : 0,
+      "replicas" : [ 1, 2, 3 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 1,
+      "replicas" : [ 2, 3, 1 ],
+      "isr" : [ 1, 3, 2 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    }, {
+      "partition" : 2,
+      "replicas" : [ 3, 1, 2 ],
+      "isr" : [ 1, 2, 3 ],
+      "leader" : 1,
+      "lastKnownElr" : [ ],
+      "eligibleLeaderReplicas" : [ ]
+    } ],
+    "apiSuccessButAbsentLowerBound" : 0,
+    "passed" : true
+  } ],
+  "operation" : "RESTORE_ORIGINAL_LEADER",
+  "correct" : true,
+  "cleanupComplete" : true,
+  "finishedAt" : "2026-10-25T16:50:48.591450Z"
+}

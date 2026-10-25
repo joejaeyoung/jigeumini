@@ -1,0 +1,52 @@
+{
+  "issue": 31,
+  "feature": "F11",
+  "technicalGoals": [
+    "T01",
+    "T10"
+  ],
+  "dateKst": "2026-10-26",
+  "command": "./scripts/ack-commit work/ack-second.json",
+  "input": {
+    "seed": 20261026,
+    "eventTimeBase": "2026-10-25T16:48:54.720237Z",
+    "eventId": "UUID.nameUUIDFromBytes(seed/index)",
+    "commit": "one identical event per fresh consumer group/projection",
+    "ack": "same 20 healthy +5 ISR1 events per ACK level"
+  },
+  "runs": [
+    {
+      "file": "first.json",
+      "sha256": "4069c221bb38269622fac0e4b778fa9a2acefa0642fd65c989ead8de542031c0",
+      "codeCommit": "dba04747b6fc649d82033b5269286384762c5d27",
+      "correct": false,
+      "cleanupComplete": true
+    },
+    {
+      "file": "second.json",
+      "sha256": "ccdc86490d9e9b449572d92564e3850b98ad7353b327f8e86e8782851ea6e7ad",
+      "codeCommit": "472908f43a4735ba85bb1d207771a80385a9cbeb",
+      "correct": true,
+      "cleanupComplete": true
+    }
+  ],
+  "commitCases": 10,
+  "commitCasesPassed": 10,
+  "normalCasesMissing": 0,
+  "intentionalUnsafeAutoMissing": 1,
+  "ackCasesPassed": 3,
+  "interpretation": {
+    "lastIsrLeaderAbsent": "all topics leader=-1, ISR empty, ELR/lastKnownELR [1] while original leader absent; no forced unclean election",
+    "recovery": "restore original disk/broker; all healthy records plus ACK0/1 fault5 retained; all fault5 rejected",
+    "productionDecision": "keep auto=false, BATCH/syncCommit, acks=all/idempotence=true; HA requires RF3/minISR2 and ELR1"
+  },
+  "limitations": [
+    "Single host process/container stop, not AZ or permanent disk loss",
+    "ACK comparison disables idempotence/retries for every level to isolate ACK policy; not production throughput comparison",
+    "ACK0 API success is not broker confirmation",
+    "No loss observed after original disk restored does not prove ACK1 durable against loss of its sole replica",
+    "AUTO_POLL_AHEAD deliberately violates DB-before-next-poll; synchronous AUTO cases had no missing event",
+    "No live source, no source gap reconstruction",
+    "First failed run exception type was recorded but not its operation/message; do not infer exact cause beyond last checkpoint"
+  ]
+}

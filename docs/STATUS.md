@@ -210,7 +210,7 @@ F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthor
 
 ### Kafka HA #29 실제 검증
 
-F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA_HA_VERIFICATION.md)·[정제근거](poc/evidence/kafka-ha-2026-10-26/summary.json). 01e943e에서실제6노드의broker1/2대손실·controller1/2대손실·복구·RF1→3이행·최종ACK/broker/DB대조10단계통과. main172시도/171ACK=broker=DB,이행20일치,정리완료. 처음3실패와보완도보존했다. a68011e에서 trend DLQ의 LOCAL 기본값 호출을 수정하고 전체 Spring 분석기·네 HA topic·10건 ranking/trend를 추가한11단계가 통과했다. 최종 Claude·CI 후 병합하며 실제AZ/디스크손상/외부배포는 미검증이다.
+F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA_HA_VERIFICATION.md)·[정제근거](poc/evidence/kafka-ha-2026-10-26/summary.json). 01e943e에서실제6노드의broker1/2대손실·controller1/2대손실·복구·RF1→3이행·최종ACK/broker/DB대조10단계통과. main172시도/171ACK=broker=DB,이행20일치,정리완료. 처음3실패와보완도보존했다. a68011e에서 trend DLQ의 LOCAL 기본값 호출을 수정하고 전체 Spring 분석기·네 HA topic·10건 ranking/trend를 추가한11단계가 통과했다. 최종1e814c7 Claude APPROVE·push40214416664/PR40214422119 SUCCESS 후 PR34를6abd51b로 develop에 병합했다. CI 단위124·실제81·하네스16·웹29/31 통과, #29·보드 완료다. 실제AZ/디스크손상/외부배포는 미검증이다.
 
 ### 배포·복구 #30
 

@@ -19,9 +19,9 @@ public final class FleetWorkerProcess {
         try(var ds=PostgresSupport.open(args[0],"chatpulse","local-chatpulse",false)) {
             var source=new ChatSource(){public String resolveRoom(String channel){return channel;}public String readToken(String room){return "SYNTHETIC_TOKEN";}public URI socketUri(String room){return URI.create("ws://127.0.0.1:"+args[2]);}};
             var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
-            var limits=new CollectorWorker.Limits(Integer.parseInt(args[3]),Duration.ofSeconds(6),Duration.ofSeconds(90),200,Duration.ofMillis(100),new BufferedKafkaPublisher.Limits(30,20,4));
+            var limits=new CollectorWorker.Limits(Integer.parseInt(args[3]),Duration.ofSeconds(6),Duration.ofSeconds(args.length>5?1:90),200,Duration.ofMillis(100),new BufferedKafkaPublisher.Limits(30,20,4));
             try(var worker=new CollectorWorker(new CollectorLeases(ds),SourceMode.SYNTHETIC,limits,source,kafka,args[1],CollectionObserver.NONE)) {
-                var written=new AtomicBoolean();worker.run(result->{if(written.compareAndSet(false,true))try{Files.writeString(Path.of(args[4]),JsonMapper.builder().build().writeValueAsString(result),StandardOpenOption.CREATE_NEW);}catch(Exception failure){throw new IllegalStateException("FLEET_RESULT_FAILED");}});
+                var written=new AtomicBoolean();worker.run(result->{if(written.compareAndSet(false,true))try{if(args.length>5){Files.writeString(Path.of(args[4]+".persisting"),"REPORT_WRITE_STARTED",StandardOpenOption.CREATE_NEW);Thread.sleep(5000);}Files.writeString(Path.of(args[4]),JsonMapper.builder().build().writeValueAsString(result),StandardOpenOption.CREATE_NEW);}catch(Exception failure){throw new IllegalStateException("FLEET_RESULT_FAILED");}});
             }
         } finally{factory.destroy();}
     }

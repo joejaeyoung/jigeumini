@@ -27,7 +27,7 @@
 
 ## 오래된 worker 차단의 정확한 범위
 
-수신전HTTP단계와연결감독,frame admission에서임대를확인한다. 수락시받은epoch permit을Kafka send직전에다시검사하므로새임대가오래된큐의권한으로바뀌지않는다. 상실/만료후같은프로세스의재획득은없으며새프로세스로시작한다.
+수신전HTTP단계와연결감독,frame admission에서임대를확인한다. 수락시받은epoch permit을Kafka send직전에다시검사하므로새임대가오래된큐의권한으로바뀌지않는다. 상실/만료 후 같은 프로세스의 재획득은 없으며 새 프로세스로 시작한다. 한 채널이 실행 기한 전에 종료해도 worker 전체를 중단하고 보유 채널 모두에30초 재시도 대기를 적용한다. 이는 현재 보수적인 PoC 운영 정책이다.
 
 **이것은 Kafka broker의 강제 fencing이 아니다.** 이미client에넘긴최대inflight64건과마지막검사→send사이정지한한건은소유권상실뒤반영될수있다. Kafka내부재시도도이미넘긴입력범위다. 정지한프로세스의기존소켓은재개/서버timeout전물리적으로남을수있으므로유효임대수와물리연결수를혼동하지않는다. DB시계의갑작스런전진·호스트단조시계속도오차·악의적client의프로토콜우회는검증하지않았다. 운영은DB시간동기화와이상경보가필요하다.
 
@@ -37,7 +37,7 @@
 
 ## 정상 종료·관측
 
-정상종료는새획득중단→WS종료→최대10초발행drain→heartbeat종료→임대해제순서다. drain동안임대를계속갱신한다. DB장애/만료면permit을취소하고미확인을남긴다. DB해제실패시새소유자는원래만료를기다린다. 진단파일은정상종료와SIGTERM hook모두동일고정결과를최대1회저장한다. 강제SIGKILL/전원손실의메모리입력과결과파일은복원하지못한다.
+정상종료는새획득중단→WS종료→최대10초발행drain→heartbeat종료→임대해제순서다. drain동안임대를계속갱신한다. DB장애/만료면permit을취소하고미확인을남긴다. DB해제실패시새소유자는원래만료를기다린다. 진단 파일은 정상 종료와 SIGTERM hook이 저장 전체를 동기화하고 파일 쓰기가 끝난 뒤 hook을 제거한다. CLI의 telemetry 마지막 flush와 producer 정리도 hook이 기다리는 저장 경로에 포함한다. released=true는 owner/epoch를 확인한 해제 명령이 DB에서 성공했다는 뜻이며, 이미 새 소유자라 실제 변경0행이어도 true다. 강제SIGKILL/전원손실의메모리입력과결과파일은복원하지못한다.
 
 status의discovered/eligible/selected와유효assigned/connected를분리한다. connected는최근heartbeat의연결관측이고건강한집계구간의증명이아니다. healthyWindow는null이며[품질API](../api/QUALITY_RANKINGS.md)에서별도판정한다. 운영worker는CollectionTelemetry에수신·종료·손실·buffer관측을연결한다. 시청자 관측은 임대한 채널만 활성화하며 채팅과 HTTP 예산·권한을 공유한다. 응답 뒤/발행 직전 재검사하며 OBSERVATIONS_ENABLED=false로 끌 수 있다. HA 정책도 채팅/관측 토픽에 같은 환경 설정을 전달한다. 원천API/토큰/채팅원문은파일과로그에기록하지않는다.
 

@@ -12,8 +12,12 @@
 - `QualityHistory`의 구간 품질을 기존 activity와 대조한다. 실제 DB 조회 직렬화 JSON을 `server/src/test/resources/broadcast-report.json`으로 공유해 웹의0/null/시각/품질 계약을 검사한다.
 - 웹은 목록→상세, 부분/미확정, 내부 관측 세션, 조회 지연, 빈 목록, 피크, 정상0과음영공백, 갱신 실패의 이전 결과를 확인한다.
 
-최초 저장 집중검사5개와 category 회귀8개가 통과했고, API/요약까지 report7개가 통과했다. 이후 동일 SQL snapshot의 품질 조회와 최종 웹을 포함한 전체 회귀·정제 근거·Claude 리뷰·CI 결과는 완료 후 STATUS에서 갱신한다. 실행 중인 시험을 통과 기록으로 계산하지 않는다.
+최종 구현 `55726f0`에서 `./scripts/check` Java84·하네스16·JAR, `./scripts/integration` 실제 Kafka/DB68(리포트7·공통 소비자 추출의category회귀8 포함), `./scripts/web check` 타입·단위29·빌드, `./scripts/web test:e2e` Chromium31이 통과했다. [정제 근거](../poc/evidence/reports-2026-10-25.json)에 코드/JAR/XML/공유JSON hash를 기록했다. 합성320/1440px 화면을 확인하고 작은 화면의 표를 내부 가로 스크롤로 보완했다. SQL private canary 노출0이다. Claude 승인·CI·병합은 STATUS에서 추적한다.
 
 ## 미검증 범위
 
 새 live·실제 원천 방송 ID 변경·장시간 미종료 세션·고부하·복제 HA·다중 호스트·report 전용 강제 JVM 종료/고정 범위 replay는 미검증이다. 실제JAR 시험은메타데이터 외부조회 disabled이며 합성 Kafka 입력이다. 세션/별칭 SQL rollback은 검사했지만 모든 DB/broker 장애 지점의 무손실을 주장하지 않는다. 공유 pool의 논리적 소비 독립성은 자원 격리가 아니다.
+
+## PR CI의 기존 heartbeat fixture 보완
+
+최초 PR CI40204570648은 ChannelProbeTest의 pong 미응답 검사에서 실패했다. artifact에10.046초 실행·WS_CLOSED가 남았고 heartbeat timeout은 없었다. 그 연결 종료의 원인은 미확정이다. 별도1.2초 승인 지연으로 기존1초 예산의 DURATION_COMPLETE 조기 종료를 재현했다. [프로토콜 검증](../poc/PROTOCOL.md#heartbeat-회귀-시험의-관측-대기)에 따라 실제 채팅/ping/미응답/timeout 관측까지 유한 대기하도록 시험만 바꿨고 ChannelProbeTest7개가 통과했다. 최종단위/CI는 수정HEAD에서 다시 확인한다.

@@ -38,7 +38,7 @@ public final class KafkaHaExperiment {
         result.put("policy",KafkaTopicPolicy.ha());result.put("phases",session.phases);Files.writeString(output,JSON.writeValueAsString(result));
         var hook=new Thread(session::close,"ha-experiment-cleanup");Runtime.getRuntime().addShutdownHook(hook);
         try {session.open();session.exercise();result.put("correct",true);}
-        catch(Exception failure) {result.put("correct",false);result.put("failureCode","HA_SCENARIO_FAILED");result.put("failureType",failure.getClass().getSimpleName());result.put("failedPhase",session.phase);if(failure.getMessage()!=null&&failure.getMessage().matches("HA_[A-Z_]+"))result.put("failureDetailCode",failure.getMessage());}
+        catch(Exception failure) {result.put("correct",false);result.put("failureCode","HA_SCENARIO_FAILED");result.put("failureType",failure.getClass().getSimpleName());result.put("failedPhase",session.phase);result.put("failedOperation",session.operation);if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());if(failure.getMessage()!=null&&failure.getMessage().matches("HA_[A-Z_]+"))result.put("failureDetailCode",failure.getMessage());}
         finally {
             session.close();Runtime.getRuntime().removeShutdownHook(hook);result.put("cleanupComplete",session.cleaned);
             if(!session.cleaned)result.put("correct",false);result.put("finishedAt",Instant.now().toString());
@@ -52,7 +52,7 @@ public final class KafkaHaExperiment {
         final List<Map<String,Object>> phases=new ArrayList<>();final List<ProjectionConsumer> consumers=new ArrayList<>();
         final Map<String,Set<UUID>> attempted=new HashMap<>(),acked=new HashMap<>();
         Admin admin;HikariDataSource ds;JdbcTemplate jdbc;DefaultKafkaProducerFactory<String,byte[]> factory;KafkaTemplate<String,byte[]> kafka;
-        boolean schemaCreated,closed,cleaned;String phase="OPEN";
+        boolean schemaCreated,closed,cleaned;String phase="OPEN",operation="OPEN";
         final Path output;final Map<String,Object> result;
         Session(Path output,Map<String,Object> result) throws Exception {this.output=output;this.result=result;cluster=new LocalKafkaCluster(Path.of(""));}
         void checkpoint() throws Exception {Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}
@@ -130,7 +130,7 @@ public final class KafkaHaExperiment {
             });
         }
         void measure(String name,Scenario action) throws Exception {
-            phase=name;long begin=System.nanoTime();var row=new LinkedHashMap<String,Object>();row.put("name",name);row.put("startedAt",Instant.now().toString());phases.add(row);checkpoint();
+            phase=name;operation="SCENARIO";long begin=System.nanoTime();var row=new LinkedHashMap<String,Object>();row.put("name",name);row.put("startedAt",Instant.now().toString());phases.add(row);checkpoint();
             try{row.putAll(action.run());row.put("passed",true);}catch(Exception failure){row.put("passed",false);throw failure;}
             finally{row.put("seconds",(System.nanoTime()-begin)/1e9);checkpoint();}
         }
@@ -166,9 +166,17 @@ public final class KafkaHaExperiment {
             row.put("partitions",description(input).partitions().stream().map(p->Map.of("partition",p.partition(),"leader",p.leader()==null?-1:p.leader().id(),"replicas",p.replicas().stream().map(n->n.id()).toList(),"isr",p.isr().stream().map(n->n.id()).toList())).toList());
             String projection=input.equals(topic)?"ha-main":"ha-migration";
             row.put("database",store(projection).totals());
+            operation="GROUP_OFFSETS_READ";
+            try {
             var committed=admin.listConsumerGroupOffsets("ha-group-"+projection+"-"+id).partitionsToOffsetAndMetadata().get(8,TimeUnit.SECONDS);
-            var offsets=ends(input);row.put("offsets",offsets.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparingInt(TopicPartition::partition)))
-                    .map(e->{var offset=committed.get(e.getKey());var item=new LinkedHashMap<String,Object>();item.put("partition",e.getKey().partition());item.put("end",e.getValue());item.put("committed",offset==null?null:offset.offset());item.put("lag",offset==null?null:Math.max(0,e.getValue()-offset.offset()));return item;}).toList());
+            operation="END_OFFSETS_READ";var offsets=ends(input);row.put("offsets",offsets.entrySet().stream().sorted(Map.Entry.comparingByKey(Comparator.comparingInt(TopicPartition::partition)))
+                    .map(e->{var offset=committed.get(e.getKey());var item=new LinkedHashMap<String,Object>();item.put("partition",e.getKey().partition());item.put("end",e.getValue());item.put("committed",offset==null?null:offset.offset());item.put("lag",offset==null?null:Math.max(0,e.getValue()-offset.offset()));return item;}).toList());row.put("offsetsAvailable",true);
+            } catch(ExecutionException|TimeoutException unavailable) {
+                row.put("offsetsAvailable",false);row.put("offsetFailureOperation",operation);row.put("offsetFailureType",unavailable.getClass().getSimpleName());
+                if(unavailable.getCause()!=null)row.put("offsetFailureCauseType",unavailable.getCause().getClass().getSimpleName());
+                // ISR 부족으로 __consumer_offsets 자체의 조회가 불가능하면 lag를0으로 만들지 않는다.
+                if(!phase.equals("ISR_ONE_WITH_CONTROLLER_QUORUM"))throw unavailable;
+            }
             return row;
         }
         Map<String,Object> reconcile(String input,String projection) throws Exception {

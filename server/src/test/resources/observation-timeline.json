@@ -1,0 +1,581 @@
+{
+  "channelId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "asOf": "2026-10-25T12:00:59Z",
+  "from": "2026-10-25T11:00:00Z",
+  "to": "2026-10-25T12:00:00Z",
+  "chat": [
+    {
+      "from": "2026-10-25T11:00:00Z",
+      "to": "2026-10-25T11:01:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:01:00Z",
+      "to": "2026-10-25T11:02:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:02:00Z",
+      "to": "2026-10-25T11:03:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:03:00Z",
+      "to": "2026-10-25T11:04:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:04:00Z",
+      "to": "2026-10-25T11:05:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:05:00Z",
+      "to": "2026-10-25T11:06:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:06:00Z",
+      "to": "2026-10-25T11:07:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:07:00Z",
+      "to": "2026-10-25T11:08:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:08:00Z",
+      "to": "2026-10-25T11:09:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:09:00Z",
+      "to": "2026-10-25T11:10:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:10:00Z",
+      "to": "2026-10-25T11:11:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:11:00Z",
+      "to": "2026-10-25T11:12:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:12:00Z",
+      "to": "2026-10-25T11:13:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:13:00Z",
+      "to": "2026-10-25T11:14:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:14:00Z",
+      "to": "2026-10-25T11:15:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:15:00Z",
+      "to": "2026-10-25T11:16:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:16:00Z",
+      "to": "2026-10-25T11:17:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:17:00Z",
+      "to": "2026-10-25T11:18:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:18:00Z",
+      "to": "2026-10-25T11:19:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:19:00Z",
+      "to": "2026-10-25T11:20:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:20:00Z",
+      "to": "2026-10-25T11:21:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:21:00Z",
+      "to": "2026-10-25T11:22:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:22:00Z",
+      "to": "2026-10-25T11:23:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:23:00Z",
+      "to": "2026-10-25T11:24:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:24:00Z",
+      "to": "2026-10-25T11:25:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:25:00Z",
+      "to": "2026-10-25T11:26:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:26:00Z",
+      "to": "2026-10-25T11:27:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:27:00Z",
+      "to": "2026-10-25T11:28:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:28:00Z",
+      "to": "2026-10-25T11:29:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:29:00Z",
+      "to": "2026-10-25T11:30:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:30:00Z",
+      "to": "2026-10-25T11:31:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:31:00Z",
+      "to": "2026-10-25T11:32:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:32:00Z",
+      "to": "2026-10-25T11:33:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:33:00Z",
+      "to": "2026-10-25T11:34:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:34:00Z",
+      "to": "2026-10-25T11:35:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:35:00Z",
+      "to": "2026-10-25T11:36:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:36:00Z",
+      "to": "2026-10-25T11:37:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:37:00Z",
+      "to": "2026-10-25T11:38:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:38:00Z",
+      "to": "2026-10-25T11:39:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:39:00Z",
+      "to": "2026-10-25T11:40:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:40:00Z",
+      "to": "2026-10-25T11:41:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:41:00Z",
+      "to": "2026-10-25T11:42:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:42:00Z",
+      "to": "2026-10-25T11:43:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:43:00Z",
+      "to": "2026-10-25T11:44:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:44:00Z",
+      "to": "2026-10-25T11:45:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:45:00Z",
+      "to": "2026-10-25T11:46:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:46:00Z",
+      "to": "2026-10-25T11:47:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:47:00Z",
+      "to": "2026-10-25T11:48:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:48:00Z",
+      "to": "2026-10-25T11:49:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:49:00Z",
+      "to": "2026-10-25T11:50:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:50:00Z",
+      "to": "2026-10-25T11:51:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:51:00Z",
+      "to": "2026-10-25T11:52:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:52:00Z",
+      "to": "2026-10-25T11:53:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:53:00Z",
+      "to": "2026-10-25T11:54:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:54:00Z",
+      "to": "2026-10-25T11:55:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:55:00Z",
+      "to": "2026-10-25T11:56:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:56:00Z",
+      "to": "2026-10-25T11:57:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:57:00Z",
+      "to": "2026-10-25T11:58:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:58:00Z",
+      "to": "2026-10-25T11:59:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    },
+    {
+      "from": "2026-10-25T11:59:00Z",
+      "to": "2026-10-25T12:00:00Z",
+      "count": 0,
+      "referenceCount": 0,
+      "coverage": 1.0,
+      "status": "HEALTHY",
+      "reasons": []
+    }
+  ],
+  "observations": [
+    {
+      "schemaVersion": 1,
+      "eventId": "00000000-0000-4000-8000-000000000001",
+      "runId": "test-v1",
+      "channelId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observedAt": "2026-10-25T11:21:07Z",
+      "ttlSeconds": 120,
+      "viewerCount": 0,
+      "liveStatus": "LIVE",
+      "quality": "OBSERVED",
+      "sourceBroadcastId": "123",
+      "broadcastIdentity": "SOURCE_PROVIDED",
+      "categoryId": "game",
+      "categoryName": "합성 게임"
+    },
+    {
+      "schemaVersion": 1,
+      "eventId": "00000000-0000-4000-8000-000000000002",
+      "runId": "test-v1",
+      "channelId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observedAt": "2026-10-25T11:22:07Z",
+      "ttlSeconds": 120,
+      "viewerCount": null,
+      "liveStatus": "LIVE",
+      "quality": "MISSING_VIEWER_COUNT",
+      "sourceBroadcastId": "123",
+      "broadcastIdentity": "SOURCE_PROVIDED",
+      "categoryId": "game",
+      "categoryName": "합성 게임"
+    }
+  ],
+  "truncated": false
+}

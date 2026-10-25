@@ -50,6 +50,8 @@ msgTime/messageTime의 정수 epoch milliseconds를 사용한다. 현재보다 5
 
 수신 프로토콜과 READ/heartbeat 송신은 유지한다. pipeline collector에서만 `CollectionObserver`가 승인·원천 생존·종료·메시지 손실을 관측하고 별도 worker가 DB에 기록한다. 일반 PoC는 기본 무동작 observer를 사용해 DB 없이 실행된다. WebSocket callback에서 DB I/O를 수행하지 않으며 메타데이터나 채팅 원문을 관측 객체에 전달하지 않는다. [품질 계약](../api/QUALITY_RANKINGS.md)을 참고한다.
 
+관측 수신자는 여러 개를 결합한다. 시청자 표본 수집기는 채널 start/stopped에서 활성 집합만 바꾸고 별도 worker가 공개 HTTP를 조회한다. 따라서 파일 잠금 획득 전이나 중단된 채널에서는 새 요청을 예약하지 않는다. READ/heartbeat 송신·채팅 분류·재접속 계약은 그대로다.
+
 ## 검증 계층
 
 - `ChatProtocolTest`: 합성 frame의 배치·역사·후원·타입·시각·크기·식별정보 제거.

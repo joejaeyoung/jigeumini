@@ -27,17 +27,20 @@ class KafkaSupportIntegrationTest {
     }
     @Test void existingInvalidTopicsAreRejectedWithoutChangingTheirSettings() throws Exception {
         try (var admin = Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))) {
-            for (boolean wrongPartitions : List.of(true,false)) {
+            for (String wrong : List.of("partitions","timestamp","compaction")) {
+                boolean wrongPartitions=wrong.equals("partitions");
+                String cleanup=wrong.equals("compaction")?"compact":"delete";
                 String topic="it.readiness."+UUID.randomUUID();
-                String timestamp=wrongPartitions?"CreateTime":"LogAppendTime";
+                String timestamp=wrong.equals("timestamp")?"LogAppendTime":"CreateTime";
                 try {
-                    admin.createTopics(List.of(new NewTopic(topic,wrongPartitions?2:3,(short)1).configs(Map.of(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,timestamp))))
+                    admin.createTopics(List.of(new NewTopic(topic,wrongPartitions?2:3,(short)1).configs(Map.of(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,timestamp,TopicConfig.CLEANUP_POLICY_CONFIG,cleanup))))
                             .all().get(10,TimeUnit.SECONDS);
                     assertThatThrownBy(() -> KafkaSupport.ensureTopic(BOOTSTRAP,topic)).hasMessage("KAFKA_TOPIC_INIT_FAILED")
-                            .hasRootCauseMessage(wrongPartitions?"M1 requires 3 partitions":"M1 requires CreateTime timestamps");
+                            .hasRootCauseMessage(wrongPartitions?"M1 requires 3 partitions":wrong.equals("timestamp")?"M1 requires CreateTime timestamps":"History requires delete cleanup policy");
                     assertThat(admin.describeTopics(List.of(topic)).allTopicNames().get(10,TimeUnit.SECONDS).get(topic).partitions()).hasSize(wrongPartitions?2:3);
                     var resource=new ConfigResource(ConfigResource.Type.TOPIC,topic);
                     assertThat(admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource).get(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG).value()).isEqualTo(timestamp);
+                    assertThat(admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource).get(TopicConfig.CLEANUP_POLICY_CONFIG).value()).isEqualTo(cleanup);
                 } finally { admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS); }
             }
         }

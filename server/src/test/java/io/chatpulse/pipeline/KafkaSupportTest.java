@@ -30,7 +30,7 @@ class KafkaSupportTest {
         when(admin.describeTopics(anyCollection())).thenReturn(topics);
         when(admin.describeTopics(anyCollection(),any(DescribeTopicsOptions.class))).thenReturn(topics);
         var configs = mock(DescribeConfigsResult.class);
-        when(configs.all()).thenReturn(KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"))))));
+        when(configs.all()).thenReturn(KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"),new ConfigEntry(TopicConfig.CLEANUP_POLICY_CONFIG,"delete"))))));
         when(admin.describeConfigs(anyCollection())).thenReturn(configs);
         when(admin.describeConfigs(anyCollection(),any(DescribeConfigsOptions.class))).thenReturn(configs);
         return admin;
@@ -38,7 +38,7 @@ class KafkaSupportTest {
     @Test void creationAndTopicDescriptionCanSucceedBeforeConfigIsVisible() {
         var admin = readyAdmin(); var configs = mock(DescribeConfigsResult.class);
         when(configs.all()).thenReturn(failed(new UnknownTopicOrPartitionException("synthetic not visible")),
-                KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"))))));
+                KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"),new ConfigEntry(TopicConfig.CLEANUP_POLICY_CONFIG,"delete"))))));
         when(admin.describeConfigs(anyCollection())).thenReturn(configs);
         when(admin.describeConfigs(anyCollection(),any(DescribeConfigsOptions.class))).thenReturn(configs);
         try (var factory = mockStatic(Admin.class)) {

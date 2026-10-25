@@ -49,17 +49,17 @@ test('2배와 3배 리본·페이지 이동·품질 정정·오래된 분석을 
 });
 test('상세 추이는 정상 0건과 공백을 따로 표시한다', async ({ page }) => {
   await setup(page);
-  await page.route('**/api/v1/channels/*/activity?**', route => {
+  await page.route('**/api/v1/channels/*/timeline?**', route => {
     const seconds = Number(new URL(route.request().url()).searchParams.get('seconds'));
     const start = now - seconds * 1000, from = new Date(start).toISOString(), to = iso();
-    return route.fulfill({ json: { channelId: a, asOf: iso(), from, to, points: Array.from({ length: seconds / 60 }, (_, i) => ({
+    return route.fulfill({ json: { channelId: a, asOf: iso(), from, to, observations: [], truncated: false, chat: Array.from({ length: seconds / 60 }, (_, i) => ({
       from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(),
       count: i === 0 ? 0 : null, referenceCount: i === 0 ? 0 : 5, coverage: i === 0 ? 1 : .5, status: i === 0 ? 'HEALTHY' : 'INCOMPLETE', reasons: i === 0 ? [] : ['LOW_COVERAGE'],
     })) } });
   });
   await page.goto(`/channels/${a}`);
   await expect(page.getByRole('table')).toBeVisible();
-  await expect(page.locator('tbody strong')).toHaveCount(30);
+  await expect(page.locator('tbody strong')).toHaveCount(60);
   await expect(page.locator('tbody strong').last()).toHaveText('0');
   await expect(page.locator('tbody strong').first()).toHaveText('—');
   await expect(page.getByText('수집 불완전 · 참고 5건').first()).toBeVisible();

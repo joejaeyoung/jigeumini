@@ -29,6 +29,7 @@ public final class KafkaSupport {
             var admin = Admin.create(Map.of("bootstrap.servers", bootstrap, "default.api.timeout.ms", 10000, "request.timeout.ms", 3000));
             try {
                 var definition = new NewTopic(topic, 3, (short) 1).configs(Map.of(
+                        TopicConfig.CLEANUP_POLICY_CONFIG, "delete",
                         TopicConfig.RETENTION_MS_CONFIG, "86400000",
                         TopicConfig.RETENTION_BYTES_CONFIG, "268435456",
                         TopicConfig.SEGMENT_BYTES_CONFIG, "33554432",
@@ -57,6 +58,8 @@ public final class KafkaSupport {
                 if (!"CreateTime".equals(config.get(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG).value())) {
                     throw new IllegalStateException("M1 requires CreateTime timestamps");
                 }
+                if (config.get(TopicConfig.CLEANUP_POLICY_CONFIG) == null || !"delete".equals(config.get(TopicConfig.CLEANUP_POLICY_CONFIG).value()))
+                    throw new IllegalStateException("History requires delete cleanup policy");
                 if (actual.partitions().size() != 3) throw new IllegalStateException("M1 requires 3 partitions");
                 return;
             } catch (ExecutionException error) {

@@ -66,3 +66,20 @@ dialog { border: 1px solid var(--color-rule); padding: 0; border-radius: 16px; c
 .notification-item.is-new .notification-meta span { color: var(--color-accent); font-weight: 700; }
 .notification-item button { flex-shrink: 0; }
 @media (max-width: 600px) { .notification-item { flex-direction: column; align-items: stretch; padding: 18px; } }
+
+.observation-timeline { margin: 1.5rem 0; padding: 1.25rem; background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb); border-radius: 16px; }
+.chart-heading, .chart-times { display: flex; justify-content: space-between; gap: 1rem; font-size: .8rem; }
+.chart-heading span { color: #65756e; }
+.observation-chart { display: block; width: 100%; height: 130px; margin-top: .8rem; overflow: visible; }
+.chart-axis { stroke: #d6ded9; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viewer-line { fill: none; stroke: #0e8775; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.viewer-point { fill: #0e8775; cursor: pointer; stroke: #fff; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viewer-point:focus { fill: #164dc7; stroke: #164dc7; }
+.chat-bar { fill: #e6805a; }
+.chat-gap { fill: #e7eae8; }
+.observation-selection, .observation-empty { color: #5a6b63; font-size: .85rem; }
+.chart-times { margin-top: .4rem; color: #65756e; }
+@media (max-width: 480px) { .observation-timeline { padding: .8rem; } .chart-heading { font-size: .72rem; gap: .4rem; } }
+
+.observation-picker { display: grid; gap: .4rem; margin-top: 1rem; font-size: .8rem; }
+.observation-picker select { width: 100%; min-height: 44px; font: inherit; padding: .5rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-surface); }

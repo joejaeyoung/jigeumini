@@ -65,3 +65,5 @@ group은 `${pipeline.group}-reports`, 시작 위치는 `reports.offset-reset` �
 원천 ID를 받기 전의 LIVE 표본은 별도 내부 관측 세션으로 남는다. 이후 알려진 원천 ID가 앞선 시각까지 소급 관측된 경우에만 기존 anchor를 포함하는 범위가 별칭으로 합쳐진다. 같은 시각의 서로 다른 표본은 eventId 순서로 결정하며 길이0인 내부 세션이 생길 수 있다. categoryId/categoryName은 허용된 공개 카테고리 분류값이고 제목·채널명·이미지 필드가 아니다. RankingStore는10초 경계마다 snapshot을 저장한다. 정상 분은 그중 UTC 정각 evaluatedAt만 결합하고 해당 tick이 빠지면 미확인으로 남긴다.
 
 정리 중인 만료 세션의 잔여 관측은 채팅 배정과 구분 coverage에서도 제외한다. 만료한 동일 원천 ID가 새 LIVE로 재등장하면 `REPORT_EXPIRED_ID_REUSE`로 배치를 rollback하고 주기 정리가 옛 자식을 모두 제거한 뒤 재시도한다. 남은 옛 bucket을 새 기록과 합산하지 않는다. 정리 완료까지 report group이 지연될 수 있으며 삭제 이력 복원을 주장하지 않는다.
+
+이 예외의 운영 API 표시는 공통 허용 코드 정책에 따라 `REPORT_PROCESSING_UNAVAILABLE`이다. 정리는 테이블별 1만 행·60초 주기이며 잠금 경합 시 해당 주기를 건너뛴다. 잔여 자식이 많으면 여러 주기 동안 소비가 지연될 수 있고, 이 숫자로 정확한 복구 완료 시간을 보장하지 않는다.

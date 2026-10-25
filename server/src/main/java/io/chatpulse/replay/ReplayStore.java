@@ -26,7 +26,7 @@ public final class ReplayStore {
     public UUID create(ReplayManifest manifest) {
         UUID id=UUID.randomUUID();
         tx.executeWithoutResult(status->{
-            jdbc.update("INSERT INTO replay_run(run_id,manifest,state) VALUES (?,?::jsonb,'QUEUED')",id,manifest.json());
+            jdbc.update("INSERT INTO replay_run(run_id,manifest,state,created_build) VALUES (?,?::jsonb,'QUEUED',?)",id,manifest.json(),ReplayBuild.id());
             var projection=projection(id);
             manifest.partitions().forEach(r->projection.initializeProgress(manifest.topic(),r.partition(),r.start()));
         });return id;
@@ -43,7 +43,7 @@ public final class ReplayStore {
             var jobs=jdbc.query("SELECT * FROM replay_run WHERE state='QUEUED' ORDER BY created_at,run_id LIMIT 1 FOR UPDATE SKIP LOCKED",this::map);
             if(jobs.isEmpty()) return null;
             var job=jobs.getFirst();
-            jdbc.update("UPDATE replay_run SET state='RUNNING',owner_id=?,started_at=now(),heartbeat_at=now() WHERE run_id=?",owner,job.id());
+            jdbc.update("UPDATE replay_run SET state='RUNNING',owner_id=?,started_at=now(),heartbeat_at=now(),worker_build=? WHERE run_id=?",owner,ReplayBuild.id(),job.id());
             return new Job(job.id(),job.manifest(),"RUNNING",owner,false);
         });
     }
@@ -140,16 +140,19 @@ public final class ReplayStore {
             var job=get(id);
             var result=new LinkedHashMap<String,Object>();result.put("runId",id.toString());result.put("state",job.state());
             result.put("manifest",job.manifest());result.put("consumerGroup","replay-"+id);result.put("projection","replay");
-            result.put("metrics",jdbc.queryForMap("SELECT read_count,filtered_count,unique_count,duplicate_count,error_count,reason,cancel_requested,created_at,started_at,heartbeat_at,finished_at FROM replay_run WHERE run_id=?",id));
+            result.put("metrics",jdbc.queryForMap("SELECT read_count,filtered_count,unique_count,duplicate_count,error_count,reason,cancel_requested,created_at,started_at,heartbeat_at,finished_at,created_build,worker_build FROM replay_run WHERE run_id=?",id));
             result.put("totals",projection(id).totals());result.put("progress",projection(id).progress());
             result.put("limitations",List.of("RETAINED_OFFSETS_ONLY","NO_FUTURE_LATE_INPUT","NO_LIVE_SNAPSHOT_OR_ALERT_REPLAY","DUPLICATES_COUNTED_WITHIN_TIME_FILTER"));
             return result;
         });
     }
     public Map<String,Object> compare(UUID left,UUID right) {
+        if(left.equals(right))throw new ReplayFailure(INCOMPATIBLE_RUNS);
         return readTx.execute(transaction->{
             var a=get(left);var b=get(right);
             if(!a.state().equals("COMPLETED") || !b.state().equals("COMPLETED") || !a.manifest().sameInput(b.manifest())) throw new ReplayFailure(INCOMPATIBLE_RUNS);
+            String build=jdbc.queryForObject("SELECT worker_build FROM replay_run WHERE run_id=?",String.class,left);
+            if(build==null || !build.matches("[a-f0-9]{64}") || !build.equals(jdbc.queryForObject("SELECT worker_build FROM replay_run WHERE run_id=?",String.class,right)))throw new ReplayFailure(INCOMPATIBLE_RUNS);
             String paired="""
                     WITH paired AS (
                       SELECT coalesce(a.channel_id,b.channel_id) channel_id,coalesce(a.bucket_start,b.bucket_start) bucket_start,

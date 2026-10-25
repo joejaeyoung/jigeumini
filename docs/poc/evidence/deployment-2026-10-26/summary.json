@@ -46,11 +46,21 @@
       "cleanupComplete": true,
       "phases": 17,
       "sensitiveArtifactsRemoved": true
+    },
+    {
+      "file": "fifth.json",
+      "sha256": "7da901d4bf2b8e5ee380f92b018d8837ae1093257a3a9ba2080d52309527ef9e",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "a0283bc3803e2a80a75fc1d770bcd55323564636",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 17,
+      "sensitiveArtifactsRemoved": true
     }
   ],
   "observedRecovery": {
-    "startedAt": "2026-10-25T17:29:16.765846+00:00",
-    "secondsToVerifiedCatchup": 18.387081207998563,
+    "startedAt": "2026-10-25T17:36:38.345648+00:00",
+    "secondsToVerifiedCatchup": 24.187962916999822,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
@@ -86,8 +96,8 @@
     "Some diagnostic counts/old-group invariance fields were literals; final followup measures them"
   ],
   "reviewFollowup": {
-    "startedAt": "2026-10-25T17:29:16.765846+00:00",
-    "secondsToVerifiedCatchup": 18.387081207998563,
+    "startedAt": "2026-10-25T17:36:38.345648+00:00",
+    "secondsToVerifiedCatchup": 24.187962916999822,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
@@ -102,8 +112,8 @@
       "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
     }
   },
-  "latestVerifiedCommit": "89879bd3b32f16b99bd75d24ca6153a6be1868b5",
-  "latestCommand": "./scripts/deploy-rehearsal work/images-baseline.json work/images-integrated.json work/deploy-fourth",
+  "latestVerifiedCommit": "a0283bc3803e2a80a75fc1d770bcd55323564636",
+  "latestCommand": "./scripts/deploy-rehearsal work/images-baseline.json work/images-operational.json work/deploy-fifth",
   "priorLocalArtifactsCleanup": {
     "directories": [
       "work/deploy-first",
@@ -113,10 +123,20 @@
     "generatedSecretAndDumpFilesDeleted": 6
   },
   "localCheck": {
-    "tests": 139,
+    "tests": 140,
     "failures": 0,
     "harness": 16,
     "jarBuilt": true,
-    "sortedXmlSha256": "f752233649fbec2c225c8d10adbc4b31e4a5119d0dc001bea815a67a44f948c1"
+    "sortedXmlSha256": "f752233649fbec2c225c8d10adbc4b31e4a5119d0dc001bea815a67a44f948c1",
+    "codeCommit": "a0283bc3803e2a80a75fc1d770bcd55323564636"
+  },
+  "localFullRegression": {
+    "tests": 91,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "versionPinned": false,
+    "excludedFromFinalEvidence": true,
+    "reason": "followup build updated classes/JAR during final 14 seconds; use isolated final CI for code provenance"
   }
 }

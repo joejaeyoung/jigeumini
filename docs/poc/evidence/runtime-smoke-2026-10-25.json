@@ -1,0 +1,150 @@
+{
+  "startedAt": "2026-10-25T13:09:37.273590Z",
+  "completedAt": "2026-10-25T13:15:06.891728Z",
+  "requestedDurationSeconds": 600,
+  "forcedReconnectAfterSeconds": 0,
+  "verdict": "FAIL_OR_INCONCLUSIVE",
+  "delivery": {
+    "accepted": 6965,
+    "acknowledged": 6965,
+    "complete": true,
+    "rejected": 0,
+    "unconfirmed": 0,
+    "mode": "KAFKA"
+  },
+  "channels": [
+    {
+      "channelId": "49d2c3cf8f0b2843d934ec15e82bb54c",
+      "chatCount": 4820,
+      "connections": 1,
+      "verdict": "FAIL",
+      "reasons": {
+        "CANCELLED": 1
+      }
+    },
+    {
+      "channelId": "792acf9ca28b42918710327e14b06b68",
+      "chatCount": 1513,
+      "connections": 1,
+      "verdict": "FAIL",
+      "reasons": {
+        "CANCELLED": 1
+      }
+    },
+    {
+      "channelId": "7ce8032370ac5121dcabce7bad375ced",
+      "chatCount": 632,
+      "connections": 1,
+      "verdict": "FAIL",
+      "reasons": {
+        "CANCELLED": 1
+      }
+    }
+  ],
+  "stopReason": "USER_REQUESTED_EARLY_STOP",
+  "collected": 6965,
+  "ledgerIncrease": 6965,
+  "bucketIncrease": 6965,
+  "countsMatch": true,
+  "runningCommit": "1eee77e5cd64a5d82b6fd8b1e31d6e9fb2657eab",
+  "notificationEventsObserved": 0,
+  "limits": [
+    "User stopped before requested600s; not a completed-duration PoC PASS",
+    "No forced reconnect",
+    "No live spike occurrence/outbox verification",
+    "Source completeness not measured"
+  ],
+  "feature": "F01",
+  "technicalGoals": [
+    "T02",
+    "T10"
+  ],
+  "commands": [
+    "./scripts/pipeline analyzer --notifications.offset-reset=earliest",
+    "./scripts/web dev",
+    "./scripts/pipeline collector <three public channel IDs> 10m 0s"
+  ],
+  "ui": {
+    "executedAt": "2026-10-25T13:09:54.108Z",
+    "results": [
+      {
+        "route": "/",
+        "heading": true,
+        "overflow": false,
+        "cards": 4,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/explore",
+        "heading": true,
+        "overflow": false,
+        "cards": 4,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/surges",
+        "heading": true,
+        "overflow": false,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/saved",
+        "heading": true,
+        "overflow": false,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/notifications",
+        "heading": true,
+        "overflow": false,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/channels/49d2c3cf8f0b2843d934ec15e82bb54c",
+        "heading": true,
+        "overflow": false,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0
+      },
+      {
+        "route": "/notifications",
+        "width": 320,
+        "overflow": false,
+        "alerts": 0
+      }
+    ],
+    "pageErrors": 0,
+    "apiErrors": []
+  },
+  "before": {
+    "asOf": "2026-10-25T13:08:51.650015Z",
+    "totals": {
+      "bucketTotal": 135,
+      "processedEvents": 135,
+      "projection": "ranking",
+      "runId": "live-v1"
+    },
+    "provenance": "수집 시작 전 API 확인 도구 출력에서 해당 필드를 전사"
+  },
+  "afterTotals": {
+    "bucketTotal": 7100,
+    "processedEvents": 7100,
+    "projection": "ranking",
+    "runId": "live-v1"
+  },
+  "stoppedProcesses": [
+    "collector",
+    "analyzer18080",
+    "web18082"
+  ],
+  "retainedInfrastructure": "Kafka/PostgreSQL for remaining integration tests"
+}

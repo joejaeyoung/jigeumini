@@ -1,8 +1,8 @@
 {
-  "executedAt": "2026-10-25T13:05:36.600494+00:00",
-  "implementationCommit": "1eee77e5cd64a5d82b6fd8b1e31d6e9fb2657eab",
+  "executedAt": "2026-10-25T13:15:57.480941+00:00",
+  "implementationCommit": "c0311716513d39758df49b93bbcc0db429d29cf1",
   "baseCommit": "c86f670efa33c08f885ad3e2a1c88a259d17a731",
-  "jarSha256": "2fcecf127afe4b5671f0aaf72717b6837694e0a2d31f629465ac6d682762fd37",
+  "jarSha256": "60879935f284a6f53bbec826c02ef09a07b82cb62e58fade399a935c5f86c258",
   "issue": 8,
   "feature": "F07",
   "technicalGoals": [
@@ -28,135 +28,135 @@
   ],
   "java": {
     "test": {
-      "tests": 62,
+      "tests": 63,
       "suites": [
         {
           "name": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
           "tests": "7",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:32.163Z",
-          "time": "0.307"
+          "timestamp": "2026-10-25T13:11:49.004Z",
+          "time": "0.287"
         },
         {
           "name": "io.chatpulse.metadata.MetadataControllerTest",
           "tests": "2",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:32.470Z",
-          "time": "0.658"
+          "timestamp": "2026-10-25T13:11:49.291Z",
+          "time": "0.055"
         },
         {
           "name": "io.chatpulse.metadata.MetadataServiceTest",
           "tests": "6",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.128Z",
-          "time": "0.016"
+          "timestamp": "2026-10-25T13:11:49.346Z",
+          "time": "0.014"
         },
         {
           "name": "io.chatpulse.notifications.NotificationControllerTest",
           "tests": "2",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.145Z",
-          "time": "0.059"
+          "timestamp": "2026-10-25T13:11:47.893Z",
+          "time": "1.107"
         },
         {
           "name": "io.chatpulse.notifications.SpikeDetectedTest",
-          "tests": "2",
+          "tests": "3",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.205Z",
-          "time": "0.021"
+          "timestamp": "2026-10-25T13:11:49.361Z",
+          "time": "0.023"
         },
         {
           "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
           "tests": "2",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.226Z",
-          "time": "0.064"
+          "timestamp": "2026-10-25T13:11:49.384Z",
+          "time": "0.081"
         },
         {
           "name": "io.chatpulse.pipeline.DeadLetterTest",
           "tests": "3",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.290Z",
-          "time": "0.006"
+          "timestamp": "2026-10-25T13:11:49.465Z",
+          "time": "0.009"
         },
         {
           "name": "io.chatpulse.pipeline.EventCodecTest",
           "tests": "4",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.297Z",
-          "time": "0.009"
+          "timestamp": "2026-10-25T13:11:49.474Z",
+          "time": "0.015"
         },
         {
           "name": "io.chatpulse.poc.ChannelProbeTest",
           "tests": "7",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:33.307Z",
-          "time": "10.495"
+          "timestamp": "2026-10-25T13:11:49.490Z",
+          "time": "10.467"
         },
         {
           "name": "io.chatpulse.poc.ChatProtocolTest",
           "tests": "11",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.802Z",
-          "time": "0.016"
+          "timestamp": "2026-10-25T13:11:59.957Z",
+          "time": "0.013"
         },
         {
           "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
           "tests": "3",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.818Z",
-          "time": "0.019"
+          "timestamp": "2026-10-25T13:11:59.971Z",
+          "time": "0.016"
         },
         {
           "name": "io.chatpulse.quality.QualityPolicyTest",
           "tests": "2",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.838Z",
-          "time": "0.004"
+          "timestamp": "2026-10-25T13:11:59.988Z",
+          "time": "0.003"
         },
         {
           "name": "io.chatpulse.quality.QualityScheduleTest",
           "tests": "1",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.842Z",
-          "time": "0.002"
+          "timestamp": "2026-10-25T13:11:59.991Z",
+          "time": "0.003"
         },
         {
           "name": "io.chatpulse.quality.RankingControllerTest",
           "tests": "4",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.844Z",
-          "time": "0.05"
+          "timestamp": "2026-10-25T13:11:59.994Z",
+          "time": "0.049"
         },
         {
           "name": "io.chatpulse.quality.TrendPolicyTest",
           "tests": "3",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.895Z",
-          "time": "0.002"
+          "timestamp": "2026-10-25T13:12:00.044Z",
+          "time": "0.001"
         },
         {
           "name": "io.chatpulse.replay.ReplayManifestTest",
           "tests": "3",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:01:43.897Z",
-          "time": "0.012"
+          "timestamp": "2026-10-25T13:12:00.045Z",
+          "time": "0.011"
         }
       ]
     },
@@ -168,46 +168,46 @@
           "tests": "5",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:02:11.470Z",
-          "time": "64.34"
+          "timestamp": "2026-10-25T13:12:38.864Z",
+          "time": "64.609"
         },
         {
           "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
           "tests": "10",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:03:15.811Z",
-          "time": "46.151"
+          "timestamp": "2026-10-25T13:13:43.473Z",
+          "time": "46.265"
         },
         {
           "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
           "tests": "9",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:04:01.963Z",
-          "time": "12.187"
+          "timestamp": "2026-10-25T13:14:29.738Z",
+          "time": "12.759"
         },
         {
           "name": "io.chatpulse.pipeline.RankingIntegrationTest",
           "tests": "11",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:04:14.152Z",
-          "time": "10.707"
+          "timestamp": "2026-10-25T13:14:42.499Z",
+          "time": "13.031"
         },
         {
           "name": "io.chatpulse.replay.ReplayIntegrationTest",
           "tests": "10",
           "failures": "0",
           "errors": "0",
-          "timestamp": "2026-10-25T13:04:24.860Z",
-          "time": "19.424"
+          "timestamp": "2026-10-25T13:14:55.533Z",
+          "time": "21.116"
         }
       ]
     }
   },
   "harnessTests": 16,
-  "webUnitTests": 20,
+  "webUnitTests": 21,
   "chromiumTests": 25,
   "syntheticCanaryResultFiles": 0,
   "input": {
@@ -230,10 +230,15 @@
   },
   "limits": [
     "synthetic input only for notification pipeline",
-    "no new live chat collection",
     "no replication HA or whole-broker outage",
     "shared DB/broker resources",
     "feed ledger cleanup not implemented",
-    "prior ensureTopic describeConfigs intermittent failure remains root-cause unconfirmed"
-  ]
+    "prior ensureTopic describeConfigs intermittent failure remains root-cause unconfirmed",
+    "separate live UI smoke did not observe a spike and does not validate live outbox delivery"
+  ],
+  "reviewRegressions": {
+    "delayPrecision": "600s exact,600s+1us,before600s,and+09:00 timezone; failure reproduced before fix",
+    "roundedRatio": "TrendPolicy current101/baseline30=3.36666667 encodes/decodes",
+    "storedContractFailure": "503 QUERY_UNAVAILABLE without original payload"
+  }
 }

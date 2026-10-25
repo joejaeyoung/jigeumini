@@ -4,7 +4,7 @@
 
 ## 실행
 
-`./scripts/check`: Java 단위 62, 하네스 16, 실행 JAR 통과. `./scripts/integration`: 실제 Kafka/PostgreSQL 45개(알림 5·DLQ 10·기존 파이프라인 9·품질 11·replay 10) 통과. `./scripts/web check`: 타입·단위 20·빌드 통과. `./scripts/web test:e2e`: Chromium 25 통과.
+`./scripts/check`: Java 단위 63, 하네스 16, 실행 JAR 통과. `./scripts/integration`: 실제 Kafka/PostgreSQL 45개(알림 5·DLQ 10·기존 파이프라인 9·품질 11·replay 10) 통과. `./scripts/web check`: 타입·단위 21·빌드 통과. `./scripts/web test:e2e`: Chromium 25 통과.
 
 입력은 합성 채널과 UUID, 1분 100건/기준 50건/비율 2의 확정 spike다. 각 시험은 UUID topic/group/DB schema를 사용하고 해당 자원을 정리한다. Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Java 21 환경이다.
 
@@ -27,10 +27,14 @@
 
 이벤트의 숫자 문자열·소수 건수는 자동 변환하지 않고 거부한다. 입력 본문/SQL 합성 canary가 서버 XML 결과에 나타난 파일은 0개다.
 
+Claude 리뷰 이후 600초+1마이크로초의 정상 지연 응답을 웹이 거부하는 문제를 재현했다. Date의 밀리초 절삭 아래 소수부를 보존하고 경계 앞/일치/뒤·시간대 차이를 단위 검증했다. TrendPolicy의 101/30=3.36666667 근거 round-trip, 저장 payload 계약 오류의 고정503도 검증했다. 명시적 topic bean 주입 후 실행 JAR를 포함한45개 통합 검증을 다시 통과했다.
+
 ## 해석과 한계
 
 outbox ACK와 PostgreSQL 저장은 다른 경계이며 물리 재발행은 허용한다. 같은 spikeId의 feed 중복은 DB에서 막는다. Broker ACK가 feed 저장 또는 복제 HA를 뜻하지 않는다. 정상 DB 재시도·정정은 기존 공개 spike를 보존하며 과거 replay는 알림을 발행하지 않는다.
 
-새 live 채팅, broker 전체 중단, 네트워크 단절, 복제 HA, 다중 publisher 처리량·고부하는 이번 검증에 포함하지 않는다. 독립 group도 DB와 broker 자원을 공유한다. 10분 지연은 고정 clock으로 검증했고 실제10분 대기 시험이라고 주장하지 않는다. feed/live ledger 정리는 별도이며 조회7일 제한과 저장삭제를 혼동하지 않는다. PR #18의 describeConfigs 간헐 실패는 원인이 확정되지 않았다.
+별도 [실방송 화면 확인](../poc/evidence/runtime-smoke-2026-10-25.json)은 공개3채널의 약5분30초 수집·웹/API를 확인했다. 6,965건 수신=Kafka ACK=DB ledger/bucket 증가였다. 사용자가 확인 후 종료를 요청해600초 계획 전에 중단했으며 collector 판정은 CANCELLED/FAIL_OR_INCONCLUSIVE다. 완료 시간 시험의 PASS로 바꾸지 않는다. 실제 급상승이 관측되지 않아 live outbox 전달 근거에는 포함하지 않는다.
+
+broker 전체 중단, 네트워크 단절, 복제 HA, 다중 publisher 처리량·고부하는 이번 검증에 포함하지 않는다. 독립 group도 DB와 broker 자원을 공유한다. 10분 지연은 고정 clock으로 검증했고 실제10분 대기 시험이라고 주장하지 않는다. feed/live ledger 정리는 별도이며 조회7일 제한과 저장삭제를 혼동하지 않는다. PR #18의 describeConfigs 간헐 실패는 원인이 확정되지 않았다.
 
 진행·리뷰·병합 상태의 정본은 [STATUS](../STATUS.md)와 연결된 PR이다.

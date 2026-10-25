@@ -34,7 +34,9 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 ### 시청자 관측·채팅 비교 #5
 
-`feat/viewer-observations`, F04 → T02/T04/T06. [계약](api/OBSERVATIONS.md)에 새60초 관측·nullable 수치·원천 방송 ID·독립 Kafka 이력/멱등 저장·7일 정리·동일 시간축 그래프를 구현했다. [실제 공개 필드 확인](poc/evidence/observation-source-2026-10-25.json)은3채널 각1회 HTTP 표본이며 장기 live 검증과 구분한다. 역순·중복·null·DB rollback·재시작·DB 직후 halt(97)·보존 정리의 실제 Kafka/DB4개 집중 검증과 웹의 시간축/빈 상태/320px 검사를 통과했다. PR #20 병합 후 단위75·하네스16·실제 Kafka/DB51·웹24·Chromium26이 통과했다. 추가 분 경계 fixture에서 PostgreSQL의 나노초→마이크로초 반올림으로 직전 표본이 다음 창에 들어가는 문제를 재현해 수정했다. 최종 `40d21b6` 단위75·하네스16·실제 Kafka/DB52 통과, 웹은 변경 없는 `1cd60af`의24/26 근거를 유지한다. [검증 기록](api/OBSERVATIONS_VERIFICATION.md)·[정제 근거](poc/evidence/observations-2026-10-25.json). 초기 코드 `1cd60af` Claude APPROVE와 `17b45ed` push/PR CI 통과를 확인했다. 리뷰 후 이전 run의7일 정리·안전한 카테고리 필드·실제 HTTP→Spring collector→Kafka/DB 연결·비어 있지 않은 서버 JSON/웹 공유 fixture·모바일44px 선택 메뉴를 보완했다. 연결 집중7개와 단위76·웹25 검증 후 전체 최종 회귀·재리뷰를 진행한다.
+`feat/viewer-observations`, F04 → T02/T04/T06. [계약](api/OBSERVATIONS.md)에 새60초 관측·nullable 수치·원천 방송 ID·독립 Kafka 이력/멱등 저장·7일 정리·동일 시간축 그래프를 구현했다. [실제 공개 필드 확인](poc/evidence/observation-source-2026-10-25.json)은3채널 각1회 HTTP 표본이며 장기 live 검증과 구분한다. [검증 기록](api/OBSERVATIONS_VERIFICATION.md)·[정제 근거](poc/evidence/observations-2026-10-25.json): 최종 서버/웹 구현 `8eaf39b`의 단위76·하네스16·웹25·Chromium26, 기본값과 다른 환경 변수 TTL 검사를 보완한 `bd81332`의 실제 Kafka/DB53이 통과했다. 역순·중복·null·DB rollback·재시작·DB 직후 halt(97)·이전 run을 포함한7일 정리·분 경계 정밀도·실제 HTTP→Spring collector→Kafka/DB 연결·비어 있지 않은 서버 JSON/웹 공유 fixture·모바일44px 선택을 확인했다.
+
+초기 `1cd60af`와 보완 `8eaf39b`는 Claude APPROVE다. PostgreSQL의 나노초→마이크로초 반올림 실패를 재현해 내림으로 수정했고, 카테고리 값 정제와 영구 계약 오류의 보류·직렬화 이행 한계를 명시했다. [PR #21](https://github.com/joejaeyoung/jigeumini/pull/21)의 이전 `17b45ed` push/PR CI는 통과했으며 최종 문서 HEAD 리뷰·최종 CI 뒤 develop에 병합한다.
 
 관측은 기존 수집기 파일 잠금 이후 채널 start에서 활성화하고 stopped 이후 새 조회를 멈춘다. 다른 호스트 간 lease는 없다. 비압축 이력을 보장하기 위해 공통 토픽 초기화에서 cleanup.policy=delete를 명시·검사한다. 기존 compact 토픽은 설정을 바꾸지 않고 거부한다. 원천 시각/시청자 수를 추정하거나 현재값을 과거로 채우지 않는다. 기존 replay CLI는 관측 토픽을 지원하지 않는다. 사용자가 확인한 live PoC는 내려둔 상태를 유지한다.
 

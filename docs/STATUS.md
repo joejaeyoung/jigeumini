@@ -17,7 +17,7 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 ## 코드 구조 리팩토링
 
 2026-10-25 · `refactor/module-boundaries` · [이슈 #17](https://github.com/joejaeyoung/jigeumini/issues/17).
-[구조 검토와 결정](REFACTORING.md)에 전체 영역의 후보와 선택 이유를 기록했다. CollectionQuality 추출, PostgresSupport 초기화 통합, 웹 API 계약·HTTP 모듈 분리를 구현했다. Java 단위 55개·하네스 16개·실제 Kafka/PostgreSQL 29개·웹 단위 17개·Chromium 22개와 JAR/웹 빌드가 통과했다. [정제 근거](poc/evidence/refactor-2026-10-25.json)의 코드 commit·JAR hash로 실행 범위를 고정했다. PR의 Claude 리뷰와 CI를 확인한 뒤 병합한다.
+[구조 검토와 결정](REFACTORING.md)에 전체 영역의 후보와 선택 이유를 기록했다. CollectionQuality 추출, PostgresSupport 초기화 통합, 웹 API 계약·HTTP 모듈 분리를 구현했다. Java 단위 55개·하네스 16개·실제 Kafka/PostgreSQL 29개·웹 단위 17개·Chromium 22개와 JAR/웹 빌드가 통과했다. [정제 근거](poc/evidence/refactor-2026-10-25.json)의 코드 commit·JAR hash로 실행 범위를 고정했다. 구현·로컬 검증은 완료했으며 Claude 리뷰·CI·병합 이력은 [PR #18](https://github.com/joejaeyoung/jigeumini/pull/18)에 기록한다.
 
 F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목표 상태를 새로 승격하지 않는다. 외부 API·SQL·transaction/offset 경계·품질/시간 기준·DB schema는 유지했다. 서버/CLI의 Hikari 한도·초기화와 웹 요청 timeout/취소·Zod 검증도 동일하다. 새 live·고부하·HA 검증은 수행하지 않았다. #16의 replay 정책 변경과 #10·#11은 별도 범위다.
 

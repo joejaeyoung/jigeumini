@@ -1,6 +1,6 @@
 # 코드 구조 검토와 리팩토링 결정
 
-2026-10-25 · 기준 `707230a` · 이슈 #17 · 구현 commit `922d9f6`.
+2026-10-25 · 기준 `707230a` · 이슈 #17 · 최종 코드 commit `f6a4d63`.
 진행 상태는 [STATUS](STATUS.md)에서 관리한다. 기능 추가 대신 기존 동작을 유지하면서 책임과 중복을 정리했다.
 
 ## 검토 범위와 선택
@@ -21,7 +21,7 @@
 
 CollectionQuality는 package-private 내부 모듈이다. RankingStore와 같은 JdbcTemplate/DataSource를 사용하고 스스로 트랜잭션을 시작하지 않는다. 따라서 기존 REPEATABLE READ·advisory lock 안에서 관측을 조회하고 순위 snapshot·급상승 상태를 확정한다. SQL, clock 호출 위치, 채널→partition 계산, 창 뒤 첫 안전한 drain과 caught-up 대조를 그대로 옮겼다. 사용하지 않던 Health의 intervals/loss 포장만 제거하고 QualityPolicy.Result를 반환한다.
 
-PostgresSupport는 서버와 CLI의 pool=4, 연결 대기 3초, 검증 2초, PostgreSQL connect/socket 3초/10초를 유지한다. 각 호출은 별도 pool을 소유하며 JVM 전역 pool을 만들지 않는다. replay의 조회 명령도 migration을 실행하는 기존 정책은 #16에서 별도로 개선한다.
+`io.chatpulse.db.PostgresSupport`는 서버와 CLI의 pool=4, 연결 대기 3초, 검증 2초, PostgreSQL connect/socket 3초/10초를 유지한다. 각 호출은 별도 pool을 소유하며 JVM 전역 pool을 만들지 않는다. migration의 RuntimeException/Error 모두 pool을 정리하고, 정리 실패는 원래 오류의 suppressed 예외로 보존한다. replay의 조회 명령도 migration을 실행하는 기존 정책은 #16에서 별도로 개선한다.
 
 웹 transport는 기존 8초 timeout, 상위 취소 신호, HTTP/네트워크/계약 오류 분류를 유지한다. fields는 channel ID·timestamp·안전한 정수 검증의 정본이다. buckets와 metadata는 각 응답 스키마와 요청-응답 일치 검사를 소유한다. 기존 client.ts 재수출 계층은 남기지 않았으며 테스트도 실제 모듈을 호출한다. HTTP 경로·JSON·사용자 화면은 바꾸지 않았다.
 

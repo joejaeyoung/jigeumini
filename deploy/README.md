@@ -50,3 +50,7 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 현재 `/readyz` 상세 본문은 loopback 로컬 진단용이다. 외부 gateway에서는 내부 운영 접근으로 제한하거나 상태 코드만 공개한다. Kafka 인증/TLS·PG standby·중앙 지표·pager·비밀 회전은 실제 공급자 환경의 별도 운영 구성이다.
 
 최신 실행의 명령·이미지·원인코드·실제API/화면·복구 대조·리뷰 보완은 [배포 검증](../docs/DEPLOYMENT_VERIFICATION.md)을 참조한다.
+
+관측 요청 예산은 `채널수 × (ceil(실행초/관측간격초)+경계여유1회) × 최대2HTTP + 채팅방/토큰/재접속 요청`으로 계산한다. 현재최대3채널·30분·60초 간격의관측은경계여유를포함해186회이며 최초채팅준비6회를합쳐192회, 총500회에서308회가재접속 등에남는다(간격/연결패턴에따른계획값). 실제총량은BudgetedChatSource카운터가제한한다. 로컬예산/임대거절로HTTP를생략하면원천오류관측을만들지않고다음간격까지기다린다. 관측은명시opt-in이다.
+
+init SQL은로컬세션의statement/error statement로깅을끄지만CREATE ROLE의실제SQL에는비밀이포함된다. 실제관리형DB의감사로그정책과비밀회전은별도설정이필요하다. healthcheck15초간격은이번로컬합성기동범위이며고부하시probeRSS/CPU/플래핑은미검증이다. UI의503은브라우저요청모의,실제프록시503은DB중단HTTP검증으로구분한다.

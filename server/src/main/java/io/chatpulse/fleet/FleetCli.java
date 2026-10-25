@@ -21,7 +21,7 @@ public final class FleetCli {
     private FleetCli() { }
     public static int run(String[] args) {
         if(org.slf4j.LoggerFactory.getILoggerFactory() instanceof ch.qos.logback.classic.LoggerContext c)c.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).setLevel(ch.qos.logback.classic.Level.OFF);
-        try {return execute(args,System.getenv());}catch(Exception failure){System.out.println("{\"error\":\"FLEET_COMMAND_FAILED\"}");return 2;}
+        try {return execute(args,System.getenv());}catch(Exception failure){System.out.println(JSON.writeValueAsString(Map.of("error","FLEET_COMMAND_FAILED","codes",io.chatpulse.operations.FailureDiagnostics.codes(failure),"types",io.chatpulse.operations.FailureDiagnostics.types(failure))));return 2;}
     }
     static int execute(String[] args,Map<String,String> env) throws Exception {
         if(args.length==0)throw new IllegalArgumentException("FLEET_ARGUMENTS");

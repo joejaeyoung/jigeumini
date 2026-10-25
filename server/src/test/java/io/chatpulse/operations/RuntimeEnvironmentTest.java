@@ -16,6 +16,8 @@ class RuntimeEnvironmentTest {
     @Test void diagnosticsDiscardUnknownMessagesAndKeepOnlyStableCodes() {
         var failure=new IllegalStateException("SYNTHETIC_SECRET",new IllegalStateException("SCHEMA_NOT_READY"));
         assertEquals(java.util.List.of("SCHEMA_NOT_READY"),FailureDiagnostics.codes(failure));
+        assertEquals(java.util.List.of("IllegalStateException"),FailureDiagnostics.types(failure));
+        assertEquals(java.util.List.of("KAFKA_TOPIC_INIT_FAILED"),FailureDiagnostics.codes(new IllegalStateException("KAFKA_TOPIC_INIT_FAILED")));
     }
     @Test void secretFileWinsWithoutAppearingInDiagnosticsAndInvalidFileFailsClosed() throws Exception {
         Path file=directory.resolve("password");Files.writeString(file,"SYNTHETIC_SECRET_VALUE\n");

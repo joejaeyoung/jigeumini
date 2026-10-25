@@ -55,6 +55,7 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
             return new PublicBroadcastObservation(LiveStatus.LIVE, viewers, broadcast,
                     category(live, "liveCategory"), category(live, "liveCategoryValue"),
                     viewers == null ? PublicBroadcastObservation.Quality.MISSING_VIEWER_COUNT : PublicBroadcastObservation.Quality.OBSERVED);
+        } catch (PublicObservationSource.Skipped skipped) { throw skipped;
         } catch (Failure failure) {
             var status = failure.reason == Reason.RESTRICTED ? LiveStatus.RESTRICTED
                     : failure.reason == Reason.NOT_FOUND ? LiveStatus.NOT_FOUND : LiveStatus.UNKNOWN;
@@ -124,7 +125,7 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
         return text.isEmpty() || text.length() > max ? null : text;
     }
     private JsonNode get(String channel,String path) {
-        beforeRequest.accept(channel);
+        try{beforeRequest.accept(channel);}catch(RuntimeException skipped){throw new PublicObservationSource.Skipped();}
         return client.get().uri(base + path).exchange((request, response) -> {
             int status = response.getStatusCode().value();
             if (status != 200) throw new Failure(reason(status));

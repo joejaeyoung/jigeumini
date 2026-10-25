@@ -80,7 +80,7 @@ class ChzzkMetadataSourceTest {
         assertThat(reservations.get()).isEqualTo(2);assertThat(paths).hasSize(2);
         paths.clear();reservations.set(0);
         var limited=new ChzzkMetadataSource("http://127.0.0.1:"+server.getAddress().getPort(),id->{if(reservations.incrementAndGet()>1)throw new IllegalStateException("SOURCE_BUDGET_EXHAUSTED");});
-        assertThat(limited.observe(ID).quality()).isEqualTo(PublicBroadcastObservation.Quality.UPSTREAM_ERROR);
+        assertThatThrownBy(()->limited.observe(ID)).isInstanceOf(PublicObservationSource.Skipped.class);
         assertThat(paths).hasSize(1);
     }
     @Test void nullLiveRequiresExplicitOfflineFromChannel() {

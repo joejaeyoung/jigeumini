@@ -1,6 +1,13 @@
 # 진행 상태
 
-2026-10-26 · 기능 이슈의 develop 병합 완료 기준
+2026-10-26 · 기능 이슈 병합 완료·후속 구조 개선 진행
+
+## 전체 코드 구조 개선 #39
+
+`refactor/codebase-depth` · 기준 `c48a190` · [이슈 #39](https://github.com/joejaeyoung/jigeumini/issues/39).
+서버·웹·실행 스크립트를 검토하고 소비 공통 계약, 수집기 실행 자원, 웹 시간축/표현, 관리 CLI의 JAR 수명을 정리한다.
+F01/F03/F04/F05/F06/F07/F08/F13/F16 → T01/T02/T03/T04/T05/T08/T11/T14/T16의 기존 계약 보존 작업이다.
+구현·회귀·Standards/Spec 검토·최종 Claude 리뷰와 CI가 남아 있다. 기존 기술 목표의 검증 범위는 승격하지 않는다.
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -16,7 +23,7 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 ## 이슈 완료 요약
 
-요청한 기존 이슈 7건과 운영 확장 이슈 6건을 각각 구현·검증하고 develop에 병합했다. 각 최종 HEAD에 Claude APPROVE와 push/PR CI SUCCESS를 확인했으며, 2026-10-26 저장소의 열린 이슈는 0건이다. 아래 이력의 테스트 수는 당시 실행 범위로 보존한다.
+요청한 기존 이슈 7건과 운영 확장 이슈 6건을 각각 구현·검증하고 develop에 병합했다. 각 최종 HEAD에 Claude APPROVE와 push/PR CI SUCCESS를 확인했으며, 2026-10-26 기능 작업 종료 시 열린 이슈0건을 확인했다. 이후 사용자 요청의 구조 개선은 위 #39에서 별도로 추적한다. 아래 이력의 테스트 수는 당시 실행 범위로 보존한다.
 
 | 이슈 | 작업·기능 | 기술 목표 | 병합 PR |
 |---|---|---|---|
@@ -38,7 +45,7 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 공개 채널3개는 익명 PoC의 자체 상한이다. 전체 목록 발견과 채팅 접근 권한을 분리했고, 팔로워1,000명은 민감도 비교가 가능한 검토안이다. 실제 공식 인증·동의/전체 수집(T13), 새 migration을 포함한 릴리스 복구·외부 운영(T16)은 부분 검증으로 유지한다. [원천 조사](research/CHZZK_SCALE.md)·[선정 계약](discovery/README.md)·[Kafka/인프라 조사](research/KAFKA_DEPLOYMENT.md)·[배포 운영안](DEPLOYMENT_OPERATIONS.md)에 재개 조건을 기록했다.
 
-로컬 PoC/API/웹과 테스트 Kafka/PostgreSQL은 정지했다. 테스트 데이터 볼륨은 보존했고 리허설 소유 자원·생성 비밀·dump는 정리했다. 다른 worktree와 `phone-*` 서비스는 변경하지 않았다. main 릴리스와 외부 배포는 실행하지 않았다.
+기능 작업 종료 시 로컬 PoC/API/웹과 테스트 Kafka/PostgreSQL을 정지했다. #39의 실제 회귀 동안 테스트 Kafka/PostgreSQL만 다시 기동한다. 테스트 데이터 볼륨은 보존했고 리허설 소유 자원·생성 비밀·dump는 정리했다. 다른 worktree와 `phone-*` 서비스는 변경하지 않았다. main 릴리스와 외부 배포는 실행하지 않았다.
 
 ### 관심 방송 알림 #8
 

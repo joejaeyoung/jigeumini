@@ -5,14 +5,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.kafka.listener.*;
-import org.springframework.util.backoff.FixedBackOff;
 
 public class DualTopicConsumer implements AutoCloseable {
-    private record Poll(Instant at, Set<TopicPartition> partitions) { }
-    private volatile Poll poll = new Poll(null,Set.of());
+    private final ConsumerPollTracker poll = new ConsumerPollTracker();
     private final KafkaMessageListenerContainer<String,byte[]> container;
     private final Admin admin;
     private final DualTopicProjection store;
@@ -32,41 +29,18 @@ public class DualTopicConsumer implements AutoCloseable {
         try { identities=describe(); store.bindSources(identities); }
         catch(RuntimeException failure) { admin.close(Duration.ofSeconds(1)); throw failure; }
         var factory=KafkaSupport.consumerFactory(bootstrap,group,reset);
-        factory.addPostProcessor(consumer -> {
-            @SuppressWarnings("unchecked") var wrapped=(org.apache.kafka.clients.consumer.Consumer<String,byte[]>)java.lang.reflect.Proxy.newProxyInstance(
-                    org.apache.kafka.clients.consumer.Consumer.class.getClassLoader(),new Class<?>[]{org.apache.kafka.clients.consumer.Consumer.class},(proxy,method,args)->{
-                        try {
-                            Object result=method.invoke(consumer,args);
-                            if(method.getName().equals("poll"))poll=new Poll(Instant.now(),Set.copyOf(consumer.assignment()));
-                            return result;
-                        } catch(java.lang.reflect.InvocationTargetException failure) { throw failure.getCause(); }
-                    });
-            return wrapped;
-        });
-        var props=new ContainerProperties(topics.toArray(String[]::new));
-        props.setAckMode(ContainerProperties.AckMode.BATCH); props.setSyncCommits(true); props.setPollTimeout(1000); props.setShutdownTimeout(10000);
-        props.setConsumerRebalanceListener(new ConsumerAwareRebalanceListener() {
-            @Override public void onPartitionsAssigned(org.apache.kafka.clients.consumer.Consumer<?,?> consumer,Collection<TopicPartition> partitions) {
-                var committed=consumer.committed(new HashSet<>(partitions)); var initial=new HashMap<TopicPartition,OffsetAndMetadata>();
-                for(var partition:partitions) {
-                    long position=consumer.position(partition); store.initialize(partition,position);
-                    if(committed.get(partition)==null && reset.equals("earliest"))initial.put(partition,new OffsetAndMetadata(position));
-                }
-                if(!initial.isEmpty())consumer.commitSync(initial);
-            }
-            @Override public void onPartitionsRevoked(Collection<TopicPartition> partitions) { poll=new Poll(null,Set.of()); }
-        });
-        props.setMessageListener((BatchMessageListener<String,byte[]>) records -> {
+        factory.addPostProcessor(poll::track);
+        var rebalance = BatchConsumers.initialOffsets(reset, store::initialize, poll::revoked);
+        BatchMessageListener<String, byte[]> listener = records -> {
             try {
                 verifySources(); store.apply(records); blocked=false; state="RUNNING"; lastFailure="NONE"; batches.incrementAndGet();
             } catch(RuntimeException failure) {
                 blocked=true; state="RETRYING"; failures.incrementAndGet();lastFailure=code(failure);
                 throw new IllegalStateException(lastFailure);
             }
-        });
-        container=new KafkaMessageListenerContainer<>(factory,props); container.setBeanName(prefix.toLowerCase(Locale.ROOT)+"-projection");
-        var handler=new DefaultErrorHandler(new FixedBackOff(1000,FixedBackOff.UNLIMITED_ATTEMPTS));
-        handler.setClassifications(Map.of(Exception.class,true),true); container.setCommonErrorHandler(handler);
+        };
+        container = BatchConsumers.create(factory, prefix.toLowerCase(Locale.ROOT) + "-projection",
+                topics.toArray(String[]::new), rebalance, listener);
     }
     private Map<String,String> describe() {
         try {
@@ -91,7 +65,7 @@ public class DualTopicConsumer implements AutoCloseable {
         sampler.scheduleWithFixedDelay(()->{try { store.cleanup(); } catch(RuntimeException ignored) { org.slf4j.LoggerFactory.getLogger(DualTopicConsumer.class).warn(prefix+"_CLEANUP_UNAVAILABLE"); }},60,60,TimeUnit.SECONDS);
     }
     public void sample() {
-        var snapshot=poll; if(snapshot.partitions().isEmpty())return;
+        var snapshot=poll.snapshot(); if(snapshot.partitions().isEmpty())return;
         try {
             verifySources(); var request=new HashMap<TopicPartition,OffsetSpec>(); snapshot.partitions().forEach(p->request.put(p,OffsetSpec.latest()));
             Instant at=Instant.now(); var ends=admin.listOffsets(request).all().get(5,TimeUnit.SECONDS);
@@ -101,12 +75,12 @@ public class DualTopicConsumer implements AutoCloseable {
         catch(Exception ignored) { sourceState="UNAVAILABLE"; try { store.unavailable(snapshot.partitions()); } catch(RuntimeException unavailable) { /* freshness 만료로 조회 보류 */ } }
     }
     public Map<String,Object> status() {
-        return Map.of("running",container.isRunning(),"state",state.equals("STARTING")&&!poll.partitions().isEmpty()?"WAITING_FOR_EVENTS":state,
-                "sourceState",sourceState,"lastFailure",lastFailure,"assignedPartitions",poll.partitions().size(),"successfulBatches",batches.get(),"failedAttempts",failures.get());
+        return Map.of("running",container.isRunning(),"state",state.equals("STARTING")&&!poll.snapshot().partitions().isEmpty()?"WAITING_FOR_EVENTS":state,
+                "sourceState",sourceState,"lastFailure",lastFailure,"assignedPartitions",poll.snapshot().partitions().size(),"successfulBatches",batches.get(),"failedAttempts",failures.get());
     }
     @Override public void close() {
         sampler.shutdownNow();
-        try { store.unavailable(poll.partitions()); } catch(RuntimeException ignored) { }
+        try { store.unavailable(poll.snapshot().partitions()); } catch(RuntimeException ignored) { }
         container.stop(); admin.close(Duration.ofSeconds(1));
     }
 }

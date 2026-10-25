@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { channelIdSchema, count, timestamp } from './fields';
 import { ApiError, read } from './transport';
+import { isMinuteTimeline } from './minuteTimeline';
 
 export const reportId = z.uuid();
 const header = z.object({ reportId, channelId: channelIdSchema, identity: z.enum(['SOURCE_BROADCAST', 'INTERNAL_OBSERVATION_SESSION']),
@@ -30,12 +31,11 @@ export const reportSchema = z.object({ header, asOf: timestamp, status, scope: z
       report.healthyMinutes > report.completedMinutes || (report.qualifiedCount === null) !== (report.healthyMinutes === 0) ||
       (report.maximumPerMinute === null) !== (report.healthyMinutes === 0) || (report.qualifiedCount !== null && report.qualifiedCount > report.referenceCount) ||
       (report.maximumPerMinute !== null && report.maximumPerMinute > report.qualifiedCount!) || report.lateCount > report.referenceCount ||
-      report.timelineTruncated !== (report.completedMinutes > 360) || report.points.length !== Math.min(360, report.completedMinutes) ||
+      report.timelineTruncated !== (report.completedMinutes > 360) || !isMinuteTimeline(report.points, visibleFrom, to) ||
       !report.header.reportVersion.startsWith('report-v1-') || (report.status === 'LAGGING' && report.healthyMinutes > 0)) invalid();
-  report.points.forEach((p, i) => {
+  report.points.forEach(p => {
     const healthy = p.reasons.length === 0;
-    if (Date.parse(p.from) !== visibleFrom + i * 60000 || Date.parse(p.to) !== Date.parse(p.from) + 60000 ||
-        healthy !== (p.count !== null) || (healthy && (p.count !== p.referenceCount || p.collectionCoverage < .95 || p.identityCoverage !== 1)) ||
+    if (healthy !== (p.count !== null) || (healthy && (p.count !== p.referenceCount || p.collectionCoverage < .95 || p.identityCoverage !== 1)) ||
         (report.status === 'LAGGING' && !p.reasons.includes('REPORT_LAGGING'))) invalid();
   });
   if (!report.timelineTruncated) {

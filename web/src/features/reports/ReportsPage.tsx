@@ -1,3 +1,4 @@
+import { MinuteBars } from '../../shared/ui/MinuteBars';
 import { Link, useParams } from 'react-router';
 import { fetchReport, fetchReports, reportId, type BroadcastReport, type ReportHeader } from '../../shared/api/reports';
 import { channelIdSchema } from '../../shared/api/fields';
@@ -47,7 +48,6 @@ function ObservationRange({ header }: { header: ReportHeader }) {
     <p>일부 구간의 관측 결과예요. 방송의 실제 시작·종료나 전체 누적 수치를 뜻하지 않아요.</p>{header.identityUnconfirmed && <p>방송 구분을 확인하지 못한 표본이 포함돼 있어요.</p>}</div>;
 }
 function ReportBody({ report }: { report: BroadcastReport }) {
-  const max = Math.max(1, ...report.points.map(p => p.count ?? 0));
   return <>
     <ObservationRange header={report.header}/>
     {report.status === 'LAGGING' && <p className="notice">요약 갱신이 지연돼요. 품질 건수와 피크는 진행 확인 후 표시해요.</p>}
@@ -65,7 +65,7 @@ function ReportBody({ report }: { report: BroadcastReport }) {
     <section className="report-chart" aria-label="방송 리포트 분별 채팅"><h2>관측 구간별 채팅</h2>
       {report.timelineTruncated && <p>그래프와 표는 마지막 6시간이에요. 위 요약은 전체 관측 구간 기준이에요.</p>}
       {report.points.length > 0 ? <><svg viewBox={`0 0 ${report.points.length * 10} 150`} preserveAspectRatio="none" role="img" aria-label="분당 채팅 막대그래프. 음영은 미확인 구간이며 수치는 아래 표에서 확인할 수 있어요.">
-        {report.points.map((point, i) => <rect key={point.from} x={i * 10 + 1} width="8" y={point.count === null ? 0 : 140 - point.count / max * 130} height={point.count === null ? 140 : point.count / max * 130} className={point.count === null ? 'category-gap' : 'category-bar'}><title>{date(point.from)} {point.count === null ? '미확인' : `${number(point.count)}건`}</title></rect>)}
+        <MinuteBars points={report.points} formatTime={date}/>
       </svg><p>음영은 공백·품질 미확인 구간이에요. 정상 관측된 0건과 구분해요.</p>
       <details><summary>분별 건수와 품질 보기</summary><div className="category-table"><table><thead><tr><th>시각</th><th>채팅</th><th>참고</th><th>수집 관측률</th></tr></thead><tbody>{report.points.map(p => <tr key={p.from}><td>{date(p.from)}</td><td>{number(p.count)}</td><td>{number(p.referenceCount)}</td><td>{Math.floor(p.collectionCoverage * 100)}%</td></tr>)}</tbody></table></div></details></> : <p>완료된 1분 구간이 아직 없어요.</p>}
     </section>

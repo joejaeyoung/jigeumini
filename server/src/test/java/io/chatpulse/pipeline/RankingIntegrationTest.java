@@ -159,7 +159,14 @@ class RankingIntegrationTest {
         healthy(a);bucket("ranking-trend",a,t.minusSeconds(300),250);bucket("ranking-trend",a,t.minusSeconds(50),100);
         bucket("ranking",a,t.minusSeconds(50),1);
         store.evaluate(t);assertThat(store.spikes(t.plusSeconds(1),new UUID(-1,-1),20).events()).isEmpty();
-        clock.now=t.plusSeconds(10);healthy(a);store.evaluate(clock.now);
+        clock.now=t.plusSeconds(10);healthy(a);
+        jdbc.execute("CREATE FUNCTION reject_outbox() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'SYNTHETIC_OUTBOX_FAILURE'; END $$");
+        jdbc.execute("CREATE TRIGGER reject_outbox BEFORE INSERT ON spike_outbox FOR EACH ROW EXECUTE FUNCTION reject_outbox()");
+        assertThatThrownBy(()->store.evaluate(clock.now)).isInstanceOf(org.springframework.dao.DataAccessException.class);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM spike_event",Long.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT max(last_evaluated_at) FROM channel_alert_state",Timestamp.class)).isEqualTo(ts(t));
+        jdbc.execute("DROP TRIGGER reject_outbox ON spike_outbox");store.evaluate(clock.now);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM spike_outbox",Long.class)).isEqualTo(1);
         var alert=store.spikes(clock.now.plusSeconds(1),new UUID(-1,-1),20).events().getFirst();
         assertThat(alert.count()).isEqualTo(100);assertThat(alert.baseline()).isEqualByComparingTo("50");assertThat(alert.ratio()).isEqualByComparingTo("2");assertThat(alert.valid()).isTrue();
         store.evaluate(clock.now);assertThat(jdbc.queryForObject("SELECT count(*) FROM spike_event",Long.class)).isEqualTo(1);

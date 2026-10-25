@@ -52,6 +52,10 @@ Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC
 
 [재처리 계약](REPLAY.md)의 로컬 CLI는 V4 작업 상태와 `replay/<UUID>` namespace를 사용한다. 운영 offset을 커밋하거나 순위·급상승을 재발행하지 않는다. M2의 V3는 창 종료 후 버퍼 표본을 짧게 보존하는 migration이다. 아래 M1 표는 최초 수직 구현의 범위이며 현재 재처리는 별도 계약을 따른다.
 
+## 알림 확장
+
+V6는 확정 spike와 같은 트랜잭션의 outbox, Kafka ACK 뒤 전달 완료, 별도 알림 group과 멱등 피드를 추가한다. [알림 계약](NOTIFICATIONS.md)을 따른다.
+
 ## 저장과 처리 계약
 
 아래는 M1 기준선이다. 현재 analyzer의 영구 오류 격리·품질 표시·진단은 [M3 DLQ 계약](DLQ.md)을 따른다. DB 성공 후 BATCH offset commit 경계는 유지하며, M1의 전체 배치 차단 정책은 안전한 격리 후 진행으로 확장했다.

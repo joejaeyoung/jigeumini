@@ -1,24 +1,30 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `feat/dlq-recovery`
+2026-10-25 · 브랜치 `feat/spike-notifications`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
-| M3 장애·재처리 | #9·PR #15 병합 완료, #10 DLQ·소비 복구 진단 구현·로컬 검증 완료 | [PR #19](https://github.com/joejaeyoung/jigeumini/pull/19)의 승인·CI·병합 이력, #16 replay 후속 보완 |
+| M3 장애·재처리 | #9·PR #15 병합 완료, #10·PR #19 develop 병합 완료 | #8 outbox 장애 경계, #16 replay 후속 보완 |
 | M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
+## 남은 이슈 구현
+
+#8 관심 방송 알림 → #5 시청자 관측 → #6 카테고리 순위 → #7 방송 요약 → #16 replay 보완 → #11 부하·복구 실험 순서로 진행한다. 각 이슈는 별도 기능 브랜치와 develop PR에서 Claude 승인·최종 CI를 확인한다.
+
+현재 #8 `feat/spike-notifications`, F07 → T02/T03/T08/T10: 동일 트랜잭션의 spike/outbox와 ACK 후 전달 완료, 독립 feed consumer, 브라우저 관심/읽음 상태를 구현 중이다. 검증 전이며 완료 근거로 계산하지 않는다.
+
 ## 오류 격리·복구 진단 #10
 
 `feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. [격리·진단 계약](pipeline/DLQ.md)대로 ranking/trend의 영구 계약 오류만 격리하고, DLQ ACK 후 정상 ledger/bucket·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DB commit 후 Kafka BATCH offset commit을 유지한다. 같은 배치의 eventId 충돌 후보는 모두 제외하고 기존 ledger는 보존한다.
 
-[검증 기록](pipeline/DLQ_VERIFICATION.md)과 [정제 근거](poc/evidence/dlq-2026-10-25.json): 서버 단위 58개·하네스 16개·실제 Kafka/PostgreSQL 40개·웹 단위 17개·Chromium 23개, JAR/웹 빌드 통과. DLQ broker 거부/복구·ACK 직후 halt(93)·DB commit 직후 halt(94)·DB 장애·재전달·양쪽 projection·보존 만료·topic 재생성·실행 JAR HTTP를 확인했다. Claude 최초 리뷰의 정상 offset 재분류 문제를 재현해 수정했고, 재전달 사이의 보존 시각 초과·새 충돌 및 ACK 뒤 SQL rollback을 추가 검증했다. 격리 기록은 신규/기존 채널의 품질 제외와 과거 순위·급상승 정정에 반영하며 운영 API/화면은 0 lag·미관측·만료를 구분한다. 구현과 로컬 검증은 완료했으며 Claude 승인·최종 CI·병합 이력은 [PR #19](https://github.com/joejaeyoung/jigeumini/pull/19)에 기록한다.
+[검증 기록](pipeline/DLQ_VERIFICATION.md)과 [정제 근거](poc/evidence/dlq-2026-10-25.json): 서버 단위 58개·하네스 16개·실제 Kafka/PostgreSQL 40개·웹 단위 17개·Chromium 23개, JAR/웹 빌드 통과. DLQ broker 거부/복구·ACK 직후 halt(93)·DB commit 직후 halt(94)·DB 장애·재전달·양쪽 projection·보존 만료·topic 재생성·실행 JAR HTTP를 확인했다. Claude 최초 리뷰의 정상 offset 재분류 문제를 재현해 수정했고, 재전달 사이의 보존 시각 초과·새 충돌 및 ACK 뒤 SQL rollback을 추가 검증했다. 격리 기록은 신규/기존 채널의 품질 제외와 과거 순위·급상승 정정에 반영하며 운영 API/화면은 0 lag·미관측·만료를 구분한다. [PR #19](https://github.com/joejaeyoung/jigeumini/pull/19)는 Claude 승인·최종 HEAD push/PR CI 통과 후 `c86f670`으로 develop에 병합됐다. 병합 후 develop CI도 통과했고 #10·보드는 완료다.
 
 합성 입력·단일 broker/RF=1 범위다. broker 전체 중단·네트워크 단절·복제 HA·새 live·고부하는 미검증이다. 오류 수정 검증은 별도 replay만 허용하며 자동 재투입하지 않는다. #11의 부하/확장/장시간 회복과 #16 replay 보완은 남는다.
 

@@ -101,8 +101,12 @@ public final class RankingStore {
                 ON CONFLICT(run_id,channel_id,algorithm_version) DO UPDATE SET last_evaluated_at=excluded.last_evaluated_at,
                 consecutive_hits=excluded.consecutive_hits,last_alert_at=excluded.last_alert_at
                 """,run,channel.id(),TrendPolicy.VERSION,ts(at),state.hits(),ts(state.lastAlertAt()));
-        if (result.alert()) jdbc.update("INSERT INTO spike_event VALUES (?,?,?,?,?,?,?,?,NULL) ON CONFLICT DO NOTHING",
-                UUID.randomUUID(),run,channel.id(),ts(at),TrendPolicy.VERSION,current,result.baseline(),result.ratio());
+        if (result.alert()) {
+            UUID spikeId=UUID.randomUUID();
+            int inserted=jdbc.update("INSERT INTO spike_event VALUES (?,?,?,?,?,?,?,?,NULL) ON CONFLICT DO NOTHING",
+                    spikeId,run,channel.id(),ts(at),TrendPolicy.VERSION,current,result.baseline(),result.ratio());
+            if(inserted==1)io.chatpulse.notifications.SpikeOutbox.enqueue(jdbc,spikeId,run);
+        }
     }
     private void reviseQuality(List<Channel> channels) {
         Instant now=clock.instant();

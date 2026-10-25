@@ -49,7 +49,8 @@ class DeadLetterIntegrationTest {
     @AfterEach void cleanup() throws Exception {
         if(recovery!=null)recovery.close(); if(producer!=null)producer.destroy();
         if(admin!=null) {
-            admin.deleteTopics(List.of(topic,topic+".dlq")).all().get(10,TimeUnit.SECONDS);
+            var topics=admin.listTopics().names().get(10,TimeUnit.SECONDS).stream().filter(t->List.of(topic,topic+".dlq",topic+".spikes").contains(t)).toList();
+            if(!topics.isEmpty())admin.deleteTopics(topics).all().get(10,TimeUnit.SECONDS);
             var groups=admin.listConsumerGroups().all().get(10,TimeUnit.SECONDS).stream().filter(g->g.groupId().startsWith(group)).map(g->g.groupId()).toList();
             if(!groups.isEmpty())admin.deleteConsumerGroups(groups).all().get(10,TimeUnit.SECONDS);
             admin.close();
@@ -233,6 +234,12 @@ class DeadLetterIntegrationTest {
             });
             var page=http.send(java.net.http.HttpRequest.newBuilder(endpoint).timeout(Duration.ofSeconds(2)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
             assertEquals(200,page.statusCode()); assertTrue(page.body().contains("소비 복구 진단"));
+            var notifications=http.send(java.net.http.HttpRequest.newBuilder(endpoint.resolve("/api/v1/notifications?channels="+EventCodecTest.CHANNEL)).timeout(Duration.ofSeconds(2)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assertEquals(200,notifications.statusCode());assertEquals(0,JsonMapper.builder().build().readTree(notifications.body()).path("events").size());
+            await().atMost(Duration.ofSeconds(15)).untilAsserted(()->{
+                var operations=http.send(java.net.http.HttpRequest.newBuilder(endpoint.resolve("/api/operations/notifications")).timeout(Duration.ofSeconds(2)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+                assertEquals(200,operations.statusCode());assertEquals(3,JsonMapper.builder().build().readTree(operations.body()).path("consumer").path("assignedPartitions").asInt());
+            });
             assertStored(2,1);
         } finally {
             process.destroy(); if(!process.waitFor(20,TimeUnit.SECONDS))process.destroyForcibly().waitFor();

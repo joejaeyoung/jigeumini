@@ -124,5 +124,37 @@
     "high load/shared pool multi-user cost",
     "HA/multi-host",
     "report-specific forced JVM crash or fixed offset replay"
-  ]
+  ],
+  "reviewCorrections": {
+    "implementationCommit": "976f88ee27ae71f745f8dd57773e20045f7caadb",
+    "recordedAt": "2026-10-25T15:19:39.331995+00:00",
+    "commands": [
+      "./scripts/check",
+      "./scripts/integration"
+    ],
+    "suites": {
+      "test": {
+        "tests": 85,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "cbcd2fbfbc2fdb965f82fde546a7efff65c82670681a116a70389ed3ce011b2e"
+      },
+      "integrationTest": {
+        "tests": 70,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "8c0aa06f72095746c7901303b47a4c0ee563dc309543aafdab381db4742492af"
+      }
+    },
+    "harnessTests": 16,
+    "jarSha256": "2ed7c08806b0a1f4f3a2e27800dcc5e1a4968adeb53006f70be2b37cb75873c1",
+    "checks": [
+      "partial cleanup 10005 events / 10006 observations; 10000 each removed; new internal session preserved; expired residual removed on next cleanup",
+      "receivedAt older than 48h but eventTime 3 days accepted; 8 day event skipped with progress; future receivedAt rejected",
+      "TTL240 source limited to report120 seconds",
+      "DB report JSON equals committed web fixture",
+      "nanosecond test expectation normalized to microseconds"
+    ],
+    "scope": "synthetic local Kafka/PostgreSQL; no live; web unchanged"
+  }
 }

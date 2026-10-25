@@ -52,6 +52,14 @@ class ChannelProbeTest {
         return stats.snapshot(!reconnect.isZero());
     }
 
+    @Test void leaseLossBeforeResolutionPreventsHttpAndWebSocketWork() {
+        ChatSource never=org.mockito.Mockito.mock(ChatSource.class);
+        EventSink guarded=new EventSink(){public void accept(List<ChatEvent> events){}public void checkHealthy(){throw new SourceFailure("COLLECTION_LEASE_LOST",true);}};
+        var stats=new ProbeStats("a".repeat(32));
+        new ChannelProbe(never,guarded).run("a".repeat(32),Duration.ofSeconds(1),Duration.ZERO,stats,new AtomicBoolean());
+        org.mockito.Mockito.verifyNoInteractions(never);assertThat(((Map<?,?>)stats.snapshot(false).get("reasons")).containsKey("COLLECTION_LEASE_LOST")).isTrue();
+    }
+
     @Test
     void realWebSocketHandshakeHeartbeatsAndForcedReconnectStayReadOnly() throws Exception {
         server = new FixtureServer(true, false);

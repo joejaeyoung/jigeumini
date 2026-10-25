@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-26 · 브랜치 `feat/bounded-publisher`
+2026-10-26 · 브랜치 `feat/collector-leases`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -100,7 +100,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
-| T14 | 미착수 | — | 수집기별 파일 잠금만 존재 | #28 DB 임대·인계·오래된 소유자 차단 |
+| T14 | 진행 중 | [임대 계약](fleet/README.md) | DB소유권·유한용량·epoch·로컬permit·정상drain과해제,단위128통과 | 실제다중프로세스·DB단절·정지후인계 검증 진행 |
 | T15 | 미착수 | [HA 조사](research/KAFKA_DEPLOYMENT.md) | 복제/ISR/quorum 운영 후보 조사; RF1 로컬 검증과 구분 | #29 격리 복제 클러스터 장애 시험 |
 | T16 | 미착수 | [배포 조사](research/KAFKA_DEPLOYMENT.md) | 외부 배포 미실행; 컨테이너/복구 리허설 설계 | #30 이미지·rollback·DB/offset 복원 대조 |
 <!-- tech-status:end -->
@@ -202,3 +202,7 @@ F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 �
 ### 유한 비동기 발행 #27 검증
 
 F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/PUBLISHER_VERIFICATION.md)·[정제 근거](poc/evidence/publisher-2026-10-26/summary.json). 로컬단위120·하네스16·JAR,실제KafkaDB81,실제입력6회+소유broker장애6경우를 통과했다. 제품500/s15,000·2,000/s120,000·편중/중복30300→DB30000, replay차이0. 채널별공정성은 합성단위범위이며 소스복원/HA는 포함하지 않는다. #11병합과최종HEAD Claude/CI 후 PR33을 병합한다.
+
+### 수집기 배정·임대 #28
+
+F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthority/CollectorWorker·fleetCLI를구현했다. 로컬단위128·하네스16·JAR통과. 실제합성WS+두JVM+PostgreSQL/Kafka의동시획득·인계·정지/재개·DB소켓단절을검증중이다. 공개live확대·외부배포는실행하지않는다.

@@ -61,8 +61,11 @@ public final class ChannelProbe {
             for (int attempt = 1; attempt <= 6 && !stop.get() && System.nanoTime() < deadline; attempt++) {
                 stats.attempt();
                 try {
+                    sink.checkHealthy();
                     String room = source.resolveRoom(channel);
+                    sink.checkHealthy();
                     String token = source.readToken(room);
+                    sink.checkHealthy();
                     try (var connection = new ChatConnection(client, scheduler, source.socketUri(room), channel,
                             room, token, stats, pingInterval, pongTimeout, sink, observer)) {
                         log.info("channel={} connected attempt={}", channel, attempt);

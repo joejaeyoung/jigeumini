@@ -1,0 +1,90 @@
+{
+  "workerId": "7226da9e-54c3-4dde-840c-088b161f6eb7",
+  "httpRequests": 2,
+  "failureCode": "CHANNEL_ENDED",
+  "sourceMode": "SYNTHETIC",
+  "complete": false,
+  "released": true,
+  "startedAt": "2026-10-25T17:45:12.743548Z",
+  "leases": [
+    {
+      "epoch": 1,
+      "stats": {
+        "channelId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "startedAt": "2026-10-25T17:45:12.803972Z",
+        "state": "PUBLISH_CHANNEL_LIMIT",
+        "verdict": "FAIL",
+        "checks": {
+          "handshake": true,
+          "liveChat": true,
+          "reconnectRequired": false,
+          "heartbeatPong": false,
+          "chatAfterReconnect": false
+        },
+        "elapsedSeconds": 3.422934875,
+        "connectedSeconds": 2.245026792,
+        "connectionTimeRatio": 0.6558777405894992,
+        "attempts": 1,
+        "connections": 1,
+        "chatCount": 21,
+        "chatAfterReconnect": 0,
+        "frames": 22,
+        "receivedFrameBytes": 1857,
+        "maxFrameBytes": 86,
+        "clientPings": 0,
+        "serverPongs": 0,
+        "commands": {
+          "10100": 1,
+          "93101": 21
+        },
+        "skipped": {},
+        "reasons": {
+          "PUBLISH_CHANNEL_LIMIT": 1
+        },
+        "candidateIdFieldPresence": {},
+        "firstEventTime": "2026-10-25T17:45:13.070Z",
+        "lastEventTime": "2026-10-25T17:45:15.191Z",
+        "lateMessagesOver120s": 0,
+        "meanSourceToReceiveMillis": 0.38095238095238093,
+        "maxSourceToReceiveMillis": 1
+      },
+      "policyVersion": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "channelId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "completedAt": "2026-10-25T17:45:16.226852Z",
+  "delivery": {
+    "complete": false,
+    "failedUnconfirmed": 0,
+    "mode": "KAFKA",
+    "inFlight": 0,
+    "failedCallbacks": 0,
+    "failureCode": "NONE",
+    "queued": 0,
+    "limits": {
+      "capacity": 30,
+      "channelCapacity": 20,
+      "maxInFlight": 4
+    },
+    "attempted": 21,
+    "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+    "channels": {
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+        "accepted": 20,
+        "acknowledged": 20,
+        "rejected": 1,
+        "pending": 0,
+        "oldest": null,
+        "stopped": true,
+        "reason": "PUBLISH_CHANNEL_LIMIT"
+      }
+    },
+    "peakInFlight": 4,
+    "untrackedRejected": 0,
+    "unconfirmed": 0,
+    "rejected": 1,
+    "peakPending": 20,
+    "acknowledged": 20,
+    "accepted": 20
+  }
+}

@@ -35,3 +35,11 @@ DB 소유권·만료와 로컬 단조시계 권한을 분리했다. 동일 epoch
 최초 push40213896363/PR40213900998은 SIGTERM 자식 진단 파일 누락2개로 실패했다. 저장 지연5초+SIGTERM 회귀로 CAS 선점 뒤 hook 반환, 저장 전 hook 제거 창을 확인했다. 첫 보완 후 파일 누락, 두 번째 보완 후 deadline 경계의 CHANNEL_ENDED 오판을 재현했고 저장 완료 후 hook 제거·deadline 검사 보완 뒤6개가 통과했다. 최초 CI의 stderr는 없어 그 내부 스택과 재현의 동일성은 단정하지 않는다. 후속 CLI의 중복 CAS 제거는 성공 저장 책임을 worker에 모으는 수정이며 최종 check/CI로 다시 검증한다.
 
 기능별 책임·공개 계약은 유지하고 broker 재조회 helper, 결과 저장 단일 책임, preflight live 비활성 게이트를 정리했다. preview/비활성 worker는 잘못된 JDBC 설정에서도 DB를 열지 않는다. 전체 결과와 이전 실패를 모두 보존한다.
+
+## Linux 간헐 실패와 producer 시작 순서
+
+1cd8476의 push40216093203/PR40216096733은 정상 인계의 connected=1/기대2, STOP 인계의 두 owner=null로 실패했다. 해당 실행에 자식 JSON이 없으므로 원인을 확정할 수 없다. 진단만 추가한4603c53의 단독6개와 전체87개 CI는 모두 통과했고, 이것을 근본 수정 근거로 삼지 않는다. 이후 CI는 `fleet-*.json`을 항상 보관한다.
+
+별도로 producer 첫 생성에3초를 넣고 합성 입력10건/초·채널 큐20을 유지하자, 수락20/ACK20/거절1과 `PUBLISH_CHANNEL_LIMIT`→`CHANNEL_ENDED` 종료를 재현했다. 이 실패 후30초 재시도 대기는 기존 인계 시험의25초보다 길다. [원본](../poc/evidence/fleet-2026-10-26/startup/reproduction.json)은 기존 코드+지연 fixture 작업 트리에서 얻었으며 과거 CI와 원인이 같다는 증거는 아니다.
+
+수집 전에 producer/metadata 준비를 완료하도록 수정했다. 지연 중 DB 임대0·WebSocket0, 준비 뒤 정상 연결·거절0·수락/ACK/broker/DB 일치를 확인하는 회귀를 추가했다. 단위134·하네스16·JAR와 실제 임대7개가 통과했다. 부모가 준비 진행을 명시 해제하는 barrier로 검사 스케줄의 경합도 제거했다. 대기열 상한은30/채널20/동시4를 유지한다. 시작 이후 broker 장애나 모든 스케줄 지연을 해결한 것으로 확대하지 않는다. 최종 HEAD CI와 리뷰는 별도 게이트다.

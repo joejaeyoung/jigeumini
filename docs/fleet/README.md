@@ -46,3 +46,7 @@ status의discovered/eligible/selected와유효assigned/connected를분리한다.
 - PostgreSQL16 [행 잠금](https://www.postgresql.org/docs/16/explicit-locking.html)과 [clock_timestamp](https://www.postgresql.org/docs/16/functions-datetime.html)를2026-10-26확인했다. 잠금후의DB현재시각을사용하며transaction시작시각을만료시계로쓰지않는다.
 - CollectorLeases는DB소유권·용량,LeaseAuthority는로컬permit,CollectorWorker는연결/갱신/종료수명,PublishingAuthority는발행직전확인을소유한다. 원천프로토콜을복제하지않고ChannelProbe를재사용한다.
 - 실제검증과남은범위는[STATUS](../STATUS.md)에서관리한다. 이번작업은외부배포나공개live확대실행을포함하지않는다.
+
+## Kafka 준비 후 수집 시작
+
+worker는 producer 생성과 `partitionsFor` 성공을 먼저 확인한 뒤 임대 획득·원천 연결을 시작한다. 준비 실패는 `FLEET_KAFKA_NOT_READY`로 거부하며 HTTP/소켓/임대를 만들지 않는다. metadata 대기는 producer의 `max.block.ms=2000` 설정을 따른다. 이 값이 JVM의 producer 생성 전체 시간을 제한한다는 뜻은 아니다. 실행 중 장애에는 기존 유한 큐·미확인 계수·실패 종료 계약을 적용하며 큐 크기를 늘려 감추지 않는다.

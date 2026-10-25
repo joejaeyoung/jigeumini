@@ -150,5 +150,75 @@
       "third: all6 passed after persistence/hook/deadline fixes"
     ],
     "scope": "All87 executed with 7fd3566 compiled classes; subsequent CLI redundant CAS removal is separately checked and final CI required"
+  },
+  "startupDiagnosis": {
+    "historicalCiFailure": {
+      "head": "1cd8476b4faad08e674726436fc89cd83190682d",
+      "push": 40216093203,
+      "pullRequest": 40216096733,
+      "symptoms": [
+        "normal handoff connected count 1 instead of 2",
+        "STOP handoff both observed owners null"
+      ],
+      "rootCauseConfirmed": false,
+      "reason": "Child JSON was not retained in failed CI"
+    },
+    "instrumentedCi": {
+      "head": "4603c53681a7d1cec89facddae96589761709584",
+      "push": 40217042124,
+      "pullRequest": 40217044659,
+      "conclusion": "SUCCESS",
+      "integration": 87,
+      "unit": 134,
+      "scope": "Diagnostics only; isolated six and full regression passed; not proof of original cause"
+    },
+    "reproduction": {
+      "base": "4603c53681a7d1cec89facddae96589761709584",
+      "workingTreeFixture": true,
+      "command": "./gradlew --console=plain :server:integrationTest --tests io.chatpulse.fleet.FleetIntegrationTest.slowProducerStartupReproduction",
+      "injection": "ProducerFactory post processor delays first producer creation 3000 ms, source sends one synthetic frame every100ms",
+      "file": "startup/reproduction.json",
+      "accepted": 20,
+      "acknowledged": 20,
+      "rejected": 1,
+      "channelReason": "PUBLISH_CHANNEL_LIMIT",
+      "workerFailure": "CHANNEL_ENDED",
+      "sameAsHistoricalCiProven": false
+    },
+    "fix": "Complete producer creation and partitionsFor before any lease or source admission; metadata readiness uses configured max.block.ms=2000, producer construction itself not claimed bounded by that setting",
+    "localVerification": {
+      "unit": 134,
+      "harness": 16,
+      "jarBuilt": true,
+      "fleetCases": 7,
+      "failures": 0,
+      "scope": "Changed runtime compiled before seven cases; fixture then adds explicit parent release barrier, separately checked and final CI required"
+    },
+    "files": [
+      {
+        "file": "startup/actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+        "sha256": "1a3a811d5e7a5f7a60bfd3941e365b050fc15b953f3af96bb7bfbb8a9c2fa4e0"
+      },
+      {
+        "file": "startup/reproduction.json",
+        "sha256": "1dd67b122aa702dbe52c46fde24f80f02e4a9ebc3528fde8930f8de2c6a1c104"
+      },
+      {
+        "file": "startup/sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile.json",
+        "sha256": "7eefd43774b51f500c2dc257a10c1c9f812e22988ce53e772f5a1dcc399eefca"
+      },
+      {
+        "file": "startup/slowProducerStartupCompletesBeforeLeaseAndSourceAdmission.json",
+        "sha256": "61c5598381b69cb7833416fa43d30396ef538c2434fce5d7fdbfbf162816701a"
+      },
+      {
+        "file": "startup/stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+        "sha256": "d7d5e50f60d53d506a45a45b13710a376c384d0bfced7367be6f793f38acdc3c"
+      },
+      {
+        "file": "startup/twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+        "sha256": "831d26dc0e6f799edf4ae3ba3ab441463a3b59dffb11a07d75148e5d38e5bfdf"
+      }
+    ]
   }
 }

@@ -4,7 +4,7 @@
 
 ## 실제 입력·DB 대조
 
-[정제 근거](../poc/evidence/publisher-2026-10-26/summary.json)와 같은 폴더의7개 원본을 보존한다. 합성20채널·seed20261025·단일Kafka4.1.2/RF1·PostgreSQL16.14·Java21.0.11, 공유 개발 호스트다. 정상6회는1c2c3ba, 장애는0791dc1에서 실행했다. 정상 성능치를 후속 예외 종료 보완 commit의 실측이라고 표시하지 않는다.
+[정제 근거](../poc/evidence/publisher-2026-10-26/summary.json)와 같은 폴더의7개 원본을 보존한다. 합성20채널·seed20261025·단일Kafka4.1.2/RF1·PostgreSQL16.14·Java21.0.11, 공유 개발 호스트다. 정상5회는1c2c3ba, product-hot과 broker 장애는0791dc1에서 실행했다. 정상 성능치를 후속 예외 종료 보완 commit의 실측이라고 표시하지 않는다.
 
 | 입력 | 수락/ACK | 거절/미확인 | DB unique | p95/p99 ms | 최대 pending/inflight | 최대 lag |
 |---|---:|---:|---:|---:|---:|---:|

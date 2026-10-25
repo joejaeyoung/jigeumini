@@ -12,11 +12,15 @@
 
 ## 처리와 복구
 
-V8의 category 전용 source identity·관측 이력·event ledger·bucket·revision·progress를 사용한다. 입력 검증 뒤 모든 배정·보정·DB progress는 같은 트랜잭션, 그 성공 뒤 BATCH 동기 Kafka commit이다. 같은 eventId의 내용 충돌과 SQL 실패는 배치 전체 rollback이며 기존 ranking/trend 이력을 수정하지 않는다. 관측 runId가 다르면 배정 없이 진행 위치만 기록한다. 채팅은 기존 이벤트 계약·live 보존 범위를 적용한다.
+V8의 category 전용 source identity·관측 이력·event ledger·bucket·revision·progress를 사용한다. 입력 검증 뒤 모든 배정·보정·DB progress는 같은 트랜잭션, 그 성공 뒤 BATCH 동기 Kafka commit이다. 같은 eventId의 내용 충돌과 SQL 실패는 배치 전체 rollback이며 기존 ranking/trend 이력을 수정하지 않는다. 관측 runId가 다르면 배정 없이 진행 위치만 기록한다. 채팅은 기존 이벤트 계약·live 보존 범위를 적용한다. receivedAt이48시간을 넘은 입력은 현재 계약상 차단된다. Kafka 보존을 늘릴 때 자동 skip으로 바꾸지 말고 이 보존/격리 계약을 함께 변경해야 한다.
 
 `categories.offset-reset`을 우선하고 생략하면 `pipeline.offset-reset`을 상속한다. 기본none, 최초 새 그룹에만earliest를 명시한다. 채팅/관측 모두3 partitions이며 합계6개다. topic ID를 DB에 고정하고 시작·배치·관측 때 확인한다. 재생성·partition 수 변경은 차단하며 기존 offset을 되감거나 새 토픽에 자동 결합하지 않는다.
 
-영구 계약 오류·내용 충돌은 카테고리 소비를 계속 차단할 수 있다. RETRYING/고정 코드로 표시하고1초 간격으로 재시도한다. 이 버전에는 카테고리용 DLQ나 자동 skip이 없다. 생산자/소비 계약을 수정한 뒤 같은 group에서 재시도하며, 해소할 수 없는 충돌은 별도 격리 절차가 필요하다. ranking/trend의 #10 DLQ 성공이 category group의 성공을 뜻하지 않는다. DB pool·broker·호스트 자원은 공유하므로 논리적 독립성이 자원 장애 격리를 보장하지 않는다.
+영구 계약 오류·내용 충돌은 카테고리 소비를 계속 차단할 수 있다. RETRYING/고정 코드로 표시하고1초 간격으로 재시도한다. 이 버전에는 카테고리용 DLQ나 자동 skip이 없다. 생산자/소비 계약을 수정한 뒤 같은 group에서 재시도하며, 해소할 수 없는 충돌은 별도 격리 절차가 필요하다. ranking/trend의 #10 DLQ 성공이 category group의 성공을 뜻하지 않는다. 시작 때 topic 확인에 실패하거나 source ID가 바뀌면 analyzer 구성 전체가 기동하지 못한다. 원천 연결/토픽 정합성을 복구한 뒤 같은 설정으로 재시작한다. 토픽을 재생성했다면 이전 namespace에 자동 연결하지 말고 새 run/group으로 분리해 재구축 범위를 판단한다. 실행 중에는 group 소비가 분리되지만 기동 장애까지 독립적인 것은 아니다.
+
+종료 요청과 이미 실행 중인 sampler SQL이 겹치면 다른 reader에서 READY가 마지막 표본의 freshness 기한까지 남을 수 있다. freshness 기한이 지나면 보류하며 즉시 상태 전파를 보장하지 않는다.
+
+DB pool·broker·호스트 자원은 공유하므로 논리적 독립성이 자원 장애 격리를 보장하지 않는다.
 
 ## 품질과 조회
 
@@ -28,11 +32,13 @@ V8의 category 전용 source identity·관측 이력·event ledger·bucket·revi
 
 - `GET /api/v1/categories`: `[from,to)`·scope·READY/LAGGING·revision·unknownReferenceCount·truncated와 카테고리별 nullable count·referenceCount·관측/품질 충족 채널 수·비중·기여 채널. 비중 분모에는unknown을 포함한 품질 충족 건수를 사용한다. 분모0이면 비중null. 건수 내림차순, 동률은categoryKey 순서다.
 - `GET /api/v1/categories/{key}/timeline`: 같은 범위 기준의 연속60개1분 point, 품질 충족/관측 채널 수·nullable count·referenceCount·revision·scope·truncated.
-- `GET /api/operations/categories`: 실행·할당·배치·실패 시도·원천 확인 상태. RUNNING만으로 낮은 lag를 주장하지 않는다.
+- `GET /api/operations/categories`: 실행·할당·배치·실패 시도·원천 확인 상태·lastFailure 고정 코드. 원천 변경/접속 실패·내용 충돌·입력 계약·DB 오류를 구분한다. RUNNING만으로 낮은 lag를 주장하지 않는다.
 
 최대20개 최근 활동 채널만 포함하고 초과하면truncated를 표시한다. no-store·잘못된key400·DB/계약 조회 실패503을 구분한다. 웹은 비중 범위와 미상 참고 건수, 기여 방송·최근1시간 막대/표, 정상0과 미확인 음영, 조회 실패 시 이전 결과를 표시한다. 기여 방송의 공개 이름은 기존 메모리 캐시에서만 읽고 category DB에는 저장하지 않는다.
 
 ## 보존과 한계
+
+정리 한도는 테이블당 분당10,000행(평균 초당 약167행)이다. 지속 입력/정리 backlog가 이 한도를 넘으면 물리 저장기간이7일보다 길어질 수 있으며,7일은 정확한 용량/삭제 기한 보장이 아니다. #11에서 입력률과 정리 처리율을 함께 측정한다.
 
 현재 run의 채팅 ledger·bucket은7일, 관측은 시각 결합 경계를 위해7일+120초 보존한다. 매60초 각 테이블 최대10,000행을 정리한다. eventTime이7일 이전인 재전달은 재집계하지 않는다. 다른 run의 category 데이터는 자동 삭제하지 않으므로 run 변경 시 해당 namespace의 운영 정리가 필요하다. 원래 live ledger·replay 작업은 삭제하지 않는다. Kafka의 시간/용량 보존이 먼저 끝난 원본을 재구축할 수 없으며 category용 replay CLI는 없다.
 

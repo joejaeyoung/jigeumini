@@ -22,7 +22,7 @@ public final class CategoryConsumer implements AutoCloseable {
     private final ScheduledExecutorService sampler = Executors.newSingleThreadScheduledExecutor();
     private final AtomicLong batches = new AtomicLong(), failures = new AtomicLong();
     private volatile boolean blocked;
-    private volatile String state="STARTING", sourceState="UNKNOWN";
+    private volatile String state="STARTING", sourceState="UNKNOWN", lastFailure="NONE";
     public CategoryConsumer(String bootstrap,List<String> topics,String group,String reset,CategoryStore store) {
         if(topics.size()!=2 || topics.stream().distinct().count()!=2 || !Set.of("none","earliest").contains(reset)) throw new IllegalArgumentException("CATEGORY_CONSUMER_CONFIGURATION");
         this.topics=List.copyOf(topics); this.store=store;
@@ -56,10 +56,10 @@ public final class CategoryConsumer implements AutoCloseable {
         });
         props.setMessageListener((BatchMessageListener<String,byte[]>) records -> {
             try {
-                verifySources(); store.apply(records); blocked=false; state="RUNNING"; batches.incrementAndGet();
+                verifySources(); store.apply(records); blocked=false; state="RUNNING"; lastFailure="NONE"; batches.incrementAndGet();
             } catch(RuntimeException failure) {
-                blocked=true; state="RETRYING"; failures.incrementAndGet();
-                throw new IllegalStateException("CATEGORY_PROCESSING_UNAVAILABLE");
+                blocked=true; state="RETRYING"; failures.incrementAndGet();lastFailure=code(failure);
+                throw new IllegalStateException(lastFailure);
             }
         });
         container=new KafkaMessageListenerContainer<>(factory,props); container.setBeanName("category-projection");
@@ -78,6 +78,12 @@ public final class CategoryConsumer implements AutoCloseable {
         catch(Exception ignored) { throw new IllegalStateException("CATEGORY_SOURCE_UNAVAILABLE"); }
     }
     private void verifySources() { if(!identities.equals(describe()))throw new IllegalStateException("CATEGORY_SOURCE_CHANGED"); }
+    private static String code(RuntimeException failure) {
+        if(failure.getMessage()!=null&&Set.of("CATEGORY_SOURCE_CHANGED","CATEGORY_SOURCE_UNAVAILABLE","CATEGORY_INPUT_TOPIC","CATEGORY_FUTURE_TIME","CATEGORY_OBSERVATION_CONFLICT","CATEGORY_EVENT_CONFLICT").contains(failure.getMessage()))return failure.getMessage();
+        if(failure instanceof org.springframework.dao.DataAccessException || failure instanceof org.springframework.transaction.TransactionException)return "CATEGORY_DB_UNAVAILABLE";
+        if(failure instanceof IllegalArgumentException || failure instanceof io.chatpulse.pipeline.EventContractException)return "CATEGORY_INVALID_EVENT";
+        return "CATEGORY_PROCESSING_UNAVAILABLE";
+    }
     public void start() {
         container.start(); sampler.scheduleWithFixedDelay(this::sample,0,5,TimeUnit.SECONDS);
         sampler.scheduleWithFixedDelay(()->{try { store.cleanup(); } catch(RuntimeException ignored) { org.slf4j.LoggerFactory.getLogger(CategoryConsumer.class).warn("CATEGORY_CLEANUP_UNAVAILABLE"); }},60,60,TimeUnit.SECONDS);
@@ -94,7 +100,7 @@ public final class CategoryConsumer implements AutoCloseable {
     }
     public Map<String,Object> status() {
         return Map.of("running",container.isRunning(),"state",state.equals("STARTING")&&!poll.partitions().isEmpty()?"WAITING_FOR_EVENTS":state,
-                "sourceState",sourceState,"assignedPartitions",poll.partitions().size(),"successfulBatches",batches.get(),"failedAttempts",failures.get());
+                "sourceState",sourceState,"lastFailure",lastFailure,"assignedPartitions",poll.partitions().size(),"successfulBatches",batches.get(),"failedAttempts",failures.get());
     }
     @Override public void close() {
         sampler.shutdownNow();

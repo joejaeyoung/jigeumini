@@ -16,6 +16,7 @@ CREATE TABLE category_event (
     PRIMARY KEY(run_id,event_id)
 );
 CREATE INDEX category_event_time ON category_event(run_id,channel_id,event_time);
+CREATE INDEX category_event_retention ON category_event(run_id,event_time);
 CREATE TABLE category_bucket (
     run_id varchar(80) NOT NULL, category_key varchar(64) NOT NULL, channel_id char(32) NOT NULL,
     bucket_start timestamptz NOT NULL, message_count bigint NOT NULL CHECK(message_count >= 0),

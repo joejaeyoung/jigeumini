@@ -124,6 +124,9 @@ class CategoryIntegrationTest {
                 kafka.send(chat,A,codec.encode(one)).get(10,TimeUnit.SECONDS);awaitCommitted(5);assertEquals(3,count("game"));
                 await().atMost(Duration.ofSeconds(15)).untilAsserted(()->assertTrue(store.window(base.minusSeconds(300),Instant.ofEpochSecond(Math.floorDiv(base.getEpochSecond(),60)*60)).fresh(),
                         ()->restarted.status()+" "+jdbc.queryForList("SELECT partition,observed_at,poll_at,source_end_offset,caught_up_at,blocked FROM category_partition")));
+                kafka.send(chat,A,new byte[]{0}).get(10,TimeUnit.SECONDS);
+                await().atMost(Duration.ofSeconds(10)).untilAsserted(()->assertEquals("CATEGORY_INVALID_EVENT",restarted.status().get("lastFailure")));
+                assertEquals(3,count("game"));awaitCommitted(5);
             }
             try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))) { admin.deleteTopics(List.of(observations)).all().get(10,TimeUnit.SECONDS); }
             KafkaSupport.ensureTopic(BOOTSTRAP,observations);
@@ -181,6 +184,21 @@ class CategoryIntegrationTest {
         } finally { process.destroy();if(!process.waitFor(20,TimeUnit.SECONDS))process.destroyForcibly().waitFor();factory.destroy();
             try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))){admin.deleteTopics(List.of(chat+".dlq",chat+".spikes")).all().get(10,TimeUnit.SECONDS);}
         }
+    }
+    @Test void twentyChannelHourQueryKeepsAllMembershipsAndRecordsLocalLatency() throws Exception {
+        Instant end=Instant.ofEpochSecond(Math.floorDiv(Instant.now().getEpochSecond()-8,60)*60),start=end.minusSeconds(3600);
+        jdbc.update("""
+                INSERT INTO category_observation(run_id,event_id,channel_id,observed_at,ttl_seconds,category_key,category_name,payload_hash)
+                SELECT 'test-v1',md5('category-measure-'||c||'-'||m)::uuid,lpad(to_hex(c),32,'0'),CAST(? AS timestamptz)+make_interval(secs=>m*60),120,?,'합성 게임',repeat('a',64)
+                FROM generate_series(1,20) c CROSS JOIN generate_series(0,59) m
+                """,java.sql.Timestamp.from(start),CategoryStore.key("game"));
+        var ranking=new io.chatpulse.quality.RankingStore(jdbc,tx(),"ranking","ranking-trend","test-v1",chat,Clock.systemUTC());
+        var queries=new CategoryQueries(store,ranking,Clock.fixed(end.plusSeconds(8),ZoneOffset.UTC));
+        long before=System.nanoTime();var timeline=queries.timeline(CategoryStore.key("game"));long elapsed=System.nanoTime()-before;
+        assertEquals(60,timeline.points().size());assertTrue(timeline.points().stream().allMatch(p->p.observedChannels()==20&&p.count()==null));
+        var path=java.nio.file.Path.of("../work/category-query-latency.json");java.nio.file.Files.createDirectories(path.toAbsolutePath().getParent());
+        java.nio.file.Files.writeString(path,tools.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(Map.of(
+                "channels",20,"minutes",60,"observationRows",1200,"chatRows",0,"quality","UNCONFIRMED","elapsedMillis",elapsed/1_000_000.0,"measuredAt",Instant.now().toString())));
     }
     private void awaitCommitted(long expected) {
         await().atMost(Duration.ofSeconds(40)).untilAsserted(()->{

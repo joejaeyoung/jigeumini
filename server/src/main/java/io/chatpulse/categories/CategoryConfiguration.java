@@ -17,9 +17,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Profile("pipeline")
 @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
 class CategoryConfiguration {
-    @Bean CategoryStore categoryStore(HikariDataSource ds,PipelineProperties p,ObservationTopic observationTopic) {
+    @Bean CategoryStore categoryStore(HikariDataSource ds,PipelineProperties p,@Qualifier("readyTopic") String chatTopic,ObservationTopic observationTopic) {
         var tx=new TransactionTemplate(new DataSourceTransactionManager(ds)); tx.setTimeout(20);
-        return new CategoryStore(new JdbcTemplate(ds),tx,p.runId(),p.topic(),observationTopic.name(),Clock.systemUTC());
+        return new CategoryStore(new JdbcTemplate(ds),tx,p.runId(),chatTopic,observationTopic.name(),Clock.systemUTC());
     }
     @Bean(initMethod="start",destroyMethod="close")
     CategoryConsumer categoryConsumer(PipelineProperties p, @Qualifier("readyTopic") String chatTopic, ObservationTopic observationTopic, CategoryStore store,

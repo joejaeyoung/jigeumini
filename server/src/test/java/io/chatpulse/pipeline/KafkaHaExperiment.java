@@ -38,7 +38,7 @@ public final class KafkaHaExperiment {
         result.put("policy",KafkaTopicPolicy.ha());result.put("phases",session.phases);Files.writeString(output,JSON.writeValueAsString(result));
         var hook=new Thread(session::close,"ha-experiment-cleanup");Runtime.getRuntime().addShutdownHook(hook);
         try {session.open();session.exercise();result.put("correct",true);}
-        catch(Exception failure) {result.put("correct",false);result.put("failureCode","HA_SCENARIO_FAILED");result.put("failureType",failure.getClass().getSimpleName());result.put("failedPhase",session.phase);result.put("failedOperation",session.operation);if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());if(failure.getMessage()!=null&&failure.getMessage().matches("HA_[A-Z_]+"))result.put("failureDetailCode",failure.getMessage());}
+        catch(Exception failure) {result.put("correct",false);result.put("failureCode","HA_SCENARIO_FAILED");result.put("failureType",failure.getClass().getSimpleName());result.put("failedPhase",session.phase);result.put("failedOperation",session.operation);if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());result.put("failureTypes",failureTypes(failure));if(failure.getMessage()!=null&&failure.getMessage().matches("HA_[A-Z_]+"))result.put("failureDetailCode",failure.getMessage());}
         finally {
             session.close();Runtime.getRuntime().removeShutdownHook(hook);result.put("cleanupComplete",session.cleaned);
             if(!session.cleaned)result.put("correct",false);result.put("finishedAt",Instant.now().toString());
@@ -88,7 +88,7 @@ public final class KafkaHaExperiment {
             measure("ONE_CONTROLLER_DOWN",()->{
                 cluster.stopController(firstController);
                 until(30,()->{int leader=admin.describeMetadataQuorum().quorumInfo().get(3,TimeUnit.SECONDS).leaderId();return leader>0&&leader!=firstController+1000;});
-                KafkaSupport.ensureTopic(cluster.bootstrap(),"ha.metadata.one."+id,KafkaTopicPolicy.ha());
+                awaitMetadataTopic("ha.metadata.one."+id);
                 var delivery=publish(topic,10);require(delivery.get("acknowledged").equals(10L));return snapshot(topic,delivery);
             });
             int secondController=admin.describeMetadataQuorum().quorumInfo().get(8,TimeUnit.SECONDS).leaderId()-1000;
@@ -104,7 +104,7 @@ public final class KafkaHaExperiment {
             measure("QUORUM_RECOVERY",()->{
                 cluster.startController(firstController);cluster.startController(secondController);
                 until(40,()->admin.describeMetadataQuorum().quorumInfo().get(3,TimeUnit.SECONDS).leaderId()>0);
-                KafkaSupport.ensureTopic(cluster.bootstrap(),"ha.metadata.restored."+id,KafkaTopicPolicy.ha());fullIsr(topic);
+                awaitMetadataTopic("ha.metadata.restored."+id);fullIsr(topic);
                 var delivery=publish(topic,20);require(delivery.get("acknowledged").equals(20L));drain(topic,"ha-main");return snapshot(topic,delivery);
             });
             measure("RF1_TO_RF3_MIGRATION",()->{
@@ -133,6 +133,18 @@ public final class KafkaHaExperiment {
             phase=name;operation="SCENARIO";long begin=System.nanoTime();var row=new LinkedHashMap<String,Object>();row.put("name",name);row.put("startedAt",Instant.now().toString());phases.add(row);checkpoint();
             try{row.putAll(action.run());row.put("passed",true);}catch(Exception failure){row.put("passed",false);throw failure;}
             finally{row.put("seconds",(System.nanoTime()-begin)/1e9);checkpoint();}
+        }
+        void awaitMetadataTopic(String input) throws Exception {
+            operation="METADATA_TOPIC_READY";long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(40);
+            var transientFailures=new ArrayList<List<String>>();phases.getLast().put("metadataTransientFailures",transientFailures);
+            while(true) {
+                try {KafkaSupport.ensureTopic(cluster.bootstrap(),input,KafkaTopicPolicy.ha());return;}
+                catch(IllegalStateException failure) {
+                    var types=failureTypes(failure);
+                    if(!types.contains("TimeoutException")||System.nanoTime()>=deadline)throw failure;
+                    transientFailures.add(types);checkpoint();Thread.sleep(200);
+                }
+            }
         }
         void startConsumer(String input,String projection) throws Exception {
             var consumer=new ProjectionConsumer(KafkaSupport.consumerFactory(cluster.bootstrap(),"ha-group-"+projection+"-"+id,"earliest"),input,store(projection));
@@ -212,5 +224,6 @@ public final class KafkaHaExperiment {
         while(System.nanoTime()<end){try{if(condition.test())return;}catch(ExecutionException|TimeoutException pending){}Thread.sleep(200);}
         throw new IllegalStateException("HA_CONDITION_TIMEOUT");
     }
+    private static List<String> failureTypes(Throwable failure) {var types=new ArrayList<String>();for(Throwable item=failure;item!=null&&types.size()<8;item=item.getCause())types.add(item.getClass().getSimpleName());return List.copyOf(types);}
     private static void require(boolean value){if(!value)throw new IllegalStateException("HA_ASSERTION");}
 }

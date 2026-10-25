@@ -76,3 +76,28 @@ CollectionQuality는 package-private 내부 모듈이다. RankingStore와 같은
 F01/F03/F04/F05/F06/F07/F08/F13/F16 → T01/T02/T03/T04/T05/T08/T11/T14/T16의 회귀 범위다. 처리량·HA·실방송 접근이나 기술 목표의 해결 범위를 새로 승격하지 않는다.
 
 기본 검증은 `./scripts/check`, `./scripts/integration`, `./scripts/web check`, `./scripts/web test:e2e`다. 추가 경계 시험은 초기 DB 실패 후 무커밋/기존 offset 보존, 성공한 빈 poll과 실패한 poll의 freshness 차이, 실행 JAR의 정상/관측 초기화 실패 종료, 관리 스크립트의 signal·동시 실행·build 실패를 확인한다. DB schema·SQL·부하 실험·배포 구성은 변경하지 않으며, 새 live·고부하·HA·이미지 배포 리허설을 실행한 근거로 사용하지 않는다.
+
+
+### #39 실제 회귀 결과
+
+[정제 근거](poc/evidence/refactor-2026-10-26.json)에 코드 commit, 현재 JAR/buildId, XML/log hash와 환경을 기록했다.
+
+| 실행 | 결과와 코드 범위 |
+|---|---|
+| `./scripts/check` | 최종 코드07021e4의 단위147·하네스20·JAR 통과 |
+| `./scripts/integration` | 최초 리팩토링e5222e0의 실제 Kafka/PostgreSQL94개 통과 |
+| `:server:integrationTest --tests io.chatpulse.fleet.FleetRuntimeIntegrationTest` | 07021e4의 실제3개 통과. 관측 활성/비활성 JAR, 초기화 실패, System.exit 없는 정상/실패 자연 종료 |
+| `fnm exec --using 24.20.0 ./scripts/web check` | 타입·단위29·빌드 통과 |
+| `fnm exec --using 24.20.0 ./scripts/web test:e2e` | Chromium31 통과. null/0·품질·기간 변경·모바일/데스크톱 표시 |
+
+최초 전체 실행 뒤 제품 코드의 후속 차이는 factory 속성 강제형변환 제거와 주석이다. 전체 최종 회귀와 병합 게이트의 정확한 HEAD·run은 [PR #40](https://github.com/joejaeyoung/jigeumini/pull/40)의 기록을 따른다. 최초94개 실행 JAR hash는 보관하지 않았고 현재 hash는07021e4의 실제 실행 JAR다. 초기 Node26 결과와 지정 Node24 재검사를 구분한다. TERM 외 shell 신호·실제 source 활성화는 새로 시험하지 않았다.
+
+### Standards
+
+고정 diff `c48a190…e5222e0`의 규칙 위반0·구조 차단0·별도 heuristic 권고0건. 공통 소비 계약과 실제 변형, DB/worker 자원 소유, API/표현 경계를 읽기 전용으로 검토했다.
+
+### Spec
+
+같은 diff의 지적0·차단0건. 초기 commit/none, poll freshness, Fleet 종료·결과 저장, null/0·360분 절단·TTL 선 연결, shell 인자/종료의 보존을 확인했다. 두 리뷰는 정적 검토이며 실제 실행이나 최종 CI를 대신하지 않는다.
+
+Claude 초기 승인의 비차단 의견에서 강제형변환·null initializer 설명·자연 종료 시험·README를 보완했다. 반복 close와 지역 JsonMapper는 기존 실패/재시도 계약을 보존하기 위해 유지했다. 최종 HEAD 승인은 PR40 게이트에 연결한다.

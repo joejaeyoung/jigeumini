@@ -217,4 +217,14 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 사용자 요청으로 최신 origin/develop c48a190에서 refactor/codebase-depth를 만들었다. 기존 기능13건 완료 이력은 보존하고 새 #39와 Project In Progress로 추적한다. 다른 develop worktree는 수정하지 않았다.
 - codebase-design으로 서버102개·웹38개·scripts26개의 구성과 주요 호출/상태 소유를 검토했다. 공통 소비 설정·poll 관측, 수집기 실행 자원, 웹 시간축 검증/막대 표현, 관리 CLI JAR 수명을 추출했다. 영역별 변경/유지 이유와 보존 계약은 REFACTORING에 기록했다.
 - generic Store/HTTP/CLI 프레임워크는 도입하지 않았다. 같은 모양의 코드라도 DB/DLQ/retention/품질 정책과 PoC의 exec 프로세스 수명은 다르므로 각 모듈에 유지했다. 임대·발행의 동시성 알고리즘과 SQL은 그대로다.
-- 초기 회귀는 단위147·하네스20·웹29/Chromium31 통과다. 추가 actual JAR 테스트는 외부 원천 요청이 없는 빈 선정 계획에서 관측기 활성/비활성 종료와 일부 초기화 후 실패 정리를 검증한다. 실제 Kafka/DB 전체 결과와 최종 commit별 근거는 후속 기록에 남긴다.
+- 초기 회귀는 단위147·하네스20·웹29/Chromium31 통과다. 최초 actual JAR 테스트는 외부 원천 요청이 없는 빈 선정 계획에서 관측기 활성/비활성의 정상 결과와 초기화 실패의 종료코드·빈 파일·worker 미등록을 확인한다. System.exit 때문에 실행기 누수를 판정하는 근거로는 부족해 후속 보강했다. 실제 Kafka/DB 전체 결과와 최종 commit별 근거는 후속 기록에 남긴다.
+
+### #39 리뷰 반영과 확정된 로컬 범위
+
+- e5222e0의 전체 실제 Kafka/PostgreSQL94개와 단위147/하네스20/웹29/Chromium31이 통과했다. code-review의 Standards/Spec 두 정적 리뷰는 각각 지적0건, Claude Sonnet 세션91fc0a46-c2a7-4b9e-a1a7-377aa06bc55f도 APPROVE다. 리뷰어는 전달된 diff·문서를 읽었으며 테스트를 직접 실행하지 않았다.
+- 비차단 의견에서 factory 속성의 불필요한 String cast를 원래의 equals 판정으로 돌리고, null initializer의 position 조회 의미를 명시했다. 루트 README에 기존 CLI 명령의 공통 실행 수명을 설명했다. 07021e4로 고정했다.
+- 최초 JAR 시험은 main의 System.exit가 남은 실행기를 종료시킬 수 있었다. 별도 JVM fixture가 FleetCli.execute를 호출한 뒤 System.exit 없이 main을 반환하도록 추가했다. 정상/초기화 실패 모두 자연 종료하고 각각0/2 반환 marker를 남겼다. 단위147·하네스20·수집기 실제3개가 통과했다. 모든 native/daemon 자원의 무누수까지 확장하지 않는다.
+- FleetRuntime의 callback/finally 반복 close는 기존 계약을 보존했다. 단순 AtomicBoolean 가드나 try-with-resources 전환은 종료 실패의 재시도·flush·예외 우선순위를 바꿀 수 있어 이번 변경에 섞지 않았다. 각 CLI의 JsonMapper와 화면 축 최대값 계산도 작은 지역 책임으로 유지했다.
+- 로컬 기본 Node는26.3.1이었고 Homebrew node@24 경로도 같은26을 가리켰다. 초기 결과는 보조 기록으로 두고 fnm의 실제24.20.0으로 웹29/Chromium31을 재실행해 통과했다. CI도 .nvmrc 버전을 사용한다.
+- 정제 근거에는 최초 전체94개와 후속 집중3개를 구분하고 XML/log hash, 현재 JAR/buildId, 실행환경·미검증 항목을 기록했다. 최초 JAR hash는 후속 빌드 전에 보관하지 않았으며 사후 생성하지 않았다. 최종 HEAD의 전체 CI/Claude/병합은 PR40의 통합 게이트 기록을 따른다.
+- 검증 후 chat-pulse Kafka/PostgreSQL만 정지하고 데이터 볼륨을 보존했다. 다른 worktree HEAD707230a와 phone 서비스는 변경하지 않았다. 공개 원천·외부 배포·새 HA/고부하 실험은 수행하지 않았다.

@@ -36,13 +36,13 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 `feat/viewer-observations`, F04 → T02/T04/T06. [계약](api/OBSERVATIONS.md)에 새60초 관측·nullable 수치·원천 방송 ID·독립 Kafka 이력/멱등 저장·7일 정리·동일 시간축 그래프를 구현했다. [실제 공개 필드 확인](poc/evidence/observation-source-2026-10-25.json)은3채널 각1회 HTTP 표본이며 장기 live 검증과 구분한다. [검증 기록](api/OBSERVATIONS_VERIFICATION.md)·[정제 근거](poc/evidence/observations-2026-10-25.json): 최종 서버/웹 구현 `8eaf39b`의 단위76·하네스16·웹25·Chromium26, 기본값과 다른 환경 변수 TTL 검사를 보완한 `bd81332`의 실제 Kafka/DB53이 통과했다. 역순·중복·null·DB rollback·재시작·DB 직후 halt(97)·이전 run을 포함한7일 정리·분 경계 정밀도·실제 HTTP→Spring collector→Kafka/DB 연결·비어 있지 않은 서버 JSON/웹 공유 fixture·모바일44px 선택을 확인했다.
 
-초기 `1cd60af`와 보완 `8eaf39b`는 Claude APPROVE다. PostgreSQL의 나노초→마이크로초 반올림 실패를 재현해 내림으로 수정했고, 카테고리 값 정제와 영구 계약 오류의 보류·직렬화 이행 한계를 명시했다. [PR #21](https://github.com/joejaeyoung/jigeumini/pull/21)은 최종 `5ec96db` Claude APPROVE·push CI40201134329·PR CI40201136793 SUCCESS 후 `98fe3a3`으로 develop에 병합했다. #5·보드는 완료이며 병합 후 CI를 확인한다.
+초기 `1cd60af`와 보완 `8eaf39b`는 Claude APPROVE다. PostgreSQL의 나노초→마이크로초 반올림 실패를 재현해 내림으로 수정했고, 카테고리 값 정제와 영구 계약 오류의 보류·직렬화 이행 한계를 명시했다. [PR #21](https://github.com/joejaeyoung/jigeumini/pull/21)은 최종 `5ec96db` Claude APPROVE·push CI40201134329·PR CI40201136793 SUCCESS 후 `98fe3a3`으로 develop에 병합했다. #5·보드는 완료이며 병합 후 develop CI40201674996도 통과했다.
 
 관측은 기존 수집기 파일 잠금 이후 채널 start에서 활성화하고 stopped 이후 새 조회를 멈춘다. 다른 호스트 간 lease는 없다. 비압축 이력을 보장하기 위해 공통 토픽 초기화에서 cleanup.policy=delete를 명시·검사한다. 기존 compact 토픽은 설정을 바꾸지 않고 거부한다. 원천 시각/시청자 수를 추정하거나 현재값을 과거로 채우지 않는다. 기존 replay CLI는 관측 토픽을 지원하지 않는다. 사용자가 확인한 live PoC는 내려둔 상태를 유지한다.
 
 ### 카테고리 반응 #6
 
-`feat/category-reactions`, F05 → T02/T06/T07/T08. [계약](api/CATEGORIES.md)의 독립 채팅/관측 소비와 시각 결합·원자 보정·품질 조회·웹을 구현했다. [검증 기록](api/CATEGORIES_VERIFICATION.md)·[정제 근거](poc/evidence/categories-2026-10-25.json): 선행 #5를 통합한 `9cedeff`에서 Java79·하네스16·실제 Kafka/DB60·웹27·Chromium28과 JAR/웹 빌드가 통과했다. Claude 리뷰 후 최종 PR/CI를 확인한다. 채팅 이전 최신 관측의 허용 나이는 min(120초, 표본TTL), 미상/만료는 unknown으로 분리한다. 늦은 관측은 해당 시각부터120초 범위의 보존된 배정만 원자적으로 정정한다. 별도 작업 폴더에서 개발했고 승인된 #5의 `98fe3a3`을 통합했다. 실제 JAR의6개 partition·비어 있지 않은 JSON과 모바일 그래프·기여 방송을 확인했다. 부하 편향·다중 소비자 수치는 #11 실험 전까지 완료로 주장하지 않는다.
+`feat/category-reactions`, F05 → T02/T06/T07/T08. [계약](api/CATEGORIES.md)의 독립 채팅/관측 소비와 시각 결합·원자 보정·품질 조회·웹을 구현했다. [검증 기록](api/CATEGORIES_VERIFICATION.md)·[정제 근거](poc/evidence/categories-2026-10-25.json): 리뷰 보완 `de67c97`에서 Java79·하네스16·실제 Kafka/DB61, 변경 없는 웹9cedeff에서 단위27·Chromium28과 빌드가 통과했다. c7b80b4·de67c97 Claude APPROVE를 확인했다. [PR #22](https://github.com/joejaeyoung/jigeumini/pull/22)의 최종 문서 HEAD 승인과 push/PR CI 뒤 병합한다. 채팅 이전 최신 관측의 허용 나이는 min(120초, 표본TTL), 미상/만료는 unknown으로 분리한다. 늦은 관측은 해당 시각부터120초 범위의 보존된 배정만 원자적으로 정정한다. 별도 작업 폴더에서 개발했고 승인된 #5의 `98fe3a3`을 통합했다. 실제 JAR의6개 partition·비어 있지 않은 JSON과 모바일 그래프·기여 방송을 확인했다. 부하 편향·다중 소비자 수치는 #11 실험 전까지 완료로 주장하지 않는다.
 
 ## 오류 격리·복구 진단 #10
 

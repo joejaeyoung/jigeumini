@@ -32,7 +32,7 @@ DB pool·broker·호스트 자원은 공유하므로 논리적 독립성이 자�
 
 - `GET /api/v1/categories`: `[from,to)`·scope·READY/LAGGING·revision·unknownReferenceCount·truncated와 카테고리별 nullable count·referenceCount·관측/품질 충족 채널 수·비중·기여 채널. 비중 분모에는unknown을 포함한 품질 충족 건수를 사용한다. 분모0이면 비중null. 건수 내림차순, 동률은categoryKey 순서다.
 - `GET /api/v1/categories/{key}/timeline`: 같은 범위 기준의 연속60개1분 point, 품질 충족/관측 채널 수·nullable count·referenceCount·revision·scope·truncated.
-- `GET /api/operations/categories`: 실행·할당·배치·실패 시도·원천 확인 상태·lastFailure 고정 코드. 원천 변경/접속 실패·내용 충돌·입력 계약·DB 오류를 구분한다. RUNNING만으로 낮은 lag를 주장하지 않는다.
+- `GET /api/operations/categories`: 실행·할당·배치·실패 시도·원천 확인 상태·lastFailure 고정 코드. 배치 처리의 원천 변경/접속 실패·내용 충돌·입력 계약·DB 오류를 구분하며 성공하면NONE으로 돌아간다. 영구 이력 저장이 아닌 현재 재시도 원인이다. RUNNING만으로 낮은 lag를 주장하지 않는다.
 
 최대20개 최근 활동 채널만 포함하고 초과하면truncated를 표시한다. no-store·잘못된key400·DB/계약 조회 실패503을 구분한다. 웹은 비중 범위와 미상 참고 건수, 기여 방송·최근1시간 막대/표, 정상0과 미확인 음영, 조회 실패 시 이전 결과를 표시한다. 기여 방송의 공개 이름은 기존 메모리 캐시에서만 읽고 category DB에는 저장하지 않는다.
 

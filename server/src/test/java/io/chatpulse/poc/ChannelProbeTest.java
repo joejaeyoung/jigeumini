@@ -74,8 +74,22 @@ class ChannelProbeTest {
     @Test
     void missingPongTimesOutEvenWhenChatWasReceived() throws Exception {
         server = new FixtureServer(false, false);
-        var result = run(Duration.ofMillis(1000), Duration.ZERO, false);
-        assertThat(((Map<?, ?>) result.get("reasons")).containsKey("HEARTBEAT_TIMEOUT")).isTrue();
+        server.handshakeDelayMillis.set(1200);
+        var stats = new ProbeStats("fixture-channel");var stop = new AtomicBoolean();
+        try (var worker = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+            var task = worker.submit(() -> new ChannelProbe(source(false), Duration.ofMillis(100), Duration.ofMillis(300), Duration.ofSeconds(30), observer)
+                    .run("fixture-channel", Duration.ofSeconds(30), Duration.ZERO, stats, stop));
+            try {
+                org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+                    var result = stats.snapshot(false);
+                    assertThat(((Map<?, ?>) result.get("reasons")).containsKey("HEARTBEAT_TIMEOUT")).as("진단 코드 %s",result.get("reasons")).isTrue();
+                    assertThat(((Number) result.get("chatCount")).longValue()).isPositive();
+                    assertThat(((Number) result.get("clientPings")).longValue()).isPositive();
+                    assertThat(result).containsEntry("serverPongs", 0L);
+                });
+            } finally { stop.set(true);task.get(15, TimeUnit.SECONDS); }
+        }
+        var result = stats.snapshot(false);
         assertThat(result).containsEntry("verdict", "FAIL");
     }
 
@@ -136,6 +150,7 @@ class ChannelProbeTest {
         final AtomicBoolean anonymousOnly = new AtomicBoolean(true);
         final AtomicBoolean invalidTime = new AtomicBoolean();
         final AtomicBoolean closeFirst = new AtomicBoolean();
+        final AtomicInteger handshakeDelayMillis = new AtomicInteger();
         final CountDownLatch handshakeObserved = new CountDownLatch(1);
         final CountDownLatch closedObserved = new CountDownLatch(1);
 
@@ -155,6 +170,8 @@ class ChannelProbeTest {
             int command = node.path("cmd").asInt();
             commands.add(command);
             if (command == 100) {
+                try { Thread.sleep(handshakeDelayMillis.getAndSet(0)); }
+                catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); return; }
                 rooms.add(node.path("cid").asText());
                 if (!"READ".equals(node.path("bdy").path("auth").asText())
                         || !node.path("bdy").path("uid").isNull()) anonymousOnly.set(false);

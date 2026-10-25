@@ -1,0 +1,239 @@
+{
+  "executedAt": "2026-10-25T13:05:36.600494+00:00",
+  "implementationCommit": "1eee77e5cd64a5d82b6fd8b1e31d6e9fb2657eab",
+  "baseCommit": "c86f670efa33c08f885ad3e2a1c88a259d17a731",
+  "jarSha256": "2fcecf127afe4b5671f0aaf72717b6837694e0a2d31f629465ac6d682762fd37",
+  "issue": 8,
+  "feature": "F07",
+  "technicalGoals": [
+    "T02",
+    "T03",
+    "T08",
+    "T10"
+  ],
+  "environment": {
+    "javaMajor": 21,
+    "images": [
+      "apache/kafka:4.1.2",
+      "postgres:16.14-alpine"
+    ],
+    "brokerCount": 1,
+    "replicationFactor": 1
+  },
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration",
+    "./scripts/web check",
+    "./scripts/web test:e2e"
+  ],
+  "java": {
+    "test": {
+      "tests": 62,
+      "suites": [
+        {
+          "name": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:32.163Z",
+          "time": "0.307"
+        },
+        {
+          "name": "io.chatpulse.metadata.MetadataControllerTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:32.470Z",
+          "time": "0.658"
+        },
+        {
+          "name": "io.chatpulse.metadata.MetadataServiceTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.128Z",
+          "time": "0.016"
+        },
+        {
+          "name": "io.chatpulse.notifications.NotificationControllerTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.145Z",
+          "time": "0.059"
+        },
+        {
+          "name": "io.chatpulse.notifications.SpikeDetectedTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.205Z",
+          "time": "0.021"
+        },
+        {
+          "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.226Z",
+          "time": "0.064"
+        },
+        {
+          "name": "io.chatpulse.pipeline.DeadLetterTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.290Z",
+          "time": "0.006"
+        },
+        {
+          "name": "io.chatpulse.pipeline.EventCodecTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.297Z",
+          "time": "0.009"
+        },
+        {
+          "name": "io.chatpulse.poc.ChannelProbeTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:33.307Z",
+          "time": "10.495"
+        },
+        {
+          "name": "io.chatpulse.poc.ChatProtocolTest",
+          "tests": "11",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.802Z",
+          "time": "0.016"
+        },
+        {
+          "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.818Z",
+          "time": "0.019"
+        },
+        {
+          "name": "io.chatpulse.quality.QualityPolicyTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.838Z",
+          "time": "0.004"
+        },
+        {
+          "name": "io.chatpulse.quality.QualityScheduleTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.842Z",
+          "time": "0.002"
+        },
+        {
+          "name": "io.chatpulse.quality.RankingControllerTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.844Z",
+          "time": "0.05"
+        },
+        {
+          "name": "io.chatpulse.quality.TrendPolicyTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.895Z",
+          "time": "0.002"
+        },
+        {
+          "name": "io.chatpulse.replay.ReplayManifestTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:01:43.897Z",
+          "time": "0.012"
+        }
+      ]
+    },
+    "integrationTest": {
+      "tests": 45,
+      "suites": [
+        {
+          "name": "io.chatpulse.notifications.NotificationIntegrationTest",
+          "tests": "5",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:02:11.470Z",
+          "time": "64.34"
+        },
+        {
+          "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
+          "tests": "10",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:03:15.811Z",
+          "time": "46.151"
+        },
+        {
+          "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
+          "tests": "9",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:04:01.963Z",
+          "time": "12.187"
+        },
+        {
+          "name": "io.chatpulse.pipeline.RankingIntegrationTest",
+          "tests": "11",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:04:14.152Z",
+          "time": "10.707"
+        },
+        {
+          "name": "io.chatpulse.replay.ReplayIntegrationTest",
+          "tests": "10",
+          "failures": "0",
+          "errors": "0",
+          "timestamp": "2026-10-25T13:04:24.860Z",
+          "time": "19.424"
+        }
+      ]
+    }
+  },
+  "harnessTests": 16,
+  "webUnitTests": 20,
+  "chromiumTests": 25,
+  "syntheticCanaryResultFiles": 0,
+  "input": {
+    "channels": "32 repeated a/b synthetic identifiers",
+    "spikes": "random UUID, 100/min, baseline50, ratio2; fixed evaluatedAt10-second boundary",
+    "topics": "per-test it.notifications UUID, isolated group/schema"
+  },
+  "observed": {
+    "outboxCommitHalt": 95,
+    "afterKafkaAckHalt": 96,
+    "physicalMessagesAfterAckCrash": 2,
+    "feedRowsAfterAckCrash": 1,
+    "committedOffsetAfterAckCrash": 2,
+    "feedPauseSeconds": 60,
+    "rankingUniqueWhileFeedStopped": 3,
+    "feedRowsAfterResume": 3,
+    "dbFailure": "notification_progress INSERT trigger rejects transaction; feed rows remain0",
+    "brokerFailure": "isolated topic max.message.bytes64 rejects payload, published_at remainsNULL until restored",
+    "cleanup": "only published older7days AND feed-present outbox removed; pending/unconsumed and feed ledger preserved"
+  },
+  "limits": [
+    "synthetic input only for notification pipeline",
+    "no new live chat collection",
+    "no replication HA or whole-broker outage",
+    "shared DB/broker resources",
+    "feed ledger cleanup not implemented",
+    "prior ensureTopic describeConfigs intermittent failure remains root-cause unconfirmed"
+  ]
+}

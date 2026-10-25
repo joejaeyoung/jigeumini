@@ -9,6 +9,11 @@ import subprocess
 
 GOALS = "docs/TECH_GOALS.md"
 STATUS = "docs/STATUS.md"
+EMPTY_VALUES = {"-", "—", "–", "없음", "해당 없음", "tbd", "n/a"}
+
+
+def empty_value(value):
+    return value.strip().casefold() in EMPTY_VALUES or bool(re.fullmatch(r"[-–—]+", value.strip()))
 
 
 def rows(text, marker, columns, errors):
@@ -73,19 +78,21 @@ def validate(goals, status, root, baseline=None):
     for tech_id, state, evidence, scope, next_action in tracking:
         if state not in {"미착수", "진행 중", "부분 검증", "검증됨", "보류"}:
             errors.append(f"{tech_id}: 허용되지 않은 상태 {state}")
-        if next_action in {"-", "없음", "TBD"}:
+        if empty_value(next_action):
             errors.append(f"{tech_id}: 다음 행동/범위 한계를 기록하세요")
         if state in {"부분 검증", "검증됨"}:
             links = re.findall(r"\]\(([^)]+)\)", evidence)
             local = [link.split("#")[0] for link in links if ":" not in link and not link.startswith(("#", "/"))]
             if not local or not all((root / "docs" / link).is_file() for link in local):
                 errors.append(f"{tech_id}: 저장소 안의 유효한 검증 근거 링크가 필요합니다")
-            if scope in {"-", "없음", "TBD"}:
+            if empty_value(scope):
                 errors.append(f"{tech_id}: 실제 검증 범위가 필요합니다")
 
     if baseline is not None:
         previous_ids = set(re.findall(r"^### (T\d{2,})\s+.+$", baseline, re.M))
-        previous_features = set(re.findall(r"^\| (F\d{2,}) \|", baseline, re.M))
+        baseline_errors = []
+        previous_features = {r[0] for r in rows(baseline, "tech-features", 4, baseline_errors)}
+        errors.extend(f"기준선: {error}" for error in baseline_errors)
         current_features = {r[0] for r in features}
         for removed in sorted((previous_ids - known) | (previous_features - current_features)):
             errors.append(f"기준 commit의 ID 삭제: {removed} — ID를 유지하고 보류/대체 근거를 기록하세요")

@@ -61,7 +61,15 @@ class TrackingContractTest(unittest.TestCase):
         self.assertTrue(any("중복 ID" in e for e in self.errors(status=STATUS.replace("| T02 |", "| T01 |"))))
 
     def test_empty_next_action(self):
-        self.assertTrue(any("다음 행동" in e for e in self.errors(status=STATUS.replace("중복 입력 시험", "-"))))
+        for value in ("-", "—", "–", "--", "없음", "해당 없음", "TBD", "N/A"):
+            with self.subTest(value=value):
+                self.assertTrue(any("다음 행동" in e for e in self.errors(status=STATUS.replace("중복 입력 시험", value))))
+
+    def test_empty_verified_scope(self):
+        for state in ("부분 검증", "검증됨"):
+            with self.subTest(state=state):
+                status = STATUS.replace("검증됨", state).replace("commit 직후 종료", "—")
+                self.assertTrue(any("검증 범위" in e for e in self.errors(status=status)))
 
     def test_coordinated_removal_is_rejected_against_baseline(self):
         goals = GOALS.replace("### T02 재전달\n", "").replace("T01, T02", "T01")
@@ -71,6 +79,17 @@ class TrackingContractTest(unittest.TestCase):
 
     def test_feature_id_removal_is_rejected(self):
         self.assertTrue(any("ID 삭제: F01" in e for e in self.errors(goals=GOALS.replace("F01", "F02"), baseline=GOALS)))
+
+    def test_padded_baseline_feature_removal_is_rejected(self):
+        baseline = GOALS.replace("| F01 |", "| F01     |")
+        self.assertTrue(any("ID 삭제: F01" in e for e in self.errors(goals=GOALS.replace("F01", "F02"), baseline=baseline)))
+
+    def test_baseline_ignores_feature_outside_marker(self):
+        baseline = GOALS + "\n| F99 | 표식 밖 예시 | T01 | 예시 |\n"
+        self.assertEqual([], self.errors(baseline=baseline))
+
+    def test_invalid_baseline_markers_fail_closed(self):
+        self.assertTrue(any("기준선:" in e for e in self.errors(baseline=GOALS.replace("tech-features:end", "missing:end"))))
 
     def test_broken_markers(self):
         self.assertTrue(any("표식" in e for e in self.errors(status=STATUS.replace("tech-status:end", "missing:end"))))

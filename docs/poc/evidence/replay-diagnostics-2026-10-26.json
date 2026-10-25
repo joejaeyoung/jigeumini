@@ -104,5 +104,29 @@
     "tests": 84,
     "harness": 16,
     "passed": true
+  },
+  "finalCi": {
+    "implementationCommit": "78630931326ac08b4ee894481ca40b46a87eaca7",
+    "mergeCommit": "cf4049ec4d60b4947056d514d3cf18fdaacb2dab",
+    "pushRun": 40207808425,
+    "pullRequestRun": 40207811784,
+    "conclusion": "SUCCESS",
+    "suites": {
+      "test": {
+        "tests": 85,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "71fac242587723b9071bcb9b8a133110812cafaf7b6980b8be2c4d14cd040fd4"
+      },
+      "integrationTest": {
+        "tests": 77,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "8b1e4c5c14f3e30e1283d3661b3bb48d4b5ef9c56e6fdd4711d39d3fd433cee4"
+      }
+    },
+    "review": "APPROVE",
+    "reviewSession": "15a9a9e4-7e49-486a-bb11-e4a2ec1c9084",
+    "scope": "synthetic final HEAD CI; no live or HA"
   }
 }

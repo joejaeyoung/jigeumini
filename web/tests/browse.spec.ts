@@ -10,12 +10,12 @@ async function mockApi(page: Page, mode: 'filled' | 'empty' = 'filled') {
       algorithmVersion: 'quality-ranking-v1', status: mode === 'empty' ? 'WARMING_UP' : 'READY', excludedChannels: [],
       entries: mode === 'empty' ? [] : [b, a].map((channelId, i) => ({ channelId, rank: i + 1, count: seconds === 60 ? 3 - i : 9 - i, referenceCount: seconds === 60 ? 3 - i : 9 - i, coverage: 1, status: 'HEALTHY', reasons: [], previousRank: null, previousReason: 'NO_PREVIOUS_SNAPSHOT' })) } });
   });
-  await page.route('**/api/v1/channels/*/activity?**', route => {
+  await page.route('**/api/v1/channels/*/timeline?**', route => {
     const url = new URL(route.request().url()), seconds = Number(url.searchParams.get('seconds'));
     const end = Math.floor(Date.now() / 60000) * 60000, start = end - seconds * 1000;
     const from = new Date(start).toISOString(), to = new Date(end).toISOString();
     return route.fulfill({ json: { channelId: url.pathname.split('/')[4], asOf: new Date().toISOString(), from, to,
-      points: Array.from({ length: seconds / 60 }, (_, i) => ({ from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(), count: 2, referenceCount: 2, coverage: 1, status: 'HEALTHY', reasons: [] })) } });
+      observations: [], truncated: false, chat: Array.from({ length: seconds / 60 }, (_, i) => ({ from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(), count: 2, referenceCount: 2, coverage: 1, status: 'HEALTHY', reasons: [] })) } });
   });
   await page.route('**/api/v1/spikes?**', route => route.fulfill({ json: { asOf: new Date().toISOString(), status: 'WARMING_UP', events: [], nextCursor: null } }));
 }

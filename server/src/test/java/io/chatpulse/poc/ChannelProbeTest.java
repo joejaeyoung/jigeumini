@@ -45,7 +45,9 @@ class ChannelProbeTest {
 
     private Map<String, Object> run(Duration duration, Duration reconnect, boolean changeRoom) {
         var stats = new ProbeStats("fixture-channel");
-        new ChannelProbe(source(changeRoom), Duration.ofMillis(100), Duration.ofMillis(300), Duration.ofMillis(200), observer)
+        new ChannelProbe(source(changeRoom), Duration.ofMillis(100), Duration.ofMillis(300), Duration.ofMillis(200), CollectionObserver.combine(List.of(observer, new CollectionObserver() {
+            @Override public void stopped(String channel) { observations.add("SECOND_STOPPED"); }
+        })))
                 .run("fixture-channel", duration, reconnect, stats, new AtomicBoolean());
         return stats.snapshot(!reconnect.isZero());
     }
@@ -59,7 +61,7 @@ class ChannelProbeTest {
         assertThat((Map<?, ?>) result.get("skipped")).hasSize(2);
         assertThat(server.commands).contains(100, 0, 10000).doesNotContain(3101, 5101);
         assertThat(server.anonymousOnly.get()).isTrue();
-        assertThat(observations).contains("START", "CONNECTED", "ALIVE", "ENDED", "STOPPED");
+        assertThat(observations).contains("START", "CONNECTED", "ALIVE", "ENDED", "STOPPED", "SECOND_STOPPED");
     }
 
     @Test

@@ -24,7 +24,7 @@ public final class PocRunner {
         this.properties = properties;
         this.source = source;
         this.sink = sinks.getIfAvailable(() -> EventSink.DISCARD);
-        this.observer = observers.getIfAvailable(() -> CollectionObserver.NONE);
+        this.observer = CollectionObserver.combine(observers.orderedStream().toList());
     }
 
     public int run() {

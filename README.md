@@ -103,6 +103,21 @@ curl --fail http://127.0.0.1:18080/api/operations/notifications
 
 급상승/outbox의 DB 원자 저장, ACK 뒤 전달 완료, 독립 소비와 사후 품질 반영은 [알림 처리 계약](docs/pipeline/NOTIFICATIONS.md)을 따른다. 외부 알림 전송은 없으며 기본 토픽은 `chat.received.v1.spikes`다.
 
+## 시청자 관측과 채팅 비교
+
+방송 상세에서 최근1시간의 시청자 관측점과 완료된1분 채팅을 같은 시간축으로 비교한다. 시청자 표본은 기본60초, 누락/TTL 초과/방송 변경에서 선을 끊으며 실제0과 미관측을 구분한다. collector가 선택한 채널만 새 관측을 생성한다.
+
+```bash
+# 새 관측 그룹 최초 시작만. 다음에는 기존 analyzer 명령을 쓴다.
+./scripts/pipeline analyzer --observations.offset-reset=earliest
+# 관측 주기·TTL 조절 또는 끄기 (수집기 실행 예)
+OBSERVATIONS_INTERVAL_SECONDS=120 OBSERVATIONS_TTL_SECONDS=240 ./scripts/pipeline collector <채널ID> 120s 0s
+# OBSERVATIONS_ENABLED=false ./scripts/pipeline collector <채널ID> 120s 0s
+curl --fail http://127.0.0.1:18080/api/operations/observations
+```
+
+비압축 Kafka 이력·DB7일 보존·원천 필드·관측 한계는 [시청자 관측 계약](docs/api/OBSERVATIONS.md)을 따른다. 과거에 쌓지 않은 시청자 수는 제공하지 않는다.
+
 ## 고정 Kafka 입력 재처리
 
 [이슈 #9 재처리 계약](docs/pipeline/REPLAY.md)은 로컬 CLI로 사용한다. 운영 group offset·순위·알림을 바꾸지 않고 UUID run에 10초 bucket만 만든다. 기존 Kafka/PostgreSQL 접속 환경 변수를 사용한다.

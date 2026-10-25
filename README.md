@@ -32,6 +32,23 @@ Node.js 24(`.nvmrc`), Java 21, Python 3, Docker Compose를 사용한다. 최초 
 
 [개발 구조·Git Flow](docs/DEVELOPMENT.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
 
+## 기술 목표와 추적 검사
+
+[기술 목표·기능 매핑](docs/TECH_GOALS.md)은 오프셋·재처리, 파티션·부하 편중, 발행 버퍼·과부하 제어를
+T ID로 관리한다. 기능/이슈/PR에서 관련 ID를 고르고, 검증 후 [STATUS](docs/STATUS.md)의 상태·근거·남은 문제를 갱신한다.
+새 기능을 구현해도 연결된 기술 문제의 완료 조건을 입증해야 해결로 기록한다.
+
+```bash
+python3 scripts/check-tech-goals.py                # 목표·기능·상태·근거 연결 및 HEAD 대비 ID 삭제 검사
+python3 scripts/check-tech-goals.py --base develop # 지정 기준 commit 대비 ID 보존 검사
+python3 scripts/check-doc-links.py                # 문서와 템플릿의 파일 링크 검사
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests # 추적 검사기의 누락 방지 검증
+./scripts/check                                  # 위 검사 + 서버 테스트·JAR 빌드
+```
+
+검사는 Python 3와 Git만 사용하며 네트워크를 호출하지 않는다. CI는 PR base/push 이전 commit과 비교한다.
+기술 ID를 없애는 대신 보류 이유·재개 조건을 기록한다. 이 검사는 실제 장애 시험이나 결과 리뷰를 대신하지 않는다.
+
 ## 웹 UI 디자인 시안
 
 ```bash

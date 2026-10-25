@@ -9,6 +9,9 @@
   `technicaltest/<주제>`, 제품 구현은 `feat/<주제>`, 수정은 `fix/<주제>`를 쓴다.
 - 이 저장소의 규칙을 적용한다. 참고한 gromo의 Jira·배포·원격 리뷰 자동화는 이식하지 않는다.
 - 진행 상태는 [docs/STATUS.md](docs/STATUS.md) 한 곳에서 관리한다.
+- 기능 추가·Kafka 실험·처리 계약 변경 시 [기술 목표](docs/TECH_GOALS.md)를 먼저 읽고
+  기술 ID를 기능·이슈·PR에 연결한다. 완료 시 STATUS의 해당 ID에 검증 근거·범위·남은 문제를 갱신한다.
+  ID는 유지하고 제외한 목표는 이유와 재개 조건을 남긴다. 매핑 검사는 `python3 scripts/check-tech-goals.py`다.
 
 ## 변경별 확인 자료
 

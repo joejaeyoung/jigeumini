@@ -6,6 +6,23 @@ on:
 permissions:
   contents: read
 jobs:
+  tech-goals:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 기술 목표 연결과 기존 ID 보존 검사
+        env:
+          BASE_REV: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -n "$BASE_REV" && ! "$BASE_REV" =~ ^0+$ ]]; then
+            python3 scripts/check-tech-goals.py --base "$BASE_REV"
+          else
+            python3 scripts/check-tech-goals.py
+          fi
+          python3 scripts/check-doc-links.py
+          PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests
   branch-policy:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest

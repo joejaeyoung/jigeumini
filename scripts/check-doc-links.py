@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 
 root = Path(__file__).resolve().parent.parent
-files = [root / "README.md", root / "AGENTS.md", root / "CLAUDE.md", root / "server/README.md", root / "web/README.md", *sorted((root / "docs").rglob("*.md"))]
+files = [root / "README.md", root / "AGENTS.md", root / "CLAUDE.md", root / "server/README.md", root / "web/README.md", *sorted((root / "docs").rglob("*.md")), *sorted((root / ".github").rglob("*.md"))]
 errors = []
 for path in files:
     text = path.read_text()

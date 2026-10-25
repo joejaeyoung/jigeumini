@@ -63,10 +63,13 @@ final class PublisherFaultExperiment {
             while(pending(serial,async)>0&&System.nanoTime()<deadline)Thread.sleep(10);
             if(pending(serial,async)!=0)throw new IllegalStateException("EXPERIMENT_WARMUP");
             result.put("phase","INJECT_FAULT");if(disconnect){command("docker","stop","--time","0",container);stopped=true;}else{command("docker","pause",container);paused=true;}
-            result.put("phase","FILL_BUFFER");accept(serial,async,events(20,0));accept(serial,async,events(10,1));
+            result.put("phase","FILL_BUFFER");
+            var admissions=new ArrayList<Map<String,Object>>();result.put("admissions",admissions);
+            admit(serial,async,events(20,0),0,admissions);admit(serial,async,events(10,1),1,admissions);
             result.put("pendingAtCapacity",pending(serial,async));
-            boolean rejected=false;try{accept(serial,async,events(1,1));}catch(RuntimeException expected){rejected=true;}
-            result.put("overflowFrameRejected",rejected);result.put("channelAdmission",List.of(Map.of("channel",0,"accepted",21,"rejected",0),Map.of("channel",1,"accepted",10,"rejected",rejected?1:0)));
+            boolean rejected=!admit(serial,async,events(1,1),1,admissions);
+            result.put("probeFrameRejected",rejected);result.put("capacityReached",((Number)result.get("pendingAtCapacity")).intValue()==30);
+            result.put("publisherFailedDuringAdmission",serialMode?serial.deliveryFailed():async.failed());
             Thread.sleep(1500);result.put("oldestUnackedMillis",serialMode?oldest(serial):async.oldestAgeMillis());
             result.put("clientHeapUsedBytes",Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
             result.put("clientRssBytes",Long.parseLong(command("ps","-o","rss=","-p",Long.toString(ProcessHandle.current().pid())).strip())*1024);
@@ -75,7 +78,10 @@ final class PublisherFaultExperiment {
             var stats=serialMode?serial.finish():async.stats();result.put("producer",stats);
             long accepted=((Number)stats.get("accepted")).longValue(),acked=((Number)stats.get("acknowledged")).longValue(),unconfirmed=((Number)stats.get("unconfirmed")).longValue(),declined=((Number)stats.get("rejected")).longValue();
             result.put("conserved",accepted+declined==32&&accepted==acked+unconfirmed);
-            result.put("bounded",((Number)result.get("pendingAtCapacity")).intValue()==30&&rejected);
+            // 정지 중 send 자체가 metadata/buffer를 기다리면 두 번째 frame 전에 callback 실패가 날 수 있다.
+            // 이때 전량 수락을 강제하지 않고 실제 조기 거절과 미확인 건수를 대조한다. pause는 상한 도달을 요구한다.
+            result.put("bounded",((Number)result.get("pendingAtCapacity")).intValue()<=30&&unconfirmed<=30&&rejected
+                    &&(disconnect||Boolean.TRUE.equals(result.get("capacityReached"))));
             result.put("phase","RESTORE_BROKER");if(stopped){command("docker","start",container);stopped=false;ready(bootstrap);}
             result.put("phase","MEASURE_BROKER");try(var admin=Admin.create(Map.of("bootstrap.servers",bootstrap))) {
                 var request=new HashMap<TopicPartition,OffsetSpec>();for(int p=0;p<3;p++)request.put(new TopicPartition(topic,p),OffsetSpec.latest());
@@ -91,6 +97,15 @@ final class PublisherFaultExperiment {
     }
     private static List<ChatEvent> events(int count,int channel){var events=new ArrayList<ChatEvent>();Instant at=Instant.now();for(int i=0;i<count;i++)events.add(new ChatEvent(1,UUID.randomUUID(),"CHZZK_UNOFFICIAL",String.format("%032x",channel),"synthetic-room",UUID.randomUUID(),null,"CHAT",at,at,false,"experiment-fault"));return events;}
     private static void accept(BufferedKafkaPublisher serial,ExperimentPublisher async,List<ChatEvent> events){if(serial!=null)serial.accept(events);else async.accept(events,0);}
+    private static boolean admit(BufferedKafkaPublisher serial,ExperimentPublisher async,List<ChatEvent> events,int channel,List<Map<String,Object>> rows) {
+        long start=System.nanoTime();boolean accepted=true;String code="ACCEPTED";
+        try{accept(serial,async,events);}catch(io.chatpulse.poc.SourceFailure failure){accepted=false;code="PUBLISH_REJECTED";}
+        catch(IllegalStateException failure){accepted=false;code="EXPERIMENT_REJECTED";}
+        rows.add(Map.of("channel",channel,"attempted",events.size(),"accepted",accepted?events.size():0,
+                "rejected",accepted?0:events.size(),"code",code,"seconds",(System.nanoTime()-start)/1_000_000_000d,
+                "pendingAfter",pending(serial,async)));
+        return accepted;
+    }
     private static int pending(BufferedKafkaPublisher serial,ExperimentPublisher async){return serial!=null?serial.bufferSnapshot().values().stream().mapToInt(BufferedKafkaPublisher.BufferState::count).sum():async.pending();}
     private static long oldest(BufferedKafkaPublisher serial){return serial.bufferSnapshot().values().stream().map(BufferedKafkaPublisher.BufferState::oldest).min(Comparator.naturalOrder()).map(at->Math.max(0,Duration.between(at,Instant.now()).toMillis())).orElse(0L);}
     private static String command(String...args) throws Exception{return ExperimentResources.command(List.of(args));}

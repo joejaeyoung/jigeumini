@@ -1,0 +1,186 @@
+{
+  "scenario" : "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+  "recordedAt" : "2026-10-25T17:46:13.349798Z",
+  "accepted" : 54,
+  "acknowledged" : 54,
+  "unconfirmed" : 0,
+  "brokerPhysical" : 54,
+  "brokerUnique" : 54,
+  "databaseUnique" : 54,
+  "brokerDatabaseDifference" : 0,
+  "children" : [ {
+    "completedAt" : "2026-10-25T17:46:07.468683Z",
+    "delivery" : {
+      "complete" : true,
+      "failedUnconfirmed" : 0,
+      "mode" : "KAFKA",
+      "inFlight" : 0,
+      "failedCallbacks" : 0,
+      "failureCode" : "NONE",
+      "queued" : 0,
+      "limits" : {
+        "capacity" : 30,
+        "channelCapacity" : 20,
+        "maxInFlight" : 4
+      },
+      "attempted" : 45,
+      "strategy" : "BOUNDED_ASYNC_ROUND_ROBIN",
+      "channels" : {
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" : {
+          "accepted" : 45,
+          "acknowledged" : 45,
+          "rejected" : 0,
+          "pending" : 0,
+          "oldest" : null,
+          "stopped" : false,
+          "reason" : "NONE"
+        }
+      },
+      "peakInFlight" : 1,
+      "untrackedRejected" : 0,
+      "unconfirmed" : 0,
+      "rejected" : 0,
+      "peakPending" : 1,
+      "acknowledged" : 45,
+      "accepted" : 45
+    },
+    "workerId" : "9d2416fc-f241-4be5-add8-0a18bf9dc2ce",
+    "httpRequests" : 2,
+    "failureCode" : "COLLECTION_LEASE_LOST",
+    "sourceMode" : "SYNTHETIC",
+    "complete" : false,
+    "released" : false,
+    "startedAt" : "2026-10-25T17:45:59.316162Z",
+    "leases" : [ {
+      "channelId" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "epoch" : 1,
+      "stats" : {
+        "channelId" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "startedAt" : "2026-10-25T17:45:59.356896Z",
+        "state" : "CANCELLED",
+        "verdict" : "FAIL",
+        "checks" : {
+          "handshake" : true,
+          "liveChat" : true,
+          "reconnectRequired" : false,
+          "heartbeatPong" : false,
+          "chatAfterReconnect" : false
+        },
+        "elapsedSeconds" : 8.111817333,
+        "connectedSeconds" : 4.925924417,
+        "connectionTimeRatio" : 0.6072528774730485,
+        "attempts" : 1,
+        "connections" : 1,
+        "chatCount" : 46,
+        "chatAfterReconnect" : 0,
+        "frames" : 47,
+        "receivedFrameBytes" : 4007,
+        "maxFrameBytes" : 86,
+        "clientPings" : 0,
+        "serverPongs" : 0,
+        "commands" : {
+          "10100" : 1,
+          "93101" : 46
+        },
+        "skipped" : { },
+        "reasons" : {
+          "CANCELLED" : 1
+        },
+        "candidateIdFieldPresence" : { },
+        "firstEventTime" : "2026-10-25T17:45:59.595Z",
+        "lastEventTime" : "2026-10-25T17:46:04.427Z",
+        "lateMessagesOver120s" : 0,
+        "meanSourceToReceiveMillis" : 0.43478260869565216,
+        "maxSourceToReceiveMillis" : 1
+      },
+      "policyVersion" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    } ]
+  }, {
+    "leases" : [ {
+      "stats" : {
+        "channelId" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "startedAt" : "2026-10-25T17:46:11.431280Z",
+        "state" : "CANCELLED",
+        "verdict" : "FAIL",
+        "checks" : {
+          "heartbeatPong" : false,
+          "reconnectRequired" : false,
+          "liveChat" : true,
+          "handshake" : true,
+          "chatAfterReconnect" : false
+        },
+        "elapsedSeconds" : 1.155037167,
+        "connectedSeconds" : 0.983742125,
+        "connectionTimeRatio" : 0.8516973765918651,
+        "attempts" : 1,
+        "connections" : 1,
+        "chatCount" : 9,
+        "chatAfterReconnect" : 0,
+        "frames" : 10,
+        "receivedFrameBytes" : 825,
+        "maxFrameBytes" : 86,
+        "clientPings" : 0,
+        "serverPongs" : 0,
+        "commands" : {
+          "93101" : 9,
+          "10100" : 1
+        },
+        "skipped" : { },
+        "reasons" : {
+          "CANCELLED" : 1
+        },
+        "candidateIdFieldPresence" : { },
+        "firstEventTime" : "2026-10-25T17:46:11.689Z",
+        "lastEventTime" : "2026-10-25T17:46:12.553Z",
+        "lateMessagesOver120s" : 0,
+        "meanSourceToReceiveMillis" : 0.2222222222222222,
+        "maxSourceToReceiveMillis" : 1
+      },
+      "epoch" : 2,
+      "channelId" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "policyVersion" : "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    } ],
+    "startedAt" : "2026-10-25T17:46:11.393791Z",
+    "released" : true,
+    "complete" : true,
+    "sourceMode" : "SYNTHETIC",
+    "failureCode" : "NONE",
+    "httpRequests" : 2,
+    "workerId" : "43ee32da-053c-4343-95da-b462a10fe9f9",
+    "delivery" : {
+      "accepted" : 9,
+      "acknowledged" : 9,
+      "peakPending" : 1,
+      "rejected" : 0,
+      "unconfirmed" : 0,
+      "untrackedRejected" : 0,
+      "peakInFlight" : 1,
+      "channels" : {
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" : {
+          "accepted" : 9,
+          "acknowledged" : 9,
+          "rejected" : 0,
+          "pending" : 0,
+          "oldest" : null,
+          "stopped" : false,
+          "reason" : "NONE"
+        }
+      },
+      "strategy" : "BOUNDED_ASYNC_ROUND_ROBIN",
+      "attempted" : 9,
+      "limits" : {
+        "capacity" : 30,
+        "channelCapacity" : 20,
+        "maxInFlight" : 4
+      },
+      "queued" : 0,
+      "failureCode" : "NONE",
+      "failedCallbacks" : 0,
+      "inFlight" : 0,
+      "mode" : "KAFKA",
+      "failedUnconfirmed" : 0,
+      "complete" : true
+    },
+    "completedAt" : "2026-10-25T17:46:12.586147Z"
+  } ]
+}

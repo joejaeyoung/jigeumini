@@ -38,6 +38,12 @@ class FleetIntegrationTest {
     }
     @AfterEach void cleanup() throws Exception {
         for(Process child:children)if(child.isAlive()){signal(child,"CONT");child.destroy();if(!child.waitFor(35,TimeUnit.SECONDS))child.destroyForcibly().waitFor();}
+        for(Path path:reports)if(Files.exists(path)) {
+            var report=JSON.readTree(Files.readString(path));var delivery=report.path("delivery");
+            System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"worker",report.path("workerId").asText(),"complete",report.path("complete").asBoolean(),
+                    "failureCode",report.path("failureCode").asText(),"deliveryCode",delivery.path("failureCode").asText(),"accepted",delivery.path("accepted").asLong(),
+                    "acknowledged",delivery.path("acknowledged").asLong(),"rejected",delivery.path("rejected").asLong())));
+        }
         if(source!=null)source.close();if(ds!=null)ds.close();
         if(root!=null){new JdbcTemplate(root).execute("DROP SCHEMA "+schema+" CASCADE");root.close();}
         try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){if(admin.listTopics().names().get(10,TimeUnit.SECONDS).contains(topic))admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}
@@ -102,11 +108,22 @@ class FleetIntegrationTest {
         var diagnostic=JSON.readTree(Files.readString(report));assertTrue(diagnostic.path("complete").asBoolean());
         assertTrue(diagnostic.path("released").asBoolean());assertReconciled();
     }
+    @Test void slowProducerStartupCompletesBeforeLeaseAndSourceAdmission() throws Exception {
+        plan(List.of(CHANNEL));var child=start(15432,1,"DELAY_PRODUCER");Path report=reports.getFirst();
+        await().atMost(Duration.ofSeconds(15)).until(()->Files.exists(Path.of(report+".producer-starting")));
+        assertFalse(Files.exists(Path.of(report+".producer-ready")));
+        assertEquals(0,((Number)leases.status().get("assigned")).intValue());assertTrue(source.accepted.isEmpty());
+        Files.writeString(Path.of(report+".producer-release"),"RELEASE",StandardOpenOption.CREATE_NEW);
+        awaitConnected(1);assertTrue(Files.exists(Path.of(report+".producer-ready")));stop(child);
+        var diagnostic=JSON.readTree(Files.readString(report));assertTrue(diagnostic.path("complete").asBoolean());
+        assertEquals(0,diagnostic.path("delivery").path("rejected").asInt());assertReconciled();
+    }
     private Process start(int dbPort,int capacity) throws Exception {return start(dbPort,capacity,false);}
-    private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {
+    private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {return start(dbPort,capacity,delayedReport?"DELAY_REPORT":null);}
+    private Process start(int dbPort,int capacity,String fixtureMode) throws Exception {
         Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();reports.add(report);
         var command=new ArrayList<>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()));
-        if(delayedReport)command.add("DELAY_REPORT");
+        if(fixtureMode!=null)command.add(fixtureMode);
         var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
     }
     private void stop(Process process) throws Exception {process.destroy();assertTrue(process.waitFor(35,TimeUnit.SECONDS));}

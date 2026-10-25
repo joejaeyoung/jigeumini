@@ -107,6 +107,34 @@
 - 완료 조건: 동일 입력으로 기존 직렬 발행과 bounded async concurrency 후보를 비교한다. producer batch 크기·요청률·처리량·p95/p99·메모리·채널 공정성을 측정하고 실패 callback/종료 drain에서 건수와 순서를 검증한다.
 - 한계: 애플리케이션 동시 발행 수, Kafka client의 연결당 in-flight 요청 수, broker batch는 서로 다르다. T11 상한·실패 추적과 T02 정합성을 유지한 후보만 채택한다.
 
+## ④ 원천 범위·운영 확장
+
+2026-10-26 사용자 요청으로 수집 범위·배포·인프라를 추가한다. 기존 T01~T12를 유지하며 합성 시험과 실제 운영 승인·전체 플랫폼 수집을 구분한다.
+
+### T13 원천 접근 범위·선정·커버리지
+
+- 문제: 전체 방송 목록 발견을 전체 채팅 수집 권한이나 무누락 통계로 오인할 수 있다.
+- 완료 조건: 공식 계약과 미확인 quota를 조사하고, 팔로워 하한·접근 허용·활성/제한 상태·용량 상한의 결정적 선정 및 발견/적격/선정/정상 관측 분모를 구현한다. 부분/변동 목록·429·누락·만료를 합성 HTTP로 검증한다.
+- 한계: 설정된 허용 목록은 운영자 선언이다. 실제 동의/토큰·원천 실수신 검증 없이 전체 접근이나 운영 승인을 주장하지 않는다. [#26](https://github.com/joejaeyoung/jigeumini/issues/26), [공식 자료 조사](research/CHZZK_SCALE.md).
+
+### T14 수집기 배정·소유권·인계
+
+- 문제: 여러 수집기가 동일 원천 채팅을 새 eventId로 받아 중복 집계하거나 인계 중 공백을 숨길 수 있다.
+- 완료 조건: 유한 worker 용량·배정/임대·만료·오래된 소유자의 발행 차단을 구현하고 두 프로세스 경쟁/정지/재시작·DB 단절을 합성 WebSocket과 실제 broker/DB로 검증한다.
+- 한계: 임대 배타성과 외부 WebSocket 수신은 하나의 트랜잭션이 아니다. 관측 공백·중첩 가능성과 Kafka 이후 멱등성을 분리한다. [#28](https://github.com/joejaeyoung/jigeumini/issues/28).
+
+### T15 Kafka 복제·quorum·장애 도메인
+
+- 문제: RF1의 acks=all을 복제 HA로 설명하거나 ISR 부족과 controller quorum 상실을 혼동할 수 있다.
+- 완료 조건: RF3/minISR2·운영 역할 분리·ELR/선출 계약, 기존 토픽 전환·실제 설정 검사를 구현한다. broker1개/복귀·ISR부족·quorum 장애를 구분해 ACK·재조회·집계·복구를 대조한다.
+- 한계: 단일 호스트 시험은 영역 장애·전원/디스크 손상·유료 클러스터 SLA를 증명하지 않는다. [#29](https://github.com/joejaeyoung/jigeumini/issues/29), [공식 자료 조사](research/KAFKA_DEPLOYMENT.md).
+
+### T16 배포·백업 복구·운영 경계
+
+- 문제: 앱 이미지 기동이나 pg_restore 성공만으로 배포·데이터 복구를 완료했다고 판단할 수 있다.
+- 완료 조건: 버전 식별·역할/네트워크·비밀 주입·readiness·migration·종료·롤백을 재현한다. 격리 DB 복원과 Kafka 보존/DB progress/group offset 정렬·집계 대조를 수행하고 자원식·경보·관측 RPO/RTO를 남긴다.
+- 한계: main 릴리스·실제 외부 배포·계정/동의·비용 결정은 별도 실행이다. 로컬 리허설을 운영 가용성으로 확대하지 않는다. [#30](https://github.com/joejaeyoung/jigeumini/issues/30).
+
 ## 기능별 기술 매핑
 
 표의 ID는 해당 기능이 **기여하거나 검증할 문제**다. 해결 여부는 STATUS의 근거로 판단한다.
@@ -126,7 +154,12 @@
 | F08 | [고정 offset replay #9](https://github.com/joejaeyoung/jigeumini/issues/9) | T01, T02, T03, T04 | 운영 offset 불변·재처리 비교; ACK 방식 비교는 별도 실험 필요 |
 | F09 | [DLQ·복구 진단 #10](https://github.com/joejaeyoung/jigeumini/issues/10) | T01, T03, T05, T08 | 영구 오류 격리·ACK/offset 경계·재시도 영향 |
 | F10 | [부하·적체 회복 #11](https://github.com/joejaeyoung/jigeumini/issues/11) | T06, T07, T08, T09, T11, T12 | 분포·consumer 수·처리 지연·버퍼·발행 병렬화 실험; 기존 이슈 범위를 이 표로 보완 |
-| F11 | ACK·커밋 방식 비교 실험 (로컬 계획) | T01, T10 | Auto/BATCH/MANUAL, ACK 수준 비교; 원격 이슈는 아직 없음 |
+| F11 | [ACK·커밋 방식 비교 #31](https://github.com/joejaeyoung/jigeumini/issues/31) | T01, T10 | Auto/BATCH/MANUAL, ACK0/1/all과 복제 장애 비교 |
+| F12 | [방송 발견·선정 #26](https://github.com/joejaeyoung/jigeumini/issues/26) | T13, T08, T11 | 원천 접근·팔로워 하한·유한 선정·범위 분모 |
+| F13 | [수집기 배정·인계 #28](https://github.com/joejaeyoung/jigeumini/issues/28) | T13, T14, T02, T11 | 임대 소유권·오래된 worker 차단·공백/중복 관측 |
+| F14 | [유한 비동기 발행 #27](https://github.com/joejaeyoung/jigeumini/issues/27) | T02, T06, T10, T11, T12 | 실측 후보 제품 적용·상한/실패/순서·채널 공정성 |
+| F15 | [Kafka HA #29](https://github.com/joejaeyoung/jigeumini/issues/29) | T04, T08, T10, T15 | 복제/ISR/quorum 계약·운영 구성·장애 대조 |
+| F16 | [배포·복구 리허설 #30](https://github.com/joejaeyoung/jigeumini/issues/30) | T04, T08, T16 | 이미지·readiness·rollback·DB/offset 복원·용량식 |
 <!-- tech-features:end -->
 
 ## 검증 기록과 완료 판정

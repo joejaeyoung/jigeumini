@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+case "${1:-help}" in
+  fixture|official) ;;
+  *) echo './scripts/selection fixture <설정.json> <합성 목록.json> <새 결과.json> | official <설정.json> <새 결과.json>'; exit 2 ;;
+esac
+./gradlew --console=plain :server:bootJar >&2
+mkdir -p work/runtime
+runtime_jar="$(mktemp "$PWD/work/runtime/selection.XXXXXX")"
+runtime_pid=''
+cleanup() { rm -f -- "$runtime_jar"; }
+stop() {
+  trap '' INT TERM HUP
+  if [[ -n "$runtime_pid" ]]; then kill -TERM "$runtime_pid" 2>/dev/null || true; wait "$runtime_pid" || true; fi
+  exit 130
+}
+trap cleanup EXIT
+trap stop INT TERM HUP
+cp server/build/libs/chat-pulse-poc.jar "$runtime_jar"
+chmod 400 "$runtime_jar"
+java -jar "$runtime_jar" selection "$@" &
+runtime_pid=$!
+set +e
+wait "$runtime_pid"
+exit "$?"

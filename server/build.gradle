@@ -72,3 +72,12 @@ tasks.register('integrationTest', Test) {
     shouldRunAfter test
     testLogging { events 'passed', 'failed', 'skipped' }
 }
+
+tasks.register('haExperiment', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.pipeline.KafkaHaExperiment'
+    workingDir = rootProject.projectDir
+    maxHeapSize = '256m'
+    if (project.hasProperty('haOutput')) args(project.property('haOutput'))
+}

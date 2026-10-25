@@ -39,10 +39,10 @@ final class PublisherFaultExperiment {
             result.put("imageId",command("docker","inspect","--format","{{.Image}}",name).strip());
             for(boolean serial:List.of(true,false))for(boolean disconnect:List.of(false,true)) {
                 String topic="exp.fault."+UUID.randomUUID().toString().replace("-","");KafkaSupport.ensureTopic(bootstrap,topic);
-                rows.add(scenario(bootstrap,name,topic,serial,disconnect));
+                var row=new LinkedHashMap<String,Object>();rows.add(row);scenario(bootstrap,name,topic,serial,disconnect,row);
             }
             result.put("correct",rows.stream().allMatch(row->Boolean.TRUE.equals(row.get("conserved"))&&Boolean.TRUE.equals(row.get("bounded"))&&Boolean.TRUE.equals(row.get("brokerCountWithinAckRange"))));
-        } catch(Exception failure){result.put("correct",false);result.put("failureCode","EXPERIMENT_BROKER_FAULT_FAILED");}
+        } catch(Exception failure){result.put("correct",false);result.put("failureCode","EXPERIMENT_BROKER_FAULT_FAILED");result.put("failureType",failure.getClass().getSimpleName());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}
         finally {
             boolean cleaned=false;try{command("docker","rm","-f",name);cleaned=true;}catch(Exception ignored){}
             Runtime.getRuntime().removeShutdownHook(cleanup);result.put("cleanupComplete",cleaned);if(!cleaned)result.put("correct",false);
@@ -51,18 +51,18 @@ final class PublisherFaultExperiment {
         }
         return result;
     }
-    private static Map<String,Object> scenario(String bootstrap,String container,String topic,boolean serialMode,boolean disconnect) throws Exception {
+    private static void scenario(String bootstrap,String container,String topic,boolean serialMode,boolean disconnect,Map<String,Object> result) throws Exception {
         var factory=KafkaSupport.producerFactory(bootstrap);var kafka=new KafkaTemplate<>(factory);var codec=new EventCodec();
         var serial=serialMode?new BufferedKafkaPublisher(kafka,topic,codec,30):null;var async=serialMode?null:new ExperimentPublisher(kafka,topic,30,false);
-        var result=new LinkedHashMap<String,Object>();result.put("publisher",serialMode?"SERIAL":"BOUNDED_ASYNC");result.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");
+        result.put("publisher",serialMode?"SERIAL":"BOUNDED_ASYNC");result.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");
         boolean paused=false,stopped=false;long start=System.nanoTime();
         try {
-            var warm=events(1,0);accept(serial,async,warm);
+            result.put("phase","WARMUP");var warm=events(1,0);accept(serial,async,warm);
             long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);
             while(pending(serial,async)>0&&System.nanoTime()<deadline)Thread.sleep(10);
             if(pending(serial,async)!=0)throw new IllegalStateException("EXPERIMENT_WARMUP");
-            if(disconnect){command("docker","stop","--time","0",container);stopped=true;}else{command("docker","pause",container);paused=true;}
-            accept(serial,async,events(20,0));accept(serial,async,events(10,1));
+            result.put("phase","INJECT_FAULT");if(disconnect){command("docker","stop","--time","0",container);stopped=true;}else{command("docker","pause",container);paused=true;}
+            result.put("phase","FILL_BUFFER");accept(serial,async,events(20,0));accept(serial,async,events(10,1));
             result.put("pendingAtCapacity",pending(serial,async));
             boolean rejected=false;try{accept(serial,async,events(1,1));}catch(RuntimeException expected){rejected=true;}
             result.put("overflowFrameRejected",rejected);result.put("channelAdmission",List.of(Map.of("channel",0,"accepted",21,"rejected",0),Map.of("channel",1,"accepted",10,"rejected",rejected?1:0)));
@@ -70,18 +70,18 @@ final class PublisherFaultExperiment {
             result.put("clientHeapUsedBytes",Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
             result.put("clientRssBytes",Long.parseLong(command("ps","-o","rss=","-p",Long.toString(ProcessHandle.current().pid())).strip())*1024);
             if(paused){command("docker","unpause",container);paused=false;}
-            if(serial!=null)serial.finish();else async.close();factory.destroy();
+            result.put("phase","CLOSE_PUBLISHER");if(serial!=null)serial.finish();else async.close();factory.destroy();
             var stats=serialMode?serial.finish():async.stats();result.put("producer",stats);
             long accepted=((Number)stats.get("accepted")).longValue(),acked=((Number)stats.get("acknowledged")).longValue(),unconfirmed=((Number)stats.get("unconfirmed")).longValue(),declined=((Number)stats.get("rejected")).longValue();
             result.put("conserved",accepted+declined==32&&accepted==acked+unconfirmed);
             result.put("bounded",((Number)result.get("pendingAtCapacity")).intValue()==30&&rejected);
-            if(stopped){command("docker","start",container);stopped=false;ready(bootstrap);}
-            try(var admin=Admin.create(Map.of("bootstrap.servers",bootstrap))) {
+            result.put("phase","RESTORE_BROKER");if(stopped){command("docker","start",container);stopped=false;ready(bootstrap);}
+            result.put("phase","MEASURE_BROKER");try(var admin=Admin.create(Map.of("bootstrap.servers",bootstrap))) {
                 var request=new HashMap<TopicPartition,OffsetSpec>();for(int p=0;p<3;p++)request.put(new TopicPartition(topic,p),OffsetSpec.latest());
                 long broker=admin.listOffsets(request).all().get(10,TimeUnit.SECONDS).values().stream().mapToLong(ListOffsetsResult.ListOffsetsResultInfo::offset).sum();
                 result.put("brokerOffsetSpan",broker);result.put("brokerCountWithinAckRange",broker>=acked&&broker<=accepted);
             }
-            result.put("seconds",(System.nanoTime()-start)/1_000_000_000d);return result;
+            result.put("seconds",(System.nanoTime()-start)/1_000_000_000d);result.put("phase","COMPLETED");
         } finally {
             if(paused)command("docker","unpause",container);
             if(serial!=null)serial.close();if(async!=null)async.close();factory.destroy();

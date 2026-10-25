@@ -8,7 +8,7 @@
 
 commit 대조는 동일1건을 새 group/projection에 사용한다. 별도 JVM에서 실제 Spring Kafka container를 구동하고 DB 전·DB commit 직후·offset commit callback 직후 `Runtime.halt`한다. 종료 hook commit이 개입하지 않는다. AUTO는 enable.auto.commit=true/interval100ms, BATCH는 auto=false/BATCH, MANUAL은 auto=false/MANUAL이며 DB 성공 뒤 acknowledge한다. poll 시작/반환·DB 완료·manual 요청·offset callback을 기록한다. MANUAL_IMMEDIATE와는 다르다.
 
-추가 AUTO_POLL_AHEAD는 DB 작업을 완료하지 않고 다음 poll로 넘어가는 **의도적으로 잘못된 순서**다. AUTO 전체가 항상 누락된다고 주장하기 위한 사례가 아니다.
+추가 AUTO_POLL_AHEAD는 DB 작업을 완료하지 않고 다음 poll로 넘어가는 **의도적으로 잘못된 순서**다. AUTO 전체가 항상 누락된다고 주장하기 위한 사례가 아니다. 위험 순서의 메커니즘 시연이며 자연 발생 확률을 측정하지 않는다.
 
 ACK 대조는 0/1/all 모두 idempotence=false·retries0·client in-flight1로 맞춰 ACK 정책만 비교한다. 제품의 idempotence=true·재시도 성능 측정이 아니다. 동일20건 정상 입력 뒤 두 broker를 내려 ISR1로 만들고 각5건을 발행한다. 마지막 ISR leader도 내리고 나머지 둘을 복귀시켜 실제 leader/ISR/ELR을 관측한 뒤 원래 디스크의 broker를 복구한다. API 성공·broker 확인·최종 broker UUID 집합·DB ledger/bucket을 구분한다. ACK0 offset -1을 확인 응답으로 세지 않는다.
 
@@ -37,9 +37,9 @@ ACK 대조는 0/1/all 모두 idempotence=false·retries0·client in-flight1로 �
 
 ## 첫 실패와 리팩토링
 
-첫 dba0474 실행은 commit10사례와 정상/ISR1 ACK 대조까지 통과했으나 마지막 ISR leader를 내린 뒤 다른 replica가 곧바로 leader가 된다는 하네스 단언에서 진행하지 못했다. 당시 결과는 IllegalStateException만 남아 정확한 메시지/내부 실패 지점은 확정하지 않는다. 마지막 checkpoint가 가리킨 관측 경계를 재검토해 쓰기 가능을 가정하지 않고 leader/ELR을 기록하도록 바꿨다. 두 실행 모두 소유 컨테이너·볼륨·schema 정리가 완료됐다.
+첫 dba0474 실행은 commit10사례와 정상/ISR1 ACK 대조까지 통과했으나 마지막 checkpoint 이후 IllegalStateException으로 종료했다. 당시 결과는 IllegalStateException만 남아 정확한 메시지/내부 실패 지점은 확정하지 않는다. 마지막 checkpoint가 가리킨 관측 경계를 재검토해 쓰기 가능을 가정하지 않고 leader/ELR을 기록하도록 바꿨다. 두 실행 모두 소유 컨테이너·볼륨·schema 정리가 완료됐다.
 
-리팩토링 점검에서 소유 자원 수명은 LocalKafkaCluster, commit 장애는 별도 JVM, 실험 진행/대조는 Session에 유지했다. 생산 consumer를 복제하지 않고 재시작 대조에 실제 ProjectionConsumer를 사용했다. 대조 producer만 모든 ACK 수준에 동일 조건을 주입했다. 새로운 범용 장애 프레임워크는 만들지 않았다.
+리팩토링 점검에서 소유 자원 수명은 LocalKafkaCluster, commit 장애는 별도 JVM, 실험 진행/대조는 Session에 유지했다. 중단 쪽은 설정을 맞춘 테스트용 container이며 error handler/rebalance listener까지 생산 클래스와 같지는 않다. 재시작 대조는 실제 ProjectionConsumer를 사용했다. 대조 producer만 모든 ACK 수준에 동일 조건을 주입했다. 새로운 범용 장애 프레임워크는 만들지 않았다.
 
 ## 결정·공식 근거·미검증
 

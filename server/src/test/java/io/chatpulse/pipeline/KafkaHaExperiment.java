@@ -161,7 +161,18 @@ public final class KafkaHaExperiment {
             }
             return Map.of("requested",(long)count,"attempted",submitted,"acknowledged",acknowledged,"unconfirmed",submitted-acknowledged,"ackMeaning","BROKER_ACK_NOT_DB_COMMIT");
         }
-        TopicDescription description(String input) throws Exception {return admin.describeTopics(List.of(input)).allTopicNames().get(8,TimeUnit.SECONDS).get(input);}
+        TopicDescription description(String input) throws Exception {
+            long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);
+            while(true) {
+                long left=deadline-System.nanoTime();if(left<=0)throw new TimeoutException("HA_TOPIC_VISIBILITY_TIMEOUT");
+                try{return admin.describeTopics(List.of(input)).allTopicNames().get(left,TimeUnit.NANOSECONDS).get(input);}
+                catch(ExecutionException failure) {
+                    if(!(failure.getCause() instanceof org.apache.kafka.common.errors.UnknownTopicOrPartitionException))throw failure;
+                    if(!phases.isEmpty())phases.getLast().merge("topicVisibilityRetries",1,(a,b)->(Integer)a+(Integer)b);
+                    Thread.sleep(50);
+                }
+            }
+        }
         void fullIsr(String input) throws Exception {until(60,()->description(input).partitions().stream().allMatch(p->p.isr().size()==3&&p.leader()!=null&&p.leader().id()>0));}
         void drain(String input,String projection) throws Exception {
             until(30,()->{

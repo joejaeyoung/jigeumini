@@ -108,7 +108,7 @@ class ObservationIntegrationTest {
             context.getEnvironment().setActiveProfiles("pipeline");
             context.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("role",Map.of("pipeline.role","collector")));
             context.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.SystemEnvironmentPropertySource("synthetic-env",
-                    Map.of("OBSERVATIONS_ENABLED","true","OBSERVATIONS_INTERVAL_SECONDS","60","OBSERVATIONS_TTL_SECONDS","120")));
+                    Map.of("OBSERVATIONS_ENABLED","true","OBSERVATIONS_INTERVAL_SECONDS","90","OBSERVATIONS_TTL_SECONDS","240")));
             context.registerBean(io.chatpulse.pipeline.PipelineProperties.class,()->pipeline);
             context.registerBean(io.chatpulse.poc.PocProperties.class,()->new io.chatpulse.poc.PocProperties(List.of(CHANNEL),Duration.ofSeconds(3),Duration.ZERO,Path.of("build","synthetic-poc.json")));
             context.registerBean(ObservationConfiguration.ObservationTopic.class,()->new ObservationConfiguration.ObservationTopic(topic));
@@ -125,7 +125,7 @@ class ObservationIntegrationTest {
             await().atMost(Duration.ofSeconds(20)).untilAsserted(()->assertEquals(1,count()));
             combined.stopped(CHANNEL); awaitCommitted(1);
             var sample=history().samples().getFirst(); assertEquals(73L,sample.viewerCount()); assertEquals("123",sample.sourceBroadcastId());
-            assertEquals(120,sample.ttlSeconds()); assertEquals(1,http.requests.get());
+            assertEquals(240,sample.ttlSeconds()); assertEquals(1,http.requests.get());
             org.mockito.Mockito.verify(telemetry).start(CHANNEL); org.mockito.Mockito.verify(telemetry).stopped(CHANNEL);
         }
     }

@@ -146,5 +146,46 @@
     "analyzer18080",
     "web18082"
   ],
-  "retainedInfrastructure": "Kafka/PostgreSQL for remaining integration tests"
+  "retainedInfrastructure": "Kafka/PostgreSQL for remaining integration tests",
+  "rankingsObserved": {
+    "asOf": "2026-10-25T13:15:12.244223Z",
+    "evaluatedAt": "2026-10-25T13:15:00Z",
+    "status": "READY",
+    "entries": [
+      {
+        "channelId": "49d2c3cf8f0b2843d934ec15e82bb54c",
+        "rank": 1,
+        "count": 914,
+        "referenceCount": 914,
+        "coverage": 1.0,
+        "status": "HEALTHY",
+        "reasons": [],
+        "previousRank": 1,
+        "previousReason": null
+      },
+      {
+        "channelId": "792acf9ca28b42918710327e14b06b68",
+        "rank": 2,
+        "count": 323,
+        "referenceCount": 323,
+        "coverage": 1.0,
+        "status": "HEALTHY",
+        "reasons": [],
+        "previousRank": 2,
+        "previousReason": null
+      },
+      {
+        "channelId": "7ce8032370ac5121dcabce7bad375ced",
+        "rank": 3,
+        "count": 87,
+        "referenceCount": 87,
+        "coverage": 1.0,
+        "status": "HEALTHY",
+        "reasons": [],
+        "previousRank": 3,
+        "previousReason": null
+      }
+    ]
+  },
+  "sharedInfrastructure": "실방송 수집과 c031171 통합45개 실행이 같은 Kafka/DB에서 겹쳤으나 통합 topic/group/schema는 UUID로 격리했다."
 }

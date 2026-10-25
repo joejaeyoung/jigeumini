@@ -4,7 +4,9 @@
 
 ## 실행
 
-`./scripts/check`: Java 단위 63, 하네스 16, 실행 JAR 통과. `./scripts/integration`: 실제 Kafka/PostgreSQL 45개(알림 5·DLQ 10·기존 파이프라인 9·품질 11·replay 10) 통과. `./scripts/web check`: 타입·단위 21·빌드 통과. `./scripts/web test:e2e`: Chromium 25 통과.
+`./scripts/check`: Java 단위 67, 하네스 16, 실행 JAR 통과. `./scripts/integration`: 실제 Kafka/PostgreSQL 47개(알림 5·DLQ 10·토픽 준비 2·기존 파이프라인 9·품질 11·replay 10) 통과. `./scripts/web check`: 타입·단위 21·빌드 통과. `./scripts/web test:e2e`: Chromium 25 통과.
+
+서버 최종 검증은 `d8f3955`, 웹 검증은 이후 웹 변경이 없는 `c031171` 기준이다. 토픽 조회 간헐 실패의 제한 재시도와 재현 범위는 [별도 기록](TOPIC_READINESS.md)을 따른다.
 
 입력은 합성 채널과 UUID, 1분 100건/기준 50건/비율 2의 확정 spike다. 각 시험은 UUID topic/group/DB schema를 사용하고 해당 자원을 정리한다. Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Java 21 환경이다.
 

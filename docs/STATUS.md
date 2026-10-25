@@ -20,17 +20,17 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 ### 관심 방송 알림 #8
 
-`feat/spike-notifications`, F07 → T02/T03/T08/T10. [알림 계약](pipeline/NOTIFICATIONS.md)의 spike/outbox 원자 저장·ACK 뒤 전달 완료, 독립 feed consumer와 멱등 저장, 브라우저 관심/읽음·지연/정정 표시를 구현했다. [검증 기록](pipeline/NOTIFICATIONS_VERIFICATION.md)·[정제 근거](poc/evidence/notifications-2026-10-25.json): Java 단위63·하네스16·실제 Kafka/DB45·웹 단위21·Chromium25와 빌드 통과. outbox commit/ACK 직후 JVM 종료, broker 거부, feed SQL rollback, 60초 소비 중단 중 ranking 진행·재시작 후 회복을 확인했다.
+`feat/spike-notifications`, F07 → T02/T03/T08/T10. [알림 계약](pipeline/NOTIFICATIONS.md)의 spike/outbox 원자 저장·ACK 뒤 전달 완료, 독립 feed consumer와 멱등 저장, 브라우저 관심/읽음·지연/정정 표시를 구현했다. [검증 기록](pipeline/NOTIFICATIONS_VERIFICATION.md)·[정제 근거](poc/evidence/notifications-2026-10-25.json): Java 단위67·하네스16·실제 Kafka/DB47·웹 단위21·Chromium25와 빌드 통과. outbox commit/ACK 직후 JVM 종료, broker 거부, feed SQL rollback, 60초 소비 중단 중 ranking 진행·재시작 후 회복을 확인했다.
 
 단일 broker/RF=1·합성 입력 범위다. broker 전체 단절·복제 HA·고부하는 #11에서 구분하며 feed/live ledger 자동 정리는 남는다. 구현/로컬 검증 완료, Claude 승인·최종 CI·병합 이력은 [PR #20](https://github.com/joejaeyoung/jigeumini/pull/20)에 기록한다.
 
-Claude 초기 리뷰는 `8f23629` APPROVE다. 비차단 지적 중 웹의 600초+1마이크로초 지연 경계 오류를 재현해 수정했고, 저장 payload 오류의 고정 503·명시적 topic bean 주입·순환 소수 ratio 검증을 보완했다. `c031171`의 최종 로컬 회귀63/16/45/21/25 통과. HEAD 재리뷰·CI를 확인한다. 영구 outbox 선두 차단·버전 이행·오래된 CreateTime 보존과 공유 연결 비용은 계약에 명시했다.
+Claude 초기 리뷰는 `8f23629` APPROVE다. 비차단 지적 중 웹의 600초+1마이크로초 지연 경계 오류를 재현해 수정했고, 저장 payload 오류의 고정 503·명시적 topic bean 주입·순환 소수 ratio 검증을 보완했다. `c031171`의 로컬 회귀63/16/45/21/25와 Claude 승인을 확인했다. 토픽 초기화 보완 `d8f3955`의 최종 서버67/16/47 회귀와 Claude 승인 후 최종 문서 HEAD의 재리뷰·CI를 확인한다. 웹은 이후 변경 없이21/25 근거를 유지한다. 영구 outbox 선두 차단·버전 이행·오래된 CreateTime 보존과 공유 연결 비용은 계약에 명시했다.
 
 사용자 요청의 [실행 확인](poc/evidence/runtime-smoke-2026-10-25.json): 실제 서버에 연결한6개 경로에서 JS/API 오류0, 데스크톱과320px 알림 화면의 가로 넘침0. 공개3채널은 완료1분 순위에서 모두 HEALTHY였다. 약5분30초의 수신6,965=ACK6,965=DB ledger/bucket 증가6,965, 거절/미확인0. 사용자가 확인 후 종료를 요청해 계획600초 전에 중단했으며 CANCELLED를 완료 시험PASS로 바꾸지 않는다. 실제 급상승/알림은 관측하지 않았다. 수집기·18080·18082는 종료하고 통합 검증용 Kafka/DB만 유지한다. 원문·제목·채널명은 검증 출력에 저장하지 않았다.
 
 ### 토픽 초기화 간헐 실패 보완
 
-PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `40196842128`에서 `DeadLetterIntegrationTest.setup → ensureTopic.describeConfigs`의 UnknownTopicOrPartitionException으로 실패했다. PR #18과 같은 위치다. 실제 로컬 생성/조회200회에서는 재현0회이며 broker 내부 원인은 미확정이다. 생성·토픽 조회 성공 뒤 설정 조회가 한 번 실패하는 Admin 응답을 주입해 기존 시작 실패를 재현했고, 해당 오류만 공통10초 기한 안에서 재조회하도록 보완 중이다. 권한/설정 오류 즉시 거부, 중단 신호 복원, 종료 한도를 검사한다. 단위 회귀4개 통과 후 전체 검증·재리뷰를 진행한다.
+PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `40196842128`에서 `DeadLetterIntegrationTest.setup → ensureTopic.describeConfigs`의 UnknownTopicOrPartitionException으로 실패했다. PR #18과 같은 위치다. 실제 로컬 생성/조회200회에서는 재현0회이며 broker 내부 원인은 미확정이다. 생성·토픽 조회 성공 뒤 설정 조회가 한 번 실패하는 Admin 응답을 주입해 기존 시작 실패를 재현했고, 해당 오류만 공통10초 기한 안에서 재조회하도록 보완했다. 권한/설정 오류 즉시 거부, 중단 신호 복원, 종료 한도의 단위 회귀4개와 실제 새 토픽20개의 최초/기존 초기화·잘못된 설정 거부가 통과했다. `d8f3955`의 전체 단위67·하네스16·실제 Kafka/DB47 통과와 Claude APPROVE를 확인했다. [처리 계약](pipeline/TOPIC_READINESS.md)·[정제 근거](poc/evidence/topic-readiness-2026-10-25.json)에 원인 미확정과 API 응답 회귀의 범위를 구분한다. 최종 원격 CI는 PR에서 확인한다.
 
 #5 시청자 관측 기반은 별도 `feat/viewer-observations` 브랜치의 진행분으로 보관했다. 원천 수치 어댑터·이벤트 계약·독립 소비/이력 기반을 시작했으며 #8 기동 회귀 해결 후 이어서 검증한다.
 

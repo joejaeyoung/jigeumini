@@ -14,6 +14,44 @@
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
+## 기술 목표 추적표
+
+2026-10-25 · 브랜치 `feat/technical-goals` · [PR #14](https://github.com/joejaeyoung/jigeumini/pull/14).
+[기술 목표·기능 매핑](TECH_GOALS.md)의 T ID별 상태 정본이다.
+기존 검증은 `44b6321` M1 기록을 기준으로 연결하고 #3의 독립 소비·품질 관측 검증 범위를 추가했다. `검증됨`은 아래 범위만 의미하며 기능 전체 완료와 구분한다.
+
+<!-- tech-status:start -->
+| 기술 ID | 상태 | 검증 근거 | 확인한 범위 | 남은 문제·다음 행동 |
+|---|---|---|---|---|
+| T01 | 부분 검증 | [M1 자동 검사](pipeline/VERIFICATION.md#자동-검사) | BATCH의 DB 성공 이후 커밋·DB 실패 시 진행 차단 | F11에서 Auto/BATCH/MANUAL 비교, 직접 ACK와 컨테이너 커밋 구분 |
+| T02 | 부분 검증 | [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영 | 신규 trend의 충돌·rollback 장애별 전용 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
+| T03 | 검증됨 | [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건 | F07 outbox의 별도 장애 경계 검증; 모든 장애·고부하 복구로 확대 해석하지 않음 |
+| T04 | 부분 검증 | [최초 offset·재시작](pipeline/VERIFICATION.md#자동-검사) | 빈 partition earliest 초기화 후 none 재시작 | #9 고정 manifest replay·retention 만료 실패·live 불변 검증 |
+| T05 | 부분 검증 | [DB 오류·malformed 검사](pipeline/VERIFICATION.md#자동-검사) | DB 복구 재시도, 잘못된 입력의 offset 차단 | #10 DLQ·실패 분류·ACK 경계와 정상 입력 진행 검증 |
+| T06 | 미착수 | — | channelId·3 partition 설정 구현, 키별 순서 실험 미실행 | #11 동일 키 분포·다중 producer·증설 영향 실험 |
+| T07 | 미착수 | — | hot key 분포·shard 비교 근거 없음 | #11 균등/80% 편향과 키 분산 후보 비용 비교 |
+| T08 | 부분 검증 | [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
+| T09 | 미착수 | — | timeout 설정 구현, 제한별 장애 실험 미실행 | #11 poll 초과·heartbeat 단절·consumer 추가/종료를 각각 재현 |
+| T10 | 부분 검증 | [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
+| T11 | 부분 검증 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |
+| T12 | 미착수 | — | 직렬 ACK worker 기준선만 존재 | #11 bounded async 후보와 처리량·메모리·실패 추적 비교 |
+<!-- tech-status:end -->
+
+하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.
+AGENTS·이슈/PR 템플릿에 갱신 절차를 연결했고, `./scripts/check` 및 CI의 `tech-goals`에서 실행한다.
+이 문서화 작업은 새로운 Kafka 실험의 통과 기록이 아니다.
+
+최초 하네스 검증: `./scripts/check` 통과(추적 검사기 테스트 11개, 문서 링크, 서버 검사·JAR는 Gradle
+UP-TO-DATE). `--base develop` 검사, 잘못된 기준 ref의 실패, CI YAML·shell 구문도 확인했다.
+추적 테스트는 ID 누락·미등록 참조·중복·기능 연결 누락·근거 없는 검증 상태·표식 손상·기준 대비 동시 삭제를 포함한다.
+이번 변경에서 Kafka/DB 통합·live 수신·원격 CI는 새로 실행하지 않았다.
+
+PR #14 리뷰 후 보완: Claude CLI가 `7f2cf86`에서 지적한 force-push 이전 SHA 확보,
+`—` 빈 값 검사, 공백 정렬된 기준선의 기능 ID 삭제 검사를 수정했다. 로컬 테스트 16개에
+실제 임시 bare 저장소의 force-push·shallow clone·이전 SHA fetch와 확보 실패 시 이벤트별 처리를 포함했다.
+push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차단한다. 첫 HEAD의 원격 서버/웹/기술 목표 CI는 통과했다.
+수정 HEAD의 재리뷰·최종 CI·병합 결과는 PR #14에서 확인한다. 새 Kafka 기술 실험은 수행하지 않았다.
+
 ## 수집 품질·순위·급상승 구현
 
 2026-10-25 · [이슈 #3](https://github.com/joejaeyoung/jigeumini/issues/3) · 브랜치 `feat/quality-rankings`. [메타데이터 PR #12](https://github.com/joejaeyoung/jigeumini/pull/12)의 브랜치에서 분기해 변경을 분리했다. #2·#3만 구현하며 #5~#11은 이번 범위에 포함하지 않는다. 보드는 In Progress, 검토·병합은 남겨둔다.

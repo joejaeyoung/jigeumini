@@ -216,6 +216,14 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. 잔존 입력 중 eventTime 최근7일만 반영하며 더 오래된 입력은 진행 위치만 갱신한다. 리포트에는 receivedAt48시간 차단을 적용하지 않는다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.
 
+## 수집 대상 선정 미리보기
+
+공식 라이브 목록/팔로워 합계와 채팅 접근 권한을 구분하고, 팔로워 하한·접근 확인 목록·최대 채널 수로 정제된 선정 계획을 만든다. 기본은 합성 입력이며 수집기를 시작하지 않는다. [선정 계약·실행법](docs/discovery/README.md)·[공식 범위 조사](docs/research/CHZZK_SCALE.md)를 따른다.
+
+```bash
+./scripts/selection fixture docs/discovery/synthetic-policy.json docs/discovery/synthetic-catalog.json work/selection.json
+```
+
 ## 격리된 합성 부하 실험
 
 `./scripts/experiment smoke work/experiment-smoke.json`으로 먼저 실행한다. `baseline`은 직렬 ACK 기준선, `steady`는500건/초600초, `burst`는2,000건/초60초의 bounded async 실험 후보다. 운영 발행기 설정은 바꾸지 않는다. 출력 경로는 새 파일이어야 하며 JSON·진행JSON·HTML을 만든다. 목표 달성과 실제 입력/ACK/DB/replay 대조를 구분한다. 공개 플랫폼에 요청하지 않는다.

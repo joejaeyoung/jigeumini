@@ -8,7 +8,7 @@
 
 원본마다 코드 commit·runtime class hash·시각·합성 입력 정의·환경·목표·실제 계수·partition별 표본·DB·replay·정리 여부를 보존한다. matrix 사이 진단 항목이 추가되어 commit이 다르며 빈 값을 사후 추정하지 않는다. 공유 호스트/서비스에서 실행했고 다른 작업 폴더의 단위 빌드도 있었다. 별도 DB 부하 실험은 직렬 실행했으나 전용 성능 장비나 통계적 반복 실험은 아니다. 지연 표본과 JVM 메모리에 하네스 자체 자료구조가 포함된다.
 
-`correct`는 수락/ACK/미확인·DB·replay 대조이며 목표 입력률 달성과 별개다. 이전 하네스의 정상 종료 경합은 표본 실패를 기록하면서 correct=true로 끝날 수 있었다. 이 원본들은 수정하지 않고 비교 보고서에서 `measurementIssueCodes`와 `verificationComplete=false`로 표시한다. 정상 종료 계측 수명을 분리한 뒤 재검증한다. 원천 live·전체 제품 projection 동시 비용·복제 HA·영역 장애·장기 디스크 보존은 여기서 검증하지 않았다.
+`correct`는 수락/ACK/미확인·DB·replay 대조이며 목표 입력률 달성과 별개다. 이전 하네스의 정상 종료 경합은 표본 실패를 기록하면서 correct=true로 끝날 수 있었다. 이 원본들은 수정하지 않고 비교 보고서에서 `measurementIssueCodes`와 `verificationComplete=false`로 표시한다. 정상 종료 계측 수명을 분리한 뒤12프로필을 재검증했고 새 결과에는 계측 실패 코드가 없다. 원천 live·전체 제품 projection 동시 비용·복제 HA·영역 장애·장기 디스크 보존은 여기서 검증하지 않았다.
 
 ## 첫 steady와 발행 후보
 
@@ -22,7 +22,7 @@
 
 ## 편향·consumer·복구 해석
 
-균등20채널의 실제 partition 배치는25/30/45%였다. consumer1/2/3/4의 할당은[3]/[1,2]/[1,1,1]/[0,1,1,1]이며4번째가 추가 partition을 받지 못했다. consumer 수에 비례한 처리량 증가를 가정하지 않는다. 첫 uniform 계측 종료 경합이 있었던 행은 최종 완료 근거로 사용하지 않고 재검증한다.
+균등20채널의 실제 partition 배치는25/30/45%였다. consumer1/2/3/4의 할당은[3]/[1,2]/[1,1,1]/[0,1,1,1]이며4번째가 추가 partition을 받지 못했다. consumer 수에 비례한 처리량 증가를 가정하지 않는다. 첫 uniform 계측 종료 경합이 있었던 행은 최종 완료 근거로 사용하지 않고 아래 final- 결과로 다시 검증했다.
 
 한 채널80% 입력은 단일 partition에약88.4%가 몰렸다. hot-3의 p95=2,288.88ms였지만 hot-1은404.85ms였다. 같은 채널의 bucket을 합치면 SQL 작업이 줄 수 있고 공유 자원 변동도 있어 모든 hot 입력이 더 느리다고 단정하지 않는다. 일부 최초 행의 계측 종료 경합도 별도로 표시한다.
 
@@ -40,3 +40,27 @@ A를60초 중단하는 동안 독립B는5,010→35,010건으로 진행했다. �
 4. 프로필/유한상한은`ExperimentPlan`, 공통HTML은`ExperimentReport`, 계측종료는`ExperimentSampler`로분리했다. 가변broker/DB/group수명은Session하나가소유한다. 예약장애작업의예외도고정실패이벤트로보존한다. 인프라정본은로컬broker id1,chat-pulse-kafka-1/postgres-1이다.
 
 자원2GiB guard와실제자원조회는각수동프로필에서실행했다. 통합smoke는resources=false로빠르게동작하므로디스크부족주입을통과했다고쓰지않는다. 저용량/쿼터초과를실제디스크를채워시험하지않았다. UUID별topic/schema/group정리와공유live총계불변을대조한다. ACK/commit방식비교는[#31](https://github.com/joejaeyoung/jigeumini/issues/31),복제ISR는#29에서별도로검증한다.
+
+## 계측 보완 뒤 최종12프로필
+
+[원본·정제표](../poc/evidence/load-2026-10-26/report/README.md)의 `final-*`12개가 추가됐다. steady는7d7b87d, 나머지는aab0b76이며 각 class hash를 보존한다. 둘 사이 변화는 운영 테이블 존재를 가정하지 않는 기준값 조회·실패 단계 진단·회귀 테스트이고 생성/발행/DB/replay/종료계측 로직은 같다. 최종 문서·#26 통합 HEAD에서 같은 바이너리로39회를 실행했다고 표시하지 않는다.
+
+| 최종 프로필 | ACK/거절 | p95/p99 A(ms) | 입력 목표 |
+|---|---:|---:|---|
+| steady500/s·600초 | 300000/0 | 17.152/34.270 | 완료 |
+| serial-control100/s | 1500/0 | 44.426/75.936 | 완료 |
+| async-control100/s | 1500/0 | 23.362/58.218 | 완료 |
+| baseline500/s | 1370/10 | 8736.107/9004.476 | 미달 |
+| async-baseline500/s | 15000/0 | 69.488/100.932 | 완료 |
+| burst2000/s·60초 | 120000/0 | 54.857/78.719 | 완료 |
+| uniform1/2/3/4 | 각30000/0 | 433.356/533.631 · 124.350/153.412 · 65.367/100.926 · 111.943/174.235 | 모두 완료 |
+| hot-1 | 30000/0 | 287.133/333.763 | 완료 |
+| poll-stall | 물리15150/0 | 5033.947/7366.129 | unique15000 완료 |
+
+모두 accepted=ACK, unconfirmed0, DB unique/bucket·고정 replay차이0,cleanupComplete=true다. 정상 종료 계측 실패0이며 baseline의 예상 PUBLISH_REJECTED와 poll 정지/재개 이벤트는 실패 코드로 바꾸지 않는다. steady B도300000개,p95/p99=64.924/153.616ms, fixed replay141.238초였다. baseline의 producer drain 포함 ACK관측률116.272/s와 완료async499.821/s는 같은 완료 입력 총량의 속도 배수가 아니다. 100/s 통제에서는 둘 다1500개를 완료했다.
+
+## CI·브라우저와 남은 범위
+
+8d533ee CI에서 부하스모크1개가0.16초에 실패했다. 당시 단계/SQLSTATE가 없어 정확한 예외는 소급 확정하지 않는다. public 운영 테이블 존재를 가정한 조회를 발견해 없음/일부/존재를 실제 격리 schema로 검증하고, 원천 상태를 migration으로 바꾸지 않게 보완했다. aab0b76의 push40209922599·PR40209926881은 서버단위91·하네스16·실제KafkaDB80·웹29/Chromium31이 통과했다. 새 CI는 원격 새 DB, 수동 부하는 기존 운영 테이블이 있는 로컬 DB라는 차이를 기록한다.
+
+HTML은 정제된 공유용 파일이며 원본의 과거실패·계측확인 필요를 그대로 보인다. 제품 적용은#27, 복제HA는#29,ACK0/1/all·Auto/BATCH/MANUAL은#31이다. 자원guard의 디스크부족 주입·모든 제품 projection 비용·다중호스트·공개 live 고부하를 검증하지 않았다.

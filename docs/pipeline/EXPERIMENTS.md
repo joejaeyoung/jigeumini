@@ -34,7 +34,7 @@ python3 scripts/summarize-experiments.py work/report work/steady.json work/burst
 
 ## 격리와 자원
 
-각 실행의 UUID `exp.chat.*` topic, `exp.a.*`/`exp.b.*` group, `exp_*` schema만 만들고 정리한다. own schema에만 migration을 적용한다. 운영 ledger/bucket 계수의 전후 불변을 확인한다. 이 검사 중 다른 운영 입력이 들어오면 비교가 실패할 수 있으며 다른 작업을 중지시키지는 않는다. 원문·닉네임·시청자 사용자ID·토큰은 생성하거나 저장하지 않는다. 채널/이벤트/세션 ID는 고정 seed에서 생성한 합성 값이다.
+각 실행의 UUID `exp.chat.*` topic, `exp.a.*`/`exp.b.*` group, `exp_*` schema만 만들고 정리한다. own schema에만 migration을 적용한다. 운영 ledger/bucket 존재 여부와 존재할 경우 계수의 전후 불변을 확인한다. 없는 테이블을 생성하거나0건으로 대체하지 않는다. 이 검사 중 다른 운영 입력이 들어오면 비교가 실패할 수 있으며 다른 작업을 중지시키지는 않는다. 원문·닉네임·시청자 사용자ID·토큰은 생성하거나 저장하지 않는다. 채널/이벤트/세션 ID는 고정 seed에서 생성한 합성 값이다.
 
 - 생성 최대600초·400,000 unique, 2,000/s, 소비자 최대4명. 입력 뒤 drain180초, fixed-range replay300초. broker-fault는 broker 시작90초/명령10초/발행기 drain10초의 유한 대기를 사용한다.
 - JVM heap768MiB. heartbeat 자식은128MiB이며 지연 A 표본은 부모JVM에서 처리한 이벤트만 포함한다. B 지연은 전체를 계측한다.
@@ -61,3 +61,5 @@ seed20261025, eventId=`UUID(seed/index)`, eventTime=`base+index/rate`이며 매1
 직렬 발행기는 운영 코드 그대로며 bounded async는 테스트 소스에만 둔다. async도 ACK 대기 포함1,000개·frame 전체 수락/거절·실패 후 수집 중단을 유지한다. 두 producer 프로필은 각1,000개로 총2,000개다. 전역 버퍼는 채널별 예약 용량이 없어서 먼저 온 채널이 공간을 차지할 수 있다. 생산 채택/키 분산/확장 판단은 실측 결과와 미검증 경계를 함께 적는다.
 
 producer의 request-rate/record-send-rate는 Kafka client의 시간 창 평균이다. 짧은 실패 실행과30초 완료 실행의 raw rate를 직접 처리량으로 비교하지 않는다. `producerSettledSeconds`와 `acknowledgedPerSecondIncludingDrain`은 생성 시작부터 producer close 뒤 ACK 계수가 확정된 시각까지를 사용한다. 그 필드가 없는 초기 실행에는 사후 추정값을 채우지 않는다. `pendingObservedAfterRejection`은 거절 직후 읽은 값이며 그 사이 ACK가 진행될 수 있다. 주기적으로 표본한 highWater와 실제 최댓값을 구분한다.
+
+계측은 ExperimentSampler가 실행 중 sample을 최대15초 기다리고 종료한다. 실제 실패는 abort와 고정 이벤트로 기록하고 producer/DB drain 뒤에도 확인한다. 이전 자료의 RESOURCE_OR_SAMPLE_FAILED는 정제 보고서에서 verificationComplete=false다. broker STOP은 콜백 조기 실패 때문에 상한30 이전 거절이 가능하므로 실제 수락/거절·한도 이내를 확인하고, PAUSE는30 도달을 요구한다.

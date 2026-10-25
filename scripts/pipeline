@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+role="${1:-help}"
+if [[ "$role" != analyzer && "$role" != collector ]]; then
+  echo './scripts/pipeline analyzer [--pipeline.offset-reset=earliest (새 그룹 최초 실행만)]'
+  echo './scripts/pipeline collector <채널ID[,채널ID]> [60s] [30s]'
+  exit 1
+fi
+shift
+./gradlew --console=plain bootJar
+# 실행 중 build/libs JAR가 다시 빌드되어도 프로세스의 classpath는 바뀌지 않는다.
+mkdir -p work/runtime
+runtime_jar="$(mktemp "$PWD/work/runtime/launch.XXXXXX")"
+cp build/libs/chat-pulse-poc.jar "$runtime_jar"
+chmod 400 "$runtime_jar"
+mkdir -p work
+if [[ "$role" == analyzer ]]; then
+  exec java -jar "$runtime_jar" --spring.profiles.active=pipeline --pipeline.role=analyzer \
+    --spring.main.web-application-type=servlet --server.address=127.0.0.1 --server.port=18080 "$@"
+else
+  [[ $# -ge 1 && $# -le 3 ]] || { echo '채널ID, 기간, 재접속 시점 확인'; exit 1; }
+  run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  exec java -jar "$runtime_jar" --spring.profiles.active=pipeline --pipeline.role=collector \
+    "--poc.channels=$1" "--poc.duration=${2:-60s}" "--poc.reconnect-after=${3:-0s}" \
+    "--poc.output=work/pipeline-$run_id.json"
+fi

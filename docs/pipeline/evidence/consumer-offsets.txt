@@ -1,0 +1,5 @@
+
+GROUP                TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                          HOST            CLIENT-ID
+chat-ranking-live-v1 chat.received.v1 1          0               0               0               consumer-chat-ranking-live-v1-1-7a96ea27-35be-41d0-bb0f-2c79878776ff /172.27.0.1     consumer-chat-ranking-live-v1-1
+chat-ranking-live-v1 chat.received.v1 0          135             135             0               consumer-chat-ranking-live-v1-1-7a96ea27-35be-41d0-bb0f-2c79878776ff /172.27.0.1     consumer-chat-ranking-live-v1-1
+chat-ranking-live-v1 chat.received.v1 2          0               0               0               consumer-chat-ranking-live-v1-1-7a96ea27-35be-41d0-bb0f-2c79878776ff /172.27.0.1     consumer-chat-ranking-live-v1-1

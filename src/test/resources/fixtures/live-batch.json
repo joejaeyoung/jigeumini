@@ -1,0 +1,7 @@
+{"cmd":93101,"bdy":[
+  {"msgTypeCode":1,"msgTime":1792897200120,"msg":"PRIVATE_MESSAGE_CANARY","profile":"PRIVATE_PROFILE_CANARY","extras":"PRIVATE_TOKEN_CANARY"},
+  {"messageTypeCode":1,"messageTime":1792897200220},
+  {"msgTypeCode":10,"msgTime":1792897200320},
+  {"msgTypeCode":30,"msgTime":1792897200420},
+  {"msgTypeCode":1,"msgTime":"bad-time"}
+]}

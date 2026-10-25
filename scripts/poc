@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ $# -lt 1 || $# -gt 3 || "$1" == "--help" ]]; then
+  echo '사용법: ./scripts/poc <채널ID[,채널ID]> [기간:60s] [강제재접속시점:0s]'
+  echo '예: ./scripts/poc 45e71a76e949e16a34764deb962f9d9f 30m 15m'
+  exit 0
+fi
+./gradlew --console=plain bootJar
+# 실행 중 build/libs JAR가 다시 빌드되어도 프로세스의 classpath는 바뀌지 않는다.
+mkdir -p work/runtime
+runtime_jar="$(mktemp "$PWD/work/runtime/launch.XXXXXX")"
+cp build/libs/chat-pulse-poc.jar "$runtime_jar"
+chmod 400 "$runtime_jar"
+run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+mkdir -p work
+exec java -jar "$runtime_jar" \
+  "--poc.channels=$1" "--poc.duration=${2:-60s}" "--poc.reconnect-after=${3:-0s}" \
+  "--poc.output=work/poc-$run_id.json"

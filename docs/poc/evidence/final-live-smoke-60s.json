@@ -1,0 +1,94 @@
+{
+  "reportVersion" : 1,
+  "mode" : "LIVE_CHZZK_ANONYMOUS_READ",
+  "startedAt" : "2026-10-25T04:59:44.084609Z",
+  "completedAt" : "2026-10-25T05:00:44.166922Z",
+  "requestedDurationSeconds" : 60,
+  "forcedReconnectAfterSeconds" : 30,
+  "verdict" : "PASS",
+  "channels" : [ {
+    "channelId" : "45e71a76e949e16a34764deb962f9d9f",
+    "startedAt" : "2026-10-25T04:59:44.084746Z",
+    "state" : "DURATION_COMPLETE",
+    "verdict" : "PASS",
+    "checks" : {
+      "handshake" : true,
+      "liveChat" : true,
+      "reconnectRequired" : true,
+      "heartbeatPong" : true,
+      "chatAfterReconnect" : true
+    },
+    "elapsedSeconds" : 60.081456958,
+    "connectedSeconds" : 58.018792208,
+    "connectionTimeRatio" : 0.9656688626668639,
+    "attempts" : 2,
+    "connections" : 2,
+    "chatCount" : 588,
+    "chatAfterReconnect" : 348,
+    "frames" : 85,
+    "receivedFrameBytes" : 771224,
+    "maxFrameBytes" : 25019,
+    "clientPings" : 2,
+    "serverPongs" : 2,
+    "commands" : {
+      "10100" : 2,
+      "93102" : 2,
+      "93101" : 79,
+      "10000" : 2
+    },
+    "skipped" : {
+      "DONATION" : 2
+    },
+    "reasons" : {
+      "DURATION_COMPLETE" : 1,
+      "FORCED_RECONNECT" : 1
+    },
+    "candidateIdFieldPresence" : { },
+    "firstEventTime" : "2026-10-25T04:59:43.922Z",
+    "lastEventTime" : "2026-10-25T05:00:42.746Z",
+    "lateMessagesOver120s" : 0,
+    "meanSourceToReceiveMillis" : 1150.187074829932,
+    "maxSourceToReceiveMillis" : 2026
+  }, {
+    "channelId" : "783f853d5504c4bf2f07ad78ed2a4ff6",
+    "startedAt" : "2026-10-25T04:59:44.084753Z",
+    "state" : "DURATION_COMPLETE",
+    "verdict" : "PASS",
+    "checks" : {
+      "handshake" : true,
+      "liveChat" : true,
+      "reconnectRequired" : true,
+      "heartbeatPong" : true,
+      "chatAfterReconnect" : true
+    },
+    "elapsedSeconds" : 60.081497583,
+    "connectedSeconds" : 56.430669125,
+    "connectionTimeRatio" : 0.9392353951737549,
+    "attempts" : 2,
+    "connections" : 2,
+    "chatCount" : 36,
+    "chatAfterReconnect" : 20,
+    "frames" : 37,
+    "receivedFrameBytes" : 37226,
+    "maxFrameBytes" : 2158,
+    "clientPings" : 2,
+    "serverPongs" : 2,
+    "commands" : {
+      "10000" : 2,
+      "93101" : 33,
+      "10100" : 2
+    },
+    "skipped" : { },
+    "reasons" : {
+      "DURATION_COMPLETE" : 1,
+      "FORCED_RECONNECT" : 1
+    },
+    "candidateIdFieldPresence" : { },
+    "firstEventTime" : "2026-10-25T04:59:51.067Z",
+    "lastEventTime" : "2026-10-25T05:00:40.957Z",
+    "lateMessagesOver120s" : 0,
+    "meanSourceToReceiveMillis" : 454.94444444444446,
+    "maxSourceToReceiveMillis" : 1464
+  } ],
+  "limitations" : [ "No source completeness or upstream dedup guarantee", "No Kafka/DB delivery test", "No raw chat, nickname, user ID or token stored" ]
+}

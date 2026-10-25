@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+"""현재 공개 방송의 채널 ID·표시명만 출력한다. 로그인 정보를 사용하지 않는다."""
+import json
+import subprocess
+import sys
+
+try:
+    result = subprocess.run([
+        "curl", "--fail", "--silent", "--show-error", "--connect-timeout", "5", "--max-time", "15",
+        "--max-filesize", "1048576", "--user-agent", "ChatPulse-PoC/0.1",
+        "https://api.chzzk.naver.com/service/v1/lives?size=10",
+    ], capture_output=True, check=True, timeout=20)
+    root = json.loads(result.stdout)
+    if root.get("code") != 200:
+        raise ValueError("API response")
+    for live in (root.get("content") or {}).get("data", []):
+        if live.get("adult") is not False:
+            continue
+        channel = live.get("channel") or {}
+        print(json.dumps({"channelId": channel.get("channelId"), "name": channel.get("channelName")}, ensure_ascii=False))
+except (subprocess.SubprocessError, ValueError, OSError):
+    print("공개 방송 목록을 조회하지 못했습니다. 나중에 재시도하거나 채널 ID를 직접 지정하세요.", file=sys.stderr)
+    sys.exit(2)

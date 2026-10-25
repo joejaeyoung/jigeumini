@@ -1,0 +1,60 @@
+{
+  "verdict": "PASS",
+  "collected": 38,
+  "kafkaAcknowledged": 38,
+  "ledgerIncrease": 38,
+  "bucketIncrease": 38,
+  "before": {
+    "consumer": {
+      "successfulBatches": 0,
+      "running": true,
+      "state": "WAITING_FOR_EVENTS",
+      "failedAttempts": 0,
+      "assignedPartitions": 3
+    },
+    "scope": "COLLECTED_CHANNELS_ONLY",
+    "progress": [
+      {
+        "partition": 0,
+        "checkedAt": "2026-10-25T05:58:57.788541Z",
+        "nextResolvedOffset": 97,
+        "topic": "chat.received.v1"
+      }
+    ],
+    "coverageMeasured": false,
+    "asOf": "2026-10-25T06:00:32.038088Z",
+    "totals": {
+      "bucketTotal": 97,
+      "runId": "live-v1",
+      "projection": "ranking",
+      "processedEvents": 97
+    }
+  },
+  "after": {
+    "consumer": {
+      "successfulBatches": 38,
+      "running": true,
+      "state": "RUNNING",
+      "failedAttempts": 0,
+      "assignedPartitions": 3
+    },
+    "scope": "COLLECTED_CHANNELS_ONLY",
+    "progress": [
+      {
+        "partition": 0,
+        "checkedAt": "2026-10-25T06:01:33.529251Z",
+        "nextResolvedOffset": 135,
+        "topic": "chat.received.v1"
+      }
+    ],
+    "coverageMeasured": false,
+    "asOf": "2026-10-25T06:01:46.880900Z",
+    "totals": {
+      "bucketTotal": 135,
+      "runId": "live-v1",
+      "projection": "ranking",
+      "processedEvents": 135
+    }
+  },
+  "limits": "다른 생산자가 같은 namespace에 쓰지 않는 로컬 단일 수집 실행의 전후 비교. 원천 누락률 검증 아님."
+}

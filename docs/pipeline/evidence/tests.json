@@ -1,0 +1,60 @@
+{
+  "test": [
+    {
+      "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:46.667Z",
+      "time": "0.678"
+    },
+    {
+      "name": "io.chatpulse.pipeline.EventCodecTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:47.348Z",
+      "time": "0.045"
+    },
+    {
+      "name": "io.chatpulse.poc.ChannelProbeTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:47.394Z",
+      "time": "9.529"
+    },
+    {
+      "name": "io.chatpulse.poc.ChatProtocolTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:56.924Z",
+      "time": "0.031"
+    },
+    {
+      "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:56.956Z",
+      "time": "0.141"
+    }
+  ],
+  "integrationTest": [
+    {
+      "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T05:59:57.864Z",
+      "time": "12.101"
+    }
+  ]
+}

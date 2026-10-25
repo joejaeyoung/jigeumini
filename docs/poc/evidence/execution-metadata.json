@@ -1,0 +1,26 @@
+{
+  "branch": "technicaltest/spring-poc",
+  "gitCommit": null,
+  "java": "Amazon Corretto 21.0.11",
+  "os": "Darwin",
+  "architecture": "arm64",
+  "libraries": [
+    "jackson-databind-3.1.7.jar",
+    "spring-boot-4.0.9.jar",
+    "spring-websocket-7.0.10.jar",
+    "tomcat-embed-websocket-11.0.27.jar"
+  ],
+  "soakJarSha256": "5963ae3819652750a5104dcdac0bef5e9a99cde8cccbeb9ec9c129dfa6574f97",
+  "finalJarSha256": "c9d7aa2ac7ff6bab0ca46f67b556d0482a5710ab89efd64751f974859b88e836",
+  "changedClassesAfterSoakStart": [
+    "BOOT-INF/classes/io/chatpulse/poc/ChatConnection.class",
+    "BOOT-INF/classes/io/chatpulse/poc/ChatProtocol.class",
+    "BOOT-INF/classes/io/chatpulse/poc/PocRunner.class"
+  ],
+  "soakVmFlags": [
+    "-XX:CICompilerCount=4 -XX:ConcGCThreads=3 -XX:G1ConcRefinementThreads=12 -XX:G1EagerReclaimRemSetThreshold=64 -XX:G1HeapRegionSize=8388608 -XX:G1RemSetArrayOfCardsEntries=64 -XX:G1RemSetHowlMaxNumBuckets=8 -XX:G1RemSetHowlNumBuckets=8 -XX:GCDrainStackTargetSize=64 -XX:InitialHeapSize=805306368 -XX:MarkStackSize=4194304 -XX:MaxHeapSize=12884901888 -XX:MaxNewSize=7725907968 -XX:MinHeapDeltaBytes=8388608 -XX:MinHeapSize=8388608 -XX:NonNMethodCodeHeapSize=5839564 -XX:NonProfiledCodeHeapSize=122909338 -XX:ProfiledCodeHeapSize=122909338 -XX:ReservedCodeCacheSize=251658240 -XX:+SegmentedCodeCache -XX:SoftMaxHeapSize=12884901888 -XX:+UseCompressedOops -XX:+UseG1GC -XX:-UseNUMA -XX:-UseNUMAInterleaving "
+  ],
+  "resourceSamples": 53,
+  "observedRssMiBMin": 111.7,
+  "observedRssMiBMax": 311.4
+}

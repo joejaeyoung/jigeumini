@@ -1,0 +1,114 @@
+# M1 — 채팅 수집부터 집계까지
+
+2026-10-25 · `feat/chat-pipeline`
+
+Spring 수집기에서 치지직 공개 채팅 발생 이벤트를 Kafka로 보내고, 별도 Spring 분석기가 PostgreSQL에 10초 단위로 집계한다. 채팅 원문·닉네임·사용자 ID는 Kafka나 DB에 저장하지 않는다.
+
+```mermaid
+flowchart LR
+  C[치지직 익명 READ] --> W[Spring WebSocket 수집기]
+  W --> B[최대 1000개 발행 큐]
+  B --> K[Kafka chat.received.v1]
+  K --> A[Spring 배치 소비자]
+  A --> D[(PostgreSQL 처리 이력 + 10초 집계)]
+  D --> Q[조회 API · 로컬 화면]
+```
+
+## 실행
+
+Java 21, Python 3, curl, Docker Compose가 필요하다. 저장소 루트에서:
+
+```bash
+./scripts/infra up
+./scripts/check
+./scripts/integration
+
+# 터미널 A: 새 consumer group의 최초 실행에서만 earliest를 명시한다.
+./scripts/pipeline analyzer --pipeline.offset-reset=earliest
+# 이후 재시작은 아래 명령. 저장된 offset이 없거나 retention 밖이면 자동 이동하지 않는다. 최초 earliest 실행은 입력이 없는 partition의 시작 offset도 기록한다.
+# ./scripts/pipeline analyzer
+
+# 터미널 B: 현재 공개 방송 중인 채널을 선택한다.
+./scripts/discover
+./scripts/pipeline collector <채널ID> 120s 60s
+
+curl --fail http://127.0.0.1:18080/api/status
+curl --fail 'http://127.0.0.1:18080/api/buckets?seconds=300'
+```
+
+화면: http://127.0.0.1:18080/ . 분석기는 Ctrl+C로 종료한다. 수집기는 지정 기간 후 종료한다.
+`./scripts/infra down`은 이 Compose 프로젝트의 컨테이너만 내리고 named volume은 보존한다.
+기존 gromo 컨테이너와 별개다. 로컬 Kafka `127.0.0.1:19092`, DB `127.0.0.1:15432`, 조회 `127.0.0.1:18080`을 사용한다.
+Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC_URL`, `PIPELINE_DB_USER`, `PIPELINE_DB_PASSWORD`, `PIPELINE_BOOTSTRAP_SERVERS`로 재정의할 수 있다.
+
+스크립트는 빌드 JAR를 `work/runtime/`의 실행별 복사본으로 실행한다. 다른 터미널의 재빌드가 실행 중 JAR를 덮어쓰지 않는다. 복사본은 프로세스를 모두 종료한 뒤 정리할 수 있다.
+기존 `./scripts/poc`는 Kafka·DB 없이 수신만 검사한다.
+
+## 저장과 처리 계약
+
+- `chat.received.v1`: 3 partitions, 개발용 RF=1, key=`channelId`, timestamp=`receivedAt`의 epoch milliseconds, CreateTime 정책.
+- Kafka 보존 설정은 시간 24h, partition당 256MiB, segment 32MiB다. segment 단위 삭제이므로 정확한 시각·용량 상한이나 24h 전체 가용성을 보장하지 않는다.
+- `acks=all`, idempotent producer, in-flight request=1. 전용 worker가 ACK를 기다리며 callback은 큐에만 넣는다. Kafka client는 delivery timeout 10초 안에서 같은 record를 재시도한다.
+- 발행 큐는 미확인 in-flight를 포함해 기본·최대 1,000개, 이벤트당 16KiB다. payload 상한은 약 16MiB이고 객체 overhead는 별도다. 채널별 공정성 제어는 아직 없다.
+- frame 전체를 담을 수 없으면 전부 거절하고 수집을 실패 처리한다. 발행 오류도 수집을 중단하며 `rejected`, `unconfirmed`를 결과에 남긴다. 종료 drain은 최대 10초다. 메모리 버퍼의 강제 종료·전원 손실은 복원하지 않는다.
+- 수집기 성공 결과의 `delivery.complete`는 Kafka ACK까지 의미한다. DB 반영은 `/api/status` 또는 아래 대조 스크립트로 별도 확인한다.
+
+소비자는 `max.poll.records=200`, auto commit=false, AckMode.BATCH, sync commit을 사용한다. 한 poll의 이벤트를 검증한 뒤 아래 작업을 한 PostgreSQL 트랜잭션에서 수행하고, commit이 끝나야 listener가 반환한다.
+
+1. 배치 안의 같은 eventId를 제거한다. 같은 ID에 다른 payload면 전체 배치를 실패 처리한다.
+2. `processed_event`에 `(projection, run_id, event_id)`를 삽입한다. conflict가 있으면 정규화 payload hash를 비교한다.
+3. 새로 삽입한 이벤트만 channel/eventTime의 10초 bucket으로 합산하여 UPSERT한다.
+4. 처리한 partition의 `next_resolved_offset`을 기록한다. 이 DB 값은 Kafka group offset을 대체하지 않는다.
+
+DB commit 직후 프로세스가 죽으면 Kafka가 이벤트를 다시 전달한다. ledger가 이미 존재하므로 집계를 재증가시키지 않는다. 원천 서버가 같은 채팅을 새 이벤트로 보내는 중복은 제거하지 않는다.
+
+스키마는 Flyway `V1__chat_projection.sql`로 관리한다. `processed_event`, `chat_bucket_10s`, `projection_progress`와 Flyway 이력만 사용한다. 기본 namespace는 `ranking/live-v1`이다. 단순 조회에서는 ledger·bucket 총합을 한 SQL snapshot으로 읽는다.
+
+## 오류와 조회
+
+DB 오류 등 listener 예외는 1초 간격으로 전체 batch를 무제한 재시도한다. 실패 record를 건너뛰는 recoverer는 없다. 계약 위반도 offset을 진행하지 않고 `/api/status`에 `BLOCKED_INVALID_EVENT`로 표시한다. 운영 DLQ·격리 후 진행 절차는 M3 범위다. 원본 메시지를 로그에 넣지 않는다.
+
+DB pool은 최대 4개, 연결 대기 3초, socket timeout 10초, transaction timeout 20초, statement timeout 5초, lock timeout 3초다. `WAITING_FOR_EVENTS`는 partition 할당은 됐지만 아직 성공 batch가 없는 상태다. `RUNNING`도 원천 수집의 생존·전체 입력의 completeness·실시간 lag를 증명하지 않는다.
+
+- `/api/status`: ledger/bucket 총합, 소비 상태, DB 진행 offset.
+- `/api/buckets?seconds=300&channelId=...`: 최근 10~3,600초의 10초 bucket. seconds는 10의 배수이며 channelId 생략 시 수집한 전체 채널이다.
+- 조회에는 진행 중인 bucket이 포함된다. coverage를 계산하지 않으므로 모든 응답에 `coverageMeasured=false`를 둔다.
+- 화면은 5초마다 갱신하며 채널별 최근 5분 합계를 보여준다. 원천 전체 방송 순위나 완전한 수집률을 뜻하지 않는다. 빈 데이터도 정상 수집 0건이라고 단정하지 않는다.
+
+## HLD 대비 이번 구현 범위
+
+[HLD](../design/HLD.md)는 전체 목표 설계이며 M1에서 모두 구현하지 않는다.
+
+| 목표 설계 | M1에서 구현한 범위 |
+|---|---|
+| 최대 20개 채널, collector 상태·gap·coverage | 기존 PoC의 최대 3개·30분 제한 유지. 한 공개 채널로 수직 경로 검증 |
+| 채널별·전역 byte/count buffer, 독립 발행 | 더 작은 전역 1,000개 큐와 단일 ACK worker. 고부하 처리량 미검증 |
+| bulk ledger insert + bucket UPSERT | ledger는 이벤트별 INSERT, 새 이벤트의 bucket은 배치 합산. 성능 최적화 전 |
+| invalid 이벤트 DLQ 후 진행 | DLQ 없이 배치 재시도·오류 상태 표시. 잘못된 입력은 처리 진행을 막음 |
+| 72h ledger, 7일 bucket 자동 정리 | 삭제 작업 미구현. 자동 삭제하지 않으므로 장기 운영 전 용량 정책 필요 |
+| start offset을 관리 절차로 지정 | 기본 none. 빈 로컬 그룹의 최초 기동만 명시적으로 earliest 허용 |
+| ranking/trend 독립 분석, snapshot, replay | ranking namespace의 기본 bucket·조회만 구현. 독립 소비·순위 snapshot·replay는 후속 |
+
+## 재현 검증
+
+`./scripts/check`: 실방송·Docker 없이 프로토콜, HTTP/WS fixture, 이벤트 계약, 발행 큐 경계 검사.
+`./scripts/integration`: 실제 로컬 Kafka·PostgreSQL에서 매 테스트마다 UUID topic/group/schema를 만들고 해당 자원만 정리한다. Docker 서비스는 유지한다.
+
+통합 검증은 중복 전달, 시각 bucket 경계, SQL rollback, 같은 ID의 내용 충돌, 실제 발행·소비·offset, DB 오류 회복, malformed 입력의 진행 차단, DB commit 직후 별도 JVM 강제 종료·재시작을 포함한다.
+실방송 전후 대조는 다른 생산자가 없는 로컬 namespace에서 다음과 같이 한다.
+
+```bash
+curl --fail http://127.0.0.1:18080/api/status > work/before.json
+./scripts/pipeline collector <채널ID> 120s 60s
+# 수집 종료 로그의 report 경로를 사용한다.
+./scripts/verify-pipeline work/before.json work/pipeline-<실행ID>.json work/reconciliation.json
+```
+
+실방송 검증과 자동 테스트의 결과는 [검증 기록](VERIFICATION.md)에 구분한다.
+
+## 기술 근거
+
+- [Spring Kafka listener container와 offset 처리](https://docs.spring.io/spring-kafka/reference/4.0/kafka/receiving-messages/message-listener-container.html)
+- [Spring Kafka 배치 오류 처리](https://docs.spring.io/spring-kafka/reference/4.0/kafka/annotation-error-handling.html)
+- [PostgreSQL INSERT / ON CONFLICT](https://www.postgresql.org/docs/16/sql-insert.html)
+- [Apache Kafka Docker 배포](https://kafka.apache.org/41/getting-started/docker/)

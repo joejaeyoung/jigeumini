@@ -1,0 +1,67 @@
+package io.chatpulse.pipeline;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.flywaydb.core.Flyway;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.transaction.support.TransactionTemplate;
+
+@Configuration
+@Profile("pipeline")
+@EnableConfigurationProperties(PipelineProperties.class)
+public class PipelineConfiguration {
+    @Bean EventCodec eventCodec(PipelineProperties p) { p.validate(); return new EventCodec(); }
+    @Bean String readyTopic(PipelineProperties p) {
+        p.validate();
+        KafkaSupport.ensureTopic(p.bootstrapServers(), p.topic());
+        return p.topic();
+    }
+    @Bean(destroyMethod = "destroy")
+    @ConditionalOnProperty(name="pipeline.role", havingValue="collector")
+    DefaultKafkaProducerFactory<String, byte[]> producerFactory(PipelineProperties p) {
+        return KafkaSupport.producerFactory(p.bootstrapServers());
+    }
+    @Bean(destroyMethod = "close")
+    @ConditionalOnProperty(name="pipeline.role", havingValue="collector")
+    BufferedKafkaPublisher publisher(DefaultKafkaProducerFactory<String, byte[]> factory,
+            PipelineProperties p, EventCodec codec, String readyTopic) {
+        return new BufferedKafkaPublisher(new KafkaTemplate<>(factory), readyTopic, codec, p.bufferCapacity());
+    }
+    @Bean(destroyMethod = "close")
+    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
+    HikariDataSource dataSource(PipelineProperties p) {
+        var config = new HikariConfig();
+        config.setJdbcUrl(p.jdbcUrl());
+        config.setUsername(p.dbUser());
+        config.setPassword(p.dbPassword());
+        config.setMaximumPoolSize(4);
+        config.setConnectionTimeout(3000);
+        config.setValidationTimeout(2000);
+        config.addDataSourceProperty("connectTimeout", "3");
+        config.addDataSourceProperty("socketTimeout", "10");
+        var ds = new HikariDataSource(config);
+        try { Flyway.configure().dataSource(ds).load().migrate(); }
+        catch (RuntimeException e) { ds.close(); throw e; }
+        return ds;
+    }
+    @Bean
+    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
+    ProjectionStore projectionStore(HikariDataSource ds, EventCodec codec, PipelineProperties p) {
+        var tx = new TransactionTemplate(new DataSourceTransactionManager(ds));
+        tx.setTimeout(20);
+        return new ProjectionStore(new JdbcTemplate(ds), tx, codec, p.projection(), p.runId());
+    }
+    @Bean(initMethod = "start", destroyMethod = "close")
+    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
+    ProjectionConsumer projectionConsumer(PipelineProperties p, ProjectionStore store, String readyTopic) {
+        return new ProjectionConsumer(KafkaSupport.consumerFactory(p.bootstrapServers(), p.group(), p.offsetReset()), readyTopic, store);
+    }
+}

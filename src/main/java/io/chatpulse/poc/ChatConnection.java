@@ -1,0 +1,139 @@
+package io.chatpulse.poc;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketHttpHeaders;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+final class ChatConnection implements AutoCloseable {
+    private final ChatProtocol protocol = new ChatProtocol();
+    private final ProbeStats stats;
+    private final CompletableFuture<Void> ready = new CompletableFuture<>();
+    private final CompletableFuture<SourceFailure> ended = new CompletableFuture<>();
+    private final AtomicBoolean active = new AtomicBoolean(true);
+    private volatile WebSocketSession socket;
+    private final Object sendLock = new Object();
+    private long lastPingNano = System.nanoTime();
+    private long awaitingPongNano;
+    private final Duration pingInterval;
+    private final Duration pongTimeout;
+    private final java.util.concurrent.ScheduledFuture<?> heartbeat;
+
+    ChatConnection(StandardWebSocketClient client, ScheduledExecutorService scheduler,
+            URI uri, String channel, String room, String token, ProbeStats stats,
+            Duration pingInterval, Duration pongTimeout, EventSink sink) throws Exception {
+        this.stats = stats;
+        this.pingInterval = pingInterval;
+        this.pongTimeout = pongTimeout;
+        UUID sessionId = UUID.randomUUID();
+        var handler = new TextWebSocketHandler() {
+            @Override
+            public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+                if (!active.get()) { session.close(); return; }
+                socket = session;
+                session.setTextMessageSizeLimit(ChatProtocol.MAX_FRAME_BYTES);
+                send(protocol.connect(room, token));
+            }
+            @Override
+            protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+                if (!active.get()) return;
+                try {
+                    int byteCount = message.getPayload().getBytes(StandardCharsets.UTF_8).length;
+                    if (byteCount > ChatProtocol.MAX_FRAME_BYTES) throw new SourceFailure("FRAME_TOO_LARGE", false);
+                    var frame = protocol.decode(message.getPayload(), channel, room, sessionId, Instant.now());
+                    if (frame.command() == 10100 && !ready.isDone()) {
+                        stats.connected();
+                        ready.complete(null);
+                    }
+                    if (frame.command() == 0) send(ChatProtocol.pong());
+                    if (frame.command() == 10000) {
+                        synchronized (sendLock) { awaitingPongNano = 0; }
+                        stats.pong();
+                    }
+                    if (!frame.events().isEmpty() && !ready.isDone()) {
+                        throw new SourceFailure("CHAT_BEFORE_HANDSHAKE", false);
+                    }
+                    stats.accept(frame, byteCount);
+                    if (!frame.events().isEmpty()) sink.accept(frame.events());
+                } catch (SourceFailure e) { fail(e); }
+                catch (Exception e) { fail(new SourceFailure("FRAME_PROCESSING_OR_SEND", false)); }
+            }
+            @Override
+            public void handleTransportError(WebSocketSession session, Throwable error) {
+                fail(new SourceFailure("WS_TRANSPORT", false));
+            }
+            @Override
+            public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+                fail(new SourceFailure("WS_CLOSED", false));
+            }
+        };
+        var connecting = client.execute(handler, new WebSocketHttpHeaders(), uri);
+        try {
+            socket = connecting.get(10, TimeUnit.SECONDS);
+            ready.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            active.set(false);
+            stats.disconnected();
+            connecting.thenAccept(session -> { try { session.close(); } catch (Exception ignored) { } });
+            closeSocket();
+            SourceFailure failure = ended.getNow(null);
+            if (failure != null) throw failure;
+            throw new SourceFailure("HANDSHAKE_TIMEOUT_OR_CONNECT", false);
+        }
+        heartbeat = scheduler.scheduleAtFixedRate(this::tick, 100, 100, TimeUnit.MILLISECONDS);
+    }
+
+    private void tick() {
+        if (!active.get()) return;
+        try {
+            synchronized (sendLock) {
+                long now = System.nanoTime();
+                if (awaitingPongNano != 0 && now - awaitingPongNano > pongTimeout.toNanos()) {
+                    fail(new SourceFailure("HEARTBEAT_TIMEOUT", false));
+                } else if (awaitingPongNano == 0 && now - lastPingNano >= pingInterval.toNanos()) {
+                    awaitingPongNano = now;
+                    lastPingNano = now;
+                    send(ChatProtocol.ping());
+                    stats.ping();
+                }
+            }
+        } catch (Exception e) { fail(new SourceFailure("HEARTBEAT_SEND", false)); }
+    }
+
+    private void send(String text) throws Exception {
+        synchronized (sendLock) {
+            if (active.get() && socket != null && socket.isOpen()) socket.sendMessage(new TextMessage(text));
+        }
+    }
+
+    private void fail(SourceFailure failure) {
+        ended.complete(failure);
+        ready.completeExceptionally(failure);
+    }
+
+    SourceFailure failure() { return ended.getNow(null); }
+
+    @Override
+    public void close() {
+        active.set(false);
+        stats.disconnected();
+        heartbeat.cancel(false);
+        closeSocket();
+    }
+
+    private void closeSocket() {
+        try { if (socket != null && socket.isOpen()) socket.close(CloseStatus.NORMAL); }
+        catch (Exception ignored) { }
+    }
+}

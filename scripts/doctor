@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+for tool in java curl python3; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "필요한 도구가 없습니다: $tool" >&2
+    exit 1
+  fi
+done
+java -version
+./gradlew --version

@@ -1,0 +1,59 @@
+{
+  "reportVersion" : 1,
+  "mode" : "LIVE_CHZZK_ANONYMOUS_READ",
+  "startedAt" : "2026-10-25T05:56:57.995757Z",
+  "completedAt" : "2026-10-25T05:58:58.099400Z",
+  "requestedDurationSeconds" : 120,
+  "forcedReconnectAfterSeconds" : 60,
+  "verdict" : "PASS",
+  "channels" : [ {
+    "channelId" : "dbd6e0689ff9debf8bb00a415786654c",
+    "startedAt" : "2026-10-25T05:56:57.995974Z",
+    "state" : "DURATION_COMPLETE",
+    "verdict" : "PASS",
+    "checks" : {
+      "handshake" : true,
+      "liveChat" : true,
+      "reconnectRequired" : true,
+      "heartbeatPong" : true,
+      "chatAfterReconnect" : true
+    },
+    "elapsedSeconds" : 120.102387834,
+    "connectedSeconds" : 118.1250095,
+    "connectionTimeRatio" : 0.9835358949171515,
+    "attempts" : 2,
+    "connections" : 2,
+    "chatCount" : 63,
+    "chatAfterReconnect" : 33,
+    "frames" : 63,
+    "receivedFrameBytes" : 69978,
+    "maxFrameBytes" : 3645,
+    "clientPings" : 4,
+    "serverPongs" : 4,
+    "commands" : {
+      "10100" : 2,
+      "10000" : 4,
+      "93101" : 57
+    },
+    "skipped" : { },
+    "reasons" : {
+      "FORCED_RECONNECT" : 1,
+      "DURATION_COMPLETE" : 1
+    },
+    "candidateIdFieldPresence" : { },
+    "firstEventTime" : "2026-10-25T05:56:58.704Z",
+    "lastEventTime" : "2026-10-25T05:58:56.828Z",
+    "lateMessagesOver120s" : 0,
+    "meanSourceToReceiveMillis" : 444.6190476190476,
+    "maxSourceToReceiveMillis" : 1413
+  } ],
+  "delivery" : {
+    "unconfirmed" : 0,
+    "rejected" : 0,
+    "complete" : true,
+    "acknowledged" : 63,
+    "accepted" : 63,
+    "mode" : "KAFKA"
+  },
+  "limitations" : [ "No source completeness or upstream dedup guarantee", "DB projection verified separately from collection report", "No raw chat, nickname, user ID or token stored" ]
+}

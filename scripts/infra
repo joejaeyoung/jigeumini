@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+case "${1:-up}" in
+  up) docker compose up -d --wait ;;
+  down) docker compose down ;;
+  status) docker compose ps ;;
+  *) echo '사용법: ./scripts/infra [up|down|status]'; exit 1 ;;
+esac

@@ -1,0 +1,23 @@
+{
+  "branch": "feat/chat-pipeline",
+  "gitCommit": null,
+  "jarSha256": "61db6993232e309aff3f41f7cfe82b578d4e9c235936eaa043f5bf3fbaaa92e5",
+  "java": "Amazon Corretto 21.0.11",
+  "libraries": [
+    "spring-kafka-4.0.8.jar",
+    "postgresql-42.7.14.jar",
+    "flyway-database-postgresql-11.14.1.jar",
+    "flyway-core-11.14.1.jar",
+    "spring-boot-4.0.9.jar",
+    "kafka-clients-4.1.2.jar"
+  ],
+  "analyzerOffsetReset": "none",
+  "topic": "chat.received.v1",
+  "group": "chat-ranking-live-v1",
+  "first120sJarSha256": "910cdb6b6de02900de4c0ba07407d02c21128a5ef1f975cf75a689462f45b999",
+  "finalChangeAfter120s": "빈 partition의 최초 offset 초기화와 none 재시작 검증 보완",
+  "dockerImages": [
+    "[\"apache/kafka@sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e\"]",
+    "[\"postgres@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777\"]"
+  ]
+}

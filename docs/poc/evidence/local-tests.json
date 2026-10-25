@@ -1,0 +1,33 @@
+{
+  "command": "./scripts/check",
+  "networkScope": "loopback fixtures only; dependency downloads excluded",
+  "suites": [
+    {
+      "name": "io.chatpulse.poc.ChannelProbeTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T04:40:23.964Z",
+      "time": "9.551"
+    },
+    {
+      "name": "io.chatpulse.poc.ChatProtocolTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T04:40:33.516Z",
+      "time": "0.034"
+    },
+    {
+      "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "timestamp": "2026-10-25T04:40:33.551Z",
+      "time": "0.109"
+    }
+  ]
+}

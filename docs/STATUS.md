@@ -8,7 +8,7 @@
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
 | M3 장애·재처리 | #9·PR #15 병합 완료, #10·PR #19 develop 병합 완료 | #8 outbox 병합 완료, #16 replay 후속 보완 |
-| M4 성능 검증 | #11 구현·실험 진행 중 | 분포·장애 비교, Claude 승인·최종 CI |
+| M4 성능 검증 | #11/PR25·#27/PR33 병합 완료 | #28 수집기·#29 HA·#31 ACK·#30 배포/복구 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
@@ -100,7 +100,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
-| T14 | 진행 중 | [임대 계약](fleet/README.md) | DB소유권·유한용량·epoch·로컬permit·정상drain과해제,단위128통과 | 실제다중프로세스·DB단절·정지후인계 검증 진행 |
+| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md) | 실제 두 JVM·합성 WS·DB/Kafka에서 배타 획득·정상/만료 인계·DB 소켓 단절, 실제 통합5개 포함 전체86 통과 | 협력 worker의 유효 DB 임대와 로컬 permit 범위; broker fencing·물리 소켓 즉시 종료·원천 무공백 보장은 아님 |
 | T15 | 미착수 | [HA 조사](research/KAFKA_DEPLOYMENT.md) | 복제/ISR/quorum 운영 후보 조사; RF1 로컬 검증과 구분 | #29 격리 복제 클러스터 장애 시험 |
 | T16 | 미착수 | [배포 조사](research/KAFKA_DEPLOYMENT.md) | 외부 배포 미실행; 컨테이너/복구 리허설 설계 | #30 이미지·rollback·DB/offset 복원 대조 |
 <!-- tech-status:end -->
@@ -205,5 +205,5 @@ F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/
 
 ### 수집기 배정·임대 #28
 
-F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthority/CollectorWorker·fleetCLI를구현했다. 로컬단위128·하네스16·JAR통과. 실제합성WS+두JVM+PostgreSQL/Kafka의동시획득·인계·정지/재개·DB소켓단절을검증중이다. 공개live확대·외부배포는실행하지않는다.
+F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthority/CollectorWorker·fleetCLI를구현했다. 로컬단위128·하네스16·JAR통과. 8425ebc 실제 통합86개(임대5개)가 통과했다. [검증](fleet/VERIFICATION.md)과 [정제 근거](poc/evidence/fleet-2026-10-26/summary.json)에 정상 인계38·정지16·DB단절54건의 수락=ACK=broker=DB를 기록했다. 최종 Claude·CI를 진행한다. 공개live확대·외부배포는실행하지않는다.
 

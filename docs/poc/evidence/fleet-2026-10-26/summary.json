@@ -1,0 +1,78 @@
+{
+  "issue": 28,
+  "feature": "F13",
+  "technicalGoals": [
+    "T13",
+    "T14",
+    "T02",
+    "T11"
+  ],
+  "dateKst": "2026-10-26",
+  "integrationCodeCommit": "8425ebc6e862a3d6d672abffcd75fb5297c813d5",
+  "command": "./scripts/integration",
+  "environment": {
+    "source": "LOOPBACK_SYNTHETIC_WEBSOCKET",
+    "postgres": "16.14",
+    "kafka": "4.1.2",
+    "replicationFactor": 1,
+    "childProcesses": "separate Java 21 JVMs",
+    "leaseTtlSeconds": 6
+  },
+  "integration": {
+    "tests": 86,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "sortedXmlSha256": "8c05267de243c3da5de780fa75df13b8ae04259d67ac3e3ece27101d59f06943",
+  "scenarios": [
+    {
+      "file": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+      "sha256": "9ac06844cfe29b5d5976d8522b8545a49750c7881fafed925dcba88033543ec8",
+      "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+      "accepted": 54,
+      "acknowledged": 54,
+      "unconfirmed": 0,
+      "brokerUnique": 54,
+      "databaseUnique": 54,
+      "brokerDatabaseDifference": 0
+    },
+    {
+      "file": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+      "sha256": "e662e87faa0e1779de7c86eba548903d35518bd735f0e388ba0027f4d8deb339",
+      "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+      "accepted": 16,
+      "acknowledged": 16,
+      "unconfirmed": 0,
+      "brokerUnique": 16,
+      "databaseUnique": 16,
+      "brokerDatabaseDifference": 0
+    },
+    {
+      "file": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+      "sha256": "c1fafeb6bd02c39285db3aceb57ad981db0067a61f50a2a76f0ca490733ebb66",
+      "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+      "accepted": 38,
+      "acknowledged": 38,
+      "unconfirmed": 0,
+      "brokerUnique": 38,
+      "databaseUnique": 38,
+      "brokerDatabaseDifference": 0
+    }
+  ],
+  "initialFailure": {
+    "stage": "Flyway setup",
+    "testsFailed": 5,
+    "reason": "existing V10 replay identity and new V10 collector lease version collision",
+    "fix": "new collector migration V11; no production migration applied"
+  },
+  "limitations": [
+    "No public live or official source authorization tested",
+    "No stable source message deduplication or gap replay",
+    "Database ownership protocol is not broker fencing; existing in-flight and check/send pause window remain",
+    "Paused sockets can physically outlive logical leases",
+    "Database clock jumps and multi-host clock rate drift untested",
+    "Count conservation does not identify individual acknowledged event IDs",
+    "ChannelProbe short runs intentionally end CANCELLED and are not live PoC PASS"
+  ]
+}

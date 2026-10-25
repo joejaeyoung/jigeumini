@@ -103,6 +103,13 @@ public final class ProjectionStore {
                 """, (rs, i) -> Map.<String, Object>of("channelId", rs.getString(1), "bucketStart", rs.getTimestamp(2).toInstant().toString(),
                         "chatCount", rs.getLong(3)), projection, runId, channel, channel, Timestamp.from(to.minusSeconds(seconds)), Timestamp.from(to));
     }
+    public List<String> recentChannelIds(int limit) {
+        if (limit < 1 || limit > 20) throw new IllegalArgumentException("CHANNEL_LIMIT");
+        return jdbc.query("""
+                SELECT channel_id FROM chat_bucket_10s WHERE projection=? AND run_id=?
+                GROUP BY channel_id ORDER BY max(bucket_start) DESC, channel_id LIMIT ?
+                """, (rs, i) -> rs.getString(1), projection, runId, limit);
+    }
     public List<Map<String, Object>> progress() {
         return jdbc.query("SELECT topic, partition, next_resolved_offset, checked_at FROM projection_progress WHERE projection=? AND run_id=? ORDER BY topic, partition",
                 (rs, i) -> Map.<String, Object>of("topic", rs.getString(1), "partition", rs.getInt(2), "nextResolvedOffset", rs.getLong(3),

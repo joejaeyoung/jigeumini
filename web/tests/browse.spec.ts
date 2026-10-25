@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 const a = 'a'.repeat(32), b = 'b'.repeat(32);
 async function mockApi(page: Page, mode: 'filled' | 'empty' = 'filled') {
+  await page.route('**/api/channels**', route => route.fulfill({ json: { asOf: new Date().toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', channels: [] } }));
   await page.route('**/api/status', route => route.fulfill({ json: { asOf: '2026-10-25T00:05:00Z', scope: 'COLLECTED_CHANNELS_ONLY', coverageMeasured: false, consumer: { running: true, state: 'RUNNING', assignedPartitions: 3 } } }));
   await page.route('**/api/buckets?**', route => {
     const params = new URL(route.request().url()).searchParams;

@@ -48,6 +48,17 @@ class PipelineIntegrationTest {
     private ConsumerRecord<String, byte[]> record(ChatEvent e, long offset) {
         return new ConsumerRecord<>(topic, 0, offset, e.channelId(), codec.encode(e));
     }
+    @Test void channelDirectoryUsesOwnNamespaceAndIncludesHistoricalChannelsWithoutZeroCounts() {
+        String first = "a".repeat(32), second = "b".repeat(32);
+        for (String id : List.of(first, second)) {
+            jdbc.update("INSERT INTO chat_bucket_10s VALUES (?, ?, ?, ?, ?)", "ranking", "test-v1", id,
+                    Timestamp.from(Instant.now().minusSeconds(id.equals(first) ? 7200 : 3600)), 1);
+        }
+        jdbc.update("INSERT INTO chat_bucket_10s VALUES (?, ?, ?, ?, ?)", "other", "other-run", "c".repeat(32), Timestamp.from(Instant.now()), 1);
+        assertEquals(List.of(second, first), store.recentChannelIds(20));
+        assertEquals(List.of(second), store.recentChannelIds(1));
+        assertTrue(store.buckets("", 300).isEmpty());
+    }
     @Test void duplicatesAcrossBatchAndRedeliveryOnlyCountOnceAndUseEventTime() {
         Instant time = Instant.ofEpochSecond(Math.floorDiv(Instant.now().getEpochSecond(), 10) * 10 - 10);
         var a = EventCodecTest.event(time.plusSeconds(9));

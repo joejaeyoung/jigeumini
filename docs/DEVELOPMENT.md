@@ -39,6 +39,8 @@ jigeumini/
 
 초기 서버 커밋 `44b6321`에서 `main`·`develop`을 만들었다. `feat/chat-pipeline`은 기존 이력으로 보존하고 첫 웹 작업은 `feat/monorepo-web`에서 수행한다. 저장소 기본 브랜치는 `main`이다. CI는 `main` 대상 PR이 `release/*` 또는 `fix/hotfix-*`인지 검사한다. 이는 PR 검사이며 관리자 직접 push를 막는 서버 측 브랜치 보호 규칙은 별도로 설정해야 한다.
 
+앞선 기능 PR의 미병합 코드가 필요한 경우 그 `feat/*`를 기반으로 후속 `feat/*`를 분기하고, PR도 앞선 기능 브랜치를 대상으로 열어 변경 범위를 분리한다. 선행 PR을 `develop`에 병합한 뒤 후속 PR의 기준을 `develop`으로 전환한다.
+
 ## GitHub Projects
 
 [지금이니 구현 보드](https://github.com/users/joejaeyoung/projects/1)는 [저장소 Projects](https://github.com/joejaeyoung/jigeumini/projects)에 연결한다.
@@ -50,10 +52,10 @@ jigeumini/
 
 ## 웹과 서버 계약
 
-제품 웹은 `/api/status`와 `/api/buckets`만 조회한다. 개발·로컬 빌드 미리보기는 Vite가 `/api`를 Spring 서버로 프록시하므로 브라우저에 서버 자격 증명을 두지 않는다. `API_PROXY_TARGET`은 개발 서버 프로세스에만 적용되는 주소다. 외부 배포에서는 정적 파일을 제공하는 호스트가 `/api`를 조회 서버로 전달하고, `/channels/...` 등 문서 요청은 `index.html`로 fallback해야 한다. API의 오류를 HTML fallback으로 바꾸지 않는다.
+제품 웹은 `/api/status`, `/api/buckets`와 `/api/channels` 계열을 조회한다. 방송 정보는 [메타데이터 계약](api/BROADCAST_METADATA.md)을 따른다. 개발·로컬 빌드 미리보기는 Vite가 `/api`를 Spring 서버로 프록시하므로 브라우저에 서버 자격 증명을 두지 않는다. `API_PROXY_TARGET`은 개발 서버 프로세스에만 적용되는 주소다. 외부 배포에서는 정적 파일을 제공하는 호스트가 `/api`를 조회 서버로 전달하고, `/channels/...` 등 문서 요청은 `index.html`로 fallback해야 한다. API의 오류를 HTML fallback으로 바꾸지 않는다.
 
 API 응답은 Zod로 실행 시 검사한다. 조회 기간 변경 시 이전 기간 데이터를 지우며, 같은 기간의 갱신 실패는 마지막 데이터·조회 시각과 함께 오류를 표시한다. 요청은 8초 제한과 취소 신호를 사용하고 응답 이후 5초 뒤 다음 요청을 보내 중첩 polling을 막는다.
 
-현재 M1 응답은 진행 중인 10초 구간을 포함하며 수집 공백을 측정하지 않는다. 합계는 수집된 건수이며 검증된 전체 순위·방송 여부·급상승 배수가 아니다. 메타데이터와 급상승 판정 전에는 중립적인 대체 화면을 쓰며, 관심 채널의 최근 기록이 없어도 0건을 만들지 않는다.
+현재 M1 응답은 진행 중인 10초 구간을 포함하며 수집 공백을 측정하지 않는다. 합계는 수집된 건수이며 검증된 전체 순위·방송 여부·급상승 배수가 아니다. 방송 여부는 독립 메타데이터 조회 결과로 표시한다. 메타데이터가 없거나 만료되면 대체 화면을 쓰며, 관심 채널의 최근 기록이 없어도 0건을 만들지 않는다. 검증된 급상승 판정은 후속 구현이다.
 
 참고한 공식 문서: [Vite 구성](https://vite.dev/guide/), [React Router 경로 구성](https://reactrouter.com/start/declarative/installation). 의존성 버전은 workspace manifest와 루트 lockfile로 고정한다.

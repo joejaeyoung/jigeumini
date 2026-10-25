@@ -27,3 +27,11 @@
 DB 소유권·만료와 로컬 단조시계 권한을 분리했다. 동일 epoch permit을 admission과 dispatch에 사용하고 source 프로토콜은 기존 ChannelProbe를 재사용한다. 테스트의 프로세스/소켓 proxy는 실수신 없이 장애 지점을 소유하며 공유 DB나 Kafka를 중단하지 않는다.
 
 임대는 Kafka broker fencing이 아니다. 이미 client에 넘긴 입력과 마지막 검사/send 사이 정지 창, 정지 프로세스의 물리 소켓 잔존, 원천 중복과 인계 공백은 [계약](README.md)의 제한을 따른다. DB 시계 점프·다중 호스트 drift·장기 운영·전체 치지직 접근은 검증하지 않았다. 최종 리뷰와 CI 상태는 STATUS에서 관리한다.
+
+## 종료 경합 수정 후 재검증
+
+7fd3566의 컴파일 결과로 실제87개(임대6개), 단위134·하네스16·JAR가 통과했다. [후속 근거](../poc/evidence/fleet-2026-10-26/summary.json)의 정상인계39·정지21·DB단절54·진단저장중SIGTERM8건에서 수락=ACK=broker물리/고유=DB이며 집합차이0이다. SIGSTOP 재개 시각 이후 기존 session의 receivedAt 입력은 broker에서0건을 직접 확인했다. 이미 보내 둔 입력까지 broker fencing한 결과는 아니다.
+
+최초 push40213896363/PR40213900998은 SIGTERM 자식 진단 파일 누락2개로 실패했다. 저장 지연5초+SIGTERM 회귀로 CAS 선점 뒤 hook 반환, 저장 전 hook 제거 창을 확인했다. 첫 보완 후 파일 누락, 두 번째 보완 후 deadline 경계의 CHANNEL_ENDED 오판을 재현했고 저장 완료 후 hook 제거·deadline 검사 보완 뒤6개가 통과했다. 최초 CI의 stderr는 없어 그 내부 스택과 재현의 동일성은 단정하지 않는다. 후속 CLI의 중복 CAS 제거는 성공 저장 책임을 worker에 모으는 수정이며 최종 check/CI로 다시 검증한다.
+
+기능별 책임·공개 계약은 유지하고 broker 재조회 helper, 결과 저장 단일 책임, preflight live 비활성 게이트를 정리했다. preview/비활성 worker는 잘못된 JDBC 설정에서도 DB를 열지 않는다. 전체 결과와 이전 실패를 모두 보존한다.

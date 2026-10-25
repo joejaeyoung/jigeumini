@@ -51,8 +51,7 @@ public final class FleetCli {
                     var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
                     var observer=new CollectionTelemetry(new JdbcTemplate(ds),tx,publisher);telemetry.set(observer);observer.start();return observer;
                 })) {
-                    var written=new java.util.concurrent.atomic.AtomicBoolean();
-                    var report=worker.run(result->{if(written.compareAndSet(false,true))try{if(telemetry.get()!=null)telemetry.get().close();factory.destroy();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
+                    var report=worker.run(result->{try{if(telemetry.get()!=null)telemetry.get().close();factory.destroy();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
                     System.out.println(JSON.writeValueAsString(Map.of("complete",report.get("complete"),"workerId",report.get("workerId"))));return Boolean.TRUE.equals(report.get("complete"))?0:2;
                 }
             } finally {if(telemetry.get()!=null)telemetry.get().close();factory.destroy();}

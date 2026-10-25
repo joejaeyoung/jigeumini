@@ -43,6 +43,7 @@ public final class LoadExperiment {
         var result=new LinkedHashMap<String,Object>();result.put("formatVersion",1);result.put("profile",plan);result.put("seed",SEED);result.put("startedAt",Instant.now().toString());
         result.put("codeCommit",ExperimentResources.command(List.of("git","rev-parse","HEAD")).strip());
         result.put("runtimeClassesSha256",runtimeHash());
+        result.put("publisherImplementation",plan.product()?"PRODUCT_BOUNDED_ASYNC":plan.serial()?"LEGACY_SERIAL_CF4049E":"EXPERIMENT_ASYNC_CANDIDATE");
         result.put("targets",Map.of("uniqueEvents",plan.rate()*(long)plan.seconds(),"eventsPerSecond",plan.rate(),"seconds",plan.seconds()));
         var environment=new LinkedHashMap<String,Object>(Map.of("java",System.getProperty("java.version"),"os",System.getProperty("os.name"),"architecture",System.getProperty("os.arch"),"processors",Runtime.getRuntime().availableProcessors(),"maxHeapBytes",Runtime.getRuntime().maxMemory(),"brokers",1,"replicationFactor",1,"kafka","4.1.2","postgresql","16.14"));
         environment.putAll(Map.of("acks","all","kafkaMaxInFlight",1,"poolMaximum",4));result.put("environment",environment);
@@ -100,7 +101,7 @@ public final class LoadExperiment {
         final ScheduledExecutorService scheduler=Executors.newScheduledThreadPool(2);
         final AtomicBoolean closed=new AtomicBoolean(),abort=new AtomicBoolean(),stalled=new AtomicBoolean();
         HikariDataSource ds;JdbcTemplate jdbc;Admin admin;DefaultKafkaProducerFactory<String,byte[]> producerFactory,secondFactory;KafkaTemplate<String,byte[]> kafka,secondKafka;
-        ExperimentPublisher async,secondAsync;BufferedKafkaPublisher serial;Map<String,Object> serialStats=Map.of(),liveBefore=Map.of();
+        ExperimentPublisher async,secondAsync;ExperimentBufferedPublisher serial;Map<String,Object> serialStats=Map.of(),liveBefore=Map.of();
         Process child;boolean childStopped;ExperimentSampler sampler;
         boolean schemaCreated,topicCreated,cleaned;long started,generatedUnique,attemptedRecords;Instant eventBase;int serialHighWater;double serialOldest;Path progressFile;boolean guardResources;Path outputDirectory;
         Session(ExperimentPlan plan){this.plan=plan;}
@@ -112,7 +113,8 @@ public final class LoadExperiment {
             jdbc.execute("CREATE TRIGGER experiment_fault BEFORE INSERT ON projection_progress FOR EACH ROW EXECUTE FUNCTION experiment_fault()");
             admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP,"default.api.timeout.ms",10000,"request.timeout.ms",5000));topicCreated=true;KafkaSupport.ensureTopic(BOOTSTRAP,topic);
             producerFactory=KafkaSupport.producerFactory(BOOTSTRAP);kafka=new KafkaTemplate<>(producerFactory);
-            if(plan.serial())serial=new BufferedKafkaPublisher(kafka,topic,codec,1000);else async=new ExperimentPublisher(kafka,topic,1000,plan.sharded());
+            if(plan.product())serial=ExperimentBufferedPublisher.product(kafka,topic,1000);
+            else if(plan.serial())serial=ExperimentBufferedPublisher.legacy(kafka,topic,1000);else async=new ExperimentPublisher(kafka,topic,1000,plan.sharded());
             if(plan.twoProducers()) {secondFactory=KafkaSupport.producerFactory(BOOTSTRAP);secondKafka=new KafkaTemplate<>(secondFactory);secondAsync=new ExperimentPublisher(secondKafka,topic,1000,plan.sharded());}
             for(int i=0;i<plan.consumers();i++)add(false);if(plan.independent())add(true);
             until(30,()->assigned(consumersA)==3&&(!plan.independent()||assigned(consumersB)==3));

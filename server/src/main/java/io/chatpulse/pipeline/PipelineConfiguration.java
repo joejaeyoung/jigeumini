@@ -32,7 +32,7 @@ public class PipelineConfiguration {
     @ConditionalOnProperty(name="pipeline.role", havingValue="collector")
     BufferedKafkaPublisher publisher(DefaultKafkaProducerFactory<String, byte[]> factory,
             PipelineProperties p, EventCodec codec, String readyTopic) {
-        return new BufferedKafkaPublisher(new KafkaTemplate<>(factory), readyTopic, codec, p.bufferCapacity());
+        return new BufferedKafkaPublisher(new KafkaTemplate<>(factory), readyTopic, codec, p.publisherLimits());
     }
     @Bean(destroyMethod = "close")
     HikariDataSource dataSource(PipelineProperties p) {

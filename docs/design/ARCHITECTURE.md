@@ -12,7 +12,7 @@ flowchart LR
     R[Spring Boot Processor\nranking 프로필 · 독립 그룹]
     T[Spring Boot Processor\ntrend 프로필 · 독립 그룹]
     P[(PostgreSQL\n상태 · 멱등 기록 · 집계 · 결과)]
-    A[Spring Boot API + UI\n순위 · 추이 · 급증 · 운영]
+    A[Spring Boot API\n순위 · 추이 · 급증 · 운영]
     U[웹 브라우저]
     D[(분석별 DLQ)]
     X[Replay Job\n새 group + 새 run]
@@ -41,7 +41,7 @@ Kafka 이전은 외부 데이터 수신 영역이고 이후는 내부 재처리 
 | collector-app | HTTP 조회, READ WebSocket, 메시지 필터, eventId 부여, Kafka 발행, 연결 상태 기록 | 새 데이터 수집 중단. 이미 Kafka에 들어간 데이터는 분석 가능 |
 | processor-app: ranking | 채팅 bucket 집계, 순위 snapshot 생성 | 순위·추이가 지연됨. trend 그룹은 독립 소비 |
 | processor-app: trend | 별도 bucket 집계, 급증 판단·이력 저장 | 급증 판단 지연. ranking 그룹은 독립 소비 |
-| api-app | 조회 API, Thymeleaf 화면, 관리자 채널 설정 | 화면 중단. 수집·분석은 계속 가능 |
+| api-app | 조회 API, 관리자 채널 설정 | 화면 중단. 수집·분석은 계속 가능 |
 | processor-app: replay | DB의 QUEUED 작업을 가져와 지정 offsets 범위를 새 run으로 재집계 | 운영 run에 영향을 주지 않아야 함 |
 
 같은 processor 코드의 프로필로 역할을 나눈다. Kafka가 독립 소비를 제공하지만 DB와 머신 자원은 공유하므로 완전한 장애 격리는 아니다. 소비자별 DB 풀·동시성을 제한하고 전체 DB 장애에서는 두 분석기가 모두 멈춘다.
@@ -51,24 +51,23 @@ MVP collector는 단일 호스트의 단일 인스턴스만 실행한다. 같은
 ## 3. 저장소와 모듈
 
 ```text
-chat-pulse/
-  apps/
-    collector-app/
-    processor-app/       # ranking / trend / replay 실행 프로필
-    api-app/             # 조회·운영 API 및 화면
-  modules/
-    event-contract/     # versioned JSON DTO, 검증 규칙
-    chzzk-adapter/      # 내부 HTTP/WebSocket 프로토콜
-    analytics-domain/  # bucket, ranking, spike 정책
-    persistence/       # JDBC repository, 트랜잭션 경계
-  database/migrations/ # Flyway
-  infra/compose/       # dev / resilience 프로필
-  tests/fixtures/      # 식별정보를 제거한 프로토콜/집계 예제
-  tools/load/          # 합성 입력과 기준 결과 생성
+jigeumini/
+  server/
+    src/main/java/io/chatpulse/poc/       # 익명 수집
+    src/main/java/io/chatpulse/pipeline/  # 발행·소비·집계·조회
+    src/main/resources/db/migration/     # Flyway
+    src/test/                            # 서버·broker/DB 검증
+  web/
+    src/app/                             # 공통 레이아웃과 경로
+    src/features/                        # 방송 탐색·관심·상세
+    src/shared/                          # API 계약·공통 UI
+    design-preview/                      # 확정 디자인 원본
+  scripts/                               # 설치·실행·검증
   docs/
+  compose.yaml                           # 로컬 Kafka·PostgreSQL
 ```
 
-공통 모듈에 모든 비즈니스 로직을 넣지 않는다. 이벤트 계약과 계산 로직만 공유하고 각 애플리케이션이 자기 처리 흐름을 소유한다. 실제 코드 작성 시 패키지와 모듈 수는 복잡도에 맞춰 축소할 수 있다.
+2026-10-25 사용자 확정에 따라 서버와 웹을 우선 분리한다. 수집기·분석기는 현재 하나의 Spring 코드에서 프로필로 실행하며 논리 책임이 커질 때만 Gradle 모듈을 세분화한다. 구현·빌드 경계와 Git Flow는 [개발 구조](../DEVELOPMENT.md)를 따른다.
 
 ## 4. 기술 선택
 
@@ -81,7 +80,7 @@ chat-pulse/
 | 이벤트 저장/전달 | Spring Kafka | 독립 소비 그룹, broker 확인, 재처리 |
 | DB | PostgreSQL + Spring JDBC | bucket UPSERT와 멱등 트랜잭션을 명시적으로 제어 |
 | 스키마 관리 | Flyway | 로컬 환경과 시험 환경의 재현성 |
-| 사용자 화면 | Spring MVC + Thymeleaf + JavaScript 차트 | 백엔드 프로젝트 범위 유지 |
+| 사용자 화면 | React + TypeScript + Vite | 확정 디자인을 기능별 웹으로 구현, 서버와 HTTP 경계 유지 |
 | 관측 | Actuator + Micrometer | 앱 지표. 필요 시 Prometheus/Grafana를 선택 프로필로 실행 |
 | 통합 검증 | JUnit + Testcontainers | 실제 Kafka/PostgreSQL commit·재전달 동작 확인 |
 

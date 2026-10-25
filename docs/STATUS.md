@@ -97,8 +97,8 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | full 제품 projection 동시 비용·자동확장 운영은 #29/#30. 표본 사이 순간 최대치 미확인 |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 부분 검증 | [알림 ACK·거부·DB 대조](pipeline/NOTIFICATIONS_VERIFICATION.md), [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조; 알림 broker 거부·ACK 뒤 재발행2/feed1 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
-| T11 | 부분 검증 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | 제품 채널별 한도/공정성·callback/종료 경계는 #27. JVM 강제 종료의 메모리 입력 복원 불가 |
-| T12 | 부분 검증 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | 실제 제품 적용·채널 공정성과 callback/종료 검증은 #27. 앱창과 Kafka request inflight는 별개 |
+| T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
+| T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
 | T14 | 미착수 | — | 수집기별 파일 잠금만 존재 | #28 DB 임대·인계·오래된 소유자 차단 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
@@ -198,6 +198,10 @@ F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff
 ### 부하·편향·복구 실험 #11
 
 F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 해석](pipeline/EXPERIMENTS_VERIFICATION.md), 원본40회·정제표/HTML을 보존했다. 과거 broker실패2회·계측확인9회를 숨기지 않고 sampler 보완 후12프로필을 재검증했다. steady600.001초300,000건·독립A/B·replay차이0, 비동기500/s15,000·burst2,000/s120,000완료; 직렬500/s는1370수락 뒤10거절로 목표미달이다. aab0b76 push40209922599/PR40209926881은 단위91·하네스16·실제KafkaDB80·웹29/31 통과했다. 소유볼륨 보완cc0a1c1에서 broker네경우를 재검증하고 과거3개의볼륨근거없음을표시했다. 최종1617bdb Claude APPROVE·push40211847614/PR40211851666 SUCCESS 뒤 PR25를f94fc38로develop에병합했다. CI단위107·실제KafkaDB80·하네스16·웹29/31이며 #11/보드는완료다. live는종료상태다.
+
+### 유한 비동기 발행 #27 검증
+
+F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/PUBLISHER_VERIFICATION.md)·[정제 근거](poc/evidence/publisher-2026-10-26/summary.json). 로컬단위120·하네스16·JAR,실제KafkaDB81,실제입력6회+소유broker장애6경우를 통과했다. 제품500/s15,000·2,000/s120,000·편중/중복30300→DB30000, replay차이0. 채널별공정성은 합성단위범위이며 소스복원/HA는 포함하지 않는다. #11은f94fc38로 병합했다. #27 최종8ad0817 Claude APPROVE·push40212712923/PR40212715517 SUCCESS 후 PR33을597a162로 develop에 병합했고 이슈/보드 완료다.
 
 ### Kafka HA #29 실제 검증
 

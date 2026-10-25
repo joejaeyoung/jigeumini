@@ -21,10 +21,16 @@ class LoadExperimentIntegrationTest {
         } finally {root.execute("DROP SCHEMA "+schema+" CASCADE");}
     }
 
+    @Test void productPublisherReconcilesPhysicalDuplicatesIndependentGroupsAndReplay() throws Exception {
+        verifyLoad("product-smoke");
+    }
     @Test void isolatedSyntheticLoadReconcilesDuplicatesIndependentGroupsAndFixedRangeReplay() throws Exception {
+        verifyLoad("smoke");
+    }
+    private void verifyLoad(String profile) throws Exception {
         Path output=Path.of("../work/experiment-test-"+UUID.randomUUID()+".json");LoadExperiment.quiet();
         try {
-            var result=LoadExperiment.run(ExperimentPlan.named("smoke"),output,null,false);
+            var result=LoadExperiment.run(ExperimentPlan.named(profile),output,null,false);
             assertThat(result.get("correct")).as("sanitized experiment result: %s",result).isEqualTo(true);assertThat(result.get("cleanupComplete")).isEqualTo(true);
             assertThat(result.get("generatedUnique")).isEqualTo(200L);assertThat(result.get("attemptedRecords")).isEqualTo(202L);assertThat(result.get("replayBucketDifferences")).isEqualTo(0L);
             assertThat(((Map<?,?>)result.get("databaseA")).get("processedEvents")).isEqualTo(200L);

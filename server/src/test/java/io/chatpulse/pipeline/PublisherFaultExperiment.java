@@ -41,10 +41,10 @@ final class PublisherFaultExperiment {
             env.forEach((key,value)->{args.add("-e");args.add(key+"="+value);});args.add("apache/kafka:4.1.2");ExperimentResources.command(args);
             String bootstrap="localhost:"+port;ready(bootstrap);
             result.put("imageId",command("docker","inspect","--format","{{.Image}}",name).strip());
-            for(boolean serial:List.of(true,false))for(boolean disconnect:List.of(false,true)) {
+            for(String publisherKind:List.of("LEGACY_SERIAL_CF4049E","EXPERIMENT_ASYNC_CANDIDATE","PRODUCT_BOUNDED_ASYNC"))for(boolean disconnect:List.of(false,true)) {
                 String topic="exp.fault."+UUID.randomUUID().toString().replace("-","");
-                var row=new LinkedHashMap<String,Object>();rows.add(row);row.put("publisher",serial?"SERIAL":"BOUNDED_ASYNC");row.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");row.put("phase","TOPIC_READY");
-                KafkaSupport.ensureTopic(bootstrap,topic);scenario(bootstrap,name,topic,serial,disconnect,row);
+                var row=new LinkedHashMap<String,Object>();rows.add(row);row.put("publisher",publisherKind);row.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");row.put("phase","TOPIC_READY");
+                KafkaSupport.ensureTopic(bootstrap,topic);scenario(bootstrap,name,topic,publisherKind,disconnect,row);
             }
             result.put("correct",rows.stream().allMatch(row->Boolean.TRUE.equals(row.get("conserved"))&&Boolean.TRUE.equals(row.get("bounded"))&&Boolean.TRUE.equals(row.get("brokerCountWithinAckRange"))));
         } catch(Exception failure){result.put("correct",false);result.put("failureCode","EXPERIMENT_BROKER_FAULT_FAILED");result.put("failureType",failure.getClass().getSimpleName());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}
@@ -70,10 +70,11 @@ final class PublisherFaultExperiment {
             command("docker","volume","rm",volume);
         }
     }
-    private static void scenario(String bootstrap,String container,String topic,boolean serialMode,boolean disconnect,Map<String,Object> result) throws Exception {
+    private static void scenario(String bootstrap,String container,String topic,String publisherKind,boolean disconnect,Map<String,Object> result) throws Exception {
         var factory=KafkaSupport.producerFactory(bootstrap);var kafka=new KafkaTemplate<>(factory);var codec=new EventCodec();
-        var serial=serialMode?new BufferedKafkaPublisher(kafka,topic,codec,30):null;var async=serialMode?null:new ExperimentPublisher(kafka,topic,30,false);
-        result.put("publisher",serialMode?"SERIAL":"BOUNDED_ASYNC");result.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");
+        var serial=publisherKind.equals("LEGACY_SERIAL_CF4049E")?ExperimentBufferedPublisher.legacy(kafka,topic,30):publisherKind.equals("PRODUCT_BOUNDED_ASYNC")?ExperimentBufferedPublisher.product(kafka,topic,30):null;
+        var async=serial==null?new ExperimentPublisher(kafka,topic,30,false):null;
+        result.put("publisher",publisherKind);result.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");
         boolean paused=false,stopped=false;long start=System.nanoTime();
         try {
             result.put("phase","WARMUP");var warm=events(1,0);accept(serial,async,warm);
@@ -87,13 +88,13 @@ final class PublisherFaultExperiment {
             result.put("pendingAtCapacity",pending(serial,async));
             boolean rejected=!admit(serial,async,events(1,1),1,admissions);
             result.put("probeFrameRejected",rejected);result.put("capacityReached",((Number)result.get("pendingAtCapacity")).intValue()==30);
-            result.put("publisherFailedDuringAdmission",serialMode?serial.deliveryFailed():async.failed());
-            Thread.sleep(1500);result.put("oldestUnackedMillis",serialMode?oldest(serial):async.oldestAgeMillis());
+            result.put("publisherFailedDuringAdmission",serial!=null?serial.deliveryFailed():async.failed());
+            Thread.sleep(1500);result.put("oldestUnackedMillis",serial!=null?oldest(serial):async.oldestAgeMillis());
             result.put("clientHeapUsedBytes",Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
             result.put("clientRssBytes",Long.parseLong(command("ps","-o","rss=","-p",Long.toString(ProcessHandle.current().pid())).strip())*1024);
             if(paused){command("docker","unpause",container);paused=false;}
             result.put("phase","CLOSE_PUBLISHER");if(serial!=null)serial.finish();else async.close();factory.destroy();
-            var stats=serialMode?serial.finish():async.stats();result.put("producer",stats);
+            var stats=serial!=null?serial.finish():async.stats();result.put("producer",stats);
             long accepted=((Number)stats.get("accepted")).longValue(),acked=((Number)stats.get("acknowledged")).longValue(),unconfirmed=((Number)stats.get("unconfirmed")).longValue(),declined=((Number)stats.get("rejected")).longValue();
             result.put("conserved",accepted+declined==32&&accepted==acked+unconfirmed);
             // 정지 중 send 자체가 metadata/buffer를 기다리면 두 번째 frame 전에 callback 실패가 날 수 있다.
@@ -114,8 +115,8 @@ final class PublisherFaultExperiment {
         }
     }
     private static List<ChatEvent> events(int count,int channel){var events=new ArrayList<ChatEvent>();Instant at=Instant.now();for(int i=0;i<count;i++)events.add(new ChatEvent(1,UUID.randomUUID(),"CHZZK_UNOFFICIAL",String.format("%032x",channel),"synthetic-room",UUID.randomUUID(),null,"CHAT",at,at,false,"experiment-fault"));return events;}
-    private static void accept(BufferedKafkaPublisher serial,ExperimentPublisher async,List<ChatEvent> events){if(serial!=null)serial.accept(events);else async.accept(events,0);}
-    private static boolean admit(BufferedKafkaPublisher serial,ExperimentPublisher async,List<ChatEvent> events,int channel,List<Map<String,Object>> rows) {
+    private static void accept(ExperimentBufferedPublisher serial,ExperimentPublisher async,List<ChatEvent> events){if(serial!=null)serial.accept(events);else async.accept(events,0);}
+    private static boolean admit(ExperimentBufferedPublisher serial,ExperimentPublisher async,List<ChatEvent> events,int channel,List<Map<String,Object>> rows) {
         long start=System.nanoTime();boolean accepted=true;String code="ACCEPTED";
         try{accept(serial,async,events);}catch(io.chatpulse.poc.SourceFailure failure){accepted=false;code="PUBLISH_REJECTED";}
         catch(IllegalStateException failure){accepted=false;code="EXPERIMENT_REJECTED";}
@@ -124,8 +125,8 @@ final class PublisherFaultExperiment {
                 "pendingAfter",pending(serial,async)));
         return accepted;
     }
-    private static int pending(BufferedKafkaPublisher serial,ExperimentPublisher async){return serial!=null?serial.bufferSnapshot().values().stream().mapToInt(BufferedKafkaPublisher.BufferState::count).sum():async.pending();}
-    private static long oldest(BufferedKafkaPublisher serial){return serial.bufferSnapshot().values().stream().map(BufferedKafkaPublisher.BufferState::oldest).min(Comparator.naturalOrder()).map(at->Math.max(0,Duration.between(at,Instant.now()).toMillis())).orElse(0L);}
+    private static int pending(ExperimentBufferedPublisher serial,ExperimentPublisher async){return serial!=null?serial.bufferSnapshot().values().stream().mapToInt(BufferedKafkaPublisher.BufferState::count).sum():async.pending();}
+    private static long oldest(ExperimentBufferedPublisher serial){return serial.bufferSnapshot().values().stream().map(BufferedKafkaPublisher.BufferState::oldest).min(Comparator.naturalOrder()).map(at->Math.max(0,Duration.between(at,Instant.now()).toMillis())).orElse(0L);}
     private static String command(String...args) throws Exception{return ExperimentResources.command(List.of(args));}
     private static void ready(String bootstrap) throws Exception {
         long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(90);

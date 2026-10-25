@@ -97,7 +97,7 @@ public final class LoadExperiment {
         final AtomicBoolean closed=new AtomicBoolean(),abort=new AtomicBoolean(),stalled=new AtomicBoolean();
         HikariDataSource ds;JdbcTemplate jdbc;Admin admin;DefaultKafkaProducerFactory<String,byte[]> producerFactory,secondFactory;KafkaTemplate<String,byte[]> kafka,secondKafka;
         ExperimentPublisher async,secondAsync;BufferedKafkaPublisher serial;Map<String,Object> serialStats=Map.of(),liveBefore=Map.of();
-        Process child;boolean childStopped;
+        Process child;boolean childStopped;ExperimentSampler sampler;
         boolean schemaCreated,topicCreated,cleaned;long started,generatedUnique,attemptedRecords;Instant eventBase;int serialHighWater;double serialOldest;Path progressFile;boolean guardResources;Path outputDirectory;
         Session(ExperimentPlan plan){this.plan=plan;}
         void open() throws Exception {
@@ -144,7 +144,7 @@ public final class LoadExperiment {
             if(eventBase.isBefore(Instant.now().minusSeconds(6*86400))||eventBase.isAfter(Instant.now()))throw new IllegalArgumentException("EXPERIMENT_EVENT_BASE");
             result.put("eventTimeBase",eventBase.toString());result.put("identityRule","UUID.nameUUIDFromBytes(seed/index); eventTime=base+index/rate, every100th minus120s; receivedAt=actual generation time");
             started=System.nanoTime();scheduleFaults();
-            scheduler.scheduleWithFixedDelay(()->{try {sample(directory,resources);}catch(Exception failure){abort.set(true);event("RESOURCE_OR_SAMPLE_FAILED");}},0,5,TimeUnit.SECONDS);
+            sampler=new ExperimentSampler(()->sample(directory,resources),()->{abort.set(true);event("RESOURCE_OR_SAMPLE_FAILED");});
             long target=plan.rate()*(long)plan.seconds();int frameSize=Math.max(1,plan.rate()/50);boolean rejected=false;
             for(long first=0;first<target&&!abort.get();first+=frameSize) {
                 long scheduled=first*1_000_000_000L/plan.rate();while(System.nanoTime()-started<scheduled&&!abort.get())LockSupport.parkNanos(Math.min(5_000_000L,scheduled-(System.nanoTime()-started)));
@@ -169,7 +169,9 @@ public final class LoadExperiment {
             if(abort.get())throw new IllegalStateException("EXPERIMENT_RESOURCE_OR_SAMPLE_FAILED");
             // 멈춘 group의 예약 재개와 DB 장애 해제 뒤에도 입력 종료로부터180초만 기다린다.
             long drainStarted=System.nanoTime();until(180,()->caughtUp(groupA)&&(!plan.independent()||caughtUp(groupB)));
-            result.put("postInputDrainSeconds",(System.nanoTime()-drainStarted)/1_000_000_000d);sample(directory,resources);
+            result.put("postInputDrainSeconds",(System.nanoTime()-drainStarted)/1_000_000_000d);
+            sampler.close();if(abort.get())throw new IllegalStateException("EXPERIMENT_RESOURCE_OR_SAMPLE_FAILED");
+            sample(directory,resources);
             scheduler.shutdownNow();scheduler.awaitTermination(15,TimeUnit.SECONDS);
             stopChild();for(var consumer:consumersA)consumer.close();for(var consumer:consumersB)consumer.close();
         }
@@ -263,6 +265,7 @@ public final class LoadExperiment {
         @Override public void close() {
             if(!closed.compareAndSet(false,true))return;
             var failures=new AtomicBoolean();
+            if(sampler!=null)cleanupStep(failures,sampler::close);
             cleanupStep(failures,()->{scheduler.shutdownNow();scheduler.awaitTermination(15,TimeUnit.SECONDS);});
             cleanupStep(failures,this::stopChild);
             for(var c:consumersA)cleanupStep(failures,c::close);for(var c:consumersB)cleanupStep(failures,c::close);

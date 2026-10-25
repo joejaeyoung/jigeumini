@@ -17,3 +17,7 @@
 
 
 초기8ac4f77은 Claude APPROVE다. 빌드 리소스 누락의 초기화 예외를 고정 BUILD_UNAVAILABLE로 바꾸고, 실제 JAR 복사본에서 리소스를 제거한 CLI가 원본 stack trace 없이 이 코드만 반환하고 run을 생성하지 않는 검사를 추가했다. runtime 복사 전 EXIT trap 설치·HUP 처리도 보완했다. V10은 UUID 임시 테스트 스키마에만 적용/정리했으며 공유 개발 DB에 선행 적용하지 않았다. 선행 V7/V8/V9 병합 후 통합 검증을 다시 고정한다.
+
+## 통합 기준의 최종 로컬 검증
+
+#5/#6/#7 코드를 통합한 `ff5c30f`에서 `./scripts/check` Java84·하네스16·JAR, `./scripts/integration` 실제 Kafka/DB74가 통과했다. [정제 근거](../poc/evidence/replay-diagnostics-2026-10-26.json)에 JAR/XML hash와 합성 입력·미검증 범위를 기록했다. 8ac4f77·61784de는 Claude APPROVE이며, 이후 migrate의 build ID 검사를 DB 변경 앞으로 옮기고 변조 JAR 시험의 경로를 finally에서 원복했다. 선행 #7의 heartbeat fixture 변경은 단위 검증으로 이어서 확인한다. 웹 변경은 없으며 #7의29/31 근거를 유지한다. 최종HEAD 리뷰·CI·병합은 STATUS를 따른다.

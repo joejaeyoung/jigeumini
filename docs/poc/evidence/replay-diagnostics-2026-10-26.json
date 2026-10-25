@@ -1,0 +1,102 @@
+{
+  "feature": "F08",
+  "issue": 16,
+  "technicalGoals": [
+    "T01",
+    "T02",
+    "T03",
+    "T04"
+  ],
+  "implementationCommit": "ff5c30f",
+  "recordedAt": "2026-10-25T15:04:03.029096+00:00",
+  "environment": {
+    "java": "21",
+    "kafka": "4.1.2",
+    "postgresql": "16.14",
+    "brokers": 1,
+    "replicationFactor": 1,
+    "input": "synthetic isolated UUID topic/group/schema"
+  },
+  "jarSha256": "0e6326a1b04f8d63fde5a504ed11373e19d51733f8c707d6d51094121ad5d924",
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration"
+  ],
+  "suites": {
+    "test": {
+      "tests": 84,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": {
+        "TEST-io.chatpulse.categories.CategoryQueriesTest.xml": "a2200a5c16c8c15d181f46a86436ca9ff5a3c9e9a2801cf7b293b996ee8726b0",
+        "TEST-io.chatpulse.metadata.ChzzkMetadataSourceTest.xml": "9ed3ae0962f9f6b3e42adca7a901564cf47807177ea7cfa7217e1159acb2a27e",
+        "TEST-io.chatpulse.metadata.MetadataControllerTest.xml": "49d4eefec4e9ebcde133f8632c41ef3b78e93533b7cda962767f9903e93b8e97",
+        "TEST-io.chatpulse.metadata.MetadataServiceTest.xml": "022bc48581aac0cfc60aba38c6e857336aa635918f0c9544644294e4e56104ba",
+        "TEST-io.chatpulse.notifications.NotificationControllerTest.xml": "dcd98b070661c5dbd1ea740217f9944afd9c6b9de1b7cc71dd8510895217a382",
+        "TEST-io.chatpulse.notifications.SpikeDetectedTest.xml": "4d2e8b03db0a020e1338e4a388371ddb014db9cdbce1aa26e0f6a8b0ffe3c013",
+        "TEST-io.chatpulse.observations.BroadcastObservedTest.xml": "4c9a14f71054fb41a0fe720d71e1025ed78bc35beda763b7cedfd67975573111",
+        "TEST-io.chatpulse.observations.ObservationCollectorTest.xml": "597df55543c39c407850ed8baffd434542d8d3bf6d0ef821af72eedaf7136eaf",
+        "TEST-io.chatpulse.observations.ObservationControllerTest.xml": "19551ad1197f7156f57b2b04b4d51de2b5b2199ee84a0ea3972c323d56c8fb03",
+        "TEST-io.chatpulse.pipeline.BufferedKafkaPublisherTest.xml": "399b2b5f33d3f1b8c9752880425ec3ccff274620286a8ccda2d336213088190e",
+        "TEST-io.chatpulse.pipeline.DeadLetterTest.xml": "5dcc49fcb8c3d3feb1b816e4543fc7954e39e2fba59fbff3cb219b10d9366afe",
+        "TEST-io.chatpulse.pipeline.EventCodecTest.xml": "23102f68aa8c3371892f0eddb41d9ae53facc8aabd9055826f3e37b6e6c8f71d",
+        "TEST-io.chatpulse.pipeline.KafkaSupportTest.xml": "27f6fc5c2cc8babd9fdaa2592e65ea24f6c1d95351bb8f545a8e8d3d17687ffd",
+        "TEST-io.chatpulse.poc.ChannelProbeTest.xml": "38e24d0c16185f1590aed8e15089be2f6256e22a7ee0b50345f7608589bc7a53",
+        "TEST-io.chatpulse.poc.ChatProtocolTest.xml": "d888b38085f75639da7975f80b3940f5b414e1a99bcae93002a45d08e1222438",
+        "TEST-io.chatpulse.poc.ChzzkHttpSourceTest.xml": "795f4c243608bb04edb0b801978d39bfadfc1b6dc30ab64ea8f1d819e2757dac",
+        "TEST-io.chatpulse.quality.QualityPolicyTest.xml": "85c14989fc989ab7269653ad4e513f2da21c2cd48b0da8f0903f620e648c6156",
+        "TEST-io.chatpulse.quality.QualityScheduleTest.xml": "59c61569da4f84dfa93dd4abcee5cc388c4d031abad693c911ae46839a886aa8",
+        "TEST-io.chatpulse.quality.RankingControllerTest.xml": "07d22733729537e7c62df5d320dfdd6ff1585c9c652ed36cb8d3349ffe6f0aa1",
+        "TEST-io.chatpulse.quality.TrendPolicyTest.xml": "2246d3f1ac729c5d543f1c99d9c0e52a9545b9276d8d1ff88cd2ba2d53e41aad",
+        "TEST-io.chatpulse.replay.ReplayManifestTest.xml": "b4600a2797c0f26eb4e009c98f97b0de038d2a9d4a20cce4ed06ddafd0685712",
+        "TEST-io.chatpulse.reports.ReportPolicyTest.xml": "943225563a54f722ff2e1c175c60b6f6d032943902c84407469e71fee1f03da4"
+      }
+    },
+    "integrationTest": {
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": {
+        "TEST-io.chatpulse.categories.CategoryIntegrationTest.xml": "95be842ce4fbf554051533070102e427ca1d3cce3c215d876b242eb61457ee1e",
+        "TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml": "bdee0e158b6f54fe29b50ab90ddd9d83cc1e5afae8f0dd38c83b18264cc7830a",
+        "TEST-io.chatpulse.observations.ObservationIntegrationTest.xml": "30d90a55544c3a07f88987ea0512e046af130169fe7a9df00586f9a9feb3272d",
+        "TEST-io.chatpulse.pipeline.DeadLetterIntegrationTest.xml": "95471b94231c373fa8112bf36f3c4a31bc6365a3ce9620c09cac5c2b20697410",
+        "TEST-io.chatpulse.pipeline.KafkaSupportIntegrationTest.xml": "fcd2dd73c3dc3b1f1c0944ac26a0f6c1d0b94563bb1dc42ce991e7ce60723b12",
+        "TEST-io.chatpulse.pipeline.PipelineIntegrationTest.xml": "7b85d3e6766c08f9b8bf09ca9fc3acb028d4b134752bc27838869d7aa06578fb",
+        "TEST-io.chatpulse.pipeline.RankingIntegrationTest.xml": "9bcb26f995d2dd75c809f178148e37d984cdc570e5123a4599ed288f236bf929",
+        "TEST-io.chatpulse.replay.ReplayIntegrationTest.xml": "cb76105569eaaa5d05e5d62ec5c7bd537e08033e0b4a63499e91a582b2522b91",
+        "TEST-io.chatpulse.reports.ReportIntegrationTest.xml": "b89d5245c8c938428d03e37984d0f3c689a32679d3497a8deef5c5009dbaedc5"
+      }
+    }
+  },
+  "harnessTests": 16,
+  "manualHarness": {
+    "command": "./scripts/replay capture work/unused.json invalid-date 2026-10-25T00:00:00Z",
+    "expectedAndActual": {
+      "exitCode": 2,
+      "error": "INVALID_DATE",
+      "newRuntimeJars": 0,
+      "manifestCreated": false
+    }
+  },
+  "verified": [
+    "status/compare do not migrate or reap; readonly UPDATE trigger",
+    "self-run and synthetic different worker build comparison rejected",
+    "source+resources+runtime dependency bytes fingerprint",
+    "bounded retention prefix/end probes and reverse Kafka timestamps",
+    "tail control record NO_PROGRESS versus intermediate OFFSET_GAP",
+    "global worker lock defers dead-run reap",
+    "missing build resource executable JAR fixed JSON and run0",
+    "invalid date/missing topic/closed local port distinct reasons"
+  ],
+  "notVerified": [
+    "new live",
+    "HA/broker loss",
+    "SIGKILL/HUP runtime cleanup experiment",
+    "different actual dependency builds in separate JARs",
+    "worker claim with missing build resource",
+    "full Kafka timestamp range or atomic broker snapshot"
+  ]
+}

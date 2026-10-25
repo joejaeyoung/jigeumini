@@ -1,12 +1,12 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `feat/broadcast-metadata`
+2026-10-25 · 브랜치 `feat/quality-rankings`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
-| M2 순위·급증 기능 | 실제 조회 웹·방송 메타데이터 구현, 품질·급증 정책 미착수 | #2 검토·병합, 품질·순위·급상승 #3 |
+| M2 순위·급증 기능 | #2 메타데이터·#3 수집 품질 기반 순위/급상승과 웹 연결 구현 | PR 검토·병합, 실방송 장기 관측·운영 확대 |
 | M3 장애·재처리 | 미착수 | 독립 소비·DLQ·고정 offset replay |
 | M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
 
@@ -14,9 +14,74 @@
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
+## 기술 목표 추적표
+
+2026-10-25 · 브랜치 `feat/technical-goals` · [PR #14](https://github.com/joejaeyoung/jigeumini/pull/14).
+[기술 목표·기능 매핑](TECH_GOALS.md)의 T ID별 상태 정본이다.
+기존 검증은 `44b6321` M1 기록을 기준으로 연결하고 #3의 독립 소비·품질 관측 검증 범위를 추가했다. `검증됨`은 아래 범위만 의미하며 기능 전체 완료와 구분한다.
+
+<!-- tech-status:start -->
+| 기술 ID | 상태 | 검증 근거 | 확인한 범위 | 남은 문제·다음 행동 |
+|---|---|---|---|---|
+| T01 | 부분 검증 | [M1 자동 검사](pipeline/VERIFICATION.md#자동-검사) | BATCH의 DB 성공 이후 커밋·DB 실패 시 진행 차단 | F11에서 Auto/BATCH/MANUAL 비교, 직접 ACK와 컨테이너 커밋 구분 |
+| T02 | 부분 검증 | [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영 | 신규 trend의 충돌·rollback 장애별 전용 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
+| T03 | 검증됨 | [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건 | F07 outbox의 별도 장애 경계 검증; 모든 장애·고부하 복구로 확대 해석하지 않음 |
+| T04 | 부분 검증 | [최초 offset·재시작](pipeline/VERIFICATION.md#자동-검사) | 빈 partition earliest 초기화 후 none 재시작 | #9 고정 manifest replay·retention 만료 실패·live 불변 검증 |
+| T05 | 부분 검증 | [DB 오류·malformed 검사](pipeline/VERIFICATION.md#자동-검사) | DB 복구 재시도, 잘못된 입력의 offset 차단 | #10 DLQ·실패 분류·ACK 경계와 정상 입력 진행 검증 |
+| T06 | 미착수 | — | channelId·3 partition 설정 구현, 키별 순서 실험 미실행 | #11 동일 키 분포·다중 producer·증설 영향 실험 |
+| T07 | 미착수 | — | hot key 분포·shard 비교 근거 없음 | #11 균등/80% 편향과 키 분산 후보 비용 비교 |
+| T08 | 부분 검증 | [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
+| T09 | 미착수 | — | timeout 설정 구현, 제한별 장애 실험 미실행 | #11 poll 초과·heartbeat 단절·consumer 추가/종료를 각각 재현 |
+| T10 | 부분 검증 | [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
+| T11 | 부분 검증 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |
+| T12 | 미착수 | — | 직렬 ACK worker 기준선만 존재 | #11 bounded async 후보와 처리량·메모리·실패 추적 비교 |
+<!-- tech-status:end -->
+
+하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.
+AGENTS·이슈/PR 템플릿에 갱신 절차를 연결했고, `./scripts/check` 및 CI의 `tech-goals`에서 실행한다.
+이 문서화 작업은 새로운 Kafka 실험의 통과 기록이 아니다.
+
+최초 하네스 검증: `./scripts/check` 통과(추적 검사기 테스트 11개, 문서 링크, 서버 검사·JAR는 Gradle
+UP-TO-DATE). `--base develop` 검사, 잘못된 기준 ref의 실패, CI YAML·shell 구문도 확인했다.
+추적 테스트는 ID 누락·미등록 참조·중복·기능 연결 누락·근거 없는 검증 상태·표식 손상·기준 대비 동시 삭제를 포함한다.
+이번 변경에서 Kafka/DB 통합·live 수신·원격 CI는 새로 실행하지 않았다.
+
+PR #14 리뷰 후 보완: Claude CLI가 `7f2cf86`에서 지적한 force-push 이전 SHA 확보,
+`—` 빈 값 검사, 공백 정렬된 기준선의 기능 ID 삭제 검사를 수정했다. 로컬 테스트 16개에
+실제 임시 bare 저장소의 force-push·shallow clone·이전 SHA fetch와 확보 실패 시 이벤트별 처리를 포함했다.
+push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차단한다. 첫 HEAD의 원격 서버/웹/기술 목표 CI는 통과했다.
+수정 HEAD의 재리뷰·최종 CI·병합 결과는 PR #14에서 확인한다. 새 Kafka 기술 실험은 수행하지 않았다.
+
+## 수집 품질·순위·급상승 구현
+
+최종 지연 예산 보완: 서버 순위/급상승과 웹의 STALE 경계를 30초로 통일했다. scheduler는 실행 후 벽시계의 다음 경계+8초를 다시 예약하고, 예약 후 시계가 뒤로 움직이면 예정 경계를 다시 기다린다. 300ms/3초/5초 평가 비용과 ±2초 시계 보정에서 120회씩 연속 tick을 확인했다. 아래 고정 주기·20초 만료 기록은 이전 단계이며 이 조건으로 대체한다. 첫 위험 표본을 건너뛰고 안전한 다음 drain까지 Kafka가 따라잡아야 정상인 경우와 telemetry의 표본 기록·120초 정리도 검사했다. 최종 서버 단위 52개·하네스 16개·실제 Kafka/DB 통합 **19개**·웹 단위 17개·Chromium 22개·JAR/웹 빌드 통과. 관측 위상 검증은 주입한 시각·offset 상태를 실제 DB로 평가한 것이며 실시간 고부하 시험으로 해석하지 않는다.
+
+최종 관측 주기 보완: 10초 경계+8초에 7초 유예를 적용한 창을 평가한다. collector 5초·observer 1초 주기와 V3의 2분 버퍼 표본 보존으로 창 뒤 첫 안전한 drain을 고정하고 소비가 따라잡는지 확인한다. 위상 0~4초·소비 지연 2초·연속 입력에서 15개 tick이 모두 HEALTHY이며 기대 합계와 일치하는 DB 타이밍 시뮬레이션을 추가했다. 느린 관측은 제외하는 조건을 유지했다. 서버 기본 검사·실제 Kafka/PostgreSQL 통합 **18개** 통과. 다중 호스트 시계·고부하 실측은 검증하지 않았다. 아래 1초 평가 주기는 이전 리뷰 보완 단계의 기록이며 이 8초 기준으로 대체한다.
+
+추가 리뷰 보완: 창 종료 이후의 버퍼 관측, 창 이전 미확인 발행 없음, 버퍼 표본 시점 이후의 Kafka 따라잡음을 모두 요구한다. 창 이전 또는 버퍼보다 오래된 처리 표본으로 정상 순위를 확정하지 않는다. broker 표본 시각은 RPC 요청 전에 잡는다. 오래된 caught-up·미확인 발행·창 이전 버퍼 표본·회복을 실제 DB에서 검증했고, 실제 store의 30/60개 연속 추이 point도 확인했다. 서버 기본 검사와 실제 Kafka/PostgreSQL 통합 **17개** 통과. 원천 전체 수집 완전성이나 무한 eventTime 지연 입력을 보장하지 않으며 보수적 품질 제외가 발생할 수 있다.
+
+리뷰 보완(2026-10-25): 선행 PR #4·#12의 집계 미확인 표시를 통합했다. 평가 시작을 10초 경계+1초에 맞추고 고정 주기로 실행해 평가 비용에 따른 누적 drift를 제거했다. 합성 300ms 실행 비용으로 120회 tick 연속성을 검증했다. 상세 조회는 서버 기준 상대 기간으로 바꿔 브라우저 시계와 분 경계 이동에 의한 400 오류를 제거했고 범위·point 연속성을 검사한다. 2.96배는 2.9배 청록으로 내려 표시한다. `./scripts/check` 서버 단위 52개·하네스 16개·JAR, 웹 단위 17개·빌드 및 e2e 22개 통과. `./scripts/integration` 실제 Kafka·PostgreSQL 16개도 통과했다. 실제 10초 초과 평가 지연은 STALE·공백으로 유지하며 과거 tick을 추측해 복원하지 않는다.
+
+
+2026-10-25 · [이슈 #3](https://github.com/joejaeyoung/jigeumini/issues/3) · 브랜치 `feat/quality-rankings`. [메타데이터 PR #12](https://github.com/joejaeyoung/jigeumini/pull/12)의 브랜치에서 분기해 변경을 분리했다. #2·#3만 구현하며 #5~#11은 이번 범위에 포함하지 않는다. 보드는 In Progress, 검토·병합은 남겨둔다.
+
+- 기술 매핑: F03 → T02·T08·T11. 동일 eventId 중복을 ranking/trend 각각 1건으로 반영하고, ranking 중지 중 trend 처리·빈 partition freshness·미확인 버퍼 품질 제외를 검증했다. 신규 trend의 충돌/rollback 전용 장애 시험, consumer 수별 확장·실제 메모리·채널 공정성은 남아 있어 해당 목표 전체 완료로 판정하지 않는다.
+- 수집 관측: 프로토콜 승인·원천 frame/pong 생존·종료·손실을 메모리에 기록하고 5초마다 DB에 flush한다. 연결 합집합, collector/source heartbeat 만료, 발행 대기·in-flight 적체, invalid 메시지와 미확인 발행을 품질에 반영한다. 일반 PoC는 DB 없이 유지한다.
+- 독립 분석: ranking과 별도 trend group/ledger/bucket. 빈 poll heartbeat와 3개 end-offset 표본으로 조용한 partition도 freshness를 판정한다. 실패 입력을 건너뛰는 동작은 추가하지 않았다.
+- 순위: 완료된 1분/5분, 관측률 95%와 손실·지연 조건, 정상 0건·동률·정확히 60초 전 순위 비교. REPEATABLE READ·advisory lock·unique snapshot으로 중복 평가를 막는다. 미확인/제외 채널은 rank/count=null과 참고 건수를 제공한다.
+- 급상승: 독립 trend 집계, 소수 기준선, C≥100·증가≥50·비율≥2, 10초 간격 2회 연속, 5분 cooldown. 중복 tick·누락 tick·품질 실패·재시작에도 DB 상태를 기준으로 판정한다. 사후 공백은 품질 경고를 붙이고 기존 snapshot 건수/순위를 재계산하지 않는다.
+- API·웹: 순위 snapshot, cursor 급상승 피드, 완료된 분별 추이, 공개 품질 요약. 기존 원시 bucket 조회는 운영 진단용으로 보존한다. 20초 만료·품질 제외·참고 건수·공백을 구분하고 유효한 피드에만 청록/코랄 리본을 표시한다. [계약](api/QUALITY_RANKINGS.md)에 기준과 제한을 기록했다.
+- 검증: `./scripts/check` 단위 테스트 50개·실행 JAR 빌드 통과. `./scripts/integration` 실제 Kafka/PostgreSQL 테스트 16개 통과. `./scripts/web check` 타입·단위 테스트 16개·제품 빌드 통과. `./scripts/web test:e2e` 합성 API Chromium 테스트 19개 통과.
+- 추가 근거: 57초/56.999초 경계·세션 중첩, 250/5와 251/5, 연속/누락 tick·cooldown, 정상 0건·동률·불변 snapshot/지연 추이, 제외·사후 정정·이전 순위·cursor·즉시 disable, collector DB 기록을 검사했다. 실제 broker에서 ranking 소비를 멈춘 뒤 trend만 새 이벤트를 반영하는 것을 확인했다.
+- 실제 로컬 실행: 분석기를 V2 migration과 새 trend 그룹으로 실행했다. ranking/trend 각각 3 partitions에 poll/따라잡음 관측이 기록됐고 완료 snapshot이 생성됐다. 18082 탐색의 기존 방송 카드와 준비 중 상태, 급상승 warmup, JS 오류 0을 확인했다. 기존 DB 기록에는 M2 품질 정보가 없어 정상 순위나 배수를 만들지 않았다.
+- 화면 확인: 1440/320px 합성 급상승 카드에서 상단 메뉴·작은 V자 리본·2.2배 청록/3.2배 코랄·기록 시각과 기준선을 확인했다. 합성 캡처만 gitignored `work/surges-*.png`에 둔다.
+- 제한: 새로운 실방송 채팅 수집이나 6분 실제 급상승 유도는 하지 않았다. 프로토콜은 loopback WS/HTTP, 판정은 합성 입력과 실제 로컬 broker/DB로 검증했다. 보존 자동 삭제·관리자 UI·다중 호스트 fencing·DLQ·재처리·장시간 부하·외부 배포는 범위 밖이다. 현 단계의 snapshot 정정 범위는 최근 7일이다.
+
 ## 방송 메타데이터 구현
 
-2026-10-25 · [이슈 #2](https://github.com/joejaeyoung/jigeumini/issues/2) · 브랜치 `feat/broadcast-metadata`. 선행 모노레포 [PR #4](https://github.com/joejaeyoung/jigeumini/pull/4)가 미병합이므로 `feat/monorepo-web`에서 분기했다. 보드는 In Progress이며 검토·병합은 남겨둔다.
+아래 구현·검증 항목은 메타데이터 최초 구현 시점의 기록이다. 최종 통합 검증은 품질·순위 절의 리뷰 보완 기록을 따른다.
+
+2026-10-25 · [이슈 #2](https://github.com/joejaeyoung/jigeumini/issues/2) · 브랜치 `feat/broadcast-metadata`. 최초 구현은 `feat/monorepo-web`에서 분기했으며 선행 [PR #4](https://github.com/joejaeyoung/jigeumini/pull/4)는 develop에 병합됐다. Claude 리뷰 승인·CI 통과 후 PR #12를 develop에 병합했고 이슈 #2·보드는 완료 처리했다.
 
 - 서버: 익명 공개 live-detail 조회, 명시적인 종료 확인, 타입이 있는 `/api/channels` 목록·개별 조회. 수집 이력 최근 20개와 요청 ID 목록을 구분한다. 메타데이터는 Kafka·DB에 저장하지 않는다.
 - 캐시: 60초 TTL·실패 재시도 15초·이전 공개 텍스트 최대 5분, 256개 제한, 동시 갱신 4개·대기 32개, 동일 채널 요청 합치기. 성인·접근 제한·404·잘못된 응답에서 이전 공개 정보를 지운다. 만료 후 LIVE·이미지를 유지하지 않는다.
@@ -29,7 +94,9 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 ## 실제 웹·모노레포 1차 구현
 
-2026-10-25 · [이슈 #1](https://github.com/joejaeyoung/jigeumini/issues/1) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1)에서 In Progress로 관리한다. PR 검토·병합은 남겨둔다.
+아래 구현·검증 항목은 M1 웹 최초 구현 당시의 기록이다. 당시 미구현 메타데이터·품질 기능은 위 절에서 추가됐으며 수치도 해당 실행 시점을 뜻한다.
+
+2026-10-25 · [이슈 #1](https://github.com/joejaeyoung/jigeumini/issues/1) · Claude 리뷰 승인·CI 통과 후 PR #4를 develop에 병합했고 이슈 #1·[보드](https://github.com/users/joejaeyoung/projects/1)는 완료 처리했다.
 
 - 저장소: 원격 주소를 변경된 이름 `joejaeyoung/jigeumini`로 맞췄다. 기존 기준 커밋 `44b6321`에서 `main`·`develop`을 만들고 기본 브랜치를 `main`으로 설정했다. `feat/monorepo-web`에서 구현하며 기존 `feat/chat-pipeline`은 보존한다.
 - 모노레포: 서버 소스·테스트·리소스와 빌드를 `server/` Gradle 서브프로젝트로 이동했다. `web/`은 npm workspace의 React·TypeScript·Vite 제품 웹이다. 루트 `scripts/` 실행 계약을 유지하고 JAR·테스트 결과 경로와 CI를 갱신했다.

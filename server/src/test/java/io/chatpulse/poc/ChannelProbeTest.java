@@ -21,6 +21,15 @@ import tools.jackson.databind.json.JsonMapper;
 
 class ChannelProbeTest {
     private FixtureServer server;
+    private final List<String> observations = new CopyOnWriteArrayList<>();
+    private final CollectionObserver observer = new CollectionObserver() {
+        public void start(String channel) { observations.add("START"); }
+        public void connected(String channel, java.util.UUID session, java.time.Instant at) { observations.add("CONNECTED"); }
+        public void alive(java.util.UUID session, java.time.Instant at) { observations.add("ALIVE"); }
+        public void ended(java.util.UUID session, java.time.Instant at, String reason) { observations.add("ENDED"); }
+        public void loss(String channel, java.time.Instant from, java.time.Instant to, String reason) { observations.add("LOSS"); }
+        public void stopped(String channel) { observations.add("STOPPED"); }
+    };
 
     @AfterEach
     void stop() throws Exception { if (server != null) server.stop(1_000); }
@@ -36,7 +45,7 @@ class ChannelProbeTest {
 
     private Map<String, Object> run(Duration duration, Duration reconnect, boolean changeRoom) {
         var stats = new ProbeStats("fixture-channel");
-        new ChannelProbe(source(changeRoom), Duration.ofMillis(100), Duration.ofMillis(300), Duration.ofMillis(200))
+        new ChannelProbe(source(changeRoom), Duration.ofMillis(100), Duration.ofMillis(300), Duration.ofMillis(200), observer)
                 .run("fixture-channel", duration, reconnect, stats, new AtomicBoolean());
         return stats.snapshot(!reconnect.isZero());
     }
@@ -50,6 +59,14 @@ class ChannelProbeTest {
         assertThat((Map<?, ?>) result.get("skipped")).hasSize(2);
         assertThat(server.commands).contains(100, 0, 10000).doesNotContain(3101, 5101);
         assertThat(server.anonymousOnly.get()).isTrue();
+        assertThat(observations).contains("START", "CONNECTED", "ALIVE", "ENDED", "STOPPED");
+    }
+
+    @Test
+    void skippedInvalidMessageIsAQualityLossWithoutKeepingPayload() throws Exception {
+        server = new FixtureServer(true, false); server.invalidTime.set(true);
+        run(Duration.ofMillis(1000), Duration.ZERO, false);
+        assertThat(observations).contains("LOSS", "ALIVE", "STOPPED");
     }
 
     @Test
@@ -115,6 +132,7 @@ class ChannelProbeTest {
         final List<Integer> commands = new CopyOnWriteArrayList<>();
         final List<String> rooms = new CopyOnWriteArrayList<>();
         final AtomicBoolean anonymousOnly = new AtomicBoolean(true);
+        final AtomicBoolean invalidTime = new AtomicBoolean();
         final AtomicBoolean closeFirst = new AtomicBoolean();
         final CountDownLatch handshakeObserved = new CountDownLatch(1);
         final CountDownLatch closedObserved = new CountDownLatch(1);
@@ -146,6 +164,7 @@ class ChannelProbeTest {
                         + ",\"msg\":\"PRIVATE_MESSAGE_CANARY\",\"profile\":\"PRIVATE_PROFILE_CANARY\"},"
                         + "{\"msgTypeCode\":30,\"msgTime\":" + time + "}]}");
                 conn.send("{\"cmd\":15101,\"bdy\":{\"messageList\":[{\"msgTypeCode\":1,\"msgTime\":" + time + "}]}}");
+                if (invalidTime.get()) conn.send("{\"cmd\":93101,\"bdy\":[{\"msgTypeCode\":1,\"msgTime\":0}]}");
                 handshakeObserved.countDown();
                 if (closeFirst.compareAndSet(true, false)) conn.close();
             } else if (command == 0 && answerPings) conn.send("{\"cmd\":10000,\"ver\":\"2\"}");

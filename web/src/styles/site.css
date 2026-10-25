@@ -49,3 +49,8 @@ dialog { border: 1px solid var(--color-rule); padding: 0; border-radius: 16px; c
 .detail-visual { position: relative; aspect-ratio: 16/9; width: 100%; border-radius: 8px; overflow: hidden; background: var(--color-mint); }
 .detail-copy { min-width: 0; flex: 1; }
 @media (min-width:640px) { .detail-visual { width: 42%; flex-shrink: 0; } }
+.quality-caption { margin-top: 6px; color: var(--color-muted); font-size: 10px; }
+.surge-explainer { max-width: 70ch; margin: 0 0 28px; color: var(--color-muted); font-size: 12px; }
+.broadcast-card[data-reaction=true] .broadcast-status { top: 10px; bottom: auto; }
+.surge-context { border-top: 1px solid var(--color-rule-soft); margin-top: 12px; padding-top: 10px; color: var(--color-muted); font-size: 11px; }
+.surge-item { min-width: 0; }.feed-pagination { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }

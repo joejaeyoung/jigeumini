@@ -12,6 +12,7 @@ public final class ChannelProbe {
     private static final Logger log = LoggerFactory.getLogger(ChannelProbe.class);
     private final ChatSource source;
     private EventSink sink = EventSink.DISCARD;
+    private CollectionObserver observer = CollectionObserver.NONE;
     private final Duration pingInterval;
     private final Duration pongTimeout;
     private final Duration roomPollInterval;
@@ -25,6 +26,10 @@ public final class ChannelProbe {
         this.sink = sink;
     }
 
+    public ChannelProbe(ChatSource source, EventSink sink, CollectionObserver observer) {
+        this(source, sink); this.observer = observer;
+    }
+
     ChannelProbe(ChatSource source, Duration pingInterval, Duration pongTimeout, Duration roomPollInterval) {
         this.source = source;
         this.pingInterval = pingInterval;
@@ -32,7 +37,17 @@ public final class ChannelProbe {
         this.roomPollInterval = roomPollInterval;
     }
 
+    ChannelProbe(ChatSource source, Duration pingInterval, Duration pongTimeout, Duration roomPollInterval, CollectionObserver observer) {
+        this(source, pingInterval, pongTimeout, roomPollInterval); this.observer = observer;
+    }
+
     public void run(String channel, Duration duration, Duration reconnectAfter, ProbeStats stats, AtomicBoolean stop) {
+        observer.start(channel);
+        try { runObserved(channel, duration, reconnectAfter, stats, stop); }
+        finally { observer.stopped(channel); }
+    }
+
+    private void runObserved(String channel, Duration duration, Duration reconnectAfter, ProbeStats stats, AtomicBoolean stop) {
         long start = System.nanoTime();
         long deadline = start + duration.toNanos();
         boolean forced = false;
@@ -49,7 +64,7 @@ public final class ChannelProbe {
                     String room = source.resolveRoom(channel);
                     String token = source.readToken(room);
                     try (var connection = new ChatConnection(client, scheduler, source.socketUri(room), channel,
-                            room, token, stats, pingInterval, pongTimeout, sink)) {
+                            room, token, stats, pingInterval, pongTimeout, sink, observer)) {
                         log.info("channel={} connected attempt={}", channel, attempt);
                         long nextRoomPoll = System.nanoTime() + roomPollInterval.toNanos();
                         while (!stop.get() && System.nanoTime() < deadline) {
@@ -74,6 +89,7 @@ public final class ChannelProbe {
                     }
                 } catch (SourceFailure e) {
                     stats.reason(e.getMessage());
+                    observer.state(channel, "OFFLINE".equals(e.getMessage()) ? "OFFLINE" : e.terminal() ? "UNAVAILABLE" : "BACKOFF");
                     log.info("channel={} attempt={} reason={}", channel, attempt, e.getMessage());
                     if (e.terminal()) return;
                 } catch (InterruptedException e) {

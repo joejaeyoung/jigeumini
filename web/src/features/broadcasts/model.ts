@@ -1,5 +1,6 @@
+import { rankingStale, type Rankings, type RankingEntry } from '../../shared/api/quality';
 import type { Bucket, BroadcastMetadata } from '../../shared/api/client';
-export type ChannelSummary = { id: string; chatCount: number | null; lastBucket: string | null; metadata?: BroadcastMetadata };
+export type ChannelSummary = { id: string; chatCount: number | null; lastBucket: string | null; metadata?: BroadcastMetadata; quality?: RankingEntry; stale?: boolean };
 export function summarize(buckets: Bucket[]): ChannelSummary[] {
   const result = new Map<string, ChannelSummary>();
   for (const bucket of buckets) {
@@ -53,4 +54,10 @@ export function metadataLabel(meta?: BroadcastMetadata): string {
     case 'NOT_FOUND': return '채널을 찾을 수 없음';
     default: return meta.reason === 'PENDING' ? '방송 정보 확인 중' : '방송 정보 확인 불가';
   }
+}
+
+export function rankedChannels(data: Rankings): ChannelSummary[] {
+  const stale = rankingStale(data);
+  return [...data.entries, ...data.excludedChannels].map(entry => ({ id: entry.channelId,
+    chatCount: stale ? null : entry.count, lastBucket: data.evaluatedAt, quality: entry, stale }));
 }

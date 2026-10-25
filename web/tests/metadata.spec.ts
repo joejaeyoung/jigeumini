@@ -14,6 +14,7 @@ async function setup(page: Page) {
     const requested = url.searchParams.get('ids')?.split(',') ?? [a, b];
     return route.fulfill({ json: id ? metadata(id) : { asOf: new Date(now).toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', channels: requested.map(metadata) } });
   });
+  await page.route('**/api/v1/rankings?**', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), evaluatedAt: null, snapshotId: null, windowSeconds: Number(new URL(route.request().url()).searchParams.get('window')), algorithmVersion: 'quality-ranking-v1', status: 'WARMING_UP', entries: [], excludedChannels: [] } }));
   await page.route('**/api/status', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', coverageMeasured: false, consumer: { running: true, state: 'RUNNING', assignedPartitions: 3 } } }));
   await page.route('**/api/buckets?**', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), windowSeconds: Number(new URL(route.request().url()).searchParams.get('seconds')), bucketSeconds: 10, includesOpenBucket: true, coverageMeasured: false, buckets: [] } }));
 }
@@ -78,7 +79,7 @@ for (const width of [320, 768, 1440]) {
 
 test('메타데이터가 있어도 집계 조회 실패를 기록 없음으로 단정하지 않는다', async ({ page }) => {
   await setup(page);
-  await page.route('**/api/buckets?**', route => route.fulfill({ status: 503, body: '' }));
+  await page.route('**/api/v1/rankings?**', route => route.fulfill({ status: 503, body: '' }));
   await page.goto('/explore');
   await expect(page.getByRole('alert')).toContainText('불러오지 못했어요');
   await expect(page.locator('.broadcast-card')).toHaveCount(2);
@@ -92,7 +93,7 @@ test('기간 변경 응답 대기 중에는 메타데이터와 집계 미확인�
   await expect(page.locator('.broadcast-card').first()).toContainText('최근 집계 없음');
   let release!: () => void;
   const pending = new Promise<void>(resolve => { release = resolve; });
-  await page.route('**/api/buckets?**', async route => { await pending; await route.fallback(); });
+  await page.route('**/api/v1/rankings?**', async route => { await pending; await route.fallback(); });
   await page.getByRole('button', { name: '최근 1분', exact: true }).click();
   await expect(page.getByText('수집된 방송을 불러오는 중…')).toBeVisible();
   await expect(page.locator('.broadcast-card').first()).toContainText('집계 확인 전');

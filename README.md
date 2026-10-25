@@ -24,11 +24,30 @@ Node.js 24(`.nvmrc`), Java 21, Python 3, Docker Compose를 사용한다. 최초 
 ./scripts/web preview           # 빌드 확인: http://127.0.0.1:18083/
 ```
 
-웹은 실제 방송 제목·공개 채널명·썸네일·카테고리·방송 상태, 1분/5분 채팅 집계, 제목·채널명 검색, 카테고리 필터, 관심 방송과 상세 기록을 제공한다. 최근 수집 이력이 있는 20개 채널을 조회하며 전체 치지직 검색은 아니다. 방송 정보는 비동기로 조회하므로 첫 화면에서 잠시 확인 중으로 표시될 수 있다. 최근 채팅 기록이 없는 채널은 건수 `—`를 표시한다. 급상승 배수는 후속 이슈 범위다. 디자인 시안은 별도 포트로 보존한다.
+웹은 실제 방송 제목·공개 채널명·썸네일·카테고리·방송 상태, 1분/5분 채팅 집계, 제목·채널명 검색, 카테고리 필터, 관심 방송과 상세 기록을 제공한다. 최근 수집 이력이 있는 20개 채널을 조회하며 전체 치지직 검색은 아니다. 방송 정보는 비동기로 조회하므로 첫 화면에서 잠시 확인 중으로 표시될 수 있다. 품질 관측이 없거나 불완전한 채널은 건수 `—`를 표시하고 정상 관측된 조용한 구간만 0건으로 표시한다. 순위는 완료된 1분/5분 구간 중 품질 조건을 통과한 방송만 포함한다. 반응 급상승은 6분의 정상 관측과 연속 판정이 쌓인 뒤 표시한다. 디자인 시안은 별도 포트로 보존한다.
+
+기존 M1 분석기에 처음 M2를 적용할 때는 `./scripts/pipeline analyzer --quality.trend-offset-reset=earliest`로 새 trend 그룹의 시작 위치를 설정한다. 다음 재시작부터는 `./scripts/pipeline analyzer`를 쓴다. 기존 ranking 그룹은 reset하지 않는다. [수집 품질·순위·급상승 계약](docs/api/QUALITY_RANKINGS.md)을 참고한다.
 
 방송 정보 조회를 끄려면 분석기를 `./scripts/pipeline analyzer --metadata.enabled=false`로 실행한다. 새 코드를 반영할 때는 실행 중인 분석기를 Ctrl+C로 종료한 뒤 `./scripts/pipeline analyzer`로 재시작한다. [방송 정보 API·캐시·원천 이용 범위](docs/api/BROADCAST_METADATA.md)를 참고한다.
 
 [개발 구조·Git Flow](docs/DEVELOPMENT.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
+
+## 기술 목표와 추적 검사
+
+[기술 목표·기능 매핑](docs/TECH_GOALS.md)은 오프셋·재처리, 파티션·부하 편중, 발행 버퍼·과부하 제어를
+T ID로 관리한다. 기능/이슈/PR에서 관련 ID를 고르고, 검증 후 [STATUS](docs/STATUS.md)의 상태·근거·남은 문제를 갱신한다.
+새 기능을 구현해도 연결된 기술 문제의 완료 조건을 입증해야 해결로 기록한다.
+
+```bash
+python3 scripts/check-tech-goals.py                # 목표·기능·상태·근거 연결 및 HEAD 대비 ID 삭제 검사
+python3 scripts/check-tech-goals.py --base develop # 지정 기준 commit 대비 ID 보존 검사
+python3 scripts/check-doc-links.py                # 문서와 템플릿의 파일 링크 검사
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests # 추적 검사기의 누락 방지 검증
+./scripts/check                                  # 위 검사 + 서버 테스트·JAR 빌드
+```
+
+검사는 Python 3와 Git만 사용하며 네트워크를 호출하지 않는다. CI는 PR base/push 이전 commit과 비교한다.
+기술 ID를 없애는 대신 보류 이유·재개 조건을 기록한다. 이 검사는 실제 장애 시험이나 결과 리뷰를 대신하지 않는다.
 
 ## 웹 UI 디자인 시안
 
@@ -111,6 +130,7 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 | `web/src/` | React·TypeScript 제품 웹, 서버 API 조회 |
 | `server/src/main/java/io/chatpulse/pipeline` | Kafka 발행·집계·조회 API |
 | `server/src/main/java/io/chatpulse/metadata` | 공개 방송 정보 조회·메모리 캐시·API |
+| `server/src/main/java/io/chatpulse/quality` | 수집 품질 관측·완료 구간 순위·독립 급상승 판정 |
 | `scripts/` | 환경 확인, 빌드·검증, 공개 채널 찾기, live 실행 |
 | [설계 문서](docs/design/README.md) | PRD·아키텍처·HLD |
 | [프로토콜과 구현 결정](docs/poc/PROTOCOL.md) | 입력 분류, timeout·재시도, 소스 근거 |

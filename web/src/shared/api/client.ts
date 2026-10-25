@@ -19,7 +19,7 @@ export type Snapshot = { status: z.infer<typeof statusSchema>; counts: BucketsRe
 export class ApiError extends Error {
   constructor(public readonly reason: 'network' | 'response' | 'contract') { super(reason); }
 }
-async function read<T>(url: string, schema: z.ZodType<T>, signal: AbortSignal): Promise<T> {
+export async function read<T>(url: string, schema: z.ZodType<T>, signal: AbortSignal): Promise<T> {
   try {
     const response = await fetch(url, { signal: AbortSignal.any([signal, AbortSignal.timeout(8000)]), headers: { Accept: 'application/json' } });
     if (!response.ok) throw new ApiError('response');

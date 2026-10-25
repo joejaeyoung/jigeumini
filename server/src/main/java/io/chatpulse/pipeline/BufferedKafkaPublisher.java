@@ -22,6 +22,16 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
     private final EventCodec codec;
     private final Thread worker;
     private final AtomicLong accepted = new AtomicLong(), acknowledged = new AtomicLong(), rejected = new AtomicLong();
+    public record BufferState(int count, java.time.Instant oldest) { }
+    private final java.util.concurrent.ConcurrentHashMap<Pending, ChatEvent> unacked = new java.util.concurrent.ConcurrentHashMap<>();
+    public boolean deliveryFailed() { return failed; }
+    public Map<String, BufferState> bufferSnapshot() {
+        var result = new java.util.HashMap<String, BufferState>();
+        for (var event : unacked.values()) result.compute(event.channelId(), (id, previous) -> new BufferState(
+                previous == null ? 1 : previous.count + 1,
+                previous == null || event.receivedAt().isBefore(previous.oldest) ? event.receivedAt() : previous.oldest));
+        return Map.copyOf(result);
+    }
     private volatile boolean closing;
     private volatile boolean failed;
     private volatile boolean finished;
@@ -45,7 +55,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
         try {
             var pending = events.stream().map(e -> new Pending(e, codec.encode(e))).toList();
             accepted.addAndGet(pending.size());
-            pending.forEach(queue::add);
+            pending.forEach(p -> { unacked.put(p, p.event); queue.add(p); });
         } catch (RuntimeException e) {
             slots.release(events.size());
             rejected.addAndGet(events.size());
@@ -61,6 +71,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 // Kafka client가 동일 record를 delivery timeout까지 재시도한다. 새 UUID를 만들지 않는다.
                 kafka.send(new ProducerRecord<>(topic, null, p.event.receivedAt().toEpochMilli(),
                         p.event.channelId(), p.bytes)).get(12, TimeUnit.SECONDS);
+                unacked.remove(p);
                 acknowledged.incrementAndGet();
                 slots.release();
             }

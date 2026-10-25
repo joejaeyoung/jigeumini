@@ -18,11 +18,13 @@ public final class PocRunner {
     private final PocProperties properties;
     private final ChatSource source;
     private final EventSink sink;
+    private final CollectionObserver observer;
 
-    public PocRunner(PocProperties properties, ChatSource source, org.springframework.beans.factory.ObjectProvider<EventSink> sinks) {
+    public PocRunner(PocProperties properties, ChatSource source, org.springframework.beans.factory.ObjectProvider<EventSink> sinks, org.springframework.beans.factory.ObjectProvider<CollectionObserver> observers) {
         this.properties = properties;
         this.source = source;
         this.sink = sinks.getIfAvailable(() -> EventSink.DISCARD);
+        this.observer = observers.getIfAvailable(() -> CollectionObserver.NONE);
     }
 
     public int run() {
@@ -53,7 +55,7 @@ public final class PocRunner {
                     for (int i = 0; i < properties.channels().size(); i++) {
                         String channel = properties.channels().get(i);
                         ProbeStats channelStats = stats.get(i);
-                        tasks.add(workers.submit(() -> new ChannelProbe(source, sink).run(channel,
+                        tasks.add(workers.submit(() -> new ChannelProbe(source, sink, observer).run(channel,
                                 properties.duration(), properties.reconnectAfter(), channelStats, stop)));
                     }
                     try {

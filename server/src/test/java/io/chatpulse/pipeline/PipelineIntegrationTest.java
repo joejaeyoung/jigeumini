@@ -159,7 +159,8 @@ class PipelineIntegrationTest {
             await().atMost(Duration.ofSeconds(20)).until(() -> ((Long) consumer.status().get("failedAttempts")) >= 2);
             assertEquals("BLOCKED_INVALID_EVENT", consumer.status().get("state"));
             assertEquals(0L, store.totals().get("processedEvents"));
-            assertTrue(store.progress().isEmpty());
+            assertEquals(3, store.progress().size());
+            assertTrue(store.progress().stream().allMatch(row -> ((Long) row.get("nextResolvedOffset")) == 0));
             try (var admin = Admin.create(Map.of("bootstrap.servers", IntegrationSupport.BOOTSTRAP))) {
                 var offsets = admin.listConsumerGroupOffsets(group).partitionsToOffsetAndMetadata().get(10, TimeUnit.SECONDS);
                 assertTrue(offsets.values().stream().allMatch(x -> x.offset() == 0));

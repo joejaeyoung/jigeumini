@@ -3,13 +3,21 @@ const a = 'a'.repeat(32), b = 'b'.repeat(32);
 async function mockApi(page: Page, mode: 'filled' | 'empty' = 'filled') {
   await page.route('**/api/channels**', route => route.fulfill({ json: { asOf: new Date().toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', channels: [] } }));
   await page.route('**/api/status', route => route.fulfill({ json: { asOf: '2026-10-25T00:05:00Z', scope: 'COLLECTED_CHANNELS_ONLY', coverageMeasured: false, consumer: { running: true, state: 'RUNNING', assignedPartitions: 3 } } }));
-  await page.route('**/api/buckets?**', route => {
-    const params = new URL(route.request().url()).searchParams;
-    const seconds = Number(params.get('seconds'));
-    const id = params.get('channelId');
-    return route.fulfill({ json: { asOf: '2026-10-25T00:05:00Z', windowSeconds: seconds, bucketSeconds: 10, includesOpenBucket: true, coverageMeasured: false,
-      buckets: mode === 'empty' ? [] : [a, b].filter(channelId => !id || id === channelId).map((channelId, i) => ({ channelId, bucketStart: '2026-10-25T00:04:50Z', chatCount: seconds === 60 ? 2 + i : 8 + i })) } });
+  await page.route('**/api/v1/rankings?**', route => {
+    const seconds = Number(new URL(route.request().url()).searchParams.get('window'));
+    const at = new Date(Math.floor(Date.now() / 10000) * 10000).toISOString();
+    return route.fulfill({ json: { asOf: new Date().toISOString(), evaluatedAt: at, snapshotId: '00000000-0000-4000-8000-000000000001', windowSeconds: seconds,
+      algorithmVersion: 'quality-ranking-v1', status: mode === 'empty' ? 'WARMING_UP' : 'READY', excludedChannels: [],
+      entries: mode === 'empty' ? [] : [b, a].map((channelId, i) => ({ channelId, rank: i + 1, count: seconds === 60 ? 3 - i : 9 - i, referenceCount: seconds === 60 ? 3 - i : 9 - i, coverage: 1, status: 'HEALTHY', reasons: [], previousRank: null, previousReason: 'NO_PREVIOUS_SNAPSHOT' })) } });
   });
+  await page.route('**/api/v1/channels/*/activity?**', route => {
+    const url = new URL(route.request().url()), seconds = Number(url.searchParams.get('seconds'));
+    const end = Math.floor(Date.now() / 60000) * 60000, start = end - seconds * 1000;
+    const from = new Date(start).toISOString(), to = new Date(end).toISOString();
+    return route.fulfill({ json: { channelId: url.pathname.split('/')[4], asOf: new Date().toISOString(), from, to,
+      points: Array.from({ length: seconds / 60 }, (_, i) => ({ from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(), count: 2, referenceCount: 2, coverage: 1, status: 'HEALTHY', reasons: [] })) } });
+  });
+  await page.route('**/api/v1/spikes?**', route => route.fulfill({ json: { asOf: new Date().toISOString(), status: 'WARMING_UP', events: [], nextCursor: null } }));
 }
 test('조회·기간 변경·검색·관심 저장·상세 및 직접 주소 복원', async ({ page }) => {
   await mockApi(page);
@@ -39,11 +47,11 @@ test('빈 결과와 서버 오류를 구분하고 재시도한다', async ({ pag
   await mockApi(page, 'empty');
   await page.goto('/explore');
   await expect(page.getByText('아직 이 시간대에 수집된 방송이 없어요')).toBeVisible();
-  await page.route('**/api/buckets?**', route => route.fulfill({ status: 503, body: '' }));
+  await page.route('**/api/v1/rankings?**', route => route.fulfill({ status: 503, body: '' }));
   await page.reload();
   await expect(page.getByRole('alert')).toContainText('불러오지 못했어요');
   await expect(page.getByText('아직 이 시간대에 수집된 방송이 없어요')).toHaveCount(0);
-  await page.unroute('**/api/buckets?**');
+  await page.unroute('**/api/v1/rankings?**');
   await mockApi(page);
   await page.getByRole('button', { name: '다시 시도' }).click();
   await expect(page.locator('.broadcast-card')).toHaveCount(2);
@@ -53,7 +61,7 @@ test('갱신 실패는 마지막 데이터와 조회 시각을 유지하고 오�
   await mockApi(page);
   await page.goto('/explore');
   await expect(page.locator('.broadcast-card')).toHaveCount(2);
-  await page.route('**/api/buckets?**', route => route.fulfill({ status: 500, body: '' }));
+  await page.route('**/api/v1/rankings?**', route => route.fulfill({ status: 500, body: '' }));
   await page.clock.fastForward(5000);
   await expect(page.getByRole('alert')).toContainText('이전 조회 결과', { timeout: 12000 });
   await expect(page.locator('.broadcast-card')).toHaveCount(2);
@@ -65,7 +73,7 @@ test('최근 기록 없는 관심 채널은 미확인 상태이며 급상승 배
   await expect(page.locator('.broadcast-card')).toContainText('최근 집계 없음');
   await expect(page.locator('.card-bottom strong')).toHaveText('—');
   await page.getByRole('navigation').getByRole('link', { name: '반응 급상승' }).click();
-  await expect(page.getByText('급상승 분석을 준비하고 있어요')).toBeVisible();
+  await expect(page.getByText('반응을 비교할 기록을 모으고 있어요')).toBeVisible();
   await expect(page.locator('.reaction-ribbon')).toHaveCount(0);
 });
 for (const width of [320, 375, 414, 768, 1440]) {
@@ -89,7 +97,7 @@ test('관심 방송 조회 중·실패를 최근 집계 없음으로 표시하�
   await page.addInitScript(id => localStorage.setItem('jigeumini.saved-channels.v1', JSON.stringify([id])), a);
   let release!: () => void;
   const pending = new Promise<void>(resolve => { release = resolve; });
-  await page.route('**/api/buckets?**', async route => { await pending; await route.fulfill({ status: 503, body: '' }); });
+  await page.route('**/api/v1/rankings?**', async route => { await pending; await route.fulfill({ status: 503, body: '' }); });
   await page.goto('/saved');
   await expect(page.getByText('수집된 방송을 불러오는 중…')).toBeVisible();
   await expect(page.locator('.broadcast-card')).toHaveCount(0);
@@ -97,7 +105,7 @@ test('관심 방송 조회 중·실패를 최근 집계 없음으로 표시하�
   release();
   await expect(page.getByRole('alert')).toContainText('불러오지 못했어요');
   await expect(page.getByText('최근 집계 없음')).toHaveCount(0);
-  await page.unroute('**/api/buckets?**');
+  await page.unroute('**/api/v1/rankings?**');
   await mockApi(page, 'empty');
   await page.getByRole('button', { name: '다시 시도' }).click();
   await expect(page.locator('.broadcast-card')).toContainText('최근 집계 없음');

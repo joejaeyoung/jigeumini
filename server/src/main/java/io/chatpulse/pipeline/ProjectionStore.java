@@ -30,6 +30,10 @@ public final class ProjectionStore {
         this.projection = projection;
         this.runId = runId;
     }
+    public void initializeProgress(String topic, int partition, long position) {
+        jdbc.update("INSERT INTO projection_progress(projection,run_id,topic,partition,next_resolved_offset) VALUES (?,?,?,?,?) ON CONFLICT DO NOTHING",
+                projection, runId, topic, partition, position);
+    }
     public long apply(List<ConsumerRecord<String, byte[]>> records) {
         var unique = new LinkedHashMap<UUID, Input>();
         var offsets = new HashMap<TopicPartition, Long>();

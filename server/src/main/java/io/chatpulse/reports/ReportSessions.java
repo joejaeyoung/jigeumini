@@ -59,8 +59,8 @@ final class ReportSessions {
                 assignments.put(observation.eventId(),id);var old=existingAnchors.get(observation.eventId());
                 if(old!=null&&!old.equals(id))aliases.put(old,id);
             }
-            String state=draft.ended!=null?"OFFLINE":draft.last.liveStatus()==LiveStatus.LIVE&&now.isBefore(draft.last.observedAt().plusSeconds(draft.last.ttlSeconds()))?"LIVE":"UNKNOWN";
-            sessions.add(new Session(id,draft.channel,draft.source,anchor,draft.first.observedAt(),draft.last.observedAt(),draft.ended,state,draft.endReason,draft.viewerMaximum,draft.identityUnconfirmed,draft.last.ttlSeconds()));
+            String state=draft.ended!=null?"OFFLINE":draft.last.liveStatus()==LiveStatus.LIVE&&now.isBefore(draft.last.observedAt().plusSeconds(Math.min(120,draft.last.ttlSeconds())))?"LIVE":"UNKNOWN";
+            sessions.add(new Session(id,draft.channel,draft.source,anchor,draft.first.observedAt(),draft.last.observedAt(),draft.ended,state,draft.endReason,draft.viewerMaximum,draft.identityUnconfirmed,Math.min(120,draft.last.ttlSeconds())));
         }
         sessions.sort(Comparator.comparing(Session::observedFrom).reversed().thenComparing(s->s.id().toString()));
         return new Result(List.copyOf(sessions),Map.copyOf(assignments),Map.copyOf(aliases));

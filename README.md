@@ -214,4 +214,4 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 채널 상세의 **방송별 요약 기록 보기**에서 최근7일 관측과 미종료 기록을 조회한다. 누적 참고 채팅·품질 충족 완료 분·분당 최대·시청자 관측 최고값·상위3개 피크를 구분한다. 실제 방송 시작/종료를 추정하지 않으며 내부 관측 세션과 미확정 상태를 표시한다. [리포트 계약](docs/api/REPORTS.md)을 따른다.
 
-새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.
+새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. 잔존 입력 중 eventTime 최근7일만 반영하며 더 오래된 입력은 진행 위치만 갱신한다. 리포트에는 receivedAt48시간 차단을 적용하지 않는다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.

@@ -69,7 +69,8 @@ public final class ReportStore implements DualTopicProjection {
                         if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_observation WHERE run_id=? AND event_id=?",String.class,run,sample.eventId())))throw new IllegalArgumentException("REPORT_OBSERVATION_CONFLICT");
                     } else affect(affected,sample.channelId(),sample.observedAt(),sample.observedAt().plusSeconds(120));
                 } else {
-                    var event=input.chat();if(event.eventTime().isBefore(oldest))continue;codec.validateLiveAge(event,now);
+                    var event=input.chat();if(event.eventTime().isBefore(oldest))continue;
+                    if(event.receivedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
                     Instant at=event.eventTime().truncatedTo(java.time.temporal.ChronoUnit.MICROS);String digest=codec.hash(event);
                     int inserted=jdbc.update("INSERT INTO report_event VALUES (?,?,?,?,?,?,?,NULL,NULL) ON CONFLICT DO NOTHING",run,event.eventId(),event.channelId(),ts(at),ts(event.receivedAt().truncatedTo(java.time.temporal.ChronoUnit.MICROS)),digest,!event.eventTime().isAfter(event.receivedAt().minusSeconds(120)));
                     if(inserted==0) {
@@ -93,9 +94,13 @@ public final class ReportStore implements DualTopicProjection {
     private void rebuild(String channel,Instant from,Instant to,Instant now,Instant oldest,Map<Delta,Long> changes) {
         var anchors=new HashMap<UUID,UUID>();jdbc.query("SELECT anchor_observation_id,report_id FROM report_session WHERE run_id=? AND channel_id=? AND anchor_observation_id IS NOT NULL",rs->{anchors.put(rs.getObject(1,UUID.class),rs.getObject(2,UUID.class));},run,channel);
         var previous=new HashMap<UUID,UUID>();
-        var samples=jdbc.query("SELECT event_id,payload::text,report_id FROM report_observation WHERE run_id=? AND channel_id=? ORDER BY observed_at,event_id",(rs,n)->{
+        var samples=jdbc.query("""
+                SELECT event_id,payload::text,report_id FROM report_observation o WHERE run_id=? AND channel_id=?
+                  AND NOT EXISTS (SELECT 1 FROM report_session s WHERE s.run_id=o.run_id AND s.report_id=o.report_id AND s.ended_at<?)
+                ORDER BY observed_at,event_id
+                """,(rs,n)->{
             previous.put(rs.getObject(1,UUID.class),rs.getObject(3,UUID.class));return BroadcastObserved.decode(channel,rs.getString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        },run,channel);
+        },run,channel,ts(oldest));
         var derived=ReportSessions.derive(samples,anchors,now);var changedObservations=new ArrayList<UUID>();
         for(var session:derived.sessions())jdbc.update("""
                 INSERT INTO report_session(run_id,report_id,channel_id,anchor_observation_id,observed_from,observed_to,ended_at,payload,updated_at)
@@ -158,16 +163,16 @@ public final class ReportStore implements DualTopicProjection {
         try { return new Stored(JSON.readValue(rs.getString("payload"),ReportSessions.Session.class),rs.getLong("revision"),rs.getTimestamp("updated_at").toInstant()); }
         catch(RuntimeException invalid) { throw new IllegalArgumentException("REPORT_STORED_CONTRACT"); }
     }
-    <T> T readSnapshot(java.util.function.Supplier<T> query) { return read.execute(status->query.get()); }
+    <T> T readSnapshot(java.util.function.Supplier<T> query) { return read.execute(status->{jdbc.execute("SET LOCAL statement_timeout='5s'");return query.get();}); }
     public Page list(String channel) {
-        return read.execute(status->{
+        return readSnapshot(()->{
             var reports=jdbc.query("SELECT * FROM report_session s WHERE run_id=? AND channel_id=? AND (greatest(observed_to,ended_at)>=? OR ended_at IS NULL) AND NOT EXISTS(SELECT 1 FROM report_alias a WHERE a.run_id=s.run_id AND a.alias_id=s.report_id) ORDER BY observed_from DESC,report_id LIMIT 101",this::stored,run,channel,ts(clock.instant().minusSeconds(7*86400)));
             return new Page(reports.stream().limit(100).toList(),reports.size()>100,unassigned(channel),fresh());
         });
     }
     private long unassigned(String channel) { return jdbc.queryForObject("SELECT count(*) FROM report_event WHERE run_id=? AND channel_id=? AND report_id IS NULL AND event_time>=?",Long.class,run,channel,ts(clock.instant().minusSeconds(7*86400))); }
     public Detail detail(UUID id) {
-        return read.execute(status->{
+        return readSnapshot(()->{
             UUID canonical=id;var visited=new HashSet<UUID>();
             for(int i=0;i<100;i++) {
                 if(!visited.add(canonical))throw new IllegalArgumentException("REPORT_ALIAS_CYCLE");

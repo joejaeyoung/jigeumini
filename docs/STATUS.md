@@ -28,6 +28,12 @@ Claude 초기 리뷰는 `8f23629` APPROVE다. 비차단 지적 중 웹의 600초
 
 사용자 요청의 [실행 확인](poc/evidence/runtime-smoke-2026-10-25.json): 실제 서버에 연결한6개 경로에서 JS/API 오류0, 데스크톱과320px 알림 화면의 가로 넘침0. 공개3채널은 완료1분 순위에서 모두 HEALTHY였다. 약5분30초의 수신6,965=ACK6,965=DB ledger/bucket 증가6,965, 거절/미확인0. 사용자가 확인 후 종료를 요청해 계획600초 전에 중단했으며 CANCELLED를 완료 시험PASS로 바꾸지 않는다. 실제 급상승/알림은 관측하지 않았다. 수집기·18080·18082는 종료하고 통합 검증용 Kafka/DB만 유지한다. 원문·제목·채널명은 검증 출력에 저장하지 않았다.
 
+### 토픽 초기화 간헐 실패 보완
+
+PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `40196842128`에서 `DeadLetterIntegrationTest.setup → ensureTopic.describeConfigs`의 UnknownTopicOrPartitionException으로 실패했다. PR #18과 같은 위치다. 실제 로컬 생성/조회200회에서는 재현0회이며 broker 내부 원인은 미확정이다. 생성·토픽 조회 성공 뒤 설정 조회가 한 번 실패하는 Admin 응답을 주입해 기존 시작 실패를 재현했고, 해당 오류만 공통10초 기한 안에서 재조회하도록 보완 중이다. 권한/설정 오류 즉시 거부, 중단 신호 복원, 종료 한도를 검사한다. 단위 회귀4개 통과 후 전체 검증·재리뷰를 진행한다.
+
+#5 시청자 관측 기반은 별도 `feat/viewer-observations` 브랜치의 진행분으로 보관했다. 원천 수치 어댑터·이벤트 계약·독립 소비/이력 기반을 시작했으며 #8 기동 회귀 해결 후 이어서 검증한다.
+
 ## 오류 격리·복구 진단 #10
 
 `feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. [격리·진단 계약](pipeline/DLQ.md)대로 ranking/trend의 영구 계약 오류만 격리하고, DLQ ACK 후 정상 ledger/bucket·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DB commit 후 Kafka BATCH offset commit을 유지한다. 같은 배치의 eventId 충돌 후보는 모두 제외하고 기존 ledger는 보존한다.

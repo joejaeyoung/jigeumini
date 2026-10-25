@@ -7,11 +7,25 @@ import static org.assertj.core.api.Assertions.*;
 
 @Tag("integration")
 class LoadExperimentIntegrationTest {
+    @Test void liveBaselineReadsMissingAndPartialTablesWithoutMigratingThem() {
+        String schema="exp_empty_"+UUID.randomUUID().toString().replace("-","");
+        var root=new org.springframework.jdbc.core.JdbcTemplate(IntegrationSupport.ds("public"));root.execute("CREATE SCHEMA "+schema);
+        try {
+            var jdbc=new org.springframework.jdbc.core.JdbcTemplate(IntegrationSupport.ds(schema));
+            assertThat(LoadExperiment.live(jdbc)).containsExactlyInAnyOrderEntriesOf(Map.of("ledgerPresent",false,"bucketPresent",false));
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM pg_tables WHERE schemaname=?",Long.class,schema)).isZero();
+            jdbc.execute("CREATE TABLE processed_event(id int)");jdbc.update("INSERT INTO processed_event VALUES(1)");
+            assertThat(LoadExperiment.live(jdbc)).containsEntry("ledgerPresent",true).containsEntry("ledger",1L).containsEntry("bucketPresent",false).doesNotContainKey("bucket");
+            jdbc.execute("CREATE TABLE chat_bucket_10s(chat_count bigint)");jdbc.update("INSERT INTO chat_bucket_10s VALUES(2)");
+            assertThat(LoadExperiment.live(jdbc)).containsEntry("bucketPresent",true).containsEntry("bucket",2L);
+        } finally {root.execute("DROP SCHEMA "+schema+" CASCADE");}
+    }
+
     @Test void isolatedSyntheticLoadReconcilesDuplicatesIndependentGroupsAndFixedRangeReplay() throws Exception {
         Path output=Path.of("../work/experiment-test-"+UUID.randomUUID()+".json");LoadExperiment.quiet();
         try {
             var result=LoadExperiment.run(ExperimentPlan.named("smoke"),output,null,false);
-            assertThat(result.get("correct")).isEqualTo(true);assertThat(result.get("cleanupComplete")).isEqualTo(true);
+            assertThat(result.get("correct")).as("sanitized experiment result: %s",result).isEqualTo(true);assertThat(result.get("cleanupComplete")).isEqualTo(true);
             assertThat(result.get("generatedUnique")).isEqualTo(200L);assertThat(result.get("attemptedRecords")).isEqualTo(202L);assertThat(result.get("replayBucketDifferences")).isEqualTo(0L);
             assertThat(((Map<?,?>)result.get("databaseA")).get("processedEvents")).isEqualTo(200L);
             assertThat(((Map<?,?>)result.get("databaseA")).get("bucketTotal")).isEqualTo(200L);

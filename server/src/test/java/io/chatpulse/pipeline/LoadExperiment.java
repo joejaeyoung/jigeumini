@@ -52,12 +52,14 @@ public final class LoadExperiment {
         Files.writeString(output,JSON.writeValueAsString(result));
         var hook=new Thread(session::close,"experiment-cleanup");Runtime.getRuntime().addShutdownHook(hook);
         try {
-            if(resources)ExperimentResources.preflight(output.getParent());session.open();result.put("liveBefore",session.liveBefore);
+            result.put("phase","PREFLIGHT");if(resources)ExperimentResources.preflight(output.getParent());
+            result.put("phase","OPEN_RESOURCES");session.open();result.put("liveBefore",session.liveBefore);
+            result.put("phase","GENERATE_AND_DRAIN");
             session.generate(output.getParent(),requestedBase,resources,result);
             var finalA=session.store("load-a").totals();var finalB=plan.independent()?session.store("load-b").totals():Map.of();
             result.put("databaseA",finalA);result.put("databaseB",finalB);result.put("metricsA",session.metricsA.snapshot());result.put("metricsB",session.metricsB.snapshot());result.put("metricsAScope",plan.name().equals("heartbeat")?"PARENT_PROCESS_ONLY_CHILD_LATENCIES_NOT_CAPTURED":"ALL_GROUP_MEMBERS");
             result.put("samples",List.copyOf(session.samples));result.put("events",List.copyOf(session.events));
-            boolean replay=session.replay(result);boolean expected=session.expectedMatches("load-a");result.put("expectedBucketsMatch",expected);
+            result.put("phase","REPLAY_AND_RECONCILE");boolean replay=session.replay(result);boolean expected=session.expectedMatches("load-a");result.put("expectedBucketsMatch",expected);
             long unique=((Number)finalA.get("processedEvents")).longValue(),upper=session.expected.values().stream().mapToLong(Long::longValue).sum(),lower=Math.max(0,session.acknowledged()-(session.accepted()-upper));
             result.put("acknowledgedUniqueLowerBound",lower);result.put("acceptedUniqueUpperBound",upper);
             var codes=session.events.stream().map(e->e.get("code")).toList();boolean scenarioComplete=(plan.pauseSeconds()==0||codes.containsAll(List.of("ANALYZER_STOPPED","ANALYZER_RESTARTED")))
@@ -74,6 +76,8 @@ public final class LoadExperiment {
         } catch(Exception failure) {
             result.put("correct",false);result.put("outcome","EXPERIMENT_FAILED");String code=failure.getMessage();
             result.put("failureCode",code!=null&&code.matches("EXPERIMENT_[A-Z_]+")?code:"EXPERIMENT_UNAVAILABLE");
+            result.put("failureType",failure.getClass().getSimpleName());
+            for(Throwable cause=failure;cause!=null;cause=cause.getCause())if(cause instanceof java.sql.SQLException sql&&sql.getSQLState()!=null) {result.put("sqlState",sql.getSQLState());break;}
         } finally {
             result.putIfAbsent("samples",List.copyOf(session.samples));result.putIfAbsent("events",List.copyOf(session.events));result.putIfAbsent("metricsA",session.metricsA.snapshot());result.putIfAbsent("metricsB",session.metricsB.snapshot());
             session.close();Runtime.getRuntime().removeShutdownHook(hook);result.put("cleanupComplete",session.cleaned);result.put("finishedAt",Instant.now().toString());
@@ -289,6 +293,15 @@ public final class LoadExperiment {
     private static void sleep(long millis){try{Thread.sleep(millis);}catch(InterruptedException interrupted){Thread.currentThread().interrupt();}}
     @FunctionalInterface interface Condition{boolean check() throws Exception;}
     private static void until(int seconds,Condition condition) throws Exception {long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(seconds);while(!condition.check()){if(System.nanoTime()>deadline)throw new IllegalStateException("EXPERIMENT_DEADLINE");Thread.sleep(100);}}
-    private static Map<String,Object> live(JdbcTemplate jdbc){return jdbc.queryForObject("SELECT (SELECT count(*) FROM processed_event),(SELECT coalesce(sum(chat_count),0)::bigint FROM chat_bucket_10s)",(rs,n)->Map.of("ledger",rs.getLong(1),"bucket",rs.getLong(2)));}
+    static Map<String,Object> live(JdbcTemplate jdbc) {
+        // 새 CI DB에는 운영 테이블이 없을 수 있다. 조회만 하고 생성/migration으로 상태를 바꾸지 않는다.
+        var result = new LinkedHashMap<String,Object>();
+        var present = jdbc.queryForObject("SELECT to_regclass('processed_event') IS NOT NULL,to_regclass('chat_bucket_10s') IS NOT NULL",
+                (rs,n)->List.of(rs.getBoolean(1),rs.getBoolean(2)));
+        result.put("ledgerPresent",present.get(0));result.put("bucketPresent",present.get(1));
+        if(present.get(0))result.put("ledger",jdbc.queryForObject("SELECT count(*) FROM processed_event",Long.class));
+        if(present.get(1))result.put("bucket",jdbc.queryForObject("SELECT coalesce(sum(chat_count),0)::bigint FROM chat_bucket_10s",Long.class));
+        return Map.copyOf(result);
+    }
     private static Map<String,Object> producerMetrics(KafkaTemplate<String,byte[]> template){var values=new TreeMap<String,Object>();template.metrics().forEach((name,metric)->{if(Set.of("batch-size-avg","records-per-request-avg","request-rate","record-send-rate","record-error-total","record-retry-total","record-queue-time-max","record-queue-time-avg","buffer-available-bytes").contains(name.name()))values.put(name.name(),metric.metricValue());});return values;}
 }

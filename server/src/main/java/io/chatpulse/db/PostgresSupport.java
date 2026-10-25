@@ -19,6 +19,16 @@ public final class PostgresSupport {
             throw exception;
         }
     }
+    /** 배포 runtime은 schema를 변경하지 않으며 누락/미적용/미래 migration도 거부한다. */
+    public static HikariDataSource openValidated(String jdbcUrl,String user,String password) {
+        var dataSource=open(jdbcUrl,user,password,false);
+        try {
+            var flyway=Flyway.configure().dataSource(dataSource).ignoreMigrationPatterns(new String[0]).load();
+            flyway.validate();
+            if(flyway.info().pending().length!=0 || flyway.info().current()==null)throw new IllegalStateException("SCHEMA_NOT_READY");
+            return dataSource;
+        } catch(RuntimeException|Error failure){dataSource.close();throw new IllegalStateException("SCHEMA_NOT_READY",failure);}
+    }
     /** 조회 CLI는 migration과 watchdog 없이 읽기 전용 연결을 사용한다. */
     public static HikariDataSource open(String jdbcUrl, String user, String password, boolean readOnly) {
         var config = new HikariConfig();

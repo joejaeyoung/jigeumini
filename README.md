@@ -248,3 +248,7 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 ```
 
 [HA 계약](docs/pipeline/KAFKA_HA.md)을 따른다. 합성 입력과 UUID별6노드 Compose project·소유 데이터 볼륨을 만들고 종료 뒤 정리한다. Docker 가용메모리6GiB 이상, 기존 사용량+실험 상한2.625GiB가90% 이내, 여유디스크2GiB가 필요하다. 기존 chat-pulse/다른 프로젝트를 정지하지 않는다. 외부 배포·실제 AZ 장애 검증은 아니다.
+
+## 로컬 배포 패키지
+
+`./scripts/deploy-images work/images.json`은 clean commit의 비특권 서버/웹 이미지를 만들고 실제 image ID를 기록한다. 비밀 주입·내부망·migration·readiness·복구 시작 검사는 [배포 계약](deploy/README.md)을 따른다. 외부 배포나 registry push를 하지 않는다.

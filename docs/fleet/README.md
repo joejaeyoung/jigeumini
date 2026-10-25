@@ -39,7 +39,7 @@
 
 정상종료는새획득중단→WS종료→최대10초발행drain→heartbeat종료→임대해제순서다. drain동안임대를계속갱신한다. DB장애/만료면permit을취소하고미확인을남긴다. DB해제실패시새소유자는원래만료를기다린다. 진단파일은정상종료와SIGTERM hook모두동일고정결과를최대1회저장한다. 강제SIGKILL/전원손실의메모리입력과결과파일은복원하지못한다.
 
-status의discovered/eligible/selected와유효assigned/connected를분리한다. connected는최근heartbeat의연결관측이고건강한집계구간의증명이아니다. healthyWindow는null이며[품질API](../api/QUALITY_RANKINGS.md)에서별도판정한다. 운영worker는CollectionTelemetry에수신·종료·손실·buffer관측을연결한다. 시청자메타데이터수집기는이새CLI에아직합성하지않았다. 원천API/토큰/채팅원문은파일과로그에기록하지않는다.
+status의discovered/eligible/selected와유효assigned/connected를분리한다. connected는최근heartbeat의연결관측이고건강한집계구간의증명이아니다. healthyWindow는null이며[품질API](../api/QUALITY_RANKINGS.md)에서별도판정한다. 운영worker는CollectionTelemetry에수신·종료·손실·buffer관측을연결한다. 시청자 관측은 임대한 채널만 활성화하며 채팅과 HTTP 예산·권한을 공유한다. 응답 뒤/발행 직전 재검사하며 OBSERVATIONS_ENABLED=false로 끌 수 있다. HA 정책도 채팅/관측 토픽에 같은 환경 설정을 전달한다. 원천API/토큰/채팅원문은파일과로그에기록하지않는다.
 
 ## 근거·리팩토링
 

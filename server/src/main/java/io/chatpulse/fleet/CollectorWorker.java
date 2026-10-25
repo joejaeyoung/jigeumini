@@ -35,11 +35,16 @@ public final class CollectorWorker implements AutoCloseable {
     }
     public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
                            java.util.function.Function<BufferedKafkaPublisher,CollectionObserver> observerFactory) {
+        this(leases,mode,limits,source,kafka,topic,(publisher,budget)->observerFactory.apply(publisher));
+    }
+    public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
+                           java.util.function.BiFunction<BufferedKafkaPublisher,BudgetedChatSource,CollectionObserver> observerFactory) {
         this.leases=leases;this.mode=mode;this.limits=limits;
         if(mode==SourceMode.OFFICIAL_AUTHORIZED||mode==SourceMode.UNOFFICIAL_POC&&limits.capacity()>3)throw new IllegalArgumentException("FLEET_SOURCE_MODE");
         this.source=new BudgetedChatSource(source,authority,limits.httpRequests(),limits.httpInterval());
         publisher=new BufferedKafkaPublisher(kafka,topic,new EventCodec(),limits.publisher(),authority);
-        this.observer=observerFactory.apply(publisher);
+        try {this.observer=observerFactory.apply(publisher,this.source);}
+        catch(RuntimeException|Error failure){publisher.close();throw failure;}
     }
     public UUID owner(){return owner;}
     public Map<String,Object> run() {return run(ignored->{ });}

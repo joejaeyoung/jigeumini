@@ -51,7 +51,8 @@ public final class DeadLetterRecovery implements AutoCloseable {
             Thread.currentThread().interrupt(); throw new ProjectionRetryException("SOURCE_METADATA_UNAVAILABLE");
         } catch (Exception e) { throw new ProjectionRetryException("SOURCE_METADATA_UNAVAILABLE"); }
     }
-    void checkSource() {
+    void checkSource(List<ConsumerRecord<String, byte[]>> records) {
+        records.forEach(this::checkRecord);
         if (!topicId.equals(currentTopicId())) throw new ProjectionRetryException("SOURCE_IDENTITY_CHANGED");
     }
     void bindSource() {
@@ -59,11 +60,6 @@ public final class DeadLetterRecovery implements AutoCloseable {
         String bound = jdbc.queryForObject("SELECT topic_id FROM projection_source WHERE projection=? AND run_id=? AND topic=?",
                 String.class, projection, run, topic);
         if (!topicId.toString().equals(bound)) throw new ProjectionRetryException("SOURCE_IDENTITY_CHANGED");
-    }
-    boolean alreadyResolved(ConsumerRecord<String, byte[]> record) {
-        checkRecord(record);
-        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM projection_failure WHERE projection=? AND run_id=? AND failure_id=?)",
-                Boolean.class, projection, run, DeadLetter.id(topicId, record.partition(), record.offset())));
     }
     void resolve(ConsumerRecord<String, byte[]> record, ChatEvent event, EventContractException error, long deadline) {
         checkRecord(record);

@@ -110,7 +110,8 @@ public final class RankingStore {
         jdbc.update("""
                 INSERT INTO snapshot_quality_revision(snapshot_id,channel_id,reason,revised_at)
                 SELECT s.snapshot_id,e.channel_id,'COLLECTION_REVISED',? FROM ranking_snapshot s JOIN ranking_entry e USING(snapshot_id)
-                WHERE s.run_id=? AND s.projection=? AND e.status='HEALTHY' AND s.evaluated_at>=?
+                LEFT JOIN snapshot_quality_revision r USING(snapshot_id,channel_id)
+                WHERE s.run_id=? AND s.projection=? AND e.status='HEALTHY' AND r.snapshot_id IS NULL AND s.evaluated_at>=?
                   AND EXISTS(SELECT 1 FROM projection_failure f WHERE f.run_id=s.run_id AND f.source_topic=?
                     AND (f.channel_id IS NULL OR f.channel_id=e.channel_id) AND f.affected_from<s.evaluated_at
                     AND f.affected_to>s.evaluated_at-make_interval(secs=>s.window_sec))

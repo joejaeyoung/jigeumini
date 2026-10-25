@@ -4,9 +4,9 @@ F09 · [이슈 #10](https://github.com/joejaeyoung/jigeumini/issues/10) → T01/
 
 ## 처리 경계
 
-1. poll의 모든 입력을 검증한다. 형식·schema·키·시각·live 보존 범위 위반과 eventId/payload 충돌만 영구 오류다. 같은 배치의 동일 ID에 서로 다른 payload가 있으면 모든 후보를 격리한다. 이미 DB에 확정한 ID와 충돌하면 기존 집계를 보존하고 새 위치의 입력을 격리한다.
-2. 원본 topic ID를 확인하고 DB namespace의 `projection_source`와 대조한다. 토픽을 재생성했으면 같은 live namespace로 진행하지 않는다.
-3. 하나의 DB 트랜잭션에서 정상 입력의 ledger를 삽입한다. 영구 오류는 별도 DLQ에 발행하고 broker ACK를 기다린 뒤 `projection_failure`에 저장한다. 이미 해당 namespace에 격리 기록이 있으면 재분류해 반영하거나 재발행하지 않는다.
+1. 원본 topic ID를 확인하고 DB 트랜잭션 안에서 namespace의 `projection_source`와 대조한다. 토픽을 재생성했으면 같은 live namespace로 진행하지 않는다. partition별 `projection_progress`를 정해진 순서로 잠그고, DB에 확정한 다음 offset보다 앞선 입력은 검증·분류·발행 없이 제외한다. 정상/격리 구분 모두 이 cursor로 보존하며 재전달 사이의 시간 경과나 배치 구성 변화가 판정을 바꾸지 않는다.
+2. 아직 확정하지 않은 입력만 검증한다. 형식·schema·키·시각·live 보존 범위 위반과 eventId/payload 충돌만 영구 오류다. 같은 배치의 미확정 동일 ID에 서로 다른 payload가 있으면 모든 후보를 격리한다. 이미 DB에 확정한 ID와 충돌하면 기존 집계를 보존하고 새 위치의 입력만 격리한다.
+3. 같은 트랜잭션에서 정상 입력의 ledger를 삽입한다. 영구 오류는 별도 DLQ에 발행하고 broker ACK를 기다린 뒤 `projection_failure`에 저장한다. 확정된 원본 위치는 1단계에서 제외하므로 재발행하지 않는다.
 4. 새 정상 이벤트만 bucket에 합산하고, 모든 정상/격리 입력의 다음 offset을 `projection_progress`에 기록한다. ledger·bucket·격리 기록·진행 위치는 함께 commit하거나 함께 rollback한다. 오류만 있는 배치도 진행 위치를 기록한다.
 5. DB commit 후 listener가 반환해야 Spring의 BATCH 동기 offset commit이 진행된다. 직접 ACK나 Kafka/DB 분산 트랜잭션이 아니다.
 
@@ -27,7 +27,7 @@ DB 오류, DLQ 전송 실패, topic identity 확인 실패와 기타 미분류 �
 
 - key=`SHA-256(topicId + ':' + partition + ':' + offset)`. topicId는 broker가 제공하는 Kafka UUID다. 같은 이름의 재생성 topic과 구분한다. ranking/trend가 같은 원본 오류를 발견하면 같은 failureId를 사용하며 DB는 `(projection,run_id,failure_id)`별 1건이다.
 - JSON은 `schemaVersion`, `failureId`, `topicId`, `sourceTopic`, `partition`, `offset`, `errorCode`, `channelId`, `affectedFrom`, `affectedTo`만 포함한다. 원본 bytes/key/headers·예외 본문·eventId·사용자 정보·원문 hash를 복사하지 않는다.
-- 허용 코드는 `EVENT_SIZE`, `INVALID_EVENT_FIELDS`, `INVALID_EVENT_JSON`, `INVALID_EVENT_CONTRACT`, `KEY_MISMATCH`, `INVALID_EVENT_TIME`, `OUTSIDE_LIVE_RETENTION`, `EVENT_ID_CONFLICT`다.
+- 허용 코드는 `EVENT_SIZE`, `EVENT_TOO_LARGE`, `INVALID_EVENT_FIELDS`, `INVALID_EVENT_JSON`, `INVALID_EVENT_CONTRACT`, `KEY_MISMATCH`, `INVALID_EVENT_TIME`, `OUTSIDE_LIVE_RETENTION`, `EVENT_ID_CONFLICT`다.
 - 완전히 검증된 충돌 이벤트만 channelId와 해당 10초 eventTime bucket을 사용한다. 나머지 오류의 channelId는 null이며, 감지 시각 기준 최근 7일부터 최대 미래 eventTime(now+10초)이 속한 10초 bucket 끝까지 전체 수집 채널의 품질을 불완전하게 만든다. 시작도 bucket 경계로 내림한다. receivedAt≤now+5초와 eventTime≤receivedAt+5초의 허용치를 모두 반영한다. 정상 live 입력이 기여할 수 있는 시간 범위를 보수적으로 덮는 정책이다. 잘못된 입력의 시각이나 key로 범위를 추측하지 않는다.
 - ACK 뒤 crash/DB 실패가 있으면 Kafka DLQ의 물리적 건수가 중복될 수 있다. 운영 건수는 DB의 failureId별 격리 건수다. producer idempotence가 재시작·애플리케이션 재발행을 중복 제거한다고 가정하지 않는다.
 
@@ -54,6 +54,6 @@ DLQ를 live 토픽으로 재투입하는 API나 동작은 없다. 코드를 수�
 
 ## 범위와 근거
 
-실제 실행 결과는 [검증 기록](DLQ_VERIFICATION.md)에서 확인한다. 단일 로컬 broker/DB와 합성 입력의 장애 경계 검증이며 실방송·고부하·복제 HA·자동 운영 복구는 포함하지 않는다. 초기 토픽 설정 조회의 알려진 간헐 실패는 원인 확인 없이 수정됐다고 주장하지 않는다.
+실제 실행 결과는 [검증 기록](DLQ_VERIFICATION.md)에서 확인한다. 단일 로컬 broker/DB와 합성 입력의 장애 경계 검증이며 실방송·고부하·복제 HA·자동 운영 복구는 포함하지 않는다. 초기 토픽 설정 조회의 알려진 간헐 실패는 원인 확인 없이 수정됐다고 주장하지 않는다. 대량 오류의 직렬 ACK 비용·7일 누적 데이터의 첫 품질 정정 비용·DB 원인 진단 세분화는 #11의 후속 실측 대상이다. 정정된 snapshot은 다음 정정 후보에서 제외하지만 최초 대량 정정의 5초 statement 한도는 별도로 검증해야 한다.
 
 기술 근거: [Spring Kafka 전체 배치 재시도](https://docs.spring.io/spring-kafka/reference/4.0/kafka/annotation-error-handling.html), [Kafka Admin의 topic identity·offset 조회](https://kafka.apache.org/41/javadoc/org/apache/kafka/clients/admin/Admin.html). 구현은 저장소 BOM 버전을 사용한다.

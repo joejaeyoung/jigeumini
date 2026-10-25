@@ -12,7 +12,7 @@ import org.apache.kafka.common.Uuid;
 /** 원본 value/key/headers나 예외 본문을 복사하지 않는 진단 계약. */
 public record DeadLetter(int schemaVersion, String failureId, String topicId, String sourceTopic,
         int partition, long offset, String errorCode, String channelId, Instant affectedFrom, Instant affectedTo) {
-    private static final Set<String> CODES = Set.of("EVENT_SIZE", "INVALID_EVENT_FIELDS", "INVALID_EVENT_JSON",
+    private static final Set<String> CODES = Set.of("EVENT_SIZE", "EVENT_TOO_LARGE", "INVALID_EVENT_FIELDS", "INVALID_EVENT_JSON",
             "INVALID_EVENT_CONTRACT", "KEY_MISMATCH", "INVALID_EVENT_TIME", "OUTSIDE_LIVE_RETENTION", "EVENT_ID_CONFLICT");
 
     public static String id(Uuid topicId, int partition, long offset) {

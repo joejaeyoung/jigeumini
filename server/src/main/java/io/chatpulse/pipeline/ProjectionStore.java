@@ -3,6 +3,7 @@ package io.chatpulse.pipeline;
 import io.chatpulse.poc.ChatEvent;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -22,8 +23,13 @@ public final class ProjectionStore {
     private final EventCodec codec;
     private final String projection;
     private final String runId;
+    private final Clock clock;
 
     public ProjectionStore(JdbcTemplate jdbc, TransactionTemplate tx, EventCodec codec, String projection, String runId) {
+        this(jdbc,tx,codec,projection,runId,Clock.systemUTC());
+    }
+    ProjectionStore(JdbcTemplate jdbc, TransactionTemplate tx, EventCodec codec, String projection, String runId, Clock clock) {
+        this.clock = clock;
         this.jdbc = jdbc;
         this.tx = tx;
         this.codec = codec;
@@ -37,7 +43,7 @@ public final class ProjectionStore {
     public long apply(List<ConsumerRecord<String, byte[]>> records) { return apply(records,true,null); }
     public long applyRecovering(List<ConsumerRecord<String, byte[]>> records, DeadLetterRecovery recovery) {
         if ("replay".equals(projection)) throw new IllegalArgumentException("LIVE_NAMESPACE_REQUIRED");
-        recovery.checkSource();
+        recovery.checkSource(records);
         return apply(records,true,recovery);
     }
     public long applyReplay(List<ConsumerRecord<String, byte[]>> records) {
@@ -46,32 +52,34 @@ public final class ProjectionStore {
         return apply(records,false,null);
     }
     private long apply(List<ConsumerRecord<String, byte[]>> records, boolean live, DeadLetterRecovery recovery) {
-        Instant now = Instant.now();
-        var inputs = new ArrayList<Input>();
-        var hashes = new HashMap<UUID,String>();
-        var conflicts = new HashSet<UUID>();
-        for (var record : records) {
-            ChatEvent event = null;
-            try {
-                event = codec.decode(record.value(),record.key());
-                if (live) codec.validateLiveAge(event,now);
-                String hash = codec.hash(event);
-                String previous = hashes.putIfAbsent(event.eventId(),hash);
-                if (previous != null && !previous.equals(hash)) {
-                    if (recovery == null) throw new EventContractException("EVENT_ID_CONFLICT");
-                    conflicts.add(event.eventId());
-                }
-                inputs.add(new Input(record,event,hash,null));
-            } catch (EventContractException error) {
-                if (recovery == null) throw error;
-                inputs.add(new Input(record,event,null,error));
-            }
-        }
         long ackDeadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
         Long inserted = tx.execute(status -> {
             jdbc.execute("SET LOCAL lock_timeout = '3s'");
             jdbc.execute("SET LOCAL statement_timeout = '5s'");
             if (recovery != null) recovery.bindSource();
+            // 확정된 위치는 시각·배치 구성이 바뀌어도 다시 분류하지 않는다.
+            var pending = recovery == null ? records : unresolved(records);
+            Instant now = clock.instant();
+            var inputs = new ArrayList<Input>();
+            var hashes = new HashMap<UUID,String>();
+            var conflicts = new HashSet<UUID>();
+            for (var record : pending) {
+                ChatEvent event = null;
+                try {
+                    event = codec.decode(record.value(),record.key());
+                    if (live) codec.validateLiveAge(event,now);
+                    String hash = codec.hash(event);
+                    String previous = hashes.putIfAbsent(event.eventId(),hash);
+                    if (previous != null && !previous.equals(hash)) {
+                        if (recovery == null) throw new EventContractException("EVENT_ID_CONFLICT");
+                        conflicts.add(event.eventId());
+                    }
+                    inputs.add(new Input(record,event,hash,null));
+                } catch (EventContractException error) {
+                    if (recovery == null) throw error;
+                    inputs.add(new Input(record,event,null,error));
+                }
+            }
             var buckets = new HashMap<Bucket, Long>();
             var offsets = new HashMap<TopicPartition, Long>();
             var unique = new HashMap<UUID, String>();
@@ -80,18 +88,15 @@ public final class ProjectionStore {
                 var r = input.record;
                 ChatEvent event = input.event;
                 try {
-                    // DB commit 후 재전달된 격리 입력은 다시 판정하거나 발행하지 않는다.
-                    if (recovery == null || !recovery.alreadyResolved(r)) {
-                        if (input.error != null) throw input.error;
-                        if (conflicts.contains(event.eventId())) throw new EventContractException("EVENT_ID_CONFLICT");
-                        String hash = input.hash;
-                        String previous = unique.putIfAbsent(event.eventId(), hash);
-                        if (previous != null && !previous.equals(hash)) throw new EventContractException("EVENT_ID_CONFLICT");
-                        if (previous == null && insert(event, hash, r)) {
-                            count++;
-                            var bucket = new Bucket(event.channelId(), Instant.ofEpochSecond(Math.floorDiv(event.eventTime().getEpochSecond(), 10) * 10));
-                            buckets.merge(bucket, 1L, Long::sum);
-                        }
+                    if (input.error != null) throw input.error;
+                    if (conflicts.contains(event.eventId())) throw new EventContractException("EVENT_ID_CONFLICT");
+                    String hash = input.hash;
+                    String previous = unique.putIfAbsent(event.eventId(), hash);
+                    if (previous != null && !previous.equals(hash)) throw new EventContractException("EVENT_ID_CONFLICT");
+                    if (previous == null && insert(event, hash, r)) {
+                        count++;
+                        var bucket = new Bucket(event.channelId(), Instant.ofEpochSecond(Math.floorDiv(event.eventTime().getEpochSecond(), 10) * 10));
+                        buckets.merge(bucket, 1L, Long::sum);
                     }
                 } catch (EventContractException error) {
                     if (recovery == null) throw error;
@@ -118,6 +123,21 @@ public final class ProjectionStore {
             return count;
         });
         return inserted == null ? 0 : inserted;
+    }
+    private List<ConsumerRecord<String,byte[]>> unresolved(List<ConsumerRecord<String,byte[]>> records) {
+        var starts = new HashMap<TopicPartition,Long>();
+        for (var r : records) starts.merge(new TopicPartition(r.topic(),r.partition()),r.offset(),Math::min);
+        var resolved = new HashMap<TopicPartition,Long>();
+        var partitions = starts.keySet().stream().sorted(java.util.Comparator.comparing(TopicPartition::topic)
+                .thenComparingInt(TopicPartition::partition)).toList();
+        for (var tp : partitions) {
+            initializeProgress(tp.topic(),tp.partition(),starts.get(tp));
+            resolved.put(tp,jdbc.queryForObject("""
+                    SELECT next_resolved_offset FROM projection_progress
+                    WHERE projection=? AND run_id=? AND topic=? AND partition=? FOR UPDATE
+                    """,Long.class,projection,runId,tp.topic(),tp.partition()));
+        }
+        return records.stream().filter(r -> r.offset() >= resolved.get(new TopicPartition(r.topic(),r.partition()))).toList();
     }
     private boolean insert(ChatEvent event, String hash, ConsumerRecord<String, byte[]> record) {
         var ids = jdbc.query("""

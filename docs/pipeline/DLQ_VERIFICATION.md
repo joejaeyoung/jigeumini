@@ -17,6 +17,8 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 | ACK 직후 JVM 종료 | halt(93), DLQ 1건·DB 0건·offset 0; 재시작 후 같은 failureId의 DLQ 2건, DB 격리는 1건·집계 2건 |
 | DB commit 직후 JVM 종료 | halt(94), DB 집계 2건·격리 1건·offset 0; 재시작 후 원본 offset 3, DLQ 추가 발행 없이 1건 유지 |
 | DB 장애 | processed_event trigger 오류 중 정상 입력의 DLQ/DB/offset 0; trigger 제거 뒤 정상 입력 1건·DLQ 0 |
+| ACK 후 DB rollback | 진행 위치 UPDATE trigger 오류: ACK가 있어도 정상 ledger/bucket·격리·진행 모두 0 유지, 복구 후 2/1/3 |
+| 확정 정상 입력 재전달 | DB commit 직후 halt(94) 후 48시간 경계 초과·새 충돌 입력 추가를 각각 재현. 기존 offset 0의 격리는 0건; 새 충돌 offset 1만 격리 |
 | 원본 보존·identity | deleteRecords 후 EXPIRED, topic 재생성 후 TOPIC_CHANGED·동일 namespace 진행 거부 |
 | 품질 | 격리 구간 제외, 이미 공개된 snapshot/spike의 경고, 상세 count=null, 채널 미확인 오류가 신규 채널에도 적용 |
 | 실행 JAR | Spring analyzer의 양쪽 group·실제 HTTP 진단 응답·운영 HTML 제공 |
@@ -42,6 +44,8 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 최초 테스트 준비에서 Kafka Admin의 default.api.timeout.ms=10000에 기본 request.timeout.ms=30000이 충돌했다. 요청 timeout을 명시해 수정했다. 이 실패는 DLQ 처리 시험에 진입하기 전의 설정 오류였다.
 
 RF=1에서 min.insync.replicas=2로 ACK 실패를 유도하려던 시험은 정상 발행됐다. 설정 조회를 추가해도 재현됐으며 소비 상태는 RUNNING·실패 시도 0이었다. [Kafka 4.1.2 Partition 소스](https://github.com/apache/kafka/blob/4.1.2/core/src/main/scala/kafka/cluster/Partition.scala#L354-L361)는 유효 최소 ISR을 복제 수 이하로 제한한다. 따라서 이 방법을 장애 근거로 쓰지 않고, DLQ 토픽의 허용 크기를 내려 실제 broker가 발행을 거부하는 시험으로 교체했다. 이는 broker 전체 중단·네트워크 단절·복제 HA 시험이 아니다.
+
+Claude 최초 리뷰는 확정된 정상 offset을 다시 분류하는 문제로 REQUEST_CHANGES였다. 시간 경과·배치 구성 변경의 두 JVM 재시작 시험이 수정 전 각각 실패했다. DB 진행 위치를 같은 트랜잭션에서 잠그고 미확정 입력만 분류하도록 변경했다. 테스트 fixture도 ledger와 격리 저장이 같은 DataSource의 트랜잭션에 참여하도록 맞췄으며 ACK 뒤 SQL 실패를 추가해 원자 rollback을 대조한다. 운영 Spring 경로는 원래 같은 DataSource bean을 공유한다.
 
 ## 해석의 한계
 

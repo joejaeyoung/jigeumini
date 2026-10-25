@@ -38,7 +38,9 @@ class DeadLetterIntegrationTest {
         new JdbcTemplate(IntegrationSupport.ds("public")).execute("CREATE SCHEMA "+schema);
         var ds=IntegrationSupport.ds(schema);
         org.flywaydb.core.Flyway.configure().dataSource(ds).defaultSchema(schema).load().migrate();
-        jdbc=new JdbcTemplate(ds); store=IntegrationSupport.store(schema);
+        jdbc=new JdbcTemplate(ds);
+        var tx=new TransactionTemplate(new DataSourceTransactionManager(ds)); tx.setTimeout(20);
+        store=new ProjectionStore(jdbc,tx,codec,"ranking","test-v1");
         KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP,topic);
         recovery=new DeadLetterRecovery(IntegrationSupport.BOOTSTRAP,topic,jdbc,"ranking","test-v1");
         producer=KafkaSupport.producerFactory(IntegrationSupport.BOOTSTRAP); kafka=new KafkaTemplate<>(producer);
@@ -90,7 +92,7 @@ class DeadLetterIntegrationTest {
                 "CHAT",original.eventTime().minusSeconds(1),original.receivedAt(),false,"test");
         send(codec.encode(conflict));
         send(new String(codec.encode(EventCodecTest.event(Instant.now()))).replace("\"schemaVersion\":1","\"schemaVersion\":2").getBytes());
-        var tx=new TransactionTemplate(new DataSourceTransactionManager(IntegrationSupport.ds(schema)));
+        var tx=new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()));
         var trendStore=new ProjectionStore(jdbc,tx,codec,"ranking-trend","test-v1");
         try(var trendRecovery=new DeadLetterRecovery(IntegrationSupport.BOOTSTRAP,topic,jdbc,"ranking-trend","test-v1");
             var trend=new ProjectionConsumer(KafkaSupport.consumerFactory(IntegrationSupport.BOOTSTRAP,group+"-trend","earliest"),topic,trendStore,trendRecovery);
@@ -146,6 +148,18 @@ class DeadLetterIntegrationTest {
             assertEquals(0,committed()); assertStored(0,0); assertEquals(0,dlqCount());
             jdbc.execute("DROP TRIGGER reject_event ON processed_event");
             awaitCommitted(1); assertStored(1,0); assertEquals(0,dlqCount());
+        }
+    }
+    @Test void databaseFailureAfterAckRollsBackFailureLedgerBucketsAndProgress() throws Exception {
+        jdbc.execute("CREATE FUNCTION reject_advance() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic progress unavailable'; END $$");
+        jdbc.execute("CREATE TRIGGER reject_advance BEFORE UPDATE ON projection_progress FOR EACH ROW EXECUTE FUNCTION reject_advance()");
+        mixedInput();
+        try(var consumer=consumer("earliest")) {
+            consumer.start();
+            await().atMost(Duration.ofSeconds(25)).until(()->(Long)consumer.status().get("failedAttempts")>=1);
+            assertEquals(0,committed()); assertStored(0,0); assertTrue(dlqCount()>=1);
+            jdbc.execute("DROP TRIGGER reject_advance ON projection_progress");
+            awaitCommitted(3); assertStored(2,1); assertTrue(dlqCount()>=2);
         }
     }
     @ParameterizedTest @ValueSource(strings={"ack","db"})
@@ -223,5 +237,30 @@ class DeadLetterIntegrationTest {
         } finally {
             process.destroy(); if(!process.waitFor(20,TimeUnit.SECONDS))process.destroyForcibly().waitFor();
         }
+    }
+    @ParameterizedTest @ValueSource(strings={"age","conflict"})
+    void committedNormalOffsetsAreNeverReclassifiedAfterCrash(String scenario) throws Exception {
+        Instant firstTime=Instant.now();
+        var event=EventCodecTest.event(scenario.equals("age")?firstTime.minusSeconds(48*3600-1):firstTime);
+        send(codec.encode(event));
+        var process=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-cp",
+                System.getProperty("integration.classpath"),DlqCrashProcess.class.getName(),schema,topic,group,"db",firstTime.toString())
+                .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+        try { assertTrue(process.waitFor(45,TimeUnit.SECONDS)); assertEquals(94,process.exitValue()); }
+        finally { if(process.isAlive())process.destroyForcibly().waitFor(); }
+        assertEquals(0,committed()); assertStored(1,0); assertEquals(0,dlqCount());
+        if(scenario.equals("conflict")) {
+            send(codec.encode(new ChatEvent(1,event.eventId(),event.source(),event.channelId(),event.chatRoomId(),event.collectionSessionId(),
+                    null,"CHAT",event.eventTime().minusSeconds(1),event.receivedAt(),false,"test")));
+        }
+        var tx=new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()));
+        var restartedStore=new ProjectionStore(jdbc,tx,codec,"ranking","test-v1",Clock.fixed(firstTime.plusSeconds(2),ZoneOffset.UTC));
+        try(var consumer=new ProjectionConsumer(KafkaSupport.consumerFactory(IntegrationSupport.BOOTSTRAP,group,"none"),topic,restartedStore,recovery)) {
+            consumer.start(); awaitCommitted(scenario.equals("age")?1:2);
+        }
+        long newFailures=scenario.equals("age")?0:1;
+        assertStored(1,newFailures); assertEquals(newFailures,dlqCount());
+        assertEquals(0L,jdbc.queryForObject("SELECT count(*) FROM projection_failure WHERE source_offset=0",Long.class));
+        if(scenario.equals("conflict")) assertEquals(1L,jdbc.queryForObject("SELECT source_offset FROM projection_failure",Long.class));
     }
 }

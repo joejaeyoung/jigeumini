@@ -1,22 +1,44 @@
 # 진행 상태
 
-2026-10-26 · 브랜치 `feat/deployment-rehearsal`
+2026-10-26 · 기능 이슈의 develop 병합 완료 기준
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
-| M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
+| M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | 후속 집계·복구 검증은 아래 완료 근거 참조 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
 | M3 장애·재처리 | #9/#10/#8/#16 구현·검증·develop 병합 완료 | 실제 원천 공백·보존 만료 입력은 복원하지 않음 |
-| M4 성능·운영 검증 | #11/PR25·#27/PR33·#29/PR34·#31/PR36 병합 완료 | #28 수집기 최종 리뷰/CI·#30 배포/복구 |
+| M4 성능·운영 검증 | #11/#26/#27/#28/#29/#30/#31 구현·리허설·develop 병합 완료 | 실제 원천 인증·동의, 외부 배포·운영 SLA, 새 migration 릴리스 복구는 별도 범위 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
-## 남은 이슈 구현
+## 이슈 완료 요약
 
-#8/#5/#6/#7/#16/#11과 추가 #26/#27/#29/#31은 완료했다. 남은 #28 수집기 인계와 #30 배포/복구를 진행한다. 각 이슈는 별도 기능 브랜치와 develop PR에서 Claude 승인·최종 CI를 확인한다. 아래 완료 항목의 당시 검증 범위는 이력을 위해 유지한다.
+요청한 기존 이슈 7건과 운영 확장 이슈 6건을 각각 구현·검증하고 develop에 병합했다. 각 최종 HEAD에 Claude APPROVE와 push/PR CI SUCCESS를 확인했으며, 2026-10-26 저장소의 열린 이슈는 0건이다. 아래 이력의 테스트 수는 당시 실행 범위로 보존한다.
+
+| 이슈 | 작업·기능 | 기술 목표 | 병합 PR |
+|---|---|---|---|
+| #10 | DLQ·소비 복구 진단 F09 | T01/T03/T05/T08 | [#19](https://github.com/joejaeyoung/jigeumini/pull/19) |
+| #8 | Outbox 관심 방송 알림 F07 | T02/T03/T08/T10 | [#20](https://github.com/joejaeyoung/jigeumini/pull/20) |
+| #5 | 시청자 관측·채팅 비교 F04 | T02/T04/T06 | [#21](https://github.com/joejaeyoung/jigeumini/pull/21) |
+| #6 | 카테고리 순위 F05 | T02/T06/T07/T08 | [#22](https://github.com/joejaeyoung/jigeumini/pull/22) |
+| #7 | 방송 리포트 F06 | T02/T04/T08 | [#23](https://github.com/joejaeyoung/jigeumini/pull/23) |
+| #16 | Replay CLI 보완 F08 | T01/T02/T03/T04 | [#24](https://github.com/joejaeyoung/jigeumini/pull/24) |
+| #11 | 부하·편향·복구 실험 F10 | T06/T07/T08/T09/T11/T12 | [#25](https://github.com/joejaeyoung/jigeumini/pull/25) |
+| #26 | 방송 발견·팔로워 기준 선정 F12 | T13/T08/T11 | [#32](https://github.com/joejaeyoung/jigeumini/pull/32) |
+| #27 | 유한 비동기 발행 F14 | T02/T06/T10/T11/T12 | [#33](https://github.com/joejaeyoung/jigeumini/pull/33) |
+| #29 | Kafka HA·장애 복구 F15 | T04/T08/T10/T15 | [#34](https://github.com/joejaeyoung/jigeumini/pull/34) |
+| #28 | 수집기 배정·임대·인계 F13 | T13/T14/T02/T11 | [#35](https://github.com/joejaeyoung/jigeumini/pull/35) |
+| #31 | ACK·커밋 방식 비교 F11 | T01/T10 | [#36](https://github.com/joejaeyoung/jigeumini/pull/36) |
+| #30 | 배포·백업 복구 리허설 F16 | T04/T08/T16 | [#37](https://github.com/joejaeyoung/jigeumini/pull/37) |
+
+최종 기능 PR #37의 `3b6d662` CI는 **서버 단위142·실제 Kafka/PostgreSQL92·하네스16·웹 단위29·Chromium31**을 통과했다. 마지막 실제 이미지/하네스는 clean `1bde2b7`이며 배포17단계가 통과했다. [최종 게이트 근거](poc/evidence/final-gates-2026-10-26.json)에 HEAD·리뷰·CI·XML hash·병합 커밋을 연결했다.
+
+공개 채널3개는 익명 PoC의 자체 상한이다. 전체 목록 발견과 채팅 접근 권한을 분리했고, 팔로워1,000명은 민감도 비교가 가능한 검토안이다. 실제 공식 인증·동의/전체 수집(T13), 새 migration을 포함한 릴리스 복구·외부 운영(T16)은 부분 검증으로 유지한다. [원천 조사](research/CHZZK_SCALE.md)·[선정 계약](discovery/README.md)·[Kafka/인프라 조사](research/KAFKA_DEPLOYMENT.md)·[배포 운영안](DEPLOYMENT_OPERATIONS.md)에 재개 조건을 기록했다.
+
+로컬 PoC/API/웹과 테스트 Kafka/PostgreSQL은 정지했다. 테스트 데이터 볼륨은 보존했고 리허설 소유 자원·생성 비밀·dump는 정리했다. 다른 worktree와 `phone-*` 서비스는 변경하지 않았다. main 릴리스와 외부 배포는 실행하지 않았다.
 
 ### 관심 방송 알림 #8
 
@@ -94,15 +116,15 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T05 | 검증됨 | [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 검증됨 | [고정/증설·복수 producer·늦은 시각](pipeline/EXPERIMENTS_VERIFICATION.md), [카테고리 결합](api/CATEGORIES_VERIFICATION.md) | 로컬3partition에서 채널 배치·append/eventTime 차이, 동일UUID 재전달·두producer bucket 정합성, 실제3→6증설의 키 이동·기존manifest 거부 | 실방송 전역 순서/외부 원천 중복 제거 보장이 아님; 운영 증설은 별도 이행 |
 | T07 | 검증됨 | [균등/80% 편향·shard 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 동일입력30000/물리30300, channelId/shard3의 partition·lag·p95/p99·DB/replay 대조; 현재 제품키 channelId 유지 결정 | 단일호스트·단회 측정. shard는 품질/offset 계약 이행 전 제품 채택 안 함 |
-| T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | full 제품 projection 동시 비용·자동확장 운영은 #29/#30. 표본 사이 순간 최대치 미확인 |
+| T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | 전체 제품 projection의 동시 부하·자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인 |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절 | 원래디스크복귀범위; 유일replica디스크영구손실·AZ내구성미검증 |
 | T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
-| T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
-| T14 | 부분 검증 | [임대 검증](fleet/VERIFICATION.md) | 실제 두 JVM·합성 WS·DB/Kafka에서 배타 획득·정상/만료 인계·DB 소켓 단절, 기존 전체87 통과·SIGTERM 저장 회귀·재개 후 기존session 입력0; Linux 간헐 인계 실패 후 시작 준비 보완·실제 임대7개 통과, 최종 CI 대기 | 협력 worker의 유효 DB 임대와 로컬 permit 범위; broker fencing·물리 소켓 즉시 종료·원천 무공백 보장은 아님 |
+| T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의/공식 채팅 수신은 미검증. 수집기 임대 연결은 T14 근거 참조 |
+| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json) | 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
-| T16 | 부분 검증 | [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 로컬RF1·합성·동일V12 이미지 범위; 외부배포/운영SLA/PITR/파괴적migration 미검증. 실제 새 migration 전후 rollback은 미검증. 보강 이미지 재검증·최종 리뷰/CI 진행 |
+| T16 | 부분 검증 | [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 로컬RF1·합성·동일V12 이미지 범위; 외부배포/운영SLA/PITR/파괴적migration 미검증. 실제 새 migration 전후 rollback은 미검증. 최종 이미지17단계·PR37 회귀 완료. 새 migration 릴리스 전에 추가 복구 리허설 필요 |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.
@@ -205,8 +227,11 @@ F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/
 
 ### 수집기 배정·임대 #28
 
-F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthority/CollectorWorker·fleetCLI를구현했다. 로컬단위128·하네스16·JAR통과. 8425ebc 실제 통합86개(임대5개)가 통과했다. [검증](fleet/VERIFICATION.md)과 [정제 근거](poc/evidence/fleet-2026-10-26/summary.json)에 정상 인계38·정지16·DB단절54건의 수락=ACK=broker=DB를 기록했다. 초기 CI의 진단파일누락2개를 재현/보완한 뒤 7fd3566 단위134·전체실제87(임대6)이 통과했다. 정상인계39·정지21·DB단절54·저장중SIGTERM8건의 집합/계수차이0과 재개 후 기존session 입력0을 추가 기록했다. Linux 인계 간헐 실패 원인은 자식 진단 부재로 미확정이다. 별도 producer3초 지연에서 큐20 초과를 재현하고 준비 후 수집하도록 보완했으며 임대7개가 통과했다. 최종 Claude·CI를 진행한다. 공개live확대·외부배포는실행하지않는다.
+F13 → T13/T14/T02/T11. [계약](fleet/README.md)의 DB 임대·단조 기한 권한·수집기 수명·CLI를 구현했다. [검증](fleet/VERIFICATION.md)과 [정제 근거](poc/evidence/fleet-2026-10-26/summary.json)에 실제 두 JVM의 정상/만료 인계·DB 단절·계수와 UUID 집합 대조를 보관했다.
 
+초기 SIGTERM 진단 파일 누락은 저장 중5초 지연 회귀로 보완했다. 후속 Linux 인계 실패는 자식 진단 부재로 원인 동일성을 확정하지 못했다. 별도로 producer 생성3초 지연에서 큐20 초과를 재현하고 Kafka 준비 후 임대/수신을 시작하도록 수정했다. 큐 상한과 실행 중 장애 계약은 유지하며 실패 JSON을 항상 보관한다.
+
+최종 `1aa8059`는 Claude APPROVE·push40218155876/PR40218160268 SUCCESS, 단위134·실제88(임대7)·하네스16·웹29/31을 확인했다. PR35를 `79d0f8d`로 develop에 병합했고 이슈/보드는 완료다. 이미 보낸 입력의 broker fencing·원천 무공백·전체 공식 수집을 보장하지 않는다.
 
 ### Kafka HA #29 실제 검증
 
@@ -218,4 +243,8 @@ F11 → T01/T10. 472908f의 실제6노드/별도JVM commit10사례·ACK3수준 �
 
 ### 배포·복구 #30
 
-F16 → T04/T08/T16. 공급자 독립 이미지와 로컬 Compose, 복원 DB의 여섯 group 위치 검사·새 group 준비를 구현한다. 원천 identity/보존 만료·offset 앞섬·schema 호환성4개 실제 검증을 통과했다. 88b30e6의 첫 이미지 리허설16단계가 통과했다. 4f85f1d→88b30e6→4f85f1d 교체/복귀, schema checksum 실패 중단, 새DB복원·새group6개 재개 후20건/알림2개·집계 차이0, 첫 browser는 shell 범위였으며 등록되지 않은/reports를 기능 성공으로 계산하지 않는다. 230852b 보강17단계는 실제8경로+리포트20건·API2xx/503재시도·원인코드/DDL42501·기존groupoffset불변·자원정리를 확인했다. 관측복구6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님)의 범위는 [운영안](DEPLOYMENT_OPERATIONS.md)에 명시했다. 최신1bde2b7 통합 이미지17단계·단위142/하네스16/JAR 통과와 [배포 검증](DEPLOYMENT_VERIFICATION.md)을 기록했다. 전체 회귀·최종 리뷰/CI를 진행하며 외부 배포는 실행하지 않는다.
+F16 → T04/T08/T16. 비특권 이미지·비밀 파일·내부망·readiness·명시적 migration, 복원 DB의 source identity/보존/진행 위치와 Kafka offset 검사를 구현했다. [배포 검증](DEPLOYMENT_VERIFICATION.md)과 [정제 근거](poc/evidence/deployment-2026-10-26/summary.json)에 초기 실패와 여섯 번의 이미지 리허설을 보관했다.
+
+최신 clean `1bde2b7`의17단계는 이미지 교체/복귀, DB 장애, 고정 거절 코드, runtime DDL42501, 새 DB·새 group6개 복구 후 합성20건/알림2개·선택 집계 차이0·기존 offset 불변, 실제 웹8경로와 리포트 상세를 확인했다. API 응답26개 모두200, 마지막 종료1.255초·복구18.900초다. 코드/검사 강도가 다른 복구6회 범위17.105~24.188초는 운영 RTO/SLA가 아니다. 소유 자원·생성 비밀·dump 정리를 확인했다.
+
+최종 `3b6d662`는 Claude APPROVE·push40218491808/PR40218495927 SUCCESS와 단위142·실제92·하네스16·웹29/31을 확인했다. PR37을 `d8b864d`로 develop에 병합했고 이슈/보드는 완료다. 이미지 실행 commit과 이후 문서/테스트 정리 변경을 구분한다. T16은 동일V12 복귀와 strict schema 거부·로컬 합성 복구 범위의 부분 검증이며, 새 migration 릴리스 복구·외부 배포/다중AZ/PITR·관측 활성 CLI의 실제 원천 연결은 미검증이다.

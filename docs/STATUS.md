@@ -197,12 +197,13 @@ F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff
 
 ### 부하·편향·복구 실험 #11
 
-F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 해석](pipeline/EXPERIMENTS_VERIFICATION.md), 원본40회·정제표/HTML을 보존했다. 과거 broker실패2회·계측확인9회를 숨기지 않고 sampler 보완 후12프로필을 재검증했다. steady600.001초300,000건·독립A/B·replay차이0, 비동기500/s15,000·burst2,000/s120,000완료; 직렬500/s는1370수락 뒤10거절로 목표미달이다. aab0b76 push40209922599/PR40209926881은 단위91·하네스16·실제KafkaDB80·웹29/31 통과했다. 소유볼륨 보완cc0a1c1에서 broker네경우를 재검증하고 과거3개의볼륨근거없음을표시했다. 최종 문서/수치 Claude와 CI를 확인한다. live는 종료 상태다.
+F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 해석](pipeline/EXPERIMENTS_VERIFICATION.md), 원본40회·정제표/HTML을 보존했다. 과거 broker실패2회·계측확인9회를 숨기지 않고 sampler 보완 후12프로필을 재검증했다. steady600.001초300,000건·독립A/B·replay차이0, 비동기500/s15,000·burst2,000/s120,000완료; 직렬500/s는1370수락 뒤10거절로 목표미달이다. aab0b76 push40209922599/PR40209926881은 단위91·하네스16·실제KafkaDB80·웹29/31 통과했다. 소유볼륨 보완cc0a1c1에서 broker네경우를 재검증하고 과거3개의볼륨근거없음을표시했다. 최종1617bdb Claude APPROVE·push40211847614/PR40211851666 SUCCESS 뒤 PR25를f94fc38로develop에병합했다. CI단위107·실제KafkaDB80·하네스16·웹29/31이며 #11/보드는완료다. live는종료상태다.
 
 ### 유한 비동기 발행 #27 검증
 
-F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/PUBLISHER_VERIFICATION.md)·[정제 근거](poc/evidence/publisher-2026-10-26/summary.json). 로컬단위120·하네스16·JAR,실제KafkaDB81,실제입력6회+소유broker장애6경우를 통과했다. 제품500/s15,000·2,000/s120,000·편중/중복30300→DB30000, replay차이0. 채널별공정성은 합성단위범위이며 소스복원/HA는 포함하지 않는다. #11병합과최종HEAD Claude/CI 후 PR33을 병합한다.
+F14 → T02/T06/T10/T11/T12. [계약](pipeline/PUBLISHER.md)·[검증](pipeline/PUBLISHER_VERIFICATION.md)·[정제 근거](poc/evidence/publisher-2026-10-26/summary.json). 로컬단위120·하네스16·JAR,실제KafkaDB81,실제입력6회+소유broker장애6경우를 통과했다. 제품500/s15,000·2,000/s120,000·편중/중복30300→DB30000, replay차이0. 채널별공정성은 합성단위범위이며 소스복원/HA는 포함하지 않는다. #11은 f94fc38로 병합했다. 최종8ad0817 Claude APPROVE·push40212712923/PR40212715517 SUCCESS 뒤 PR33을597a162로 develop에 병합했다. CI단위120·실제81·하네스16·웹29/31이며 #27/보드는 완료다.
 
 ### 수집기 배정·임대 #28
 
 F13 → T13/T14/T02/T11. [계약](fleet/README.md)의CollectorLeases/LeaseAuthority/CollectorWorker·fleetCLI를구현했다. 로컬단위128·하네스16·JAR통과. 실제합성WS+두JVM+PostgreSQL/Kafka의동시획득·인계·정지/재개·DB소켓단절을검증중이다. 공개live확대·외부배포는실행하지않는다.
+

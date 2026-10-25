@@ -24,6 +24,7 @@ function ChannelDetail({ id, saved, toggle }: { id: string; saved: boolean; togg
   const max = Math.max(1, ...rows.map(row => (row.count ?? 0)));
   return <>
     <Link className="back-link" to="/explore">← 방송 탐색</Link>
+    <Link className="report-history-link" to={`/channels/${id}/reports`}>방송별 요약 기록 보기 →</Link>
     <div className="page-heading"><div><h1>{name}</h1><p>채팅이 수집된 구간의 기록을 살펴보세요.</p></div><button className="secondary-button" aria-pressed={saved} onClick={() => toggle(id)}><Icon name="bookmark"/>{saved ? '관심 방송 해제' : '관심 방송 저장'}</button></div>
     <section className="channel-intro"><div className="detail-visual"><BroadcastImage metadata={meta}/></div><div className="detail-copy"><h2>{meta?.title ?? (meta?.liveStatus === 'OFFLINE' ? '다음 방송을 기다리고 있어요' : '어떤 방송인지 궁금하다면')}</h2><p>{metadataLabel(meta)}{meta?.categoryName && ` · ${meta.categoryName}`}{meta?.checkedAt && ` · 확인 ${formatTime(meta.checkedAt)}`}</p><a className="primary-button" href={`https://chzzk.naver.com/live/${id}`} target="_blank" rel="noopener noreferrer">치지직 채널 보기 <span aria-hidden="true">↗</span></a></div></section>
     {metadata.error && <div className="notice" role="status">방송 정보를 갱신하지 못했어요.<button onClick={metadata.retry}>방송 정보 재시도</button></div>}

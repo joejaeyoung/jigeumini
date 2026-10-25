@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /** 시각 기준 카테고리 배정과 보정을 독립 트랜잭션에 저장한다. */
-public final class CategoryStore {
+public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProjection {
     public static final String UNKNOWN = "unknown";
     public record Bucket(String channelId, String categoryKey, Instant at, long count) { }
     public record Category(String key, String name) { }

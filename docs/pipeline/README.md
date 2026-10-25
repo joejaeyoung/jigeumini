@@ -64,6 +64,10 @@ V7은 별도 `broadcast.observed.v1` 이력과 독립 consumer/DB 진행 위치�
 
 V8의 독립 category group은 채팅·관측을 시각 기준으로 결합하며 자체 ledger/bucket/progress와 지연 보정을 저장한다. [카테고리 계약](../api/CATEGORIES.md)을 따른다.
 
+## 방송 리포트 확장
+
+V9의 독립 report group은 같은 두 입력에서 관측 세션·별칭·채팅 귀속·요약을 만든다. [리포트 계약](../api/REPORTS.md)의 DB 원자 보정·품질·7일 종료 기록 정리와 active 보호를 따른다.
+
 ## 저장과 처리 계약
 
 아래는 M1 기준선이다. 현재 analyzer의 영구 오류 격리·품질 표시·진단은 [M3 DLQ 계약](DLQ.md)을 따른다. DB 성공 후 BATCH offset commit 경계는 유지하며, M1의 전체 배치 차단 정책은 안전한 격리 후 진행으로 확장했다.

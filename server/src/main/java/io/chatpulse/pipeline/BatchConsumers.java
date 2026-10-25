@@ -44,7 +44,10 @@ public final class BatchConsumers {
         return initialOffsets(reset, null, () -> { });
     }
 
-    /** DB 초기화가 모두 성공한 뒤에만 최초 earliest 위치를 기록하며 기존 commit은 바꾸지 않는다. */
+    /**
+     * DB 초기화가 모두 성공한 뒤에만 최초 earliest 위치를 기록하며 기존 commit은 바꾸지 않는다.
+     * initialize가 null이면 DB 초기화가 없는 소비자이며, 최초 earliest 외에는 position도 조회하지 않는다.
+     */
     public static ConsumerAwareRebalanceListener initialOffsets(String reset,
             BiConsumer<TopicPartition, Long> initialize, Runnable revoked) {
         return new ConsumerAwareRebalanceListener() {

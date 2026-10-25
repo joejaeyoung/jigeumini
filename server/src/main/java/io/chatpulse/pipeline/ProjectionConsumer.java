@@ -34,7 +34,7 @@ public final class ProjectionConsumer implements AutoCloseable {
     ProjectionConsumer(DefaultKafkaConsumerFactory<String, byte[]> factory, String topic, ProjectionStore store,
             DeadLetterRecovery recovery, Consumer<List<ConsumerRecord<String, byte[]>>> afterDbCommit) {
         factory.addPostProcessor(poll::track);
-        String reset = (String) factory.getConfigurationProperties().get("auto.offset.reset");
+        String reset = "earliest".equals(factory.getConfigurationProperties().get("auto.offset.reset")) ? "earliest" : "none";
         var rebalance = BatchConsumers.initialOffsets(reset,
                 (partition, position) -> store.initializeProgress(partition.topic(), partition.partition(), position),
                 poll::revoked);

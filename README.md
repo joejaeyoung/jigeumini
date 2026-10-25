@@ -77,6 +77,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests # 추적
 
 `./scripts/check`는 로컬 자동 테스트, `./scripts/integration`은 실제 Docker Kafka·DB 통합 테스트를 실행한다.
 실행 스크립트는 JAR를 `work/runtime/`에 별도로 복사하므로 재빌드 중에도 실행 파일이 바뀌지 않는다.
+`replay`·`selection`·`fleet`는 내부 실행기 `scripts/lib/run-cli`를 공유한다. 기존 명령으로 실행하며, 자식 종료 후 해당 JAR 복사본을 정리한다. signal을 받으면 자식에 TERM을 전달하고 종료를 기다린다.
 
 ## 오류 격리·소비 복구 진단
 

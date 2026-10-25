@@ -24,7 +24,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
     public record BufferState(int count, Instant oldest) { }
     public record ChannelState(long accepted, long acknowledged, long rejected, int pending, Instant oldest,
             boolean stopped, String reason) { }
-    private record Pending(long sequence, ChatEvent event, byte[] bytes) { }
+    private record Pending(long sequence, ChatEvent event, byte[] bytes, PublishingAuthority.Permit permit) { }
     private static final int MAX_TRACKED_CHANNELS = 1000;
     private static final class Channel {
         final ArrayDeque<Pending> queue = new ArrayDeque<>();
@@ -43,6 +43,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
     private final EventCodec codec;
     private final Limits limits;
     private final Duration drainTimeout;
+    private final PublishingAuthority authority;
     private final Thread worker;
     private long sequence, accepted, acknowledged, rejected, failedCallbacks, untrackedRejected;
     private int peakPending, peakInFlight;
@@ -56,10 +57,16 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
     public BufferedKafkaPublisher(KafkaTemplate<String, byte[]> kafka, String topic, EventCodec codec, Limits limits) {
         this(kafka, topic, codec, limits, Duration.ofSeconds(10));
     }
+    public BufferedKafkaPublisher(KafkaTemplate<String, byte[]> kafka, String topic, EventCodec codec, Limits limits, PublishingAuthority authority) {
+        this(kafka, topic, codec, limits, Duration.ofSeconds(10), authority);
+    }
     BufferedKafkaPublisher(KafkaTemplate<String, byte[]> kafka, String topic, EventCodec codec, Limits limits, Duration drainTimeout) {
+        this(kafka, topic, codec, limits, drainTimeout, PublishingAuthority.UNRESTRICTED);
+    }
+    private BufferedKafkaPublisher(KafkaTemplate<String, byte[]> kafka, String topic, EventCodec codec, Limits limits, Duration drainTimeout, PublishingAuthority authority) {
         if (drainTimeout.compareTo(Duration.ofMillis(1)) < 0 || drainTimeout.compareTo(Duration.ofSeconds(10)) > 0)
             throw new IllegalArgumentException("publisher drain timeout");
-        this.kafka = kafka; this.topic = topic; this.codec = codec; this.limits = limits; this.drainTimeout = drainTimeout;
+        this.kafka = kafka; this.topic = topic; this.codec = codec; this.limits = limits; this.drainTimeout = drainTimeout; this.authority = java.util.Objects.requireNonNull(authority);
         worker = Thread.ofPlatform().daemon(true).name("kafka-publisher").start(this::publish);
     }
     @Override public void accept(List<ChatEvent> events) {
@@ -72,7 +79,8 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 reject(events, "PUBLISH_CHANNEL_LIMIT", false);
             if (events.size() > limits.capacity() - unacked.size()) reject(events, "PUBLISH_BUFFER_REJECTED", true);
             List<Pending> frame;
-            try { frame = events.stream().map(e -> new Pending(++sequence, e, codec.encode(e))).toList(); }
+            try { frame = events.stream().map(e -> new Pending(++sequence, e, codec.encode(e), authority.acquire(e.channelId()))).toList(); }
+            catch (SourceFailure lost) { reject(events, "PUBLISH_AUTHORITY_LOST", true); return; }
             catch (RuntimeException invalid) { reject(events, "PUBLISH_INVALID_EVENT", true); return; }
             var counts = new LinkedHashMap<String, Integer>();
             frame.forEach(p -> counts.merge(p.event.channelId(), 1, Integer::sum));
@@ -128,9 +136,11 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 }
                 // send 자체도 metadata/buffer를 기다릴 수 있어 WebSocket callback 밖에서 호출한다.
                 try {
+                    p.permit.check();
                     kafka.send(new ProducerRecord<>(topic, null, p.event.receivedAt().toEpochMilli(),
                             p.event.channelId(), p.bytes)).whenComplete((result, error) -> delivered(p, error));
-                } catch (RuntimeException | Error error) { delivered(p, error); }
+                } catch (SourceFailure lost) { synchronized (lock) { fail("PUBLISH_AUTHORITY_LOST"); } delivered(p, lost); }
+                catch (RuntimeException | Error error) { delivered(p, error); }
             }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();

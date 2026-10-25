@@ -1,0 +1,224 @@
+{
+  "issue": 28,
+  "feature": "F13",
+  "technicalGoals": [
+    "T13",
+    "T14",
+    "T02",
+    "T11"
+  ],
+  "dateKst": "2026-10-26",
+  "integrationCodeCommit": "8425ebc6e862a3d6d672abffcd75fb5297c813d5",
+  "command": "./scripts/integration",
+  "environment": {
+    "source": "LOOPBACK_SYNTHETIC_WEBSOCKET",
+    "postgres": "16.14",
+    "kafka": "4.1.2",
+    "replicationFactor": 1,
+    "childProcesses": "separate Java 21 JVMs",
+    "leaseTtlSeconds": 6
+  },
+  "integration": {
+    "tests": 86,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "sortedXmlSha256": "8c05267de243c3da5de780fa75df13b8ae04259d67ac3e3ece27101d59f06943",
+  "scenarios": [
+    {
+      "file": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+      "sha256": "9ac06844cfe29b5d5976d8522b8545a49750c7881fafed925dcba88033543ec8",
+      "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+      "accepted": 54,
+      "acknowledged": 54,
+      "unconfirmed": 0,
+      "brokerUnique": 54,
+      "databaseUnique": 54,
+      "brokerDatabaseDifference": 0
+    },
+    {
+      "file": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+      "sha256": "e662e87faa0e1779de7c86eba548903d35518bd735f0e388ba0027f4d8deb339",
+      "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+      "accepted": 16,
+      "acknowledged": 16,
+      "unconfirmed": 0,
+      "brokerUnique": 16,
+      "databaseUnique": 16,
+      "brokerDatabaseDifference": 0
+    },
+    {
+      "file": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+      "sha256": "c1fafeb6bd02c39285db3aceb57ad981db0067a61f50a2a76f0ca490733ebb66",
+      "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+      "accepted": 38,
+      "acknowledged": 38,
+      "unconfirmed": 0,
+      "brokerUnique": 38,
+      "databaseUnique": 38,
+      "brokerDatabaseDifference": 0
+    }
+  ],
+  "initialFailure": {
+    "stage": "Flyway setup",
+    "testsFailed": 5,
+    "reason": "existing V10 replay identity and new V10 collector lease version collision",
+    "fix": "new collector migration V11; no production migration applied"
+  },
+  "limitations": [
+    "No public live or official source authorization tested",
+    "No stable source message deduplication or gap replay",
+    "Database ownership protocol is not broker fencing; existing in-flight and check/send pause window remain",
+    "Paused sockets can physically outlive logical leases",
+    "Database clock jumps and multi-host clock rate drift untested",
+    "Count conservation does not identify individual acknowledged event IDs",
+    "ChannelProbe short runs intentionally end CANCELLED and are not live PoC PASS"
+  ],
+  "followup": {
+    "integrationCodeCommit": "7fd3566972a8c286f8e1a30329d91e8b426d5164",
+    "command": "./scripts/check && ./scripts/integration",
+    "unitTests": 134,
+    "integration": {
+      "tests": 87,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "sortedXmlSha256": "370485c42268a7b9bd74a2a2411b6d4c6408ecbd684cf34c84c32ab14982b6d2",
+    "scenarios": [
+      {
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "accepted": 54,
+        "acknowledged": 54,
+        "unconfirmed": 0,
+        "brokerPhysical": 54,
+        "brokerUnique": 54,
+        "databaseUnique": 54,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+        "sha256": "a61b2ff4d4532a697e53b117b0caae64133ea5460d2a9212dd48741056c61a5e"
+      },
+      {
+        "scenario": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile",
+        "accepted": 8,
+        "acknowledged": 8,
+        "unconfirmed": 0,
+        "brokerPhysical": 8,
+        "brokerUnique": 8,
+        "databaseUnique": 8,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile.json",
+        "sha256": "cee2d03e7af3457fe4f2e7e0af05161047e10e9a7ef97de20ade35631910b8c0"
+      },
+      {
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "accepted": 21,
+        "acknowledged": 21,
+        "unconfirmed": 0,
+        "brokerPhysical": 21,
+        "brokerUnique": 21,
+        "databaseUnique": 21,
+        "brokerDatabaseDifference": 0,
+        "stalePostResumeAccepted": 0,
+        "file": "followup/stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+        "sha256": "103272ed832581aa4ee68802aec6259d88ce15283850f5a5cf509e8797a98738"
+      },
+      {
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "accepted": 39,
+        "acknowledged": 39,
+        "unconfirmed": 0,
+        "brokerPhysical": 39,
+        "brokerUnique": 39,
+        "databaseUnique": 39,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+        "sha256": "6d80c5b1f23b5d7cd92b79e2701fbcb916c268c7acad2b66b11267dd9a1798ef"
+      }
+    ],
+    "initialCiFailure": {
+      "push": 40213896363,
+      "pullRequest": 40213900998,
+      "fleetTests": 5,
+      "failed": 2,
+      "type": "NoSuchFileException on SIGTERM child report"
+    },
+    "persistenceRegression": [
+      "first: file missing with delayed write plus SIGTERM",
+      "second: complete false because deadline boundary marked CHANNEL_ENDED",
+      "third: all6 passed after persistence/hook/deadline fixes"
+    ],
+    "scope": "All87 executed with 7fd3566 compiled classes; subsequent CLI redundant CAS removal is separately checked and final CI required"
+  },
+  "startupDiagnosis": {
+    "historicalCiFailure": {
+      "head": "1cd8476b4faad08e674726436fc89cd83190682d",
+      "push": 40216093203,
+      "pullRequest": 40216096733,
+      "symptoms": [
+        "normal handoff connected count 1 instead of 2",
+        "STOP handoff both observed owners null"
+      ],
+      "rootCauseConfirmed": false,
+      "reason": "Child JSON was not retained in failed CI"
+    },
+    "instrumentedCi": {
+      "head": "4603c53681a7d1cec89facddae96589761709584",
+      "push": 40217042124,
+      "pullRequest": 40217044659,
+      "conclusion": "SUCCESS",
+      "integration": 87,
+      "unit": 134,
+      "scope": "Diagnostics only; isolated six and full regression passed; not proof of original cause"
+    },
+    "reproduction": {
+      "base": "4603c53681a7d1cec89facddae96589761709584",
+      "workingTreeFixture": true,
+      "command": "./gradlew --console=plain :server:integrationTest --tests io.chatpulse.fleet.FleetIntegrationTest.slowProducerStartupReproduction",
+      "injection": "ProducerFactory post processor delays first producer creation 3000 ms, source sends one synthetic frame every100ms",
+      "file": "startup/reproduction.json",
+      "accepted": 20,
+      "acknowledged": 20,
+      "rejected": 1,
+      "channelReason": "PUBLISH_CHANNEL_LIMIT",
+      "workerFailure": "CHANNEL_ENDED",
+      "sameAsHistoricalCiProven": false
+    },
+    "fix": "Complete producer creation and partitionsFor before any lease or source admission; metadata readiness uses configured max.block.ms=2000, producer construction itself not claimed bounded by that setting",
+    "localVerification": {
+      "unit": 134,
+      "harness": 16,
+      "jarBuilt": true,
+      "fleetCases": 7,
+      "failures": 0,
+      "scope": "Changed runtime compiled before seven cases; fixture then adds explicit parent release barrier, separately checked and final CI required"
+    },
+    "files": [
+      {
+        "file": "startup/actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+        "sha256": "1a3a811d5e7a5f7a60bfd3941e365b050fc15b953f3af96bb7bfbb8a9c2fa4e0"
+      },
+      {
+        "file": "startup/reproduction.json",
+        "sha256": "1dd67b122aa702dbe52c46fde24f80f02e4a9ebc3528fde8930f8de2c6a1c104"
+      },
+      {
+        "file": "startup/sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile.json",
+        "sha256": "7eefd43774b51f500c2dc257a10c1c9f812e22988ce53e772f5a1dcc399eefca"
+      },
+      {
+        "file": "startup/slowProducerStartupCompletesBeforeLeaseAndSourceAdmission.json",
+        "sha256": "61c5598381b69cb7833416fa43d30396ef538c2434fce5d7fdbfbf162816701a"
+      },
+      {
+        "file": "startup/stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+        "sha256": "d7d5e50f60d53d506a45a45b13710a376c384d0bfced7367be6f793f38acdc3c"
+      },
+      {
+        "file": "startup/twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+        "sha256": "831d26dc0e6f799edf4ae3ba3ab441463a3b59dffb11a07d75148e5d38e5bfdf"
+      }
+    ]
+  }
+}

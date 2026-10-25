@@ -6,10 +6,10 @@
     "T10"
   ],
   "dateKst": "2026-10-26",
-  "command": "./scripts/ack-commit work/ack-second.json",
+  "command": "./scripts/ack-commit work/ack-third.json",
   "input": {
     "seed": 20261026,
-    "eventTimeBase": "2026-10-25T16:48:54.720237Z",
+    "eventTimeBase": "2026-10-25T17:05:57.313500Z",
     "eventId": "UUID.nameUUIDFromBytes(seed/index)",
     "commit": "one identical event per fresh consumer group/projection",
     "ack": "same 20 healthy +5 ISR1 events per ACK level"
@@ -55,7 +55,8 @@
     "No loss observed after original disk restored does not prove ACK1 durable against loss of its sole replica",
     "AUTO_POLL_AHEAD deliberately violates DB-before-next-poll; synchronous AUTO cases had no missing event",
     "No live source, no source gap reconstruction",
-    "First failed run exception type was recorded but not its operation/message; do not infer exact cause beyond last checkpoint"
+    "First failed run exception type was recorded but not its operation/message; do not infer exact cause beyond last checkpoint",
+    "Last broker stopped with docker stop --timeout 0; absence observed for 15.048 seconds. replica lag limit 3s is compressed test configuration, not an operating recommendation."
   ],
   "latestVerifiedCommit": "49a3834f199b4bd5bf8d833f5355682b2edb40bd",
   "observedEnvironment": {

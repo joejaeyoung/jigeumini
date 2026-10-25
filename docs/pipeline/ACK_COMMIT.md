@@ -14,9 +14,9 @@ ACK 대조는 0/1/all 모두 idempotence=false·retries0·client in-flight1로 �
 
 시간·메모리·디스크 한도와 UUID 프로젝트/소유 label 정리는 #29 [HA 하네스](KAFKA_HA.md)를 재사용한다. 자식 JVM35초 한도·강제정리, producer/consumer/Admin 대기 한도가 있다. 장애 관측은 checkpoint에 쓰며 실패도 correct=false와 정리 결과를 보존한다.
 
-## 실제 결과
+## 두 번째 실행 결과
 
-`472908f43a4735ba85bb1d207771a80385a9cbeb`, UTC2026-10-25 16:49:04~16:50:48. [원본2회·정제 요약](../poc/evidence/ack-commit-2026-10-26/summary.json).
+`472908f43a4735ba85bb1d207771a80385a9cbeb`, UTC2026-10-25 16:49:04~16:50:48. [원본3회·정제 요약](../poc/evidence/ack-commit-2026-10-26/summary.json).
 
 | 종료 경계 | AUTO/BATCH/MANUAL 각각의 DB/offset | 재시작 후 각 DB | 해석 |
 |---|---|---:|---|

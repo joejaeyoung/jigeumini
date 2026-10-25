@@ -45,6 +45,16 @@ class BufferedKafkaPublisherTest {
         assertEquals(rejected, result.get("rejected")); assertEquals(accepted - ack, result.get("unconfirmed"));
         assertEquals(accepted + rejected, result.get("attempted"));
     }
+    @Test void queuedRecordRetainsItsAdmissionPermitAndCannotDispatchAfterLeaseLoss() throws Exception {
+        var b = new Broker();var valid = new java.util.concurrent.atomic.AtomicBoolean(true);
+        PublishingAuthority authority = channel -> {if(!valid.get())throw new SourceFailure("COLLECTION_LEASE_LOST",true);return ()->{if(!valid.get())throw new SourceFailure("COLLECTION_LEASE_LOST",true);};};
+        try(var p=new BufferedKafkaPublisher(b.kafka,"topic",new EventCodec(),new BufferedKafkaPublisher.Limits(4,4,1),authority)) {
+            p.accept(List.of(event(HOT),event(HOT)));var first=b.next();valid.set(false);first.future.complete(null);
+            org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(3)).until(p::deliveryFailed);
+            var result=p.finish();balances(result,2,1,0);assertEquals("PUBLISH_AUTHORITY_LOST",result.get("failureCode"));
+            verify(b.kafka,times(1)).send(any(ProducerRecord.class));
+        }
+    }
     @Test void inFlightCountsTowardCapacityAndOverflowIsExplicit() throws Exception {
         var b = new Broker();
         try (var p = publisher(b, 1, 1, 1)) {

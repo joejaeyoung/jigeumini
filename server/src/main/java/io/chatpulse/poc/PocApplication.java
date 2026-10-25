@@ -8,6 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties(PocProperties.class)
 public class PocApplication {
     public static void main(String[] args) throws InterruptedException {
+        if (args.length > 0 && "fleet".equals(args[0])) {
+            System.exit(io.chatpulse.fleet.FleetCli.run(java.util.Arrays.copyOfRange(args,1,args.length)));return;
+        }
         if (args.length > 0 && "selection".equals(args[0])) {
             System.exit(io.chatpulse.discovery.SelectionCli.run(java.util.Arrays.copyOfRange(args,1,args.length)));return;
         }

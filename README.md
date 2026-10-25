@@ -237,6 +237,10 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 수집기 #27의 기본 발행 한도는 전체1,000·채널500·비동기 창64다. 채널별 초과/거절·ACK 미확인·종료 정책은 [발행 계약](docs/pipeline/PUBLISHER.md)을 따른다.
 
+## 다중 수집기 배정과 인계
+
+`./scripts/fleet preview <선정.json> <유효초>`는 DB/원천 호출 없는 계획 확인이다. `migrate`, `apply`, `status`, `worker`의 실행 경계·공개 최대3개 제한·소유권 상실·미확인 입력은 [수집기 임대 계약](docs/fleet/README.md)을 따른다. 전체 치지직 수집을 자동 활성화하지 않는다.
+
 ## Kafka HA 로컬 장애 리허설
 
 ```bash

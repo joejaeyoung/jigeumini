@@ -78,6 +78,34 @@
 
 - #11 최종1617bdb의Claude승인과push40211847614/PR40211851666성공을확인하고PR25를f94fc38로develop에병합했다. 이슈/보드완료와CI단위107·실제80근거를기록했다.
 
+## 2026-10-26 · #28 수집기 임대 구현·리팩토링
+
+- PostgreSQL 행잠금/DB시계와 요청시작 단조기한을 결합하고 owner/epoch/미만료 조건을 갱신·해제에 사용했다. 선정 분모·배정·연결·미관측 품질을 구분한다.
+- DB소유권·로컬permit·연결수명·원천HTTP예산을 분리했다. 발행기는 기존 EventSink를 유지하며 admission의 동일permit을dispatch에서재확인한다. 원천READ/heartbeat프로토콜은재사용한다.
+- 로컬단위128·하네스16·JAR를통과했다. 네트워크지연/정지후만료·기존permit차단·재획득거절과큐발행차단을검증한다. 실제두JVM·합성WS·DB/Kafka대조는진행중이다.
+- broker강제fencing이나원천EOS를주장하지않으며이미발행한inflight와검사/send사이정지창,물리소켓잔존·DB시간점프·legacy비참여경로한계를계약에명시했다.
+
+- #28 첫실제통합에서기존#16의V10 migration과번호가충돌해setup5개가실패했다. 새임대migration을V11로고치고초기화실패정리에서미생성topic의재삭제를피한다. 운영schema에는적용되지않았으며번호/실패를그대로기록했다.
+
+
+### #28 실제 인계 검증과 #27 병합 반영
+
+- 8425ebc에서 전체 실제 통합86개(임대5개)가 통과했다. 별도 JVM 정상 인계38·정지/만료16·DB 소켓 단절54건의 수락/ACK/broker/DB를 대조했다. 각 진단과 XML hash를 정제해 보관했다.
+- 정상 종료 중 heartbeat interrupt와 채널 완료의 경합을 점검하고 정상 종료 complete/released 단언을 추가했다. 소유권·permit·연결·원천 예산의 책임 경계를 유지했다. 추가 범용 lease 프레임워크는 만들지 않았다.
+- #27 최종8ad0817 Claude APPROVE와 push40212712923/PR40212715517 SUCCESS 뒤 PR33을597a162로 develop에 병합했다. CI artifact는 단위120·실제81·실패/skip0이며 웹29/31·하네스16은 CI 로그 근거다. browser-install 지연을 E2E 실패로 해석하지 않았다. 최종 병합과 이슈/보드 완료를 STATUS에 반영했다.
+
+### #28 Linux CI의 종료 진단 파일 누락 보완
+
+- 첫 push40213896363/PR40213900998에서 정상 SIGTERM 자식의 결과 파일이 없어 실제 통합2개가 실패했다. DB 단절/만료 인계 자체와 구분한다.
+- main과 shutdown hook이 CAS로 쓰기 권한만 나누면 main이 JSON 저장 중일 때 hook이 반환하고 JVM이 종료될 수 있음을 확인했다. worker가 파일 저장까지 동기화하고 성공 후에만 persisted를 확정하도록 바꿨다.
+- 별도 JVM의 main 결과 저장을5초 지연시키고 그 시작 marker를 본 뒤 SIGTERM을 보내는 회귀를 추가했다. hook이 저장 완료를 기다리는지 실제 파일·수락/ACK/DB로 검증한다. 기존 CI는 stderr를 버렸으므로 최초 누락의 내부 스택 자체는 확인하지 못했다.
+
+- 추가 회귀는 첫 동기화 보완만으로도 실패했다. 정상 실행의 finally에서 파일 저장 전에 hook을 제거하는 별도 창을 실제 재현했다. hook 제거를 저장 완료 뒤로 옮기고 저장 전체를 동기화한다. 최종 CI 원인의 동일성은 최초 stderr 부재로 단정하지 않지만 두 종료 창은 코드·별도 JVM 회귀로 확인한다.
+
+### #28 종료 경합 회귀와 재개 후 원천 차단 보완
+
+최초 push40213896363/PR40213900998의 정상 SIGTERM 진단 누락을 조사했다. 결과 저장을5초 지연한 자식에 SIGTERM을 보내면 main의 CAS 선점 뒤 hook 반환·hook 조기 해제 창에서 파일이 없는 실패를 재현했다. 저장 완료까지 hook을 유지하고 동기화한 뒤1초 실행의 경계에서 CHANNEL_ENDED를 잘못 기록한 사례를 발견해 deadline 이후 검사를 제외했다. 첫 회귀는 파일 누락, 두 번째는 complete=false, 세 번째6개는 통과했다. SIGSTOP/CONT 시험은 기존 session의 재개 시각 이후 receivedAt 입력0을 broker에서 직접 단언하도록 강화했다. 이미 client에 전달한 이전 입력은 이 판정에 포함하지 않는다. worker 비활성 게이트를 DB 열기 앞으로 옮기고 preview/비활성 worker가 잘못된 JDBC 설정에서도 DB를 열지 않는 단위 사례를 추가했다. 리팩토링은 broker 재조회 helper와 결과 저장 단일 책임으로 한정했다.
+
 ### #29 Kafka HA 계약 구현·리팩토링 점검
 
 - 공식4.1 KRaft·ELR·topic·재배치 문서를 확인했다. ELR 신규 기본값을 기록하고 HA 시작에서 finalized feature1을 요구한다.
@@ -103,6 +131,8 @@
 - QualityConfiguration→QualityRuntime→DeadLetterRecovery에 같은 KafkaTopicPolicy를 전달하도록 수정했다. 6노드 하네스에 전체 Spring 분석기 기동, 합성10건 ranking/trend 각각 반영, 네 topic의 실제 HA 정책 대조를 추가한다. 초기 리뷰/기존 좁은 하네스가 놓친 범위를 숨기지 않는다.
 - 실행 결과에 dirty tree 여부도 추가한다. 원인 진단은 원문 stderr를 보관하지 않고 고정 단계/타입을 유지한다.
 
+- 결과 callback의 중복 CAS도 제거했다. worker의 synchronized 저장 계약이 성공 이후에만 persisted를 확정하므로 CLI가 먼저 CAS를 세우면 실제 파일쓰기 실패 후 두 번째 callback에서 성공으로 오인할 수 있었다. 성공 판정·재시도 책임을 worker 한 곳에 둔다.
+
 ## 2026-10-26 · #31 ACK·commit 비교 구현
 
 - Spring Kafka container와 KafkaConsumer 공식문서에서 MANUAL 지연commit·BATCH·AUTO의poll조건을 확인했다. 같은고정합성입력에서처리전/DB직후/offset직후Runtime.halt를주입한다.
@@ -122,3 +152,13 @@
 - 검토 HEAD와 이전 실험 코드의 차이를 해소하려고 #27 및 #29 조립 수정까지 합친49a3834 clean tree에서 전체를 재실행했다. commit10/ACK3사례·정리 통과다.
 - 실제topic설정·Java/PG버전·dirty여부,물리/고유건수·성공/실패입력별보존을추가했다. 25/25/20물리=고유=DB,누락/실패후보존0이다. 마지막leader부재는15.048초의timeout0정지관측이며기존범위를확대하지않는다.
 - 중단용container와생산재시작consumer를구별하고첫실패는마지막checkpoint이후예외로표현을정정했다. AUTO위험순서는메커니즘시연이며확률측정이아니다.
+
+- #31 최종cb5fa38 Claude APPROVE·push40215140028/PR40215143544 SUCCESS를 확인해 PR36을50cd6ad로 병합했다. CI artifact 단위124/실제81, 로그 하네스16·웹29/31이다. 문서의 원본2회를3회로 정정하고 요약의 대표 command/eventTimeBase를 최신third로 맞췄다.
+
+### #28 Linux 후속 CI 연결/인계 실패 조사
+
+1cd8476의 push40216093203/PR40216096733에서 저장 경합 회귀는 통과했지만 정상 두JVM 연결2개 대기와 SIGSTOP 인계의 owner 대조가 실패했다. 로컬87개 통과와 다르며 초기 파일누락과 같은 원인으로 단정하지 않는다. 당시 CI artifact에 자식진단JSON이 없어 실패/발행buffer 코드를 확보할 수 없다. 정제된 자식진단을 artifact와 JUnit 출력에 연결하고 임시로 수집기6개를 전체회귀보다 먼저 실행해 Linux의 실제실패코드를 수집한다. 정상경로의 작은 fixturebuffer30/20와 cold producer 지연은 가설이며 아직확정하지않았다.
+
+### 2026-10-26 · #28 producer 준비 경계와 Linux 진단
+
+1cd8476 CI의 인계2개 실패는 자식 결과 미보관으로 내부 원인을 확정하지 못했다. 진단 추가4603c53의 push/PR은 단독6개+전체87개 통과했으나 원인 해결로 기록하지 않는다. ProducerFactory 생성3초 지연을 주입해 채널 큐20 초과·거절1·CHANNEL_ENDED를 별도로 재현했다. CollectorWorker는 producer/metadata 준비 후 임대·소켓을 시작하도록 바꿨다. 실제7개와 단위134/하네스16/JAR 통과, 지연 동안 무임대/무수신·완료 후 계수 일치 회귀를 추가했다. 최종 fixture는 부모 해제 barrier를 사용한다. 책임은 worker의 수명 시작 경계에 두고 BufferedKafkaPublisher의 큐/실행 중 장애 계약은 유지했다. 중복 CI 단독 실행은 제거하고 정제 자식 JSON 업로드는 유지한다. 과거 CI와 재현 원인의 동일성, producer 생성 시간 상한은 주장하지 않는다.

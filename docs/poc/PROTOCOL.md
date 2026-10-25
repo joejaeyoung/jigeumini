@@ -71,3 +71,7 @@ msgTime/messageTime의 정수 epoch milliseconds를 사용한다. 현재보다 5
 ### heartbeat 회귀 시험의 관측 대기
 
 PR #23 CI40204570648의 pong 미응답 시험은10.046초 뒤 WS_CLOSED로 끝나 HEARTBEAT_TIMEOUT을 관측하지 못했다. 해당 연결 종료의 내부 원인은 재현하지 못했다. 별도로 fixture의 승인 응답을1.2초 지연하면 기존1초 전체실행 예산이 heartbeat 검사 전에 끝나는 결함을 재현했다. 시험은 최대30초 실행 안에서 최대20초 동안 실제 채팅·client ping·pong0·HEARTBEAT_TIMEOUT을 기다린 뒤 종료한다. 승인 지연을 회귀 입력으로 유지하고 실패를 단순 재실행으로 처리하지 않는다. 수신 프로토콜·운영 heartbeat 간격/제한은 바꾸지 않았다.
+
+### 수집기 임대 확인 #28
+
+fleet 경로는 HTTP resolve/token/WS 연결 전, 연결감독·frame수락·Kafka dispatch 직전에 로컬 임대permit을 확인한다. ChannelProbe는 원천 호출 전에 EventSink 건강검사를 추가하며 wire contract·READ/heartbeat·수신 분류는 유지한다. [임대 계약](../fleet/README.md)의 캐시 기한·인계/중복 한계를 따른다. ChannelProbeTest는 이미 상실한 임대에서 HTTP/WS 호출0회를 검증한다. 기존 ChatProtocolTest/ChzzkHttpSourceTest 입력 계약은 그대로 실행한다.

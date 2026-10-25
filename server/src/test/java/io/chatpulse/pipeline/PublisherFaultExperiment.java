@@ -17,15 +17,19 @@ final class PublisherFaultExperiment {
         output=output.toAbsolutePath();Files.createDirectories(output.getParent());
         if(Files.exists(output)||Files.exists(output.resolveSibling(output.getFileName()+".html")))throw new IllegalArgumentException("EXPERIMENT_OUTPUT_EXISTS");
         ExperimentResources.preflight(output.getParent());Files.createFile(output);
-        String name="exp-kafka-"+UUID.randomUUID().toString().replace("-","");int port;
+        String name="exp-kafka-"+UUID.randomUUID().toString().replace("-","");String volume=name+"-data";int port;
         try(var socket=new java.net.ServerSocket(0)){port=socket.getLocalPort();}
         var result=new LinkedHashMap<String,Object>();result.put("profile","broker-fault");result.put("startedAt",Instant.now().toString());
         result.put("codeCommit",command("git","rev-parse","HEAD").strip());result.put("environment",Map.of("image","apache/kafka:4.1.2","replicationFactor",1,"acks","all","minInSyncReplicas",1,"applicationCapacity",30,"containerMemoryBytes",536870912,"containerName",name,"bootstrap","localhost:"+port));
         result.put("scope","SYNTHETIC_OWNED_BROKER_NO_DATABASE_OR_HA_CLAIM");
+        result.put("dataVolume",volume);result.put("cleanupEvidenceScope","CONTAINER_AND_LABELLED_DATA_VOLUME");
         var rows=new ArrayList<Map<String,Object>>();result.put("cases",rows);Files.writeString(output,JSON.writeValueAsString(result)+"\n");
-        var cleanup=new Thread(()->{try{command("docker","rm","-f",name);}catch(Exception ignored){}},"fault-broker-cleanup");Runtime.getRuntime().addShutdownHook(cleanup);
+        var cleanup=new Thread(()->{try{cleanupResources(name,volume);}catch(Exception ignored){}},"fault-broker-cleanup");Runtime.getRuntime().addShutdownHook(cleanup);
         try {
-            var args=new ArrayList<>(List.of("docker","run","-d","--name",name,"--memory","512m","--label","io.chatpulse.experiment=publisher-fault","-p","127.0.0.1:"+port+":"+port));
+            command("docker","volume","create","--label","io.chatpulse.experiment.owner="+name,volume);
+            var args=new ArrayList<>(List.of("docker","run","-d","--name",name,"--memory","512m","--label","io.chatpulse.experiment=publisher-fault","--label","io.chatpulse.experiment.owner="+name,
+                    "--mount","type=volume,src="+volume+",dst=/var/lib/kafka/data",
+                    "--tmpfs","/etc/kafka/secrets:rw,mode=0755","--tmpfs","/mnt/shared/config:rw,mode=0755","-p","127.0.0.1:"+port+":"+port));
             var env=new LinkedHashMap<String,String>();
             env.put("KAFKA_NODE_ID","1");env.put("KAFKA_PROCESS_ROLES","broker,controller");
             env.put("KAFKA_LISTENERS","INTERNAL://:9092,EXTERNAL://:"+port+",CONTROLLER://:9093");
@@ -45,12 +49,26 @@ final class PublisherFaultExperiment {
             result.put("correct",rows.stream().allMatch(row->Boolean.TRUE.equals(row.get("conserved"))&&Boolean.TRUE.equals(row.get("bounded"))&&Boolean.TRUE.equals(row.get("brokerCountWithinAckRange"))));
         } catch(Exception failure){result.put("correct",false);result.put("failureCode","EXPERIMENT_BROKER_FAULT_FAILED");result.put("failureType",failure.getClass().getSimpleName());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}
         finally {
-            boolean cleaned=false;try{command("docker","rm","-f",name);cleaned=true;}catch(Exception ignored){}
+            boolean cleaned=false;try{cleanupResources(name,volume);cleaned=true;}catch(Exception ignored){}
             Runtime.getRuntime().removeShutdownHook(cleanup);result.put("cleanupComplete",cleaned);if(!cleaned)result.put("correct",false);
             result.put("finishedAt",Instant.now().toString());result.put("outcome",Boolean.TRUE.equals(result.get("correct"))?"RECONCILED":"EXPERIMENT_FAILED");
             Files.writeString(output,JSON.writeValueAsString(result)+"\n");ExperimentReport.writeHtml(output,result);
         }
         return result;
+    }
+    private static void cleanupResources(String name,String volume) throws Exception {
+        var containers=command("docker","container","ls","-a","--filter","name="+name,"--format","{{.Names}}").lines().toList();
+        if(containers.contains(name)) {
+            String owner=command("docker","inspect","--format","{{index .Config.Labels \"io.chatpulse.experiment.owner\"}}",name).strip();
+            if(!name.equals(owner))throw new IllegalStateException("EXPERIMENT_OWNER_MISMATCH");
+            command("docker","rm","-f",name);
+        }
+        var volumes=command("docker","volume","ls","--filter","name="+volume,"--format","{{.Name}}").lines().toList();
+        if(volumes.contains(volume)) {
+            String owner=command("docker","volume","inspect","--format","{{index .Labels \"io.chatpulse.experiment.owner\"}}",volume).strip();
+            if(!name.equals(owner))throw new IllegalStateException("EXPERIMENT_OWNER_MISMATCH");
+            command("docker","volume","rm",volume);
+        }
     }
     private static void scenario(String bootstrap,String container,String topic,String publisherKind,boolean disconnect,Map<String,Object> result) throws Exception {
         var factory=KafkaSupport.producerFactory(bootstrap);var kafka=new KafkaTemplate<>(factory);var codec=new EventCodec();

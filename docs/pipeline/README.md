@@ -54,6 +54,8 @@ Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC
 
 ## 저장과 처리 계약
 
+아래는 M1 기준선이다. 현재 analyzer의 영구 오류 격리·품질 표시·진단은 [M3 DLQ 계약](DLQ.md)을 따른다. DB 성공 후 BATCH offset commit 경계는 유지하며, M1의 전체 배치 차단 정책은 안전한 격리 후 진행으로 확장했다.
+
 - `chat.received.v1`: 3 partitions, 개발용 RF=1, key=`channelId`, timestamp=`receivedAt`의 epoch milliseconds, CreateTime 정책.
 - Kafka 보존 설정은 시간 24h, partition당 256MiB, segment 32MiB다. segment 단위 삭제이므로 정확한 시각·용량 상한이나 24h 전체 가용성을 보장하지 않는다.
 - `acks=all`, idempotent producer, in-flight request=1. 전용 worker가 ACK를 기다리며 callback은 큐에만 넣는다. Kafka client는 delivery timeout 10초 안에서 같은 record를 재시도한다.

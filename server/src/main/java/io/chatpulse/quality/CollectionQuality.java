@@ -41,7 +41,11 @@ final class CollectionQuality {
                 }, channel, ts(to), ts(from));
     }
     boolean hasLoss(String channel, Instant from, Instant to) {
-        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM collection_loss WHERE channel_id=? AND start_at<? AND end_at>?)", Boolean.class, channel,ts(to),ts(from)));
+        return Boolean.TRUE.equals(jdbc.queryForObject("""
+                SELECT EXISTS(SELECT 1 FROM collection_loss WHERE channel_id=? AND start_at<? AND end_at>?)
+                    OR EXISTS(SELECT 1 FROM projection_failure WHERE run_id=? AND source_topic=?
+                        AND (channel_id IS NULL OR channel_id=?) AND affected_from<? AND affected_to>?)
+                """, Boolean.class, channel,ts(to),ts(from),run,topic,channel,ts(to),ts(from)));
     }
     QualityPolicy.Result evaluate(Channel c, Instant from, Instant to, String projection) {
         Instant now = clock.instant();

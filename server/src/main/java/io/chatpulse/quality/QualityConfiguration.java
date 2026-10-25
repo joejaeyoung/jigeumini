@@ -30,4 +30,11 @@ class QualityConfiguration {
             @Value("${quality.trend-offset-reset:${pipeline.offset-reset:none}}") String reset) {
         return new QualityRuntime(p,new JdbcTemplate(ds),transaction(ds),consumer,ranking,reset);
     }
+    @Bean(initMethod="start",destroyMethod="close")
+    @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
+    RecoveryDiagnostics recoveryDiagnostics(HikariDataSource ds,PipelineProperties p,ProjectionConsumer consumer,QualityRuntime runtime) {
+        return new RecoveryDiagnostics(p.bootstrapServers(),p.topic(),p.runId(),new JdbcTemplate(ds),java.util.List.of(
+                new RecoveryDiagnostics.Target(p.group(),p.projection(),consumer),
+                new RecoveryDiagnostics.Target(p.group()+"-trend",p.projection()+"-trend",runtime.trendConsumer())));
+    }
 }

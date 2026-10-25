@@ -78,6 +78,18 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests # 추적
 `./scripts/check`는 로컬 자동 테스트, `./scripts/integration`은 실제 Docker Kafka·DB 통합 테스트를 실행한다.
 실행 스크립트는 JAR를 `work/runtime/`에 별도로 복사하므로 재빌드 중에도 실행 파일이 바뀌지 않는다.
 
+## 오류 격리·소비 복구 진단
+
+분석기는 ranking/trend의 영구 계약 오류를 `<원본 topic>.dlq`에 격리한다. broker ACK와 DB 저장이 끝난 뒤에만 원본 offset이 진행한다. 일시 DB/Kafka 장애는 배치를 재시도하며, 격리된 입력은 순위·급상승·상세 기록의 수집 불완전에 반영한다.
+
+기존 분석기 실행 후 `http://127.0.0.1:18080/`의 **소비 복구 진단**에서 group/partition lag, 첫 미처리 offset의 시각, 오류·격리 건수, 마지막 진행과 원본 보존 여부를 확인한다.
+
+```bash
+curl --fail http://127.0.0.1:18080/api/operations/recovery
+```
+
+미관측은 0으로 표시하지 않는다. DLQ에 원본 payload를 보관하거나 live로 자동 재투입하지 않으며, 수정 검증은 보존된 원본의 별도 replay run을 사용한다. [격리·품질·진단 계약](docs/pipeline/DLQ.md)을 참고한다.
+
 ## 고정 Kafka 입력 재처리
 
 [이슈 #9 재처리 계약](docs/pipeline/REPLAY.md)은 로컬 CLI로 사용한다. 운영 group offset·순위·알림을 바꾸지 않고 UUID run에 10초 bucket만 만든다. 기존 Kafka/PostgreSQL 접속 환경 변수를 사용한다.

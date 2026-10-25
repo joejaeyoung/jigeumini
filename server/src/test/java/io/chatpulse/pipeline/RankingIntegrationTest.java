@@ -50,6 +50,27 @@ class RankingIntegrationTest {
     private void bucket(String projection,String id,Instant at,long count) {
         jdbc.update("INSERT INTO chat_bucket_10s VALUES (?,?,?,?,?) ON CONFLICT(projection,run_id,channel_id,bucket_start) DO UPDATE SET chat_count=excluded.chat_count",projection,"test-v1",id,ts(at),count);
     }
+    @Test void quarantinedInputExcludesWindowsAndRevisesPublishedRankingsAndSpikes() {
+        healthy(a);healthy(b);store.evaluate(t);
+        jdbc.update("INSERT INTO spike_event VALUES (?,?,?,?,?,?,?,?,NULL)",UUID.randomUUID(),"test-v1",a,ts(t),TrendPolicy.VERSION,100,10,10);
+        jdbc.update("""
+                INSERT INTO projection_failure VALUES ('ranking','test-v1',?,?,?,0,0,'EVENT_ID_CONFLICT',?,?,?,?)
+                ""","a".repeat(64),topic,"synthetic-topic-id",a,ts(t.minusSeconds(10)),ts(t),ts(t));
+        store.evaluate(t);
+        assertThat(store.rankings(60,20).entries()).extracting(RankingStore.Entry::channelId).containsExactly(b);
+        assertThat(store.rankings(60,20).excludedChannels().getFirst().reasons()).contains("COLLECTION_REVISED");
+        assertThat(store.activity(a,t.minusSeconds(60),t).points().getFirst().count()).isNull();
+        assertThat(jdbc.queryForObject("SELECT quality_warning FROM spike_event",String.class)).isEqualTo("COLLECTION_REVISED");
+        clock.now=t.plusSeconds(10);healthy(a);healthy(b);store.evaluate(clock.now);
+        assertThat(store.rankings(60,20).excludedChannels().getFirst().reasons()).contains("KNOWN_LOSS");
+        // 시각·채널 미확인 입력은 새로 추가된 채널을 포함해 해당 범위 전체를 불완전하게 만든다.
+        jdbc.update("""
+                INSERT INTO projection_failure VALUES ('ranking-trend','test-v1',?,?,?,0,1,'INVALID_EVENT_JSON',NULL,?,?,?)
+                ""","b".repeat(64),topic,"synthetic-topic-id",ts(t.minusSeconds(7*86400)),ts(clock.now.plusSeconds(5)),ts(clock.now));
+        clock.now=t.plusSeconds(20);healthy(a);healthy(b);healthy(c);store.evaluate(clock.now);
+        assertThat(store.rankings(60,20).entries()).isEmpty();
+        assertThat(store.rankings(60,20).excludedChannels()).hasSize(3).allSatisfy(e->{assertThat(e.count()).isNull();assertThat(e.status()).isEqualTo("INCOMPLETE");});
+    }
     @Test void completedWindowsHealthyZeroTiesAndImmutableSnapshot() {
         healthy(a);healthy(b);healthy(c);
         bucket("ranking",a,t.minusSeconds(60),5);bucket("ranking",a,t.minusSeconds(10),5);bucket("ranking",a,t,999);

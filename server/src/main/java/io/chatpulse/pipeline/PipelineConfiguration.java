@@ -47,7 +47,12 @@ public class PipelineConfiguration {
     }
     @Bean(initMethod = "start", destroyMethod = "close")
     @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
-    ProjectionConsumer projectionConsumer(PipelineProperties p, ProjectionStore store, String readyTopic) {
-        return new ProjectionConsumer(KafkaSupport.consumerFactory(p.bootstrapServers(), p.group(), p.offsetReset()), readyTopic, store);
+    ProjectionConsumer projectionConsumer(PipelineProperties p, ProjectionStore store, String readyTopic, DeadLetterRecovery recovery) {
+        return new ProjectionConsumer(KafkaSupport.consumerFactory(p.bootstrapServers(), p.group(), p.offsetReset()), readyTopic, store, recovery);
+    }
+    @Bean(destroyMethod = "close")
+    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
+    DeadLetterRecovery deadLetterRecovery(PipelineProperties p, HikariDataSource ds, String readyTopic) {
+        return new DeadLetterRecovery(p.bootstrapServers(), readyTopic, new JdbcTemplate(ds), p.projection(), p.runId());
     }
 }

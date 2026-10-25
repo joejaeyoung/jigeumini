@@ -1,0 +1,361 @@
+{
+  "date": "2026-10-25",
+  "implementationCommit": "5563532a3fc4d2c5d104046ed610bde1b7066351",
+  "baseCommit": "b58d0849edeb7958b04e80faa56fd13cbc35047e",
+  "jarSha256": "a3077f8fd5043d9acd594b3af4112b4a2cf40003cefb31e2d861cdb365119d11",
+  "feature": "F09",
+  "technicalGoals": [
+    "T01",
+    "T03",
+    "T05",
+    "T08"
+  ],
+  "environment": {
+    "java": 21,
+    "kafka": "4.1.2",
+    "postgres": "16.14",
+    "brokerCount": 1,
+    "replicationFactor": 1,
+    "node": 24,
+    "browser": "Chromium"
+  },
+  "input": {
+    "kind": "합성 입력만 사용, UUID topic/group/schema 격리",
+    "failureBatch": "partition 0: 정상 이벤트 1건, malformed 1건, 정상 이벤트 1건",
+    "identities": "테스트마다 임의 UUID; 내용·시각은 fixture 코드에서 구성",
+    "conflicts": "배치 내 동일 eventId의 상이한 payload 전부 격리, 이미 확정한 ledger의 충돌은 신규 위치만 격리",
+    "source": "server/src/test/java/io/chatpulse/pipeline/DeadLetterIntegrationTest.java"
+  },
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration",
+    "./scripts/web check",
+    "./scripts/web test:e2e"
+  ],
+  "tests": {
+    "test": {
+      "totals": {
+        "tests": 58,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suites": [
+        {
+          "name": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:51.271Z"
+        },
+        {
+          "name": "io.chatpulse.metadata.MetadataControllerTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:51.658Z"
+        },
+        {
+          "name": "io.chatpulse.metadata.MetadataServiceTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:52.494Z"
+        },
+        {
+          "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:52.515Z"
+        },
+        {
+          "name": "io.chatpulse.pipeline.DeadLetterTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:52.619Z"
+        },
+        {
+          "name": "io.chatpulse.pipeline.EventCodecTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:52.630Z"
+        },
+        {
+          "name": "io.chatpulse.poc.ChannelProbeTest",
+          "tests": "7",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:58:52.660Z"
+        },
+        {
+          "name": "io.chatpulse.poc.ChatProtocolTest",
+          "tests": "11",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.155Z"
+        },
+        {
+          "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.172Z"
+        },
+        {
+          "name": "io.chatpulse.quality.QualityPolicyTest",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.196Z"
+        },
+        {
+          "name": "io.chatpulse.quality.QualityScheduleTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.202Z"
+        },
+        {
+          "name": "io.chatpulse.quality.RankingControllerTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.205Z"
+        },
+        {
+          "name": "io.chatpulse.quality.TrendPolicyTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.285Z"
+        },
+        {
+          "name": "io.chatpulse.replay.ReplayManifestTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:03.291Z"
+        }
+      ]
+    },
+    "integrationTest": {
+      "totals": {
+        "tests": 40,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suites": [
+        {
+          "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
+          "tests": "10",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:05.501Z"
+        },
+        {
+          "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
+          "tests": "9",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T11:59:53.088Z"
+        },
+        {
+          "name": "io.chatpulse.pipeline.RankingIntegrationTest",
+          "tests": "11",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T12:00:05.195Z"
+        },
+        {
+          "name": "io.chatpulse.replay.ReplayIntegrationTest",
+          "tests": "10",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "timestamp": "2026-10-25T12:00:15.800Z"
+        }
+      ]
+    },
+    "harness": {
+      "passed": 16
+    },
+    "web": {
+      "unitPassed": 17,
+      "chromiumPassed": 23,
+      "typecheck": "passed",
+      "build": "passed"
+    }
+  },
+  "observations": [
+    {
+      "case": "DLQ_BROKER_REJECTION",
+      "injection": "격리 DLQ 토픽 max.message.bytes=64",
+      "beforeRecovery": {
+        "sourceOffset": 0,
+        "bucket": 0,
+        "failures": 0
+      },
+      "afterRecovery": {
+        "sourceOffset": 3,
+        "bucket": 2,
+        "failures": 1
+      }
+    },
+    {
+      "case": "CRASH_AFTER_ACK",
+      "exitCode": 93,
+      "beforeRestart": {
+        "sourceOffset": 0,
+        "bucket": 0,
+        "dbFailures": 0,
+        "dlqRecords": 1
+      },
+      "afterRestart": {
+        "sourceOffset": 3,
+        "bucket": 2,
+        "dbFailures": 1,
+        "dlqRecords": 2,
+        "distinctFailureIds": 1
+      }
+    },
+    {
+      "case": "CRASH_AFTER_DB_COMMIT",
+      "exitCode": 94,
+      "beforeRestart": {
+        "sourceOffset": 0,
+        "bucket": 2,
+        "dbFailures": 1,
+        "dlqRecords": 1
+      },
+      "afterRestart": {
+        "sourceOffset": 3,
+        "bucket": 2,
+        "dbFailures": 1,
+        "dlqRecords": 1
+      }
+    },
+    {
+      "case": "DB_FAILURE",
+      "injection": "processed_event INSERT trigger 오류",
+      "beforeRecovery": {
+        "sourceOffset": 0,
+        "bucket": 0,
+        "dlqRecords": 0
+      },
+      "afterRecovery": {
+        "sourceOffset": 1,
+        "bucket": 1,
+        "dlqRecords": 0
+      }
+    },
+    {
+      "case": "INDEPENDENT_PROJECTIONS",
+      "projections": [
+        "ranking",
+        "ranking-trend"
+      ],
+      "perProjectionFinal": {
+        "sourceRecords": 9,
+        "bucket": 3,
+        "failures": 6
+      }
+    },
+    {
+      "case": "RETENTION_AND_IDENTITY",
+      "results": [
+        "EXPIRED",
+        "TOPIC_CHANGED",
+        "SOURCE_IDENTITY_CHANGED"
+      ]
+    },
+    {
+      "case": "QUALITY",
+      "results": [
+        "겹치는 창 INCOMPLETE",
+        "기존 snapshot/spike COLLECTION_REVISED",
+        "상세 count null",
+        "채널 미확인 오류의 신규 채널 적용"
+      ]
+    },
+    {
+      "case": "EXECUTABLE_JAR",
+      "results": [
+        "실제 HTTP 200",
+        "독립 group 2개",
+        "group별 partition 3개",
+        "운영 HTML 제공"
+      ]
+    },
+    {
+      "case": "UNKNOWN_TIME_BOUNDARY",
+      "input": "receivedAt=now+5초, eventTime=now+10초인 유효 이벤트",
+      "result": "미확인 입력의 전체 품질 영향 범위가 해당 bucket 끝까지 포함"
+    },
+    {
+      "case": "COMMITTED_NORMAL_REDELIVERY",
+      "beforeFixFailedScenarios": [
+        "age",
+        "conflict"
+      ],
+      "injection": "DB commit 직후 halt(94), 고정 Clock +2초로 48시간 경계 초과 / 새 payload 충돌 offset 1 추가",
+      "afterFix": {
+        "oldOffsetZeroFailures": 0,
+        "bucket": 1,
+        "ageScenarioFailures": 0,
+        "conflictScenarioFailures": 1,
+        "conflictFailureOffset": 1
+      }
+    },
+    {
+      "case": "SQL_ROLLBACK_AFTER_ACK",
+      "injection": "projection_progress UPDATE trigger 오류",
+      "beforeRecovery": {
+        "bucket": 0,
+        "dbFailures": 0,
+        "sourceOffset": 0,
+        "dlqRecordsAtLeast": 1
+      },
+      "afterRecovery": {
+        "bucket": 2,
+        "dbFailures": 1,
+        "sourceOffset": 3,
+        "dlqRecordsAtLeast": 2
+      }
+    }
+  ],
+  "limitations": [
+    "새 실방송 수집 없음",
+    "broker 전체 중단·네트워크 단절·복제 HA·고부하 미검증",
+    "DLQ 자동 재투입·DB 보존 자동 정리 없음",
+    "원본 보존 만료 시 복원 불가",
+    "PR #18의 describeConfigs 간헐 실패 원인 미확정",
+    "직렬 ACK·첫 대량 품질 정정의 시간 비용은 #11에서 실측",
+    "미분류 DB 원인 코드는 현재 DB_OR_PROCESSING_UNAVAILABLE로 묶음"
+  ],
+  "discardedExperiment": {
+    "configuration": "RF=1, min.insync.replicas=2",
+    "result": "발행 성공: Kafka 4.1.2 effectiveMinIsr가 복제 수 이하로 제한됨",
+    "countedAsFailureEvidence": false
+  }
+}

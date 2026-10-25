@@ -24,7 +24,7 @@ export function BrowsePage({ view, saved, toggle }: { view: BrowseView; saved: s
   const categories = [...new Set(source.flatMap(channel => channel.metadata?.categoryName ? [channel.metadata.categoryName] : []))].sort();
   const channels = source.filter(channel => matchesSearch(channel, query) && (!category || channel.metadata?.categoryName === category));
   const stale = result.data ? rankingStale(result.data) : false;
-  const showCards = Boolean(result.data) || Boolean(metadata.data?.length) || view === 'saved';
+  const showCards = Boolean(result.data) || Boolean(metadata.data?.length) || (view === 'saved' && saved.length === 0);
   function changeWindow(value: number) {
     const next = new URLSearchParams(params); next.set('window', String(value)); setParams(next, { replace: true, preventScrollReset: true });
   }
@@ -41,8 +41,8 @@ export function BrowsePage({ view, saved, toggle }: { view: BrowseView; saved: s
       {metadata.error && <div className="notice" role="status"><span>방송 제목과 이미지를 갱신하지 못했어요. 수집된 채팅 건수는 별도로 표시해요.</span><button onClick={metadata.retry}>방송 정보 재시도</button></div>}
       {stale && <div className="notice" role="status">순위 갱신이 늦어지고 있어요. 이전 결과의 순위와 건수는 보류합니다.</div>}
       {result.data?.status === 'WARMING_UP' && <div className="notice" role="status">수집 품질을 확인하고 있어요. 정상 관측 구간이 쌓이면 순위에 표시돼요.</div>}
-      {result.loading && !showCards && <div className="loading-state" role="status"><Icon name="broadcast"/><p>수집된 방송을 불러오는 중…</p></div>}
-      {showCards && (channels.length ? <ul className="broadcast-grid">{channels.map(channel => <BroadcastCard key={channel.id} channel={channel} seconds={seconds} saved={saved.includes(channel.id)} onSave={toggle}/>)}</ul> : <div className="empty-state"><Icon name={view === 'saved' ? 'bookmark' : 'broadcast'}/><h3>{view === 'saved' ? '다시 보고 싶은 방송을 저장해보세요' : query || category ? '검색한 채널을 찾지 못했어요' : '아직 이 시간대에 수집된 방송이 없어요'}</h3><p>{view === 'saved' ? '방송 카드의 북마크를 누르면 이곳에서 다시 찾을 수 있어요.' : query || category ? '검색어나 카테고리를 바꾸거나 전체 방송을 둘러보세요.' : '새 기록이 들어오면 자동으로 보여드릴게요. 기록 없음은 채팅 0건을 뜻하지 않아요.'}</p>{view === 'saved' || query || category ? <Link className="primary-button" to="/explore">방송 둘러보기 <Icon name="arrow"/></Link> : <button className="secondary-button" onClick={result.retry}>다시 확인</button>}</div>)}
+      {result.loading && !result.data && <div className="loading-state" role="status"><Icon name="broadcast"/><p>수집된 방송을 불러오는 중…</p></div>}
+      {showCards && (channels.length ? <ul className="broadcast-grid">{channels.map(channel => <BroadcastCard key={channel.id} channel={channel} countsKnown={Boolean(result.data)} seconds={seconds} saved={saved.includes(channel.id)} onSave={toggle}/>)}</ul> : <div className="empty-state"><Icon name={view === 'saved' ? 'bookmark' : 'broadcast'}/><h3>{view === 'saved' ? '다시 보고 싶은 방송을 저장해보세요' : query || category ? '검색한 채널을 찾지 못했어요' : '아직 이 시간대에 수집된 방송이 없어요'}</h3><p>{view === 'saved' ? '방송 카드의 북마크를 누르면 이곳에서 다시 찾을 수 있어요.' : query || category ? '검색어나 카테고리를 바꾸거나 전체 방송을 둘러보세요.' : '새 기록이 들어오면 자동으로 보여드릴게요. 기록 없음은 채팅 0건을 뜻하지 않아요.'}</p>{view === 'saved' || query || category ? <Link className="primary-button" to="/explore">방송 둘러보기 <Icon name="arrow"/></Link> : <button className="secondary-button" onClick={result.retry}>다시 확인</button>}</div>)}
       {result.data && <div className="scope-note"><span>조회 <time dateTime={result.data.asOf}>{formatTime(result.data.asOf)}</time> · 5초마다 갱신</span><span>완료된 {seconds / 60}분 · 연결 관측 95% 이상만 순위 포함</span></div>}
     </section>
   </>;

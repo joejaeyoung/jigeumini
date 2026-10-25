@@ -74,5 +74,81 @@
     "Database clock jumps and multi-host clock rate drift untested",
     "Count conservation does not identify individual acknowledged event IDs",
     "ChannelProbe short runs intentionally end CANCELLED and are not live PoC PASS"
-  ]
+  ],
+  "followup": {
+    "integrationCodeCommit": "7fd3566972a8c286f8e1a30329d91e8b426d5164",
+    "command": "./scripts/check && ./scripts/integration",
+    "unitTests": 134,
+    "integration": {
+      "tests": 87,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "sortedXmlSha256": "370485c42268a7b9bd74a2a2411b6d4c6408ecbd684cf34c84c32ab14982b6d2",
+    "scenarios": [
+      {
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "accepted": 54,
+        "acknowledged": 54,
+        "unconfirmed": 0,
+        "brokerPhysical": 54,
+        "brokerUnique": 54,
+        "databaseUnique": 54,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+        "sha256": "a61b2ff4d4532a697e53b117b0caae64133ea5460d2a9212dd48741056c61a5e"
+      },
+      {
+        "scenario": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile",
+        "accepted": 8,
+        "acknowledged": 8,
+        "unconfirmed": 0,
+        "brokerPhysical": 8,
+        "brokerUnique": 8,
+        "databaseUnique": 8,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile.json",
+        "sha256": "cee2d03e7af3457fe4f2e7e0af05161047e10e9a7ef97de20ade35631910b8c0"
+      },
+      {
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "accepted": 21,
+        "acknowledged": 21,
+        "unconfirmed": 0,
+        "brokerPhysical": 21,
+        "brokerUnique": 21,
+        "databaseUnique": 21,
+        "brokerDatabaseDifference": 0,
+        "stalePostResumeAccepted": 0,
+        "file": "followup/stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+        "sha256": "103272ed832581aa4ee68802aec6259d88ce15283850f5a5cf509e8797a98738"
+      },
+      {
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "accepted": 39,
+        "acknowledged": 39,
+        "unconfirmed": 0,
+        "brokerPhysical": 39,
+        "brokerUnique": 39,
+        "databaseUnique": 39,
+        "brokerDatabaseDifference": 0,
+        "file": "followup/twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+        "sha256": "6d80c5b1f23b5d7cd92b79e2701fbcb916c268c7acad2b66b11267dd9a1798ef"
+      }
+    ],
+    "initialCiFailure": {
+      "push": 40213896363,
+      "pullRequest": 40213900998,
+      "fleetTests": 5,
+      "failed": 2,
+      "type": "NoSuchFileException on SIGTERM child report"
+    },
+    "persistenceRegression": [
+      "first: file missing with delayed write plus SIGTERM",
+      "second: complete false because deadline boundary marked CHANNEL_ENDED",
+      "third: all6 passed after persistence/hook/deadline fixes"
+    ],
+    "scope": "All87 executed with 7fd3566 compiled classes; subsequent CLI redundant CAS removal is separately checked and final CI required"
+  }
 }

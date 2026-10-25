@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 1 ]] || { echo '사용법: ./scripts/ack-commit <새 결과.json>'; exit 2; }
+./scripts/infra up
+exec ./gradlew --console=plain :server:ackExperiment "-PackOutput=$1"

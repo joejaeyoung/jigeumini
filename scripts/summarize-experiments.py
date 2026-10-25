@@ -87,12 +87,14 @@ def main():
     (args.output / 'summary.json').write_text(json.dumps({'formatVersion': 1, 'experiments': rows}, ensure_ascii=False, indent=2)+'\n')
     header = ['프로필', '결과', '입력/목표', 'ACK', 'DB A/B', 'p95/p99 A (ms)', '최대 lag A', '입력 후 drain (s)', 'replay 차이']
     table = []
+    labels = {'TARGET_INPUT_COMPLETED': '목표 완료', 'TARGET_INPUT_NOT_COMPLETED': '목표 미달', 'RECONCILIATION_FAILED': '대조 실패', 'EXPERIMENT_FAILED': '실험 실패', 'CLEANUP_FAILED': '정리 실패', 'RECONCILED': '대조 완료'}
     for row in rows:
         if row['profile'] == 'broker-fault':
+            table.append([row['profile'], labels.get(row['outcome'], row['outcome'])] + ['—'] * (len(header)-2))
             continue
         latency = row.get('metricsA', {}).get('receivedToDbMillis', {})
         db_a, db_b = row.get('databaseA') or {}, row.get('databaseB') or {}
-        table.append([row['profile'], row['outcome'], f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
+        table.append([row['profile'], labels.get(row['outcome'], row['outcome']), f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
                       str(row['producer'].get('acknowledged', '—')), f"{db_a.get('processedEvents', '—')}/{db_b.get('processedEvents', '—')}",
                       f"{number(latency.get('p95'))}/{number(latency.get('p99'))}",
                       str(row['groupMeasurements'].get('groupA', {}).get('maximumLagTotal', '—')),
@@ -107,7 +109,8 @@ def main():
         '균등 채널이 균등 partition을 뜻하지 않는다. 3 partitions에서 4번째 consumer의 유휴 할당을 실제 표본으로 확인한다.',
         '복제 HA·외부 네트워크·다중 호스트·실방송·장기 디스크 보존·전체 제품 projection의 동시 비용은 검증하지 않았다.',
     ]
-    markdown = '# 지금이니 합성 부하·복구 실험\n\n' + '\n'.join('- '+n for n in notes) + '\n\n'
+    totals = f"전체 {len(rows)}회 · 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회"
+    markdown = '# 지금이니 합성 부하·복구 실험\n\n' + totals + '\n\n' + '\n'.join('- '+n for n in notes) + '\n\n'
     markdown += '| '+' | '.join(header)+' |\n|'+ '|'.join(['---']*len(header))+'|\n'
     markdown += '\n'.join('| '+' | '.join(line)+' |' for line in table)+'\n\n'
     markdown += '환경·버전·seed·eventTime·입력 manifest·표본별 partition 처리율·자원·장애 시각은 [summary.json](summary.json)에 있다. 상세 원본 JSON의 파일명과 SHA256으로 대조한다.\n'
@@ -115,7 +118,7 @@ def main():
     html_table = '<table><thead><tr>'+''.join('<th>'+html.escape(h)+'</th>' for h in header)+'</tr></thead><tbody>'
     html_table += ''.join('<tr>'+''.join('<td>'+html.escape(cell)+'</td>' for cell in line)+'</tr>' for line in table)+'</tbody></table>'
     details = ''.join('<details><summary>'+html.escape(row['profile'])+'</summary><pre>'+html.escape(json.dumps(row, ensure_ascii=False, indent=2))+'</pre></details>' for row in rows)
-    document = '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>지금이니 부하·복구 실험</title><style>body{margin:32px;font:15px/1.7 system-ui;color:#173c30}h1{font-size:28px}table{border-collapse:collapse;white-space:nowrap}th,td{padding:10px;border-bottom:1px solid #cdded5;text-align:right}th:first-child,td:first-child{text-align:left}thead{background:#e6f5ee}.table{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f6f3;padding:16px}summary{padding:12px;cursor:pointer}</style><h1>합성 부하·복구 실험</h1><ul>'+''.join('<li>'+html.escape(n)+'</li>' for n in notes)+'</ul><div class="table">'+html_table+'</div><h2>프로필별 근거</h2>'+details+'</html>'
+    document = '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>지금이니 부하·복구 실험</title><style>body{margin:32px;font:15px/1.7 system-ui;color:#173c30}h1{font-size:28px}table{border-collapse:collapse;white-space:nowrap}th,td{padding:10px;border-bottom:1px solid #cdded5;text-align:right}th:first-child,td:first-child{text-align:left}thead{background:#e6f5ee}.table{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f6f3;padding:16px}summary{padding:12px;cursor:pointer}</style><h1>합성 부하·복구 실험</h1><p>'+html.escape(totals)+'</p><ul>'+''.join('<li>'+html.escape(n)+'</li>' for n in notes)+'</ul><div class="table">'+html_table+'</div><h2>프로필별 근거</h2>'+details+'</html>'
     (args.output / 'index.html').write_text(document)
     print(f'{len(rows)}개 결과: {args.output / "index.html"}')
 

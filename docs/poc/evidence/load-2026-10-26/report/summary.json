@@ -22,7 +22,11 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
-      "verificationComplete": true,
+      "cleanupIssueCodes": [
+        "UNTRACKED_IMAGE_VOLUMES"
+      ],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": false,
       "profile": "broker-fault",
       "cases": [
         {
@@ -273,6 +277,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "async-baseline",
       "plan": {
@@ -607,6 +613,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "async-control",
       "plan": {
@@ -913,6 +921,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "baseline",
       "plan": {
@@ -1229,6 +1239,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "burst",
       "plan": {
@@ -1621,6 +1633,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "hot-1",
       "plan": {
@@ -1903,6 +1917,255 @@
       "recoverySamples": []
     },
     {
+      "file": "final-managed-broker-fault.json",
+      "sha256": "7e6fb9120acab90967a0498102d31b8f5efe69a7db757061a19c655d6b0afc48",
+      "codeCommit": "cc0a1c1b7eb2609378fea0b96e48f91604305bd2",
+      "runtimeClassesSha256": null,
+      "startedAt": "2026-10-25T16:26:08.215942Z",
+      "finishedAt": "2026-10-25T16:27:30.255691Z",
+      "environment": {
+        "bootstrap": "localhost:55832",
+        "containerName": "exp-kafka-83341278f6f24b9ab80f6fc9f5451131",
+        "applicationCapacity": 30,
+        "minInSyncReplicas": 1,
+        "replicationFactor": 1,
+        "image": "apache/kafka:4.1.2",
+        "acks": "all",
+        "containerMemoryBytes": 536870912
+      },
+      "outcome": "RECONCILED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": "CONTAINER_AND_LABELLED_DATA_VOLUME",
+      "verificationComplete": true,
+      "profile": "broker-fault",
+      "cases": [
+        {
+          "publisher": "SERIAL",
+          "fault": "BROKER_PAUSE",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "rejected": 0,
+              "accepted": 20,
+              "pendingAfter": 20,
+              "code": "ACCEPTED",
+              "seconds": 0.001913292,
+              "attempted": 20,
+              "channel": 0
+            },
+            {
+              "rejected": 0,
+              "accepted": 10,
+              "pendingAfter": 30,
+              "code": "ACCEPTED",
+              "seconds": 0.0009385,
+              "attempted": 10,
+              "channel": 1
+            },
+            {
+              "rejected": 1,
+              "accepted": 0,
+              "pendingAfter": 30,
+              "code": "PUBLISH_REJECTED",
+              "seconds": 3.2333e-05,
+              "attempted": 1,
+              "channel": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1514.0,
+          "clientHeapUsedBytes": 29141568,
+          "clientRssBytes": 147587072,
+          "producer": {
+            "unconfirmed": 0,
+            "rejected": 1,
+            "complete": false,
+            "acknowledged": 31,
+            "accepted": 31,
+            "mode": "KAFKA"
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 31,
+          "brokerCountWithinAckRange": true,
+          "seconds": 2.062268541
+        },
+        {
+          "publisher": "SERIAL",
+          "fault": "BROKER_STOP",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "rejected": 0,
+              "accepted": 20,
+              "pendingAfter": 20,
+              "code": "ACCEPTED",
+              "seconds": 0.001767792,
+              "attempted": 20,
+              "channel": 0
+            },
+            {
+              "rejected": 0,
+              "accepted": 10,
+              "pendingAfter": 30,
+              "code": "ACCEPTED",
+              "seconds": 0.000497416,
+              "attempted": 10,
+              "channel": 1
+            },
+            {
+              "rejected": 1,
+              "accepted": 0,
+              "pendingAfter": 30,
+              "code": "PUBLISH_REJECTED",
+              "seconds": 1.0458e-05,
+              "attempted": 1,
+              "channel": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1512.0,
+          "clientHeapUsedBytes": 34817944,
+          "clientRssBytes": 153976832,
+          "producer": {
+            "unconfirmed": 30,
+            "rejected": 1,
+            "complete": false,
+            "acknowledged": 1,
+            "accepted": 31,
+            "mode": "KAFKA"
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 1,
+          "brokerCountWithinAckRange": true,
+          "seconds": 21.998887625
+        },
+        {
+          "publisher": "BOUNDED_ASYNC",
+          "fault": "BROKER_PAUSE",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "rejected": 0,
+              "accepted": 20,
+              "pendingAfter": 20,
+              "code": "ACCEPTED",
+              "seconds": 0.00146975,
+              "attempted": 20,
+              "channel": 0
+            },
+            {
+              "rejected": 0,
+              "accepted": 10,
+              "pendingAfter": 30,
+              "code": "ACCEPTED",
+              "seconds": 0.000564,
+              "attempted": 10,
+              "channel": 1
+            },
+            {
+              "rejected": 1,
+              "accepted": 0,
+              "pendingAfter": 30,
+              "code": "EXPERIMENT_REJECTED",
+              "seconds": 2.9042e-05,
+              "attempted": 1,
+              "channel": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1512.989,
+          "clientHeapUsedBytes": 14479752,
+          "clientRssBytes": 168034304,
+          "producer": {
+            "accepted": 31,
+            "unconfirmed": 0,
+            "highWater": 30,
+            "failedCallbacks": 0,
+            "rejected": 1,
+            "capacity": 30,
+            "complete": false,
+            "acknowledged": 31
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 31,
+          "brokerCountWithinAckRange": true,
+          "seconds": 1.715407
+        },
+        {
+          "publisher": "BOUNDED_ASYNC",
+          "fault": "BROKER_STOP",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "rejected": 0,
+              "accepted": 20,
+              "pendingAfter": 20,
+              "code": "ACCEPTED",
+              "seconds": 40.158724292,
+              "attempted": 20,
+              "channel": 0
+            },
+            {
+              "rejected": 10,
+              "accepted": 0,
+              "pendingAfter": 20,
+              "code": "EXPERIMENT_REJECTED",
+              "seconds": 7e-06,
+              "attempted": 10,
+              "channel": 1
+            },
+            {
+              "rejected": 1,
+              "accepted": 0,
+              "pendingAfter": 20,
+              "code": "EXPERIMENT_REJECTED",
+              "seconds": 3.125e-06,
+              "attempted": 1,
+              "channel": 1
+            }
+          ],
+          "pendingAtCapacity": 20,
+          "probeFrameRejected": true,
+          "capacityReached": false,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 41665.76,
+          "clientHeapUsedBytes": 18882160,
+          "clientRssBytes": 169771008,
+          "producer": {
+            "accepted": 21,
+            "unconfirmed": 20,
+            "highWater": 20,
+            "failedCallbacks": 20,
+            "rejected": 11,
+            "capacity": 30,
+            "complete": false,
+            "acknowledged": 1
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 1,
+          "brokerCountWithinAckRange": true,
+          "seconds": 53.550734792
+        }
+      ],
+      "scope": "SYNTHETIC_OWNED_BROKER_NO_DATABASE_OR_HA_CLAIM"
+    },
+    {
       "file": "final-poll-stall.json",
       "sha256": "e826e126a42da269b73e99b09f0918707f4683592815aeb717d4f3dea3017ca0",
       "codeCommit": "aab0b76ade30e76c65630543c6f3078ea79eb164",
@@ -1927,6 +2190,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "poll-stall",
       "plan": {
@@ -2402,6 +2667,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "serial-control",
       "plan": {
@@ -2707,6 +2974,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "steady",
       "plan": {
@@ -5244,6 +5513,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "uniform-1",
       "plan": {
@@ -5550,6 +5821,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "uniform-2",
       "plan": {
@@ -5871,6 +6144,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "uniform-3",
       "plan": {
@@ -6179,6 +6454,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "uniform-4",
       "plan": {
@@ -6488,6 +6765,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "steady",
       "plan": {
@@ -8960,6 +9239,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "async-baseline",
       "plan": {
@@ -9308,6 +9589,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "baseline",
       "plan": {
@@ -9620,6 +9903,10 @@
       "correct": false,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [
+        "UNTRACKED_IMAGE_VOLUMES"
+      ],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "broker-fault",
       "cases": [
@@ -9757,6 +10044,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "burst",
       "plan": {
@@ -10160,6 +10449,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "db-delay",
       "plan": {
@@ -10662,6 +10953,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "db-failure",
       "plan": {
@@ -11164,6 +11457,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "heartbeat",
       "plan": {
@@ -11700,6 +11995,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "hot-1",
       "plan": {
@@ -12017,6 +12314,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "hot-2",
       "plan": {
@@ -12338,6 +12637,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "hot-3",
       "plan": {
@@ -12660,6 +12961,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "hot-4",
       "plan": {
@@ -12983,6 +13286,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "hot-duplicates",
       "plan": {
@@ -13326,6 +13631,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "membership",
       "plan": {
@@ -13910,6 +14217,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "poll-stall",
       "plan": {
@@ -14401,6 +14710,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "recovery",
       "plan": {
@@ -15156,6 +15467,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "sharded-3",
       "plan": {
@@ -15518,6 +15831,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "uniform-1",
       "plan": {
@@ -15837,6 +16152,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "uniform-2",
       "plan": {
@@ -16157,6 +16474,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "uniform-3",
       "plan": {
@@ -16478,6 +16797,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "uniform-4",
       "plan": {
@@ -16800,6 +17121,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "async-baseline",
       "plan": {
@@ -17147,6 +17470,8 @@
       "measurementIssueCodes": [
         "RESOURCE_OR_SAMPLE_FAILED"
       ],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "async-control",
       "plan": {
@@ -17464,6 +17789,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "baseline",
       "plan": {
@@ -17776,6 +18103,10 @@
       "correct": false,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [
+        "UNTRACKED_IMAGE_VOLUMES"
+      ],
+      "cleanupEvidenceScope": null,
       "verificationComplete": false,
       "profile": "broker-fault",
       "cases": [
@@ -17919,6 +18250,8 @@
       "correct": true,
       "cleanupComplete": true,
       "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
       "verificationComplete": true,
       "profile": "serial-control",
       "plan": {

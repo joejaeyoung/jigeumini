@@ -34,7 +34,7 @@ A를60초 중단하는 동안 독립B는5,010→35,010건으로 진행했다. �
 
 ## 실패·보완·리팩토링
 
-1. broker-fault 최초2회는async+BROKER_STOP의FILL_BUFFER에서 실패했다. 두 번째는IllegalStateException과단계를 남겼지만 당시 수락/콜백 세부 값은 없으므로 내부 원인을 확정하지 않는다. 하네스의 모든장애에서30건전량수락 가정은 틀릴 수 있다. callback이 먼저 실패하면 상한 전에 다음frame을 전량거절하는 회귀를 추가하고 실제 수락/거절/대기시간을 기록했다. 보완610aaf1 재시험4경우는대조/상한/정리true였다. pause직렬/async모두31ACK, stop은각ACK1/미확인30/거절1이며 재시작 broker에는1개가 남았다. 초기실패2회도 정제보고서에 포함한다.
+1. broker-fault 최초2회는async+BROKER_STOP의FILL_BUFFER에서 실패했다. 두 번째는IllegalStateException과단계를 남겼지만 당시 수락/콜백 세부 값은 없으므로 내부 원인을 확정하지 않는다. 하네스의 모든장애에서30건전량수락 가정은 틀릴 수 있다. callback이 먼저 실패하면 상한 전에 다음frame을 전량거절하는 회귀를 추가하고 실제 수락/거절/대기시간을 기록했다. 보완610aaf1 재시험4경우는대조/상한/컨테이너정리true였다. 이미지의 익명볼륨까지 정리했다는 근거는 당시 남기지 못했다. pause직렬/async모두31ACK, stop은각ACK1/미확인30/거절1이며 재시작 broker에는1개가 남았다. 초기실패2회도 정제보고서에 포함한다.
 2. 최초 자료9개에RESOURCE_OR_SAMPLE_FAILED가 입력후종료 시 기록됐다. shutdownNow가 실행중계측을 interrupt할 수 있고, 입력후의abort를최종판정에서놓치는 경로를 확인했다. `ExperimentSampler`로 현재계측을 기다린뒤종료하고 실제실패는대조완료로승격하지 않게 고쳤다. 진행중sample/정상종료와실제sample실패를 latch로 검증한다. 과거실패의정확한예외는저장되지않아 모두같은내부원인이라고소급단정하지 않는다.
 3. Claude 초기 리뷰가 지적한 partition목록순서는 `ReplayManifest` 생성자에서이미정렬·연속번호검사를 수행했다. 실제기존결함으로기록하지 않는다. 비정렬입력 회귀를추가하고소비측도번호→range조회로바꿔정렬불변식의모듈간의존을줄였다.
 4. 프로필/유한상한은`ExperimentPlan`, 공통HTML은`ExperimentReport`, 계측종료는`ExperimentSampler`로분리했다. 가변broker/DB/group수명은Session하나가소유한다. 예약장애작업의예외도고정실패이벤트로보존한다. 인프라정본은로컬broker id1,chat-pulse-kafka-1/postgres-1이다.
@@ -66,3 +66,12 @@ A를60초 중단하는 동안 독립B는5,010→35,010건으로 진행했다. �
 HTML은 정제된 공유용 파일이며 원본의 과거실패·계측확인 필요를 그대로 보인다. 제품 적용은#27, 복제HA는#29,ACK0/1/all·Auto/BATCH/MANUAL은#31이다. 자원guard의 디스크부족 주입·모든 제품 projection 비용·다중호스트·공개 live 고부하를 검증하지 않았다.
 
 최신 통합단위107·하네스16·JAR,39행 HTML의1440/375px JS오류0·문서가로넘침0 확인은 [최종 검증 요약](../poc/evidence/load-verification-2026-10-26.json)에 기록했다. 최종 CI/리뷰는 STATUS에서 판정한다.
+
+
+## broker 실험 볼륨 정리 보완
+
+Kafka 이미지의 VOLUME 선언3개 때문에 컨테이너만 제거하면 익명볼륨이 남는다. 과거3개 broker-fault 원본의cleanupComplete는 컨테이너만 확인한 값이다. 원본을 보존하고 비교표의cleanupIssueCodes에UNTRACKED_IMAGE_VOLUMES,verificationComplete=false를 추가했다. 소유권 없는 과거 익명볼륨은 임의 삭제하지 않았다.
+
+cc0a1c1에서 명시적 데이터 볼륨·소유권 라벨과 다른VOLUME경로의tmpfs를 추가하고 네경우를 재실행했다. 새 원본final-managed-broker-fault.json은컨테이너+소유볼륨정리true,계수/상한/복구broker대조true다. pause직렬/후보는ACK31,stop직렬은ACK1/미확인30/거절1,stop후보는ACK1/미확인20/거절11이었다. 후보는첫frame의send대기동안callback이실패해상한30에못미쳐거절한허용경계다. 실제종료뒤소유컨테이너/볼륨조회결과0이다.
+
+이 보완으로 전체 원본40회이며12개final 부하 matrix와별도로1개broker run의4장애사례를 추가했다. 결과표는 과거3개의볼륨근거없음과과거9개의계측확인필요를보존한다. 수치범위가 다른범주의교집합은허용한다.

@@ -197,4 +197,4 @@ F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff
 
 ### 부하·편향·복구 실험 #11
 
-F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 해석](pipeline/EXPERIMENTS_VERIFICATION.md), 원본39회·정제표/HTML을 보존했다. 과거 broker실패2회·계측확인9회를 숨기지 않고 sampler 보완 후12프로필을 재검증했다. steady600.001초300,000건·독립A/B·replay차이0, 비동기500/s15,000·burst2,000/s120,000완료; 직렬500/s는1370수락 뒤10거절로 목표미달이다. aab0b76 push40209922599/PR40209926881은 단위91·하네스16·실제KafkaDB80·웹29/31 통과했다. #26 최신develop 통합 뒤 최종 문서/수치 Claude와 CI를 확인한다. live는 종료 상태다.
+F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 해석](pipeline/EXPERIMENTS_VERIFICATION.md), 원본40회·정제표/HTML을 보존했다. 과거 broker실패2회·계측확인9회를 숨기지 않고 sampler 보완 후12프로필을 재검증했다. steady600.001초300,000건·독립A/B·replay차이0, 비동기500/s15,000·burst2,000/s120,000완료; 직렬500/s는1370수락 뒤10거절로 목표미달이다. aab0b76 push40209922599/PR40209926881은 단위91·하네스16·실제KafkaDB80·웹29/31 통과했다. 소유볼륨 보완cc0a1c1에서 broker네경우를 재검증하고 과거3개의볼륨근거없음을표시했다. 최종 문서/수치 Claude와 CI를 확인한다. live는 종료 상태다.

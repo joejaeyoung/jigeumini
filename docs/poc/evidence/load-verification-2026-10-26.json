@@ -8,7 +8,7 @@
     "T11",
     "T12"
   ],
-  "recordedAt": "2026-10-25T16:18:28.593298+00:00",
+  "recordedAt": "2026-10-25T16:28:23.723504+00:00",
   "localMergedVerification": {
     "sourceCommit": "2d381a4",
     "command": "./scripts/check",
@@ -45,22 +45,22 @@
       "errors": [],
       "documentWidth": 1440,
       "viewport": 1440,
-      "rows": 39,
+      "rows": 40,
       "heading": "합성 부하·복구 실험",
-      "totals": "전체 39회 · 원본 입력 목표 완료 33회 · 목표 미달 3회 · 대조 실패 2회 · 계측 확인 필요 9회"
+      "totals": "전체 40회 · 원본 입력 목표 완료 33회 · 목표 미달 3회 · 대조 실패 2회 · 계측 확인 필요 9회 · 볼륨 정리 근거 없음 3회"
     },
     {
       "width": 375,
       "errors": [],
       "documentWidth": 375,
       "viewport": 375,
-      "rows": 39,
+      "rows": 40,
       "heading": "합성 부하·복구 실험",
-      "totals": "전체 39회 · 원본 입력 목표 완료 33회 · 목표 미달 3회 · 대조 실패 2회 · 계측 확인 필요 9회"
+      "totals": "전체 40회 · 원본 입력 목표 완료 33회 · 목표 미달 3회 · 대조 실패 2회 · 계측 확인 필요 9회 · 볼륨 정리 근거 없음 3회"
     }
   ],
   "runs": {
-    "total": 39,
+    "total": 40,
     "rawTargetCompleted": 33,
     "targetShortfall": 3,
     "comparisonFailed": 2,
@@ -69,13 +69,16 @@
     "finalMatrixReconciliationAndCleanup": 12,
     "finalMatrixTargetCompleted": 11,
     "finalMatrixTargetShortfall": 1,
-    "finalMatrixMeasurementIssues": 0
+    "finalMatrixMeasurementIssues": 0,
+    "brokerManagedRerunCases": 4,
+    "historicalVolumeCleanupUnverified": 3
   },
   "interpretation": [
     "Historical raw failures and measurement issues preserved; categories overlap",
     "Final steady uses 7d7b87d; final other profiles use aab0b76. Version and runtime class hashes recorded per file",
     "Original 9 sample error exception types were not saved; one shutdown interruption path reproduced, not every original cause proven",
-    "CI initial smoke cause not emitted; missing-table assumption fixed and fresh CI plus empty/partial schema regression passed"
+    "CI initial smoke cause not emitted; missing-table assumption fixed and fresh CI plus empty/partial schema regression passed",
+    "Historical broker cleanupComplete only covered container removal; all 3 raw files retained and volume evidence marked unverified. Unknown anonymous volumes not deleted."
   ],
   "notVerified": [
     "RF3 or HA",
@@ -85,5 +88,19 @@
     "disk-full fault injection",
     "multi-host or AZ failure",
     "source replay/dedup guarantees"
-  ]
+  ],
+  "managedBroker": {
+    "codeCommit": "cc0a1c1",
+    "correct": true,
+    "cleanupComplete": true,
+    "scope": "CONTAINER_AND_LABELLED_DATA_VOLUME",
+    "actualRemainingOwnedContainers": 0,
+    "actualRemainingOwnedVolumes": 0
+  },
+  "managedVolumeLocalCheck": {
+    "tests": 107,
+    "failures": 0,
+    "errors": 0,
+    "xmlSha256": "218716ac1f141eb27d678a4341c5d6cec7c83211cc0d3f1fd3bf889c0f4b31ba"
+  }
 }

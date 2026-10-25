@@ -1,8 +1,8 @@
 {
   "date": "2026-10-25",
-  "implementationCommit": "cb4117acbbc931c775af891829f9fcff60787db8",
+  "implementationCommit": "5563532a3fc4d2c5d104046ed610bde1b7066351",
   "baseCommit": "b58d0849edeb7958b04e80faa56fd13cbc35047e",
-  "jarSha256": "4bc099c55c0d29313354f96abaf73ed296e5ca6666e4dac262860c4d263896be",
+  "jarSha256": "a3077f8fd5043d9acd594b3af4112b4a2cf40003cefb31e2d861cdb365119d11",
   "feature": "F09",
   "technicalGoals": [
     "T01",
@@ -47,7 +47,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:52.976Z"
+          "timestamp": "2026-10-25T11:58:51.271Z"
         },
         {
           "name": "io.chatpulse.metadata.MetadataControllerTest",
@@ -55,7 +55,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:53.350Z"
+          "timestamp": "2026-10-25T11:58:51.658Z"
         },
         {
           "name": "io.chatpulse.metadata.MetadataServiceTest",
@@ -63,7 +63,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:53.994Z"
+          "timestamp": "2026-10-25T11:58:52.494Z"
         },
         {
           "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
@@ -71,7 +71,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:54.017Z"
+          "timestamp": "2026-10-25T11:58:52.515Z"
         },
         {
           "name": "io.chatpulse.pipeline.DeadLetterTest",
@@ -79,7 +79,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:54.125Z"
+          "timestamp": "2026-10-25T11:58:52.619Z"
         },
         {
           "name": "io.chatpulse.pipeline.EventCodecTest",
@@ -87,7 +87,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:54.136Z"
+          "timestamp": "2026-10-25T11:58:52.630Z"
         },
         {
           "name": "io.chatpulse.poc.ChannelProbeTest",
@@ -95,7 +95,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:50:54.166Z"
+          "timestamp": "2026-10-25T11:58:52.660Z"
         },
         {
           "name": "io.chatpulse.poc.ChatProtocolTest",
@@ -103,7 +103,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.685Z"
+          "timestamp": "2026-10-25T11:59:03.155Z"
         },
         {
           "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
@@ -111,7 +111,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.697Z"
+          "timestamp": "2026-10-25T11:59:03.172Z"
         },
         {
           "name": "io.chatpulse.quality.QualityPolicyTest",
@@ -119,7 +119,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.719Z"
+          "timestamp": "2026-10-25T11:59:03.196Z"
         },
         {
           "name": "io.chatpulse.quality.QualityScheduleTest",
@@ -127,7 +127,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.723Z"
+          "timestamp": "2026-10-25T11:59:03.202Z"
         },
         {
           "name": "io.chatpulse.quality.RankingControllerTest",
@@ -135,7 +135,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.725Z"
+          "timestamp": "2026-10-25T11:59:03.205Z"
         },
         {
           "name": "io.chatpulse.quality.TrendPolicyTest",
@@ -143,7 +143,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.789Z"
+          "timestamp": "2026-10-25T11:59:03.285Z"
         },
         {
           "name": "io.chatpulse.replay.ReplayManifestTest",
@@ -151,13 +151,13 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:04.791Z"
+          "timestamp": "2026-10-25T11:59:03.291Z"
         }
       ]
     },
     "integrationTest": {
       "totals": {
-        "tests": 37,
+        "tests": 40,
         "failures": 0,
         "errors": 0,
         "skipped": 0
@@ -165,11 +165,11 @@
       "suites": [
         {
           "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
-          "tests": "7",
+          "tests": "10",
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:06.655Z"
+          "timestamp": "2026-10-25T11:59:05.501Z"
         },
         {
           "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
@@ -177,7 +177,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:37.126Z"
+          "timestamp": "2026-10-25T11:59:53.088Z"
         },
         {
           "name": "io.chatpulse.pipeline.RankingIntegrationTest",
@@ -185,7 +185,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:51:49.189Z"
+          "timestamp": "2026-10-25T12:00:05.195Z"
         },
         {
           "name": "io.chatpulse.replay.ReplayIntegrationTest",
@@ -193,7 +193,7 @@
           "failures": "0",
           "errors": "0",
           "skipped": "0",
-          "timestamp": "2026-10-25T11:52:00.371Z"
+          "timestamp": "2026-10-25T12:00:15.800Z"
         }
       ]
     },
@@ -311,6 +311,37 @@
       "case": "UNKNOWN_TIME_BOUNDARY",
       "input": "receivedAt=now+5초, eventTime=now+10초인 유효 이벤트",
       "result": "미확인 입력의 전체 품질 영향 범위가 해당 bucket 끝까지 포함"
+    },
+    {
+      "case": "COMMITTED_NORMAL_REDELIVERY",
+      "beforeFixFailedScenarios": [
+        "age",
+        "conflict"
+      ],
+      "injection": "DB commit 직후 halt(94), 고정 Clock +2초로 48시간 경계 초과 / 새 payload 충돌 offset 1 추가",
+      "afterFix": {
+        "oldOffsetZeroFailures": 0,
+        "bucket": 1,
+        "ageScenarioFailures": 0,
+        "conflictScenarioFailures": 1,
+        "conflictFailureOffset": 1
+      }
+    },
+    {
+      "case": "SQL_ROLLBACK_AFTER_ACK",
+      "injection": "projection_progress UPDATE trigger 오류",
+      "beforeRecovery": {
+        "bucket": 0,
+        "dbFailures": 0,
+        "sourceOffset": 0,
+        "dlqRecordsAtLeast": 1
+      },
+      "afterRecovery": {
+        "bucket": 2,
+        "dbFailures": 1,
+        "sourceOffset": 3,
+        "dlqRecordsAtLeast": 2
+      }
     }
   ],
   "limitations": [
@@ -318,7 +349,9 @@
     "broker 전체 중단·네트워크 단절·복제 HA·고부하 미검증",
     "DLQ 자동 재투입·DB 보존 자동 정리 없음",
     "원본 보존 만료 시 복원 불가",
-    "PR #18의 describeConfigs 간헐 실패 원인 미확정"
+    "PR #18의 describeConfigs 간헐 실패 원인 미확정",
+    "직렬 ACK·첫 대량 품질 정정의 시간 비용은 #11에서 실측",
+    "미분류 DB 원인 코드는 현재 DB_OR_PROCESSING_UNAVAILABLE로 묶음"
   ],
   "discardedExperiment": {
     "configuration": "RF=1, min.insync.replicas=2",

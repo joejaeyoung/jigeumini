@@ -26,12 +26,12 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 
 ## 실제 실행 결과
 
-[정제 근거](../poc/evidence/dlq-2026-10-25.json)에 구현 commit `cb4117a`, 실행 JAR SHA-256, suite별 시각·건수와 장애 대조값을 기록했다.
+[정제 근거](../poc/evidence/dlq-2026-10-25.json)에 구현 commit `5563532`, 실행 JAR SHA-256, suite별 시각·건수와 장애 대조값을 기록했다.
 
 | 명령 | 결과 |
 |---|---|
 | `./scripts/check` | 서버 단위 58개·하네스 16개·JAR, 기술 목표/문서 링크 통과 |
-| `./scripts/integration` | 실제 Kafka/PostgreSQL 37개 통과: DLQ 7개, 기존 파이프라인 9개, 품질 11개, replay 10개 |
+| `./scripts/integration` | 실제 Kafka/PostgreSQL 40개 통과: DLQ 10개, 기존 파이프라인 9개, 품질 11개, replay 10개 |
 | `./scripts/web check` | 타입·웹 단위 17개·제품 빌드 통과 |
 | `./scripts/web test:e2e` | Chromium 23개 통과, 운영 진단 사례 1개 포함 |
 
@@ -45,7 +45,7 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 
 RF=1에서 min.insync.replicas=2로 ACK 실패를 유도하려던 시험은 정상 발행됐다. 설정 조회를 추가해도 재현됐으며 소비 상태는 RUNNING·실패 시도 0이었다. [Kafka 4.1.2 Partition 소스](https://github.com/apache/kafka/blob/4.1.2/core/src/main/scala/kafka/cluster/Partition.scala#L354-L361)는 유효 최소 ISR을 복제 수 이하로 제한한다. 따라서 이 방법을 장애 근거로 쓰지 않고, DLQ 토픽의 허용 크기를 내려 실제 broker가 발행을 거부하는 시험으로 교체했다. 이는 broker 전체 중단·네트워크 단절·복제 HA 시험이 아니다.
 
-Claude 최초 리뷰는 확정된 정상 offset을 다시 분류하는 문제로 REQUEST_CHANGES였다. 시간 경과·배치 구성 변경의 두 JVM 재시작 시험이 수정 전 각각 실패했다. DB 진행 위치를 같은 트랜잭션에서 잠그고 미확정 입력만 분류하도록 변경했다. 테스트 fixture도 ledger와 격리 저장이 같은 DataSource의 트랜잭션에 참여하도록 맞췄으며 ACK 뒤 SQL 실패를 추가해 원자 rollback을 대조한다. 운영 Spring 경로는 원래 같은 DataSource bean을 공유한다.
+Claude 최초 리뷰는 확정된 정상 offset을 다시 분류하는 문제로 REQUEST_CHANGES였다. 시간 경과·배치 구성 변경의 두 JVM 재시작 시험이 수정 전 각각 실패했다. DB 진행 위치를 같은 트랜잭션에서 잠그고 미확정 입력만 분류하도록 변경했다. 테스트 fixture도 ledger와 격리 저장이 같은 DataSource의 트랜잭션에 참여하도록 맞췄으며 ACK 뒤 SQL 실패를 추가해 원자 rollback도 통과했다. 운영 Spring 경로는 원래 같은 DataSource bean을 공유한다.
 
 ## 해석의 한계
 

@@ -24,7 +24,9 @@ Node.js 24(`.nvmrc`), Java 21, Python 3, Docker Compose를 사용한다. 최초 
 ./scripts/web preview           # 빌드 확인: http://127.0.0.1:18083/
 ```
 
-웹은 실제 집계 조회·1분/5분 선택·채널 ID 검색·관심 방송·상세 기록을 제공한다. 아직 서버에 없는 방송 메타데이터와 급상승 배수는 표시하지 않는다. 최근 수집 기록이 없으면 빈 화면이 정상이며 가상 방송으로 대체하지 않는다. 디자인 시안은 별도 포트로 보존한다.
+웹은 실제 방송 제목·공개 채널명·썸네일·카테고리·방송 상태, 1분/5분 채팅 집계, 제목·채널명 검색, 카테고리 필터, 관심 방송과 상세 기록을 제공한다. 최근 수집 이력이 있는 20개 채널을 조회하며 전체 치지직 검색은 아니다. 방송 정보는 비동기로 조회하므로 첫 화면에서 잠시 확인 중으로 표시될 수 있다. 최근 채팅 기록이 없는 채널은 건수 `—`를 표시한다. 급상승 배수는 후속 이슈 범위다. 디자인 시안은 별도 포트로 보존한다.
+
+방송 정보 조회를 끄려면 분석기를 `./scripts/pipeline analyzer --metadata.enabled=false`로 실행한다. 새 코드를 반영할 때는 실행 중인 분석기를 Ctrl+C로 종료한 뒤 `./scripts/pipeline analyzer`로 재시작한다. [방송 정보 API·캐시·원천 이용 범위](docs/api/BROADCAST_METADATA.md)를 참고한다.
 
 [개발 구조·Git Flow](docs/DEVELOPMENT.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
 
@@ -108,6 +110,7 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 | `server/src/test` | 합성 frame, 로컬 HTTP·실제 WebSocket 테스트 |
 | `web/src/` | React·TypeScript 제품 웹, 서버 API 조회 |
 | `server/src/main/java/io/chatpulse/pipeline` | Kafka 발행·집계·조회 API |
+| `server/src/main/java/io/chatpulse/metadata` | 공개 방송 정보 조회·메모리 캐시·API |
 | `scripts/` | 환경 확인, 빌드·검증, 공개 채널 찾기, live 실행 |
 | [설계 문서](docs/design/README.md) | PRD·아키텍처·HLD |
 | [프로토콜과 구현 결정](docs/poc/PROTOCOL.md) | 입력 분류, timeout·재시도, 소스 근거 |

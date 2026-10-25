@@ -46,7 +46,7 @@ class SelectionPolicyTest {
         var empty = policy(null,20).evaluate(snapshot(),NOW);
         assertThat(empty.selectedOfEligible()).isNull(); assertThat(empty.selectedOfDiscovered()).isNull();
     }
-    @Test void partialAndStaleScanNeverBecomeCollectionSuccess() {
+    @Test void staleCandidatesAreExcludedAndPartialScanIsReported() {
         var input = new Snapshot("SYNTHETIC",NOW.minusSeconds(2),NOW,Result.RATE_LIMITED,1,2,0,List.of(candidate(1,10L,0L)));
         var result = policy(null,20,1).evaluate(input,NOW.plusSeconds(120));
         assertThat(result.scanComplete()).isFalse(); assertThat(result.scanAgeSeconds()).isEqualTo(120);

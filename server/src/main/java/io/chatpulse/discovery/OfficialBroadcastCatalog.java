@@ -84,7 +84,7 @@ public final class OfficialBroadcastCatalog implements BroadcastCatalog {
         long nextRequest;
         Result result = Result.COMPLETE;
         Scan(Limits limits) {
-            this.limits = limits; end = System.nanoTime() + limits.deadline().toNanos();
+            this.limits = limits; nextRequest = System.nanoTime(); end = nextRequest + limits.deadline().toNanos();
             // 실원천은 최소 1초 간격. 이는 자체 보수적 예산이며 공식 허용량이라는 뜻이 아니다.
             interval = Math.max(base.getHost().equals("openapi.chzzk.naver.com") ? 1_000_000_000L : 0,
                     limits.requestInterval().toNanos());
@@ -105,7 +105,7 @@ public final class OfficialBroadcastCatalog implements BroadcastCatalog {
                 var future = client.sendAsync(request, ignored -> new BoundedBody());
                 HttpResponse<byte[]> response;
                 try { response = future.get(timeout.toNanos(), TimeUnit.NANOSECONDS); }
-                catch (TimeoutException failure) { future.cancel(true); throw new Failure(System.nanoTime() >= end ? Result.DEADLINE : Result.SOURCE_UNAVAILABLE); }
+                catch (TimeoutException failure) { future.cancel(true); throw new Failure(end - System.nanoTime() <= 0 ? Result.DEADLINE : Result.SOURCE_UNAVAILABLE); }
                 int status = response.statusCode();
                 if (status == 429) throw new Failure(Result.RATE_LIMITED);
                 if (status == 401 || status == 403) throw new Failure(Result.AUTHORIZATION_FAILED);

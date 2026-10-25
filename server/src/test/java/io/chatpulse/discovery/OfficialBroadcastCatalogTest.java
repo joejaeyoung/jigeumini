@@ -32,21 +32,22 @@ class OfficialBroadcastCatalogTest {
     }
     @Test void pagesBatchFollowersDuplicatesMissingValuesAndPrivacy() throws Exception {
         var count=new AtomicInteger();
+        var queries=new CopyOnWriteArrayList<String>();var secrets=new CopyOnWriteArrayList<String>();
         var source=source(exchange->{
             count.incrementAndGet();
-            assertThat(exchange.getRequestHeaders().getFirst("Client-Secret")).isEqualTo("synthetic-secret");
-            String query=exchange.getRequestURI().getRawQuery();
+            secrets.add(exchange.getRequestHeaders().getFirst("Client-Secret"));
+            String query=exchange.getRequestURI().getRawQuery();queries.add(query);
             if(exchange.getRequestURI().getPath().endsWith("lives")) {
                 boolean next=query.contains("next=");
                 respond(exchange,200,Map.of("data",next?List.of(live(1),live(2)):List.of(live(1)),"page",next?Map.of():Map.of("next","opaque+cursor")));
-                if(next)assertThat(query).contains("next=opaque%2Bcursor");
             }else {
-                assertThat(query).isEqualTo("channelIds="+id(1)+"&channelIds="+id(2));
                 respond(exchange,200,Map.of("data",List.of(Map.of("channelId",id(1),"followerCount",0,"channelName","synthetic-private-name"))));
             }
         });
         var result=source.scan(limits(5,6));
         assertThat(result.result()).isEqualTo(Result.COMPLETE);assertThat(result.duplicateRows()).isEqualTo(1);
+        assertThat(queries).containsExactly("size=20","size=20&next=opaque%2Bcursor","channelIds="+id(1)+"&channelIds="+id(2));
+        assertThat(secrets).containsExactly("synthetic-secret","synthetic-secret","synthetic-secret");
         assertThat(count.get()).isEqualTo(3);assertThat(result.candidates()).extracting(Candidate::followerCount).containsExactly(0L,null);
         String output=JSON.writeValueAsString(result);
         assertThat(output).doesNotContain("synthetic-private","synthetic-secret","opaque+cursor","channelName","liveTitle");

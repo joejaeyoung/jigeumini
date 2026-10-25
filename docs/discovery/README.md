@@ -62,3 +62,14 @@ SELECTION_OFFICIAL_ENABLED=true ./scripts/selection official work/selection-poli
 공식 HTTP와 합성 fixture라는 실제 두 원천을 `BroadcastCatalog` 경계에 두고, `SelectionPolicy`는 I/O 없는 선정 규칙만 소유한다. 페이지/요청 예산과 원문 제거는 공식 adapter 안에 숨겼다. CLI는 명령·설정·새 결과 파일 수명만 소유하며 Spring 서버나 DB를 만들지 않는다. 범용 HTTP 프레임워크나 다른 메타데이터 캐시를 이 경로에 결합하지 않았다.
 
 실제 앱 인증·채널 동의·quota·전체 페이지 순회, 동적 목록 누락률, 실방송20개·공식 채팅 수신·토큰 갱신은 미검증이다. 새 토큰 저장소를 만들지 않았다. 최종 검증과 commit·명령·근거는 [검증 기록](VERIFICATION.md)을 따른다.
+
+## 팔로워 하한 민감도 재현
+
+정책 파일 5종은 `docs/discovery/policies/`에 있다. 모두 같은 합성 목록·최대3개·TTL120초다. 각 출력은 새 경로를 사용한다.
+
+```bash
+mkdir -p work/selection-sensitivity
+for floor in none 0 1000 5000 10000; do
+  ./scripts/selection fixture "docs/discovery/policies/followers-$floor.json" docs/discovery/synthetic-catalog.json "work/selection-sensitivity/followers-$floor.json"
+done
+```

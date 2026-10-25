@@ -24,7 +24,9 @@ public final class SelectionCli {
             boolean official = args.length == 3 && args[0].equals("official");
             if (!fixture && !official) throw new IllegalArgumentException("INVALID_COMMAND");
             Path output = Path.of(args[args.length - 1]);
-            if (Files.exists(output)) throw new IllegalArgumentException("OUTPUT_EXISTS");
+            if (Files.exists(output, LinkOption.NOFOLLOW_LINKS)) throw new IllegalArgumentException("OUTPUT_EXISTS");
+            Path parent = output.toAbsolutePath().getParent();
+            if (!Files.isDirectory(parent) || !Files.isWritable(parent)) throw new IllegalArgumentException("OUTPUT_PARENT_UNAVAILABLE");
             var config = json.readValue(FixtureBroadcastCatalog.read(Path.of(args[1]), 1_048_576), Configuration.class);
             BroadcastCatalog catalog;
             if (fixture) {

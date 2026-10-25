@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-26 · 브랜치 `feat/kafka-ha`
+2026-10-26 · 브랜치 `technicaltest/ack-commit`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -202,3 +202,7 @@ F10 → T06/T07/T08/T09/T11/T12. [계약](pipeline/EXPERIMENTS.md)과 [검증 �
 ### Kafka HA #29 실제 검증
 
 F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA_HA_VERIFICATION.md)·[정제근거](poc/evidence/kafka-ha-2026-10-26/summary.json). 01e943e에서실제6노드의broker1/2대손실·controller1/2대손실·복구·RF1→3이행·최종ACK/broker/DB대조10단계통과. main172시도/171ACK=broker=DB,이행20일치,정리완료. 처음3실패와보완도보존했다. 최종통합/Claude/CI후병합하며실제AZ/디스크손상/외부배포는미검증이다.
+
+### ACK·commit 경계 #31
+
+F11 → T01/T10. 실제AUTO/BATCH/MANUAL container와별도JVM의처리전/DB직후/offset직후종료,RF3복제장애에서ACK0/1/all의API응답·보존·DB대조하네스를구현중이다. 제품기본설정을변경하지않는다. 실측결과/리뷰/CI는아직진행전이다.

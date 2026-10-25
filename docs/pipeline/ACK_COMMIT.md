@@ -53,3 +53,9 @@ ACK 대조는 0/1/all 모두 idempotence=false·retries0·client in-flight1로 �
 - [ELR 계약](https://kafka.apache.org/41/operations/eligible-leader-replicas/): minISR와 선출 가능 후보를 확인하며 last ISR 상실의 결과를 일반적인 RF 수만으로 추정하지 않았다.
 
 단일 호스트의 프로세스 중단/복귀·소량 합성 입력이다. 실제 AZ 상실·디스크 영구 손상·전원 장애·장기 부하·시계 점프·모든 client 버전의 동작은 미검증이다. DB 처리 지연/재할당 장기 부하는 [#11 검증](EXPERIMENTS_VERIFICATION.md)의 별도 범위를 참조한다. 최종 리뷰·CI는 STATUS에서 관리한다.
+
+## 최신 통합 코드 재실행
+
+49a3834의 clean tree에서 세 번째 실행을 수행해 전체13사례와 정리가 다시 통과했다. Java21.0.11/PostgreSQL16.14 및 실제 topic의 retention/minISR/unclean 설정을 원본에 추가했다. broker 물리/고유/DB는25/25/25,25/25/25,20/20/20이며 성공 입력별 부재0·실패 입력의 보존0을 집합으로 대조했다. 마지막 leader 부재 관측은15.048초이며 `docker stop --timeout 0`의 비정상 정지 조건이다. 정상 종료와의 차이나 관측 창 이후의 선출을 이 실험으로 확정하지 않는다.
+
+검토 HEAD와 이전 실험 코드의 차이를 해소하기 위해 승인된 #27 발행과 #29 전체 분석기 정책 수정까지 통합한 뒤 재실행했다. 첫 두 실행은 당시 증거로 유지한다.

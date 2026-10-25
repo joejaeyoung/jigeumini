@@ -209,4 +209,4 @@ F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA
 
 ### ACK·commit 경계 #31
 
-F11 → T01/T10. 472908f의 실제6노드/별도JVM commit10사례·ACK3수준 대조가 통과했다. [검증·결정](pipeline/ACK_COMMIT.md)과 [원본2회](poc/evidence/ack-commit-2026-10-26/summary.json)에 첫 실패와 보완, 위험한 AUTO poll 순서의 누락1·정상9사례누락0·복구broker/DB차이0을 기록했다. 제품BATCH/acks=all 설정은 유지한다. 최종 Claude·CI를 진행한다.
+F11 → T01/T10. 472908f의 실제6노드/별도JVM commit10사례·ACK3수준 대조가 통과했다. [검증·결정](pipeline/ACK_COMMIT.md)과 [원본2회](poc/evidence/ack-commit-2026-10-26/summary.json)에 첫 실패와 보완, 위험한 AUTO poll 순서의 누락1·정상9사례누락0·복구broker/DB차이0을 기록했다. 제품BATCH/acks=all 설정은 유지한다. 최신49a3834 clean tree 재실행도13사례·정리 통과했고 물리/고유/DB 및 실제 설정을 기록했다. 최종 Claude·CI를 진행한다.

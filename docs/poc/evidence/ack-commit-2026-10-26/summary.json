@@ -28,6 +28,14 @@
       "codeCommit": "472908f43a4735ba85bb1d207771a80385a9cbeb",
       "correct": true,
       "cleanupComplete": true
+    },
+    {
+      "file": "third.json",
+      "sha256": "9c3dc3af302daf6a4f41270ae8db3ab9cd720a135cc6462e347331791f6543f0",
+      "codeCommit": "49a3834f199b4bd5bf8d833f5355682b2edb40bd",
+      "correct": true,
+      "cleanupComplete": true,
+      "workingTreeDirty": false
     }
   ],
   "commitCases": 10,
@@ -48,5 +56,12 @@
     "AUTO_POLL_AHEAD deliberately violates DB-before-next-poll; synchronous AUTO cases had no missing event",
     "No live source, no source gap reconstruction",
     "First failed run exception type was recorded but not its operation/message; do not infer exact cause beyond last checkpoint"
-  ]
+  ],
+  "latestVerifiedCommit": "49a3834f199b4bd5bf8d833f5355682b2edb40bd",
+  "observedEnvironment": {
+    "java": "21.0.11",
+    "postgres": "16.14",
+    "brokerStopMode": "DOCKER_STOP_TIMEOUT_ZERO",
+    "leaderAbsenceObservationSeconds": 15.048296292
+  }
 }

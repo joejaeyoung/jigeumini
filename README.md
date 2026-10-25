@@ -248,3 +248,7 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 ```
 
 [HA 계약](docs/pipeline/KAFKA_HA.md)을 따른다. 합성 입력과 UUID별6노드 Compose project·소유 데이터 볼륨을 만들고 종료 뒤 정리한다. Docker 가용메모리6GiB 이상, 기존 사용량+실험 상한2.625GiB가90% 이내, 여유디스크2GiB가 필요하다. 기존 chat-pulse/다른 프로젝트를 정지하지 않는다. 외부 배포·실제 AZ 장애 검증은 아니다.
+
+## ACK 수준과 offset commit 경계 비교
+
+`./scripts/ack-commit work/ack-result.json`은 소유권이 있는 로컬6노드·합성 고정입력으로 AUTO/BATCH/MANUAL의 프로세스 종료와 ACK0/1/all의 복제 장애를 비교한다. 제품 기본 ACK/commit 설정은 유지한다. [HA 리허설](docs/pipeline/KAFKA_HA.md)의 자원 조건을 먼저 확인한다. 결과에서 API 성공·broker 확인·장애 후 보존·DB 반영을 구분한다.

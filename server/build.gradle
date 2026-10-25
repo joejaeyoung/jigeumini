@@ -93,3 +93,12 @@ tasks.register('haExperiment', JavaExec) {
     maxHeapSize = '256m'
     if (project.hasProperty('haOutput')) args(project.property('haOutput'))
 }
+
+tasks.register('ackExperiment', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.pipeline.AckCommitExperiment'
+    workingDir = rootProject.projectDir
+    maxHeapSize = '256m'
+    if (project.hasProperty('ackOutput')) args(project.property('ackOutput'))
+}

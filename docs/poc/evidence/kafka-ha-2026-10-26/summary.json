@@ -81,5 +81,13 @@
     "long term saturation",
     "paid infrastructure",
     "ACK0/1 or commit alternatives"
-  ]
+  ],
+  "integrationBeforeLoadMerge": {
+    "sourceCommit": "01e943e",
+    "command": "./scripts/integration",
+    "tests": 77,
+    "failures": 0,
+    "errors": 0,
+    "xmlSha256": "a658dc2f829f68c25489fcaca14208f17c102179e3b36b75bde688995cfdb11c"
+  }
 }

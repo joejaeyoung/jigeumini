@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+  echo '사용법: ./scripts/experiment <프로필> <새 결과.json> [eventTime 기준 UTC]'
+  exit 2
+fi
+./scripts/infra up
+experiment_args=("-PexperimentProfile=$1" "-PexperimentOutput=$2")
+if [[ $# -eq 3 ]]; then experiment_args+=("-PexperimentBase=$3"); fi
+./gradlew --console=plain :server:loadExperiment "${experiment_args[@]}"

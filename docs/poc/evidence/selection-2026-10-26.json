@@ -6,12 +6,12 @@
     "T08",
     "T11"
   ],
-  "implementationCommit": "fae95319b04870287b56c1fed0ac12f2df7cdb70",
-  "recordedAt": "2026-10-25T15:52:25.832502+00:00",
+  "implementationCommit": "b2001340873dee6eb489d4abedeae06750361879",
+  "recordedAt": "2026-10-25T16:02:56.993646+00:00",
   "input": "synthetic HTTP/normalized catalog; no official credentials or live calls",
   "command": [
     "./scripts/check",
-    "./scripts/selection fixture <policy> docs/discovery/synthetic-catalog.json <new-output>"
+    "for floor in none 0 1000 5000 10000; do ./scripts/selection fixture docs/discovery/policies/followers-$floor.json docs/discovery/synthetic-catalog.json work/selection-reviewed/$floor.json; done"
   ],
   "javaUnit": {
     "tests": 101,
@@ -19,10 +19,11 @@
     "failures": 0
   },
   "harnessTests": 16,
-  "xmlSha256": "be27240b1f5d741d22e22a69a2093d232c5f15ba0d2a71f020ceb1913a81cf1c",
-  "jarSha256": "c5918642bda1954c7aefdebc1b7c1a8e02bc45bbc399ed5b181ef775f36f7786",
+  "xmlSha256": "fb83dc7226469cc4447ccba41abe07b615431801bd8ffd10195d23593d1cd8e8",
+  "jarSha256": "5927c93d7c9ee85e35b7f1807cb75555dcb2ad8e41122ced2bfbd71bbffcbb55",
   "sensitivity": [
     {
+      "policy": "docs/discovery/policies/followers-none.json",
       "minFollowers": null,
       "counts": {
         "discovered": 8,
@@ -33,9 +34,36 @@
         "healthyWindow": null
       },
       "selected": [
-        "00000000000000000000000000000001",
-        "00000000000000000000000000000003",
-        "00000000000000000000000000000002"
+        {
+          "channelId": "00000000000000000000000000000001",
+          "liveId": 1,
+          "followerCount": 999,
+          "viewerCount": 100,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        },
+        {
+          "channelId": "00000000000000000000000000000003",
+          "liveId": 3,
+          "followerCount": 5000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        },
+        {
+          "channelId": "00000000000000000000000000000002",
+          "liveId": 2,
+          "followerCount": 1000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        }
       ],
       "exclusionCounts": {
         "ADULT_OR_UNKNOWN": 1,
@@ -46,6 +74,7 @@
       "activationAllowed": false
     },
     {
+      "policy": "docs/discovery/policies/followers-0.json",
       "minFollowers": 0,
       "counts": {
         "discovered": 8,
@@ -56,9 +85,36 @@
         "healthyWindow": null
       },
       "selected": [
-        "00000000000000000000000000000001",
-        "00000000000000000000000000000003",
-        "00000000000000000000000000000002"
+        {
+          "channelId": "00000000000000000000000000000001",
+          "liveId": 1,
+          "followerCount": 999,
+          "viewerCount": 100,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        },
+        {
+          "channelId": "00000000000000000000000000000003",
+          "liveId": 3,
+          "followerCount": 5000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        },
+        {
+          "channelId": "00000000000000000000000000000002",
+          "liveId": 2,
+          "followerCount": 1000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        }
       ],
       "exclusionCounts": {
         "ADULT_OR_UNKNOWN": 1,
@@ -69,6 +125,7 @@
       "activationAllowed": false
     },
     {
+      "policy": "docs/discovery/policies/followers-1000.json",
       "minFollowers": 1000,
       "counts": {
         "discovered": 8,
@@ -79,8 +136,26 @@
         "healthyWindow": null
       },
       "selected": [
-        "00000000000000000000000000000003",
-        "00000000000000000000000000000002"
+        {
+          "channelId": "00000000000000000000000000000003",
+          "liveId": 3,
+          "followerCount": 5000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        },
+        {
+          "channelId": "00000000000000000000000000000002",
+          "liveId": 2,
+          "followerCount": 1000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        }
       ],
       "exclusionCounts": {
         "ADULT_OR_UNKNOWN": 1,
@@ -92,6 +167,7 @@
       "activationAllowed": false
     },
     {
+      "policy": "docs/discovery/policies/followers-5000.json",
       "minFollowers": 5000,
       "counts": {
         "discovered": 8,
@@ -102,7 +178,16 @@
         "healthyWindow": null
       },
       "selected": [
-        "00000000000000000000000000000003"
+        {
+          "channelId": "00000000000000000000000000000003",
+          "liveId": 3,
+          "followerCount": 5000,
+          "viewerCount": 50,
+          "adult": false,
+          "live": true,
+          "observedAt": "2026-10-26T00:00:00Z",
+          "ambiguousBroadcast": false
+        }
       ],
       "exclusionCounts": {
         "ADULT_OR_UNKNOWN": 1,
@@ -114,6 +199,7 @@
       "activationAllowed": false
     },
     {
+      "policy": "docs/discovery/policies/followers-10000.json",
       "minFollowers": 10000,
       "counts": {
         "discovered": 8,
@@ -140,6 +226,18 @@
     "streamer consent or chat access",
     "live collection",
     "fleet assignment",
-    "platform completeness or representativeness"
-  ]
+    "platform completeness or representativeness",
+    "official repeated channelIds query and null page.next response shape"
+  ],
+  "previousVerification": {
+    "implementationCommit": "fae95319b04870287b56c1fed0ac12f2df7cdb70",
+    "recordedAt": "2026-10-25T15:52:25.832502+00:00",
+    "javaUnit": {
+      "tests": 101,
+      "errors": 0,
+      "failures": 0
+    },
+    "xmlSha256": "be27240b1f5d741d22e22a69a2093d232c5f15ba0d2a71f020ceb1913a81cf1c",
+    "jarSha256": "c5918642bda1954c7aefdebc1b7c1a8e02bc45bbc399ed5b181ef775f36f7786"
+  }
 }

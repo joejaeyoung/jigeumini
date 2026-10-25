@@ -192,3 +192,5 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 ### 방송 선정 #26
 
 F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff5종을 검증했다. [선정 계약](discovery/README.md)·[검증](discovery/VERIFICATION.md)·[정제 근거](poc/evidence/selection-2026-10-26.json). Client 인증 목록 어댑터는 기본 비활성이며 page/request/time/body 상한·부분 결과·안전한 필드만 남긴다. 선정은 순수 정책으로 분리하고 공식/합성의 실제 두 adapter를 검토했다. 원문/비밀 헤더를 저장하지 않으며 assigned/connected/healthy는미관측null이다. Claude 최종리뷰·CI·병합을 진행한다. 공개live와 외부배포는 실행하지 않았다.
+
+#26 a31eebe Claude APPROVE·push40209024613/PR40209027685 성공 이후 비차단 리뷰6개를 반영했다. b200134에서 단위101·하네스16·JAR·정책5종 CLI 재실행이 통과했으며 새 최종 HEAD 리뷰/CI를 확인한다.

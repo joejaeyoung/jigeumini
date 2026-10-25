@@ -26,10 +26,13 @@ public record DeadLetter(int schemaVersion, String failureId, String topicId, St
         if (!CODES.contains(code)) throw new IllegalArgumentException("UNKNOWN_CONTRACT_CODE");
         // 완전히 검증된 충돌 이벤트만 채널과 eventTime을 신뢰한다. 나머지는 전체 수집 범위의 최근 7일을 제외한다.
         boolean precise = code.equals("EVENT_ID_CONFLICT") && validEvent != null;
-        Instant from = precise ? Instant.ofEpochSecond(Math.floorDiv(validEvent.eventTime().getEpochSecond(), 10) * 10)
-                : now.minusSeconds(7 * 86400L);
-        Instant to = precise ? from.plusSeconds(10) : now.plusSeconds(5);
+        Instant from = bucketStart(precise ? validEvent.eventTime() : now.minusSeconds(7 * 86400L));
+        // receivedAt <= now+5초, eventTime <= receivedAt+5초. 마지막 허용 이벤트의 bucket 전체를 포함한다.
+        Instant to = precise ? from.plusSeconds(10) : bucketStart(now.plusSeconds(10)).plusSeconds(10);
         return new DeadLetter(1, id(topicId, record.partition(), record.offset()), topicId.toString(), record.topic(),
                 record.partition(), record.offset(), code, precise ? validEvent.channelId() : null, from, to);
+    }
+    private static Instant bucketStart(Instant at) {
+        return Instant.ofEpochSecond(Math.floorDiv(at.getEpochSecond(), 10) * 10);
     }
 }

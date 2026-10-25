@@ -173,7 +173,7 @@ sequenceDiagram
 
 - batch listener, `enable.auto.commit=false`, `AckMode.BATCH`로 고정한다. consumer thread에서 동기 처리하며, 별도 DB transactional service 호출이 commit까지 끝난 뒤 listener가 반환한다. 비동기 worker에서 ack하지 않는다.
 - `ByteArrayDeserializer`로 받고 listener 안에서 계약 검증을 수행해, 파싱 불가 record도 위치를 식별해 격리할 수 있게 한다.
-- poll 배치를 유효·영구 오류로 먼저 분류한다. historical 입력도 계약 위반으로 격리한다. 정상 ledger 처리와 DLQ ACK를 수행하고, bucket·진행 정보·격리 오류를 같은 DB 트랜잭션에 저장한다. 완전히 검증된 충돌의 채널/시간은 해당 구간을 불완전 처리한다. 나머지는 감지 시각 -7일~+5초의 전체 수집 범위를 불완전 처리한다. 이는 live 입력이 기여할 수 있는 시간 범위이며 해당 범위 밖 새 창에서도 정상 관측 조건을 다시 충족해야 한다. 상세 정책·한계는 M3 계약에 둔다.
+- poll 배치를 유효·영구 오류로 먼저 분류한다. historical 입력도 계약 위반으로 격리한다. 정상 ledger 처리와 DLQ ACK를 수행하고, bucket·진행 정보·격리 오류를 같은 DB 트랜잭션에 저장한다. 완전히 검증된 충돌의 채널/시간은 해당 구간을 불완전 처리한다. 나머지는 감지 시각 -7일의 bucket 시작부터 +10초가 속한 bucket 끝까지 전체 수집 범위를 불완전 처리한다. 수신·이벤트 시각의 각 +5초 허용치를 함께 고려한다. 이는 live 입력이 기여할 수 있는 시간 범위이며 해당 범위 밖 새 창에서도 정상 관측 조건을 다시 충족해야 한다. 상세 정책·한계는 M3 계약에 둔다.
 - 모든 단계가 성공한 경우에만 listener가 정상 반환한다. 하나라도 실패하면 **poll 배치 전체를 재시도**한다. 부분 성공 offset commit은 MVP에서 사용하지 않는다. DLQ 중복은 failureId로 식별한다.
 - ledger INSERT의 `ON CONFLICT DO NOTHING RETURNING` 결과에 포함된 신규 ID만 채널/bucket별 합산 UPSERT한다. batch 내부 ID도 먼저 중복 제거한다. 같은 eventId에 다른 핵심 필드(channelId/eventTime 등)가 들어오는 경우 입력 계약 위반으로 격리한다. 같은 배치 안에서 충돌하는 ID는 어느 payload도 임의 선택하지 않는다. 기존 ledger와 충돌하면 기존 집계를 유지하고 새 입력을 격리한다. 이를 검사할 정규화 payload hash를 ledger에 저장한다. [PostgreSQL INSERT](https://www.postgresql.org/docs/current/sql-insert.html)
 - DB commit 전 실패는 rollback한다. DB commit 후 Kafka commit 전 실패는 재수신되지만 ledger로 중복 증가를 막는다. `next_resolved_offset`은 해당 파티션에서 유효 반영·명시 제외·DLQ 확인까지 끝난 마지막 연속 record offset + 1이다. 모든 record가 무효여도 진행 정보는 DB에 반영한다.

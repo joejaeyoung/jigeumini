@@ -28,7 +28,7 @@ DB 오류, DLQ 전송 실패, topic identity 확인 실패와 기타 미분류 �
 - key=`SHA-256(topicId + ':' + partition + ':' + offset)`. topicId는 broker가 제공하는 Kafka UUID다. 같은 이름의 재생성 topic과 구분한다. ranking/trend가 같은 원본 오류를 발견하면 같은 failureId를 사용하며 DB는 `(projection,run_id,failure_id)`별 1건이다.
 - JSON은 `schemaVersion`, `failureId`, `topicId`, `sourceTopic`, `partition`, `offset`, `errorCode`, `channelId`, `affectedFrom`, `affectedTo`만 포함한다. 원본 bytes/key/headers·예외 본문·eventId·사용자 정보·원문 hash를 복사하지 않는다.
 - 허용 코드는 `EVENT_SIZE`, `INVALID_EVENT_FIELDS`, `INVALID_EVENT_JSON`, `INVALID_EVENT_CONTRACT`, `KEY_MISMATCH`, `INVALID_EVENT_TIME`, `OUTSIDE_LIVE_RETENTION`, `EVENT_ID_CONFLICT`다.
-- 완전히 검증된 충돌 이벤트만 channelId와 해당 10초 eventTime bucket을 사용한다. 나머지 오류의 channelId는 null이며, 감지 시각 기준 최근 7일부터 5초 뒤까지 전체 수집 채널의 품질을 불완전하게 만든다. 정상 live 입력이 기여할 수 있는 시간 범위를 보수적으로 덮는 정책이다. 잘못된 입력의 시각이나 key로 범위를 추측하지 않는다.
+- 완전히 검증된 충돌 이벤트만 channelId와 해당 10초 eventTime bucket을 사용한다. 나머지 오류의 channelId는 null이며, 감지 시각 기준 최근 7일부터 최대 미래 eventTime(now+10초)이 속한 10초 bucket 끝까지 전체 수집 채널의 품질을 불완전하게 만든다. 시작도 bucket 경계로 내림한다. receivedAt≤now+5초와 eventTime≤receivedAt+5초의 허용치를 모두 반영한다. 정상 live 입력이 기여할 수 있는 시간 범위를 보수적으로 덮는 정책이다. 잘못된 입력의 시각이나 key로 범위를 추측하지 않는다.
 - ACK 뒤 crash/DB 실패가 있으면 Kafka DLQ의 물리적 건수가 중복될 수 있다. 운영 건수는 DB의 failureId별 격리 건수다. producer idempotence가 재시작·애플리케이션 재발행을 중복 제거한다고 가정하지 않는다.
 
 ## 품질 반영

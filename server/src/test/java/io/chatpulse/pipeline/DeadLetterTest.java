@@ -18,12 +18,17 @@ class DeadLetterTest {
     @Test void malformedInputCopiesNeitherKeyPayloadHeadersNorExceptionBody() {
         var record=new ConsumerRecord<String,byte[]>("synthetic",0,1,"PRIVATE_KEY_CANARY","PRIVATE_BODY_CANARY".getBytes());
         record.headers().add("private","PRIVATE_HEADER_CANARY".getBytes());
-        Instant now=Instant.now();
+        Instant now=Instant.parse("2026-10-25T12:00:07.123Z");
         var failure=DeadLetter.create(Uuid.randomUuid(),record,"INVALID_EVENT_JSON",null,now);
         String json=JsonMapper.builder().build().writeValueAsString(failure);
         assertFalse(json.contains("PRIVATE")); assertNull(failure.channelId());
-        assertEquals(now.minusSeconds(7*86400),failure.affectedFrom());
-        assertEquals(now.plusSeconds(5),failure.affectedTo());
+        assertEquals(Instant.parse("2026-10-18T12:00:00Z"),failure.affectedFrom());
+        assertEquals(Instant.parse("2026-10-25T12:00:20Z"),failure.affectedTo());
+        var source=EventCodecTest.event(now);
+        var future=new io.chatpulse.poc.ChatEvent(1,source.eventId(),source.source(),source.channelId(),source.chatRoomId(),
+                source.collectionSessionId(),null,"CHAT",now.plusSeconds(10),now.plusSeconds(5),false,"test");
+        new EventCodec().validate(future); new EventCodec().validateLiveAge(future,now);
+        assertTrue(failure.affectedTo().isAfter(future.eventTime()));
         assertThrows(IllegalArgumentException.class,()->DeadLetter.create(Uuid.randomUuid(),record,"PRIVATE_EXCEPTION_CANARY",null,now));
     }
     @Test void onlyValidatedConflictNarrowsQualityToChannelAndBucket() {

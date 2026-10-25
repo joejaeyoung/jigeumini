@@ -59,6 +59,10 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./scripts/check
+      - name: 수집기 Linux 실패 진단
+        run: |
+          ./scripts/infra up
+          ./gradlew --console=plain :server:integrationTest --tests io.chatpulse.fleet.FleetIntegrationTest
       - run: ./scripts/integration
       - run: docker compose down
         if: always()
@@ -69,6 +73,7 @@ jobs:
           path: |
             server/build/reports/tests
             server/build/test-results
+            server/build/fleet-*.json
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 15

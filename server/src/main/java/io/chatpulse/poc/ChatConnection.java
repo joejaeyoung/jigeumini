@@ -19,6 +19,10 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 final class ChatConnection implements AutoCloseable {
     private final ChatProtocol protocol = new ChatProtocol();
     private final ProbeStats stats;
+    private final CollectionObserver observer;
+    private final String channel;
+    private final UUID sessionId = UUID.randomUUID();
+    private volatile Instant lastAlive = Instant.now();
     private final CompletableFuture<Void> ready = new CompletableFuture<>();
     private final CompletableFuture<SourceFailure> ended = new CompletableFuture<>();
     private final AtomicBoolean active = new AtomicBoolean(true);
@@ -32,11 +36,10 @@ final class ChatConnection implements AutoCloseable {
 
     ChatConnection(StandardWebSocketClient client, ScheduledExecutorService scheduler,
             URI uri, String channel, String room, String token, ProbeStats stats,
-            Duration pingInterval, Duration pongTimeout, EventSink sink) throws Exception {
-        this.stats = stats;
+            Duration pingInterval, Duration pongTimeout, EventSink sink, CollectionObserver observer) throws Exception {
+        this.stats = stats; this.observer = observer; this.channel = channel;
         this.pingInterval = pingInterval;
         this.pongTimeout = pongTimeout;
-        UUID sessionId = UUID.randomUUID();
         var handler = new TextWebSocketHandler() {
             @Override
             public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -54,6 +57,7 @@ final class ChatConnection implements AutoCloseable {
                     var frame = protocol.decode(message.getPayload(), channel, room, sessionId, Instant.now());
                     if (frame.command() == 10100 && !ready.isDone()) {
                         stats.connected();
+                        observer.connected(channel, sessionId, Instant.now());
                         ready.complete(null);
                     }
                     if (frame.command() == 0) send(ChatProtocol.pong());
@@ -63,6 +67,11 @@ final class ChatConnection implements AutoCloseable {
                     }
                     if (!frame.events().isEmpty() && !ready.isDone()) {
                         throw new SourceFailure("CHAT_BEFORE_HANDSHAKE", false);
+                    }
+                    lastAlive = Instant.now();
+                    observer.alive(sessionId, lastAlive);
+                    if (frame.skipped().keySet().stream().anyMatch(key -> key.startsWith("INVALID_"))) {
+                        observer.loss(channel, lastAlive.minusMillis(1), lastAlive, "INVALID_MESSAGE");
                     }
                     stats.accept(frame, byteCount);
                     if (!frame.events().isEmpty()) sink.accept(frame.events());
@@ -118,7 +127,12 @@ final class ChatConnection implements AutoCloseable {
     }
 
     private void fail(SourceFailure failure) {
-        ended.complete(failure);
+        if (ended.complete(failure)) {
+            observer.ended(sessionId, Instant.now(), failure.getMessage());
+            if (failure.getMessage().contains("FRAME") || failure.getMessage().startsWith("INVALID_") || failure.getMessage().contains("PUBLISH") || failure.getMessage().contains("KAFKA")) {
+                observer.loss(channel, lastAlive, Instant.now(), failure.getMessage());
+            }
+        }
         ready.completeExceptionally(failure);
     }
 
@@ -128,6 +142,7 @@ final class ChatConnection implements AutoCloseable {
     public void close() {
         active.set(false);
         stats.disconnected();
+        observer.ended(sessionId, Instant.now(), "CLOSED");
         heartbeat.cancel(false);
         closeSocket();
     }

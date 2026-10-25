@@ -46,6 +46,10 @@ msgTime/messageTime의 정수 epoch milliseconds를 사용한다. 현재보다 5
 
 성공은 실제 관측한 채팅·heartbeat·재접속의 기능 검증이다. 알려지지 않은 원천 누락과 재전송, 강제 재접속 공백을 없애는 보장은 없다.
 
+## 제품 품질 관측 연결
+
+수신 프로토콜과 READ/heartbeat 송신은 유지한다. pipeline collector에서만 `CollectionObserver`가 승인·원천 생존·종료·메시지 손실을 관측하고 별도 worker가 DB에 기록한다. 일반 PoC는 기본 무동작 observer를 사용해 DB 없이 실행된다. WebSocket callback에서 DB I/O를 수행하지 않으며 메타데이터나 채팅 원문을 관측 객체에 전달하지 않는다. [품질 계약](../api/QUALITY_RANKINGS.md)을 참고한다.
+
 ## 검증 계층
 
 - `ChatProtocolTest`: 합성 frame의 배치·역사·후원·타입·시각·크기·식별정보 제거.

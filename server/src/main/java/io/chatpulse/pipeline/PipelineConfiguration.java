@@ -36,7 +36,6 @@ public class PipelineConfiguration {
         return new BufferedKafkaPublisher(new KafkaTemplate<>(factory), readyTopic, codec, p.bufferCapacity());
     }
     @Bean(destroyMethod = "close")
-    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
     HikariDataSource dataSource(PipelineProperties p) {
         var config = new HikariConfig();
         config.setJdbcUrl(p.jdbcUrl());

@@ -14,6 +14,7 @@ async function setup(page: Page) {
     const requested = url.searchParams.get('ids')?.split(',') ?? [a, b];
     return route.fulfill({ json: id ? metadata(id) : { asOf: new Date(now).toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', channels: requested.map(metadata) } });
   });
+  await page.route('**/api/v1/rankings?**', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), evaluatedAt: null, snapshotId: null, windowSeconds: Number(new URL(route.request().url()).searchParams.get('window')), algorithmVersion: 'quality-ranking-v1', status: 'WARMING_UP', entries: [], excludedChannels: [] } }));
   await page.route('**/api/status', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), scope: 'COLLECTED_CHANNELS_ONLY', coverageMeasured: false, consumer: { running: true, state: 'RUNNING', assignedPartitions: 3 } } }));
   await page.route('**/api/buckets?**', route => route.fulfill({ json: { asOf: new Date(now).toISOString(), windowSeconds: Number(new URL(route.request().url()).searchParams.get('seconds')), bucketSeconds: 10, includesOpenBucket: true, coverageMeasured: false, buckets: [] } }));
 }

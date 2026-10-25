@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { BrowsePage } from '../features/broadcasts/BrowsePage';
+import { SurgesPage } from '../features/broadcasts/SurgesPage';
 import { ChannelPage } from '../features/broadcasts/ChannelPage';
 import { useSavedChannels } from '../features/saved/useSavedChannels';
 import { Icon } from '../shared/ui/Icon';
@@ -43,12 +44,12 @@ export function App() {
         <Route path="/explore" element={<BrowsePage view="explore" saved={saved} toggle={toggle}/>}/>
         <Route path="/saved" element={<BrowsePage view="saved" saved={saved} toggle={toggle}/>}/>
         <Route path="/search" element={<BrowsePage view="search" saved={saved} toggle={toggle}/>}/>
-        <Route path="/surges" element={<><div className="page-heading"><div><h1>지금, 반응이 모이는 순간</h1><p>평소보다 채팅 반응이 늘어난 방송을 모아볼 공간이에요.</p></div></div><section className="empty-state"><Icon name="trend"/><h2>급상승 분석을 준비하고 있어요</h2><p>현재는 수집된 채팅 건수만 볼 수 있어요.<br/>반응 배수와 급상승 방송은 분석이 준비되면 제공할게요.</p><Link className="primary-button" to="/explore">수집된 방송 둘러보기 <Icon name="arrow"/></Link></section></>}/>
+        <Route path="/surges" element={<SurgesPage saved={saved} toggle={toggle}/>}/>
         <Route path="/channels/:channelId" element={<ChannelPage saved={saved} toggle={toggle}/>}/>
         <Route path="*" element={<section className="empty-state"><h1>페이지를 찾을 수 없어요</h1><p>주소를 확인하거나 홈으로 돌아가주세요.</p><Link className="primary-button" to="/">홈으로 돌아가기</Link></section>}/>
       </Routes>
       <footer><Link className="wordmark" to="/">지금이니</Link><button onClick={() => setInfo(true)}>서비스와 집계 기준</button><span>채팅으로 발견하는 새로운 방송</span></footer>
     </main>
-    {info && <Modal title="어떤 반응을 보여주나요?" onClose={() => setInfo(false)}><div className="modal-body"><h3>수집한 채널 안에서 살펴봐요</h3><p>최근 1분·5분 동안 수집된 일반 채팅 건수를 보여줘요. 전체 치지직 순위나 시청자 수를 뜻하지 않아요.</p><h3>기록이 없다고 0건은 아니에요</h3><p>진행 중인 10초 구간이 포함되며, 수집이 끊긴 구간은 아직 측정하지 않아요. 채팅이 수집되지 않은 시간대를 0건으로 채우지 않아요.</p><h3>방송 정보와 채팅 집계는 별도로 확인해요</h3><p>공개 방송 제목·썸네일·방송 상태를 주기적으로 확인해요. 오래되거나 제한된 방송 정보는 구분해 표시하며, 이미지가 없으면 대체 화면을 보여줘요. 반응 배수는 준비 중이에요. 홈 대표 이미지는 서비스 일러스트예요.</p><h3>관심 방송은 이 브라우저에 저장해요</h3><p>로그인 없이 현재 브라우저에 저장돼요. 브라우저 데이터를 지우면 함께 삭제돼요.</p><button className="primary-button" onClick={() => setInfo(false)}>확인했어요</button></div></Modal>}
+    {info && <Modal title="어떤 반응을 보여주나요?" onClose={() => setInfo(false)}><div className="modal-body"><h3>수집한 채널 안에서 살펴봐요</h3><p>완료된 1분·5분의 일반 채팅 건수를 보여줘요. 연결 관측 95% 이상이고 수집·발행·분석 상태를 확인한 방송만 순위에 포함해요. 전체 치지직 순위나 시청자 수를 뜻하지 않아요.</p><h3>기록이 없다고 0건은 아니에요</h3><p>진행 중인 구간은 제외해요. 공백·손실·지연이 확인되면 순위에서 제외하고, 관측이 정상인 조용한 방송만 0건으로 표시해요. 연결 관측률은 원천 채팅의 완전한 수신율을 보장하지 않아요.</p><h3>방송 정보와 채팅 집계는 별도로 확인해요</h3><p>공개 방송 제목·썸네일·방송 상태를 주기적으로 확인해요. 오래되거나 제한된 방송 정보는 구분해 표시하며, 이미지가 없으면 대체 화면을 보여줘요. 급상승은 최근 1분 100건 이상, 평소보다 50건 이상 증가, 2배 이상을 두 번 연속 확인한 결과예요. 같은 방송은 5분 뒤부터 다시 판단해요. 홈 대표 이미지는 서비스 일러스트예요.</p><h3>관심 방송은 이 브라우저에 저장해요</h3><p>로그인 없이 현재 브라우저에 저장돼요. 브라우저 데이터를 지우면 함께 삭제돼요.</p><button className="primary-button" onClick={() => setInfo(false)}>확인했어요</button></div></Modal>}
   </>;
 }

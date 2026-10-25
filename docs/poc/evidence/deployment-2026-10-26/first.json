@@ -1,0 +1,1007 @@
+{
+  "scope": "SINGLE_HOST_RF1_SYNTHETIC_LOCAL_REHEARSAL",
+  "owner": "e4646000ae384e7da3b3d7eff8350be5",
+  "project": "jigeumini-deploy-e4646000ae384e7da3b3d7eff8350be5",
+  "startedAt": "2026-10-25T17:11:36.727517+00:00",
+  "baseline": {
+    "revision": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+    "workingTreeDirty": false,
+    "jarSha256": "7a7aee1ab605653029e7339068b77ffcdd67300357e093dd2f3020b4a59c50bf",
+    "buildId": "743738e17d4e59ccfed0f40ba4f297e0eb166e0295f3e0f70f23a19e19826f24",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+        "id": "sha256:f33ddfa65119572607917d84a6db4b098f8fae1c572c2ee77916340959cd4ad9",
+        "sizeBytes": 140748213,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+        "id": "sha256:41df74967d1a66971d7e6179224dcf78233494346addd044dd3a0492c276624b",
+        "sizeBytes": 26068379,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "candidate": {
+    "revision": "88b30e68b7958678d54540b34af945f9b9935e1a",
+    "workingTreeDirty": false,
+    "jarSha256": "ebd17a1545e8da7deb8c37d44053bd22dd223ad86a7daf7af24086fe05777785",
+    "buildId": "3a6f04d23930b73d0a177c3f1883432f32660c454367785fcb9ed8d553bccdbf",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:88b30e68b7958678d54540b34af945f9b9935e1a",
+        "id": "sha256:7a0796cce8a7fd477b2626058b4230ab2357c9d1b62605835c72a4a0677adac0",
+        "sizeBytes": 140748694,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:88b30e68b7958678d54540b34af945f9b9935e1a",
+        "id": "sha256:ec156de7f06cdd4ee718db4ddbca001405127fc0b7b323d1227f5b394fd152af",
+        "sizeBytes": 26068391,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "phases": [
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-25T17:11:36.728074+00:00",
+      "result": {
+        "dockerMemoryBytes": 8217145344,
+        "hostFreeDiskBytes": 182808637440,
+        "applicationImageUsers": [
+          "10001:10001",
+          "101:101"
+        ],
+        "maximumComposeMemoryBytes": 2617245696
+      },
+      "passed": true,
+      "seconds": 2.7527944580069743
+    },
+    {
+      "name": "INITIALIZE",
+      "startedAt": "2026-10-25T17:11:39.481316+00:00",
+      "result": {
+        "runtimeDdlRejected": true,
+        "groupsInitialized": 6,
+        "sourcesBound": 4
+      },
+      "passed": true,
+      "seconds": 11.004573791986331
+    },
+    {
+      "name": "BASELINE_IMAGE",
+      "startedAt": "2026-10-25T17:11:50.486607+00:00",
+      "result": {
+        "revision": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+        "buildId": "743738e17d4e59ccfed0f40ba4f297e0eb166e0295f3e0f70f23a19e19826f24",
+        "ready": true
+      },
+      "passed": true,
+      "seconds": 11.398996000003535
+    },
+    {
+      "name": "RUNTIME_BOUNDARIES",
+      "startedAt": "2026-10-25T17:12:01.886413+00:00",
+      "result": {
+        "api": {
+          "user": "10001:10001",
+          "readOnlyRoot": true,
+          "publishedPorts": [],
+          "networkCount": 2
+        },
+        "web": {
+          "user": "101:101",
+          "readOnlyRoot": true,
+          "publishedPorts": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "61770"
+            }
+          ],
+          "networkCount": 2
+        },
+        "postgres": {
+          "user": "",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        },
+        "kafka": {
+          "user": "appuser",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        }
+      },
+      "passed": true,
+      "seconds": 0.4067425419925712
+    },
+    {
+      "name": "SEED_BEFORE_BACKUP",
+      "startedAt": "2026-10-25T17:12:02.293633+00:00",
+      "result": {
+        "observationsAcknowledged": 1,
+        "synthetic": true,
+        "outboxCreated": 1,
+        "batch": 0,
+        "chatAcknowledged": 10
+      },
+      "passed": true,
+      "seconds": 1.6573939999798313
+    },
+    {
+      "name": "BASELINE_DATA",
+      "startedAt": "2026-10-25T17:12:03.951676+00:00",
+      "result": {
+        "processed_event": {
+          "sha256": "437c2ec20d2c832b3093f1cc5696db42a37cad511654a872d900a9182899de83",
+          "rows": 20
+        },
+        "chat_bucket_10s": {
+          "sha256": "8555a0f20e4ec806b98d169e9c843902c2c560f06b2afb2059e97474a47338a7",
+          "rows": 2
+        },
+        "broadcast_observation": {
+          "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+          "rows": 1
+        },
+        "category_event": {
+          "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+          "rows": 10
+        },
+        "category_bucket": {
+          "sha256": "15c9c73539a202b46644aca4aa127d3b47e9524ebdfa97e6b21906d1834685eb",
+          "rows": 1
+        },
+        "report_event": {
+          "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+          "rows": 10
+        },
+        "report_bucket": {
+          "sha256": "807a92aae160a89528ee0a8c54c4212fe9321979f9e72a712def023879632cd5",
+          "rows": 1
+        },
+        "report_observation": {
+          "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+          "rows": 1
+        },
+        "notification_event": {
+          "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438",
+          "rows": 1
+        },
+        "spike_event": {
+          "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438",
+          "rows": 1
+        },
+        "spike_outbox": {
+          "sha256": "4bd635bc32e8bf3c47b3b502873150bd5579fe72f856086431485e3acb4280f3",
+          "rows": 1
+        },
+        "rankingCount": 10,
+        "trendCount": 10,
+        "notificationCount": 1,
+        "pendingOutbox": 0
+      },
+      "passed": true,
+      "seconds": 0.9795985000091605
+    },
+    {
+      "name": "DATABASE_OUTAGE",
+      "startedAt": "2026-10-25T17:12:04.931908+00:00",
+      "result": {
+        "readinessDuringFault": 503,
+        "livenessDuringFault": 200,
+        "apiDuringFault": 503,
+        "readinessRecovered": 200
+      },
+      "passed": true,
+      "seconds": 8.517299625003943
+    },
+    {
+      "name": "BACKUP",
+      "startedAt": "2026-10-25T17:12:13.450262+00:00",
+      "result": {
+        "bytes": 79253,
+        "sha256": "cc210ac97b5697832103435ede97470362f19d08afa30232fcb90d2be2fc7567",
+        "chat": 10,
+        "pendingOutbox": 1
+      },
+      "passed": true,
+      "seconds": 3.2931988750060555
+    },
+    {
+      "name": "UPGRADE_IMAGE",
+      "startedAt": "2026-10-25T17:12:16.744092+00:00",
+      "result": {
+        "revision": "88b30e68b7958678d54540b34af945f9b9935e1a",
+        "buildId": "3a6f04d23930b73d0a177c3f1883432f32660c454367785fcb9ed8d553bccdbf",
+        "ready": true
+      },
+      "passed": true,
+      "seconds": 6.65089491699473
+    },
+    {
+      "name": "SEED_AFTER_BACKUP",
+      "startedAt": "2026-10-25T17:12:23.395791+00:00",
+      "result": {
+        "synthetic": true,
+        "observationsAcknowledged": 1,
+        "chatAcknowledged": 10,
+        "batch": 1,
+        "outboxCreated": 0
+      },
+      "passed": true,
+      "seconds": 1.411525834002532
+    },
+    {
+      "name": "BROWSER",
+      "startedAt": "2026-10-25T17:12:25.776337+00:00",
+      "result": {
+        "checks": [
+          {
+            "path": "/",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/explore",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/surges",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/saved",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/notifications",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/categories",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          },
+          {
+            "path": "/reports",
+            "status": 200,
+            "refresh": true,
+            "overflow": false
+          }
+        ],
+        "mobileOverflow": false,
+        "pageErrors": 0,
+        "revision": {
+          "revision": "88b30e68b7958678d54540b34af945f9b9935e1a"
+        }
+      },
+      "passed": true,
+      "seconds": 9.076568083022721
+    },
+    {
+      "name": "STOP_NEW_IMAGE",
+      "startedAt": "2026-10-25T17:12:34.854105+00:00",
+      "result": {
+        "seconds": 1.1440735420037527,
+        "exitCode": 143,
+        "oomKilled": false
+      },
+      "passed": true,
+      "seconds": 1.1440820000134408
+    },
+    {
+      "name": "ROLLBACK_IMAGE",
+      "startedAt": "2026-10-25T17:12:35.998819+00:00",
+      "result": {
+        "revision": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+        "buildId": "743738e17d4e59ccfed0f40ba4f297e0eb166e0295f3e0f70f23a19e19826f24",
+        "ready": true
+      },
+      "passed": true,
+      "seconds": 6.128388707991689
+    },
+    {
+      "name": "SCHEMA_FAILURE_ROLLBACK",
+      "startedAt": "2026-10-25T17:12:43.102219+00:00",
+      "result": {
+        "checksumMismatchStartRejected": true,
+        "automaticRepair": false,
+        "previousImageRecovered": true
+      },
+      "passed": true,
+      "seconds": 11.628729916992597
+    },
+    {
+      "name": "RESTORE_NEW_DATABASE",
+      "startedAt": "2026-10-25T17:12:54.732097+00:00",
+      "result": {
+        "startedAt": "2026-10-25T17:12:56.055788+00:00",
+        "secondsToVerifiedCatchup": 17.105119707994163,
+        "backupChatGap": 10,
+        "chatGapAfterRecovery": 0,
+        "businessSnapshotDifferences": [],
+        "newGroups": 6,
+        "oldGroupsModified": false,
+        "restoredIntoNewDatabase": true
+      },
+      "passed": true,
+      "seconds": 18.428650249989005
+    },
+    {
+      "name": "FINAL_GRACEFUL_STOP",
+      "startedAt": "2026-10-25T17:13:13.161902+00:00",
+      "result": {
+        "seconds": 1.3261085409903899,
+        "exitCode": 143,
+        "oomKilled": false
+      },
+      "passed": true,
+      "seconds": 1.3261167499877047
+    }
+  ],
+  "syntheticEventBase": "2026-10-25T17:11:02+00:00",
+  "backupSnapshot": {
+    "processed_event": {
+      "sha256": "437c2ec20d2c832b3093f1cc5696db42a37cad511654a872d900a9182899de83",
+      "rows": 20
+    },
+    "chat_bucket_10s": {
+      "sha256": "8555a0f20e4ec806b98d169e9c843902c2c560f06b2afb2059e97474a47338a7",
+      "rows": 2
+    },
+    "broadcast_observation": {
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+      "rows": 1
+    },
+    "category_event": {
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+      "rows": 10
+    },
+    "category_bucket": {
+      "sha256": "15c9c73539a202b46644aca4aa127d3b47e9524ebdfa97e6b21906d1834685eb",
+      "rows": 1
+    },
+    "report_event": {
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+      "rows": 10
+    },
+    "report_bucket": {
+      "sha256": "807a92aae160a89528ee0a8c54c4212fe9321979f9e72a712def023879632cd5",
+      "rows": 1
+    },
+    "report_observation": {
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+      "rows": 1
+    },
+    "notification_event": {
+      "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438",
+      "rows": 1
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "ac12e8d23f9f5787b5e65ff193d909375322699e08e998f8f881e118f60cfa48",
+      "rows": 2
+    },
+    "rankingCount": 10,
+    "trendCount": 10,
+    "notificationCount": 1,
+    "pendingOutbox": 1
+  },
+  "dumpSha256": "cc210ac97b5697832103435ede97470362f19d08afa30232fcb90d2be2fc7567",
+  "expectedSnapshot": {
+    "processed_event": {
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c",
+      "rows": 40
+    },
+    "chat_bucket_10s": {
+      "sha256": "8f5f63a521edb45a85c5e838ff581b563757d4367eb6c6d1fd3205e736fa55a2",
+      "rows": 4
+    },
+    "broadcast_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "category_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "category_bucket": {
+      "sha256": "10bc66a8975cbeec8b397a17bb6982db3b87ec873665bec8edeab2639fe17605",
+      "rows": 2
+    },
+    "report_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "report_bucket": {
+      "sha256": "6bf6817439057b6e76a36a39b6458e418e3813a6d4d9a5753e1ef64d74e9a343",
+      "rows": 2
+    },
+    "report_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "notification_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c",
+      "rows": 2
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "restoredPlanBefore": {
+    "partitions": [
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ],
+    "safeForStartup": false,
+    "recoverableFromRetainedLog": true,
+    "clusterId": "3LLdjDuMR4qQ1bIjhGfa0Q"
+  },
+  "restoredSnapshot": {
+    "processed_event": {
+      "rows": 40,
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c"
+    },
+    "chat_bucket_10s": {
+      "rows": 4,
+      "sha256": "8f5f63a521edb45a85c5e838ff581b563757d4367eb6c6d1fd3205e736fa55a2"
+    },
+    "broadcast_observation": {
+      "rows": 2,
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76"
+    },
+    "category_event": {
+      "rows": 20,
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0"
+    },
+    "category_bucket": {
+      "rows": 2,
+      "sha256": "10bc66a8975cbeec8b397a17bb6982db3b87ec873665bec8edeab2639fe17605"
+    },
+    "report_event": {
+      "rows": 20,
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0"
+    },
+    "report_bucket": {
+      "rows": 2,
+      "sha256": "6bf6817439057b6e76a36a39b6458e418e3813a6d4d9a5753e1ef64d74e9a343"
+    },
+    "report_observation": {
+      "rows": 2,
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76"
+    },
+    "notification_event": {
+      "rows": 2,
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2"
+    },
+    "spike_event": {
+      "rows": 2,
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2"
+    },
+    "spike_outbox": {
+      "rows": 2,
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c"
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "restoredPlanAfter": {
+    "clusterId": "3LLdjDuMR4qQ1bIjhGfa0Q",
+    "recoverableFromRetainedLog": true,
+    "safeForStartup": true,
+    "partitions": [
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 3,
+        "databaseNext": 3,
+        "committed": 3,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ]
+  },
+  "correct": true,
+  "cleanupComplete": true,
+  "finishedAt": "2026-10-25T17:13:16.077000+00:00"
+}

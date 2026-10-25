@@ -89,7 +89,7 @@ class Rehearsal:
         assert info['MemTotal']>=6*1024**3 and shutil.disk_usage(ROOT).free>=2*1024**3
         usage=0
         for line in self.command(['docker','stats','--no-stream','--format','{{.MemUsage}}']).stdout.splitlines():
-            match=re.match(r'([0-9.]+)([KMGT]?i?B) /',line)
+            match=re.match(r'([0-9.]+)([kKMGT]?i?B) /',line)
             if not match:raise RuntimeError('DOCKER_MEMORY_UNAVAILABLE')
             scale={'B':1,'kB':1000,'KB':1000,'KiB':1024,'MB':1000**2,'MiB':1024**2,'GB':1000**3,'GiB':1024**3,'TB':1000**4,'TiB':1024**4}[match[2]]
             usage+=float(match[1])*scale
@@ -102,6 +102,12 @@ class Rehearsal:
         self.ops('migrate');self.ops('bind-sources');self.ops('initialize-groups')
         denied=self.sql('CREATE TABLE runtime_must_not_create(id int)',user='app_runtime',check=False);assert denied.returncode!=0
         return {'runtimeDdlRejected':True,'groupsInitialized':6,'sourcesBound':4}
+    def collector_preflight(self):
+        status=self.compose('run','--rm','--no-deps','api','fleet','status')
+        state=json.loads(status.stdout.strip().splitlines()[-1]);assert state['assigned']==0
+        denied=self.compose('run','--rm','--no-deps','api','fleet','worker','1','10','/tmp/disabled.json',check=False)
+        assert denied.returncode!=0 and json.loads(denied.stdout.strip().splitlines()[-1])['error']=='FLEET_COMMAND_FAILED'
+        return {'statusReadWithRuntimeSecret':True,'assigned':0,'disabledWorkerRejected':True,'liveSourceCalls':0}
     def audit(self):
         services={}
         for service in ['api','web','postgres','kafka']:
@@ -152,7 +158,7 @@ class Rehearsal:
         return {'startedAt':started_at,'secondsToVerifiedCatchup':time.monotonic()-started,'backupChatGap':10,'chatGapAfterRecovery':0,'businessSnapshotDifferences':differences,'newGroups':prepared['groups'],'oldGroupsModified':False,'restoredIntoNewDatabase':True}
     def run(self):
         try:
-            self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit)
+            self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit);self.phase('COLLECTOR_CLI_PREFLIGHT',self.collector_preflight)
             self.event_base=(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(seconds=60)).replace(microsecond=0).isoformat()
             self.result['syntheticEventBase']=self.event_base
             self.phase('SEED_BEFORE_BACKUP',lambda:self.probe('seed','0',self.event_base));self.phase('BASELINE_DATA',lambda:self.snapshot(10,1));self.phase('DATABASE_OUTAGE',self.database_fault)

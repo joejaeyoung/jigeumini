@@ -36,7 +36,7 @@ public final class FleetCli {
         if(args[0].equals("worker")&&!"true".equals(env.get("FLEET_LIVE_ENABLED")))throw new IllegalArgumentException("FLEET_LIVE_DISABLED");
         String url=env.getOrDefault("PIPELINE_JDBC_URL","jdbc:postgresql://localhost:15432/chatpulse"),user=env.getOrDefault("PIPELINE_DB_USER","chatpulse"),password=io.chatpulse.operations.RuntimeEnvironment.secret(env.getOrDefault("PIPELINE_DB_PASSWORD","local-chatpulse"),env.getOrDefault("PIPELINE_DB_PASSWORD_FILE",""));
         if(args[0].equals("migrate")){try(var ds=PostgresSupport.openMigrated(url,user,password)){System.out.println("{\"migrated\":true}");return 0;}}
-        try(var ds=PostgresSupport.open(url,user,password,args[0].equals("status"))) {
+        try(var ds=args[0].equals("worker")&&"VALIDATE".equals(env.get("PIPELINE_SCHEMA_MODE"))?PostgresSupport.openValidated(url,user,password):PostgresSupport.open(url,user,password,args[0].equals("status"))) {
             var store=new CollectorLeases(ds);
             if(args[0].equals("status")){System.out.println(JSON.writeValueAsString(store.status()));return 0;}
             if(args[0].equals("apply")){store.apply(plan);System.out.println(JSON.writeValueAsString(store.status()));return 0;}
@@ -47,6 +47,7 @@ public final class FleetCli {
             var observations=new java.util.concurrent.atomic.AtomicReference<LeasedObservations>();
             var observationPublisher=new java.util.concurrent.atomic.AtomicReference<io.chatpulse.observations.ObservationPublisher>();
             var factory=KafkaSupport.producerFactory(bootstrap);var telemetry=new java.util.concurrent.atomic.AtomicReference<CollectionTelemetry>();
+            Runnable closeRuntime=()->{if(observations.get()!=null)observations.get().close();if(observationPublisher.get()!=null)observationPublisher.get().close();if(telemetry.get()!=null)telemetry.get().close();factory.destroy();};
             try {
                 var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
                 try(var worker=new CollectorWorker(store,SelectionPolicy.SourceMode.UNOFFICIAL_POC,limits,new ChzzkHttpSource(),kafka,topic,(publisher,budget)->{
@@ -62,11 +63,10 @@ public final class FleetCli {
                             new io.chatpulse.metadata.ChzzkMetadataSource()::observe,observedPublisher);observations.set(observed);
                     return io.chatpulse.poc.CollectionObserver.combine(List.of(observer,observed));
                 })) {
-                    var written=new java.util.concurrent.atomic.AtomicBoolean();
-                    var report=worker.run(result->{if(written.compareAndSet(false,true))try{if(telemetry.get()!=null)telemetry.get().close();factory.destroy();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
+                    var report=worker.run(result->{try{closeRuntime.run();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
                     System.out.println(JSON.writeValueAsString(Map.of("complete",report.get("complete"),"workerId",report.get("workerId"))));return Boolean.TRUE.equals(report.get("complete"))?0:2;
                 }
-            } finally {if(observations.get()!=null)observations.get().close();if(observationPublisher.get()!=null)observationPublisher.get().close();if(telemetry.get()!=null)telemetry.get().close();factory.destroy();}
+            } finally {closeRuntime.run();}
         }
     }
 }

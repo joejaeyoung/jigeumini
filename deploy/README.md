@@ -31,6 +31,10 @@ Dockerfile의 Java/NGINX base는 digest로 고정했다. 빌드 manifest는 로�
 
 전체 원천 입력이 없으면 복원할 수 없다. 과거 데이터만 복원한 DB를 기존 최신 group과 바로 기동하지 않는다. outbox의 ACK/DB 완료 사이 중복은 알림의 멱등 consumer가 처리한다.
 
+## 운영 구성·용량·검증
+
+[배포·용량·복구 운영안](../docs/DEPLOYMENT_OPERATIONS.md)에 초기/HA/관리형 후보, 역할별 자원 상한·비용 입력식, 경보/확대 중단 조건과 실제 복구 시간의 범위를 기록했다. 수집기는 동일 서버 이미지의 fleet 진입점을 사용하며 공개 원천 호출은 기본 비활성이다. 배포 worker도 schema VALIDATE를 사용하고 SIGTERM 결과 저장 전에 관측/telemetry/producer를 정리한다.
+
 ## 공식 근거
 
 2026-10-26 조회. [Docker secrets](https://docs.docker.com/compose/how-tos/use-secrets/)의 서비스별 파일 mount, [Flyway validate](https://documentation.red-gate.com/flyway/reference/commands/validate)의 migration 일치 검사, [PostgreSQL pg_dump](https://www.postgresql.org/docs/16/app-pgdump.html)의 논리 백업과 일관 snapshot, [NGINX 비특권 이미지](https://github.com/nginx/docker-nginx-unprivileged)의 실행 경로를 확인했다. 복원 DB의 Kafka 위치 검사는 이 프로젝트의 추가 계약이다. 운영 후보·비용 산정 입력은 [조사](../docs/research/KAFKA_DEPLOYMENT.md)를 따른다.

@@ -19,11 +19,13 @@ public final class LeasedObservations implements CollectionObserver,AutoCloseabl
     @Override public synchronized void start(String channel) {
         if(closed||active.containsKey(channel))return;if(active.size()>=20)throw new IllegalStateException("OBSERVATION_CAPACITY");
         budget.authorize(channel).check();
-        var collector=new ObservationCollector(List.of(channel),run,interval,ttl,id->{
-            var permit=budget.authorize(id);budget.reserveFor(id);var data=source.apply(id);permit.check();return data;
-        },event->{budget.authorize(event.channelId()).check();publisher.accept(event);});
+        var collector=new ObservationCollector(List.of(channel),run,interval,ttl,this::observe,this::publish);
         active.put(channel,collector);collector.start(channel);collector.start();
     }
+    PublicBroadcastObservation observe(String channel) {
+        var permit=budget.authorize(channel);budget.reserveFor(channel);var data=source.apply(channel);permit.check();return data;
+    }
+    void publish(BroadcastObserved event){budget.authorize(event.channelId()).check();publisher.accept(event);}
     @Override public void stopped(String channel) {ObservationCollector collector;synchronized(this){collector=active.remove(channel);}if(collector!=null){collector.stopped(channel);collector.close();}}
     @Override public void close(){List<String> channels;synchronized(this){closed=true;channels=List.copyOf(active.keySet());}channels.forEach(this::stopped);}
 }

@@ -1,0 +1,47 @@
+{
+  "issue": 30,
+  "feature": "F16",
+  "technicalGoals": [
+    "T04",
+    "T08",
+    "T16"
+  ],
+  "dateKst": "2026-10-26",
+  "command": "./scripts/deploy-rehearsal work/images-baseline.json work/images-candidate.json work/deploy-first",
+  "runs": [
+    {
+      "file": "first.json",
+      "sha256": "f3f745e6fdd4b16be29450db026cb56935cc43e5683ed63fafa7e8f2bf8a08a8",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "88b30e68b7958678d54540b34af945f9b9935e1a",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 16
+    }
+  ],
+  "observedRecovery": {
+    "startedAt": "2026-10-25T17:12:56.055788+00:00",
+    "secondsToVerifiedCatchup": 17.105119707994163,
+    "backupChatGap": 10,
+    "chatGapAfterRecovery": 0,
+    "businessSnapshotDifferences": [],
+    "newGroups": 6,
+    "oldGroupsModified": false,
+    "restoredIntoNewDatabase": true
+  },
+  "limitations": [
+    "Single host RF1 synthetic fixture; not external deployment or AZ failover",
+    "No original source gap recovery; zero fixture difference only while source Kafka retained",
+    "RTO begins after old API stop and excludes outage detection, provisioning and operator time",
+    "Both image versions use V12 schema; checksum failure is not a destructive forward migration rollback",
+    "Synthetic pending outbox injected directly; not a full live spike detection experiment",
+    "Secret files and database dump retained only in ignored local work directory, not evidence"
+  ],
+  "initialIntegrationFailure": {
+    "cases": 4,
+    "reason": "Admin default.api.timeout.ms below request.timeout.ms; setup failed",
+    "ownedSchemasCleaned": 4,
+    "ownedTopicsCleaned": 16,
+    "cleanupEvidence": "local work/deployment-initial-cleanup.json"
+  }
+}

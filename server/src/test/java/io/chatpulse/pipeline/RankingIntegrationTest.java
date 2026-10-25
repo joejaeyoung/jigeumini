@@ -61,7 +61,39 @@ class RankingIntegrationTest {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM ranking_snapshot",Long.class)).isEqualTo(2);
         var activity=store.activity(a,t.minusSeconds(60),t);
         assertThat(activity.points().getFirst().count()).isEqualTo(105); // 지연 입력은 추이만 보정한다.
+        for (int seconds : List.of(1800,3600)) {
+            var dense=store.activity(a,t.minusSeconds(seconds),t).points();
+            assertThat(dense).hasSize(seconds/60);
+            for (int i=0;i<dense.size();i++) {
+                assertThat(dense.get(i).from()).isEqualTo(t.minusSeconds(seconds).plusSeconds(i*60L).toString());
+                assertThat(dense.get(i).to()).isEqualTo(t.minusSeconds(seconds).plusSeconds((i+1)*60L).toString());
+            }
+        }
         clock.now=t.plusSeconds(21);assertThat(store.rankings(60,20).status()).isEqualTo("STALE");
+    }
+    @Test void windowEndRequiresDrainedBufferAndCaughtUpSampleAfterBufferObservation() {
+        healthy(a);healthy(b);healthy(c);
+        clock.now=t.plusSeconds(1);
+        jdbc.update("UPDATE projection_observation SET last_caught_up_at=?",ts(t.minusSeconds(8)));
+        store.evaluate(t);
+        assertThat(store.rankings(60,20).entries()).isEmpty();
+        assertThat(store.rankings(60,20).excludedChannels()).allMatch(e -> e.count()==null && e.reasons().contains("ANALYSIS_LAG"));
+        assertThat(jdbc.queryForObject("SELECT sum(consecutive_hits) FROM channel_alert_state",Long.class)).isZero();
+        // 다음 창: 1) 아직 ACK되지 않은 창 이전 입력 2) 창 이전 버퍼 표본 3) 버퍼 표본보다 오래된 Kafka 표본.
+        clock.now=t.plusSeconds(11);healthy(a);healthy(b);healthy(c);
+        jdbc.update("UPDATE collector_channel_buffer SET oldest_unacked_at=? WHERE channel_id=?",ts(t.plusSeconds(9)),a);
+        jdbc.update("UPDATE collector_channel_buffer SET observed_at=? WHERE channel_id=?",ts(t.plusSeconds(9)),b);
+        jdbc.update("UPDATE projection_observation SET last_caught_up_at=?",ts(t.plusSeconds(10)));
+        store.evaluate(t.plusSeconds(10));
+        var excluded=store.rankings(60,20).excludedChannels();
+        assertThat(excluded).hasSize(3);
+        assertThat(excluded.stream().filter(e -> e.channelId().equals(a)).findFirst().orElseThrow().reasons()).contains("BUFFER_LAG");
+        assertThat(excluded.stream().filter(e -> e.channelId().equals(b)).findFirst().orElseThrow().reasons()).contains("BUFFER_UNKNOWN");
+        assertThat(excluded.stream().filter(e -> e.channelId().equals(c)).findFirst().orElseThrow().reasons()).contains("ANALYSIS_LAG");
+        clock.now=t.plusSeconds(21);healthy(a);healthy(b);healthy(c);
+        jdbc.update("UPDATE collector_channel_buffer SET oldest_unacked_at=NULL");
+        store.evaluate(t.plusSeconds(20));
+        assertThat(store.rankings(60,20).entries()).hasSize(3);
     }
     @Test void knownLossLowCoverageWarmupAndLagAreExcluded() {
         healthy(a);healthy(b);healthy(c);
@@ -76,7 +108,7 @@ class RankingIntegrationTest {
         healthy(a);bucket("ranking-trend",a,t.minusSeconds(300),250);bucket("ranking-trend",a,t.minusSeconds(50),100);
         bucket("ranking",a,t.minusSeconds(50),1);
         store.evaluate(t);assertThat(store.spikes(t.plusSeconds(1),new UUID(-1,-1),20).events()).isEmpty();
-        clock.now=t.plusSeconds(10);store.evaluate(clock.now);
+        clock.now=t.plusSeconds(10);healthy(a);store.evaluate(clock.now);
         var alert=store.spikes(clock.now.plusSeconds(1),new UUID(-1,-1),20).events().getFirst();
         assertThat(alert.count()).isEqualTo(100);assertThat(alert.baseline()).isEqualByComparingTo("50");assertThat(alert.ratio()).isEqualByComparingTo("2");assertThat(alert.valid()).isTrue();
         store.evaluate(clock.now);assertThat(jdbc.queryForObject("SELECT count(*) FROM spike_event",Long.class)).isEqualTo(1);

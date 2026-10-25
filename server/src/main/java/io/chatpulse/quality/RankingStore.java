@@ -77,14 +77,19 @@ public final class RankingStore {
         boolean sourceFresh = live.stream().anyMatch(s -> fresh(s.get(0),15,now) && fresh(s.get(1),30,now));
         var buffers = jdbc.query("SELECT observed_at,oldest_unacked_at FROM collector_channel_buffer WHERE channel_id=? AND collector_id=?",
                 (rs,n) -> new Instant[]{instant(rs,1),instant(rs,2)},c.id,c.collector);
-        boolean bufferFresh = !buffers.isEmpty() && fresh(buffers.getFirst()[0],15,now);
-        boolean bufferLag = bufferFresh && buffers.getFirst()[1] != null && now.isAfter(buffers.getFirst()[1].plusSeconds(10));
+        boolean bufferFresh = !buffers.isEmpty() && fresh(buffers.getFirst()[0],15,now)
+                && !buffers.getFirst()[0].isBefore(to);
+        boolean bufferLag = bufferFresh && buffers.getFirst()[1] != null && (buffers.getFirst()[1].isBefore(to) || now.isAfter(buffers.getFirst()[1].plusSeconds(10)));
         int partition = Utils.toPositive(Utils.murmur2(c.id.getBytes(java.nio.charset.StandardCharsets.UTF_8))) % 3;
         var observations = jdbc.query("SELECT observed_at,last_caught_up_at,poll_heartbeat_at,blocked FROM projection_observation WHERE projection=? AND run_id=? AND topic=? AND partition=?",
                 (rs,n) -> new Observation(instant(rs,1),instant(rs,2),instant(rs,3),rs.getBoolean(4)),projection,run,topic,partition);
         var observation = observations.isEmpty() ? null : observations.getFirst();
         boolean known = observation != null && fresh(observation.observed,15,now) && fresh(observation.poll,15,now);
-        boolean analysisFresh = known && observation.caught != null && !now.isAfter(observation.caught.plusSeconds(10));
+        // 창 끝 이후 수집 버퍼를 관측한 시점까지의 broker 표본이 DB에 반영돼야 한다.
+        // 버퍼 ACK 이후에 DB에 미반영된 이벤트를 오래된 caught-up 관측으로 정상 확정하지 않는다.
+        boolean analysisFresh = known && bufferFresh && observation.caught != null
+                && !observation.caught.isBefore(buffers.getFirst()[0])
+                && !now.isAfter(observation.caught.plusSeconds(10));
         return new Health(QualityPolicy.evaluate(c.enabled,c.state,c.since,from,to,intervals,loss,fresh(c.updated,15,now),sourceFresh,
                 bufferFresh,bufferLag,known,analysisFresh,observation != null && observation.blocked),intervals,loss);
     }

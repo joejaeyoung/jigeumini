@@ -29,6 +29,11 @@
 
 ## 완료 구간과 순위
 
+평가 scheduler는 각 10초 경계의 1초 뒤에 고정 주기로 실행한다. 창 끝 T 이후의 버퍼 표본이 있어야 하며, 창 이전 receivedAt의 미확인 발행이 있으면 LAGGING이다. Kafka 처리 완료 표본은 그 버퍼 표본 시각 이상이어야 한다. 표본 시각은 broker RPC 요청 전에 기록한다. 이 조건이 확인되지 않으면 참고 건수만 남기고 순위·급상승에서 제외한다. 관측 주기와 consumer 지연 때문에 정상 연결도 보수적으로 제외될 수 있다.
+
+이는 관측한 입력의 처리 완료 조건이며 eventTime watermark나 원천 전체 입력의 완전성을 보장하지 않는다. 이후 도착하는 과거 eventTime 입력은 bucket·추이만 보정한다. 무한 지연 입력까지 불변 순위에 반영하려면 별도 watermark·정정 설계가 필요하다.
+
+
 10초 tick의 UTC 시각 T에서 `[T−60,T)`, `[T−300,T)`만 집계한다. 현재 진행 중인 10초 bucket은 포함하지 않는다. scheduler가 놓친 tick은 소급 생성하지 않는다.
 
 `REPEATABLE READ` 트랜잭션과 projection/run별 `pg_try_advisory_xact_lock`으로 header·entries·trend 상태를 저장한다. 동일 projection/run/window/T/algorithm의 unique 제약으로 중복 snapshot을 막는다. 채팅 건수가 없더라도 등록·정상 관측 조건을 통과한 채널은 0건으로 포함한다.

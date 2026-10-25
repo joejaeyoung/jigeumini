@@ -28,13 +28,14 @@ public final class ProjectionObserver implements AutoCloseable {
         if (poll.partitions().isEmpty()) return;
         var request = new HashMap<TopicPartition, OffsetSpec>();
         poll.partitions().forEach(tp -> request.put(tp, OffsetSpec.latest()));
+        Instant sampledAt = Instant.now(); // RPC 응답 시각을 표본 시각으로 쓰면 경계 이전 요청이 이후 표본으로 보인다.
         var ends = admin.listOffsets(request).all().get(4, TimeUnit.SECONDS);
         Instant now = Instant.now();
         samples.keySet().retainAll(poll.partitions());
         boolean blocked = !Boolean.TRUE.equals(consumer.status().get("running")) || !Set.of("RUNNING", "WAITING_FOR_EVENTS").contains(consumer.status().get("state"));
         for (var tp : poll.partitions()) {
             var history = samples.computeIfAbsent(tp, key -> new ArrayDeque<>());
-            history.addLast(new Sample(now, ends.get(tp).offset()));
+            history.addLast(new Sample(sampledAt, ends.get(tp).offset()));
             while (history.size() > 3) history.removeFirst();
             long resolved = jdbc.queryForObject("SELECT coalesce(max(next_resolved_offset),-1) FROM projection_progress WHERE projection=? AND run_id=? AND topic=? AND partition=?",
                     Long.class, projection, run, tp.topic(), tp.partition());

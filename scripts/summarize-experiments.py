@@ -23,7 +23,11 @@ def summarize(path):
            'correct': data['correct'], 'cleanupComplete': data.get('cleanupComplete')}
     row['measurementIssueCodes'] = sorted({event['code'] for event in data.get('events', [])
                                           if event['code'] == 'RESOURCE_OR_SAMPLE_FAILED' or event['code'].endswith('_EXPERIMENT_FAILED')})
-    row['verificationComplete'] = bool(data['correct'] and data.get('cleanupComplete') and not row['measurementIssueCodes'])
+    row['cleanupIssueCodes'] = (['UNTRACKED_IMAGE_VOLUMES'] if data.get('profile') == 'broker-fault'
+                                and data.get('cleanupEvidenceScope') != 'CONTAINER_AND_LABELLED_DATA_VOLUME' else [])
+    row['cleanupEvidenceScope'] = data.get('cleanupEvidenceScope')
+    row['verificationComplete'] = bool(data['correct'] and data.get('cleanupComplete')
+                                       and not row['measurementIssueCodes'] and not row['cleanupIssueCodes'])
     if data.get('profile') == 'broker-fault':
         return row | {'profile': 'broker-fault', 'cases': data['cases'], 'scope': data['scope']}
     profile = data['profile']
@@ -94,7 +98,7 @@ def main():
     labels = {'TARGET_INPUT_COMPLETED': '목표 완료', 'TARGET_INPUT_NOT_COMPLETED': '목표 미달', 'RECONCILIATION_FAILED': '대조 실패', 'EXPERIMENT_FAILED': '실험 실패', 'CLEANUP_FAILED': '정리 실패', 'RECONCILED': '대조 완료'}
     for row in rows:
         if row['profile'] == 'broker-fault':
-            table.append([row['file'], labels.get(row['outcome'], row['outcome'])] + ['—'] * (len(header)-2))
+            table.append([row['file'], ('정리 확인 필요' if row['correct'] and row['cleanupIssueCodes'] else labels.get(row['outcome'], row['outcome']))] + ['—'] * (len(header)-2))
             continue
         latency = row.get('metricsA', {}).get('receivedToDbMillis', {})
         db_a, db_b = row.get('databaseA') or {}, row.get('databaseB') or {}
@@ -107,6 +111,7 @@ def main():
     notes = [
         '단일 로컬 broker·RF1·공유 PostgreSQL의 합성 실험이다. 공개 플랫폼에 부하를 주지 않았다.',
         '목표 입력 완료, 수락/ACK/거절/미확인 보존, DB 정합성, 자원 정리를 각각 판정한다. 실패도 결과에 포함한다.',
+        '과거 broker-fault의 cleanupComplete는 컨테이너 제거만 확인했다. 이미지 익명 볼륨의 삭제 근거는 없으며 소유권 없는 잔여 볼륨을 임의 삭제하지 않는다.',
         '이전 하네스는 입력 종료 후 계측 실패를 correct에 반영하지 못했다. 해당 원본을 보존하고 계측 확인 필요로 별도 판정한다.',
         '지연은 receivedAt부터 실제 DB commit 뒤 계측 시각까지다. heartbeat 실험의 A 지연은 부모 JVM 표본만 포함한다.',
         '입력률/commit률은 표본 차분이다. Kafka·DB 조회는 원자적 snapshot이 아니며 표본 간 비용과 오차가 있다.',
@@ -115,7 +120,7 @@ def main():
         '균등 채널이 균등 partition을 뜻하지 않는다. 3 partitions에서 4번째 consumer의 유휴 할당을 실제 표본으로 확인한다.',
         '복제 HA·외부 네트워크·다중 호스트·실방송·장기 디스크 보존·전체 제품 projection의 동시 비용은 검증하지 않았다.',
     ]
-    totals = f"전체 {len(rows)}회 · 원본 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 대조 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회 · 계측 확인 필요 {sum(bool(r['measurementIssueCodes']) for r in rows)}회"
+    totals = f"전체 {len(rows)}회 · 원본 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 대조 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회 · 계측 확인 필요 {sum(bool(r['measurementIssueCodes']) for r in rows)}회 · 볼륨 정리 근거 없음 {sum(bool(r['cleanupIssueCodes']) for r in rows)}회"
     markdown = '# 지금이니 합성 부하·복구 실험\n\n' + totals + '\n\n' + '\n'.join('- '+n for n in notes) + '\n\n'
     markdown += '| '+' | '.join(header)+' |\n|'+ '|'.join(['---']*len(header))+'|\n'
     markdown += '\n'.join('| '+' | '.join(line)+' |' for line in table)+'\n\n'

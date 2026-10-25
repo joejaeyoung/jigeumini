@@ -1,0 +1,269 @@
+{
+  "liveUnchanged": {
+    "alertState": true,
+    "ledgerAndBuckets": true,
+    "groupOffsets": true,
+    "snapshots": true,
+    "spikes": true
+  },
+  "manifest": {
+    "formatVersion": 1,
+    "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774",
+    "topicId": "Dg1qGcl0TWiZJF9MVuTFZg",
+    "partitions": [
+      {
+        "partition": 0,
+        "start": 0,
+        "end": 3
+      },
+      {
+        "partition": 1,
+        "start": 0,
+        "end": 2
+      },
+      {
+        "partition": 2,
+        "start": 0,
+        "end": 0
+      }
+    ],
+    "eventFrom": "2026-10-25T09:00:34Z",
+    "eventTo": "2026-10-25T09:01:34Z",
+    "schemaVersion": 1,
+    "algorithmVersion": "bucket-10s-v1",
+    "capturedAt": "2026-10-25T09:01:34.926130Z"
+  },
+  "firstRun": {
+    "runId": "fa0ef2ea-7a59-48ee-a002-2f932093ca71",
+    "state": "COMPLETED",
+    "manifest": {
+      "formatVersion": 1,
+      "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774",
+      "topicId": "Dg1qGcl0TWiZJF9MVuTFZg",
+      "partitions": [
+        {
+          "partition": 0,
+          "start": 0,
+          "end": 3
+        },
+        {
+          "partition": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "partition": 2,
+          "start": 0,
+          "end": 0
+        }
+      ],
+      "eventFrom": "2026-10-25T09:00:34Z",
+      "eventTo": "2026-10-25T09:01:34Z",
+      "schemaVersion": 1,
+      "algorithmVersion": "bucket-10s-v1",
+      "capturedAt": "2026-10-25T09:01:34.926130Z"
+    },
+    "consumerGroup": "replay-fa0ef2ea-7a59-48ee-a002-2f932093ca71",
+    "projection": "replay",
+    "metrics": {
+      "read_count": 5,
+      "filtered_count": 1,
+      "unique_count": 3,
+      "duplicate_count": 1,
+      "error_count": 0,
+      "reason": null,
+      "cancel_requested": false,
+      "created_at": "2026-10-25T09:01:34.985Z",
+      "started_at": "2026-10-25T09:01:35.014Z",
+      "heartbeat_at": "2026-10-25T09:01:35.058Z",
+      "finished_at": "2026-10-25T09:01:35.058Z"
+    },
+    "totals": {
+      "processedEvents": 3,
+      "bucketTotal": 3,
+      "runId": "fa0ef2ea-7a59-48ee-a002-2f932093ca71",
+      "projection": "replay"
+    },
+    "progress": [
+      {
+        "partition": 0,
+        "checkedAt": "2026-10-25T09:01:35.043450Z",
+        "nextResolvedOffset": 3,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      },
+      {
+        "partition": 1,
+        "checkedAt": "2026-10-25T09:01:35.043450Z",
+        "nextResolvedOffset": 2,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      },
+      {
+        "partition": 2,
+        "checkedAt": "2026-10-25T09:01:35.043450Z",
+        "nextResolvedOffset": 0,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      }
+    ],
+    "limitations": [
+      "RETAINED_OFFSETS_ONLY",
+      "NO_FUTURE_LATE_INPUT",
+      "NO_LIVE_SNAPSHOT_OR_ALERT_REPLAY",
+      "DUPLICATES_COUNTED_WITHIN_TIME_FILTER"
+    ]
+  },
+  "secondRun": {
+    "runId": "b1d6699c-aee4-454b-b444-a224e327e0e7",
+    "state": "COMPLETED",
+    "manifest": {
+      "formatVersion": 1,
+      "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774",
+      "topicId": "Dg1qGcl0TWiZJF9MVuTFZg",
+      "partitions": [
+        {
+          "partition": 0,
+          "start": 0,
+          "end": 3
+        },
+        {
+          "partition": 1,
+          "start": 0,
+          "end": 2
+        },
+        {
+          "partition": 2,
+          "start": 0,
+          "end": 0
+        }
+      ],
+      "eventFrom": "2026-10-25T09:00:34Z",
+      "eventTo": "2026-10-25T09:01:34Z",
+      "schemaVersion": 1,
+      "algorithmVersion": "bucket-10s-v1",
+      "capturedAt": "2026-10-25T09:01:34.926130Z"
+    },
+    "consumerGroup": "replay-b1d6699c-aee4-454b-b444-a224e327e0e7",
+    "projection": "replay",
+    "metrics": {
+      "read_count": 5,
+      "filtered_count": 1,
+      "unique_count": 3,
+      "duplicate_count": 1,
+      "error_count": 0,
+      "reason": null,
+      "cancel_requested": false,
+      "created_at": "2026-10-25T09:01:35.144Z",
+      "started_at": "2026-10-25T09:01:35.160Z",
+      "heartbeat_at": "2026-10-25T09:01:35.228Z",
+      "finished_at": "2026-10-25T09:01:35.228Z"
+    },
+    "totals": {
+      "processedEvents": 3,
+      "bucketTotal": 3,
+      "runId": "b1d6699c-aee4-454b-b444-a224e327e0e7",
+      "projection": "replay"
+    },
+    "progress": [
+      {
+        "partition": 0,
+        "checkedAt": "2026-10-25T09:01:35.201491Z",
+        "nextResolvedOffset": 3,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      },
+      {
+        "partition": 1,
+        "checkedAt": "2026-10-25T09:01:35.201491Z",
+        "nextResolvedOffset": 2,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      },
+      {
+        "partition": 2,
+        "checkedAt": "2026-10-25T09:01:35.201491Z",
+        "nextResolvedOffset": 0,
+        "topic": "it.replay.cc95341e-ea16-44de-bf7c-e575cf089774"
+      }
+    ],
+    "limitations": [
+      "RETAINED_OFFSETS_ONLY",
+      "NO_FUTURE_LATE_INPUT",
+      "NO_LIVE_SNAPSHOT_OR_ALERT_REPLAY",
+      "DUPLICATES_COUNTED_WITHIN_TIME_FILTER"
+    ]
+  },
+  "comparison": {
+    "comparable": true,
+    "leftRun": "fa0ef2ea-7a59-48ee-a002-2f932093ca71",
+    "rightRun": "b1d6699c-aee4-454b-b444-a224e327e0e7",
+    "summary": {
+      "matched_buckets": 3,
+      "mismatched_buckets": 0,
+      "left_total": 3,
+      "right_total": 3
+    },
+    "equal": true,
+    "differences": [],
+    "differenceLimit": 100,
+    "leftMetrics": {
+      "read_count": 5,
+      "filtered_count": 1,
+      "unique_count": 3,
+      "duplicate_count": 1,
+      "error_count": 0,
+      "reason": null,
+      "cancel_requested": false,
+      "created_at": "2026-10-25T09:01:34.985Z",
+      "started_at": "2026-10-25T09:01:35.014Z",
+      "heartbeat_at": "2026-10-25T09:01:35.058Z",
+      "finished_at": "2026-10-25T09:01:35.058Z"
+    },
+    "rightMetrics": {
+      "read_count": 5,
+      "filtered_count": 1,
+      "unique_count": 3,
+      "duplicate_count": 1,
+      "error_count": 0,
+      "reason": null,
+      "cancel_requested": false,
+      "created_at": "2026-10-25T09:01:35.144Z",
+      "started_at": "2026-10-25T09:01:35.160Z",
+      "heartbeat_at": "2026-10-25T09:01:35.228Z",
+      "finished_at": "2026-10-25T09:01:35.228Z"
+    }
+  },
+  "verification": {
+    "date": "2026-10-25",
+    "implementationCommit": "577f1f62d5445bb81c15dcd55d339f2a5d26057a",
+    "jarSha256": "d26cf0050bd005048dea58ced437fff6b4df4c516ce7526ea7e6272834291bed",
+    "environment": {
+      "java": 21,
+      "kafka": "4.1.2",
+      "postgres": "16.14",
+      "brokerCount": 1,
+      "input": "synthetic"
+    },
+    "commands": [
+      "./scripts/check",
+      "./scripts/integration"
+    ],
+    "tests": {
+      "test": {
+        "tests": 55,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "integrationTest": {
+        "tests": 29,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "limits": [
+      "No new live chat collection",
+      "No HA/load/network partition validation",
+      "Only currently retained fixed offsets",
+      "No live ranking/alert re-evaluation",
+      "Worker death test ages heartbeat explicitly before watchdog; not a wall-clock recovery benchmark"
+    ]
+  }
+}

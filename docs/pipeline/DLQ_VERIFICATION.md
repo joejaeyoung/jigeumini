@@ -22,6 +22,19 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 | 실행 JAR | Spring analyzer의 양쪽 group·실제 HTTP 진단 응답·운영 HTML 제공 |
 | 브라우저 | 합성 운영 응답의 0/null lag, 오류 수, 보존 만료, 관측 불가와 HTTP 실패 시 이전 표본 표시 |
 
+## 실제 실행 결과
+
+[정제 근거](../poc/evidence/dlq-2026-10-25.json)에 구현 commit `4fd93c5`, 실행 JAR SHA-256, suite별 시각·건수와 장애 대조값을 기록했다.
+
+| 명령 | 결과 |
+|---|---|
+| `./scripts/check` | 서버 단위 58개·하네스 16개·JAR, 기술 목표/문서 링크 통과 |
+| `./scripts/integration` | 실제 Kafka/PostgreSQL 37개 통과: DLQ 7개, 기존 파이프라인 9개, 품질 11개, replay 10개 |
+| `./scripts/web check` | 타입·웹 단위 17개·제품 빌드 통과 |
+| `./scripts/web test:e2e` | Chromium 23개 통과, 운영 진단 사례 1개 포함 |
+
+서버 테스트 결과 파일에서 합성 원본 canary 표식이 남은 파일은 0개였다. 이는 해당 합성 경로의 출력 검사이며 모든 운영 입력의 전수 개인정보 감사는 아니다.
+
 ## 시험 설계에서 확인한 점
 
 최초 테스트 준비에서 Kafka Admin의 default.api.timeout.ms=10000에 기본 request.timeout.ms=30000이 충돌했다. 요청 timeout을 명시해 수정했다. 이 실패는 DLQ 처리 시험에 진입하기 전의 설정 오류였다.

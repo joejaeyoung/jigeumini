@@ -7,7 +7,7 @@
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
-| M3 장애·재처리 | #9·PR #15 병합 완료, #10 DLQ·소비 복구 진단 구현 중 | DLQ ACK/DB/offset 장애 검증·Claude 리뷰·CI, #16 replay 후속 보완 |
+| M3 장애·재처리 | #9·PR #15 병합 완료, #10 DLQ·소비 복구 진단 구현·로컬 검증 완료 | [PR #19](https://github.com/joejaeyoung/jigeumini/pull/19)의 승인·CI·병합 이력, #16 replay 후속 보완 |
 | M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
@@ -16,14 +16,18 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 ## 오류 격리·복구 진단 #10
 
-`feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. 영구 계약 오류만 안전한 DLQ로 격리하고 정상 이벤트·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DLQ ACK 실패와 DB 오류는 배치를 재시도한다. ranking/trend 양쪽에 적용하고 수집 불완전 품질·로컬 운영 진단을 연결한다. 실제 broker/DB 장애 시험 전이며 완료 판정은 검증 후 갱신한다.
+`feat/dlq-recovery` · F09 → T01/T03/T05/T08. `b58d084`의 origin/develop에서 시작했다. [격리·진단 계약](pipeline/DLQ.md)대로 ranking/trend의 영구 계약 오류만 격리하고, DLQ ACK 후 정상 ledger/bucket·격리 기록·진행 위치를 같은 DB 트랜잭션에 저장한다. DB commit 후 Kafka BATCH offset commit을 유지한다. 같은 배치의 eventId 충돌 후보는 모두 제외하고 기존 ledger는 보존한다.
 
-PR #18 push CI의 `describeConfigs` 단계 `UnknownTopicOrPartitionException`은 같은 HEAD 재실행에서 통과했으나 원인은 미확정이다. 이번 구현의 결과와 구분해 추적한다.
+[검증 기록](pipeline/DLQ_VERIFICATION.md)과 [정제 근거](poc/evidence/dlq-2026-10-25.json): 서버 단위 58개·하네스 16개·실제 Kafka/PostgreSQL 37개·웹 단위 17개·Chromium 23개, JAR/웹 빌드 통과. DLQ broker 거부/복구·ACK 직후 halt(93)·DB commit 직후 halt(94)·DB 장애·재전달·양쪽 projection·보존 만료·topic 재생성·실행 JAR HTTP를 확인했다. 격리 기록은 신규/기존 채널의 품질 제외와 과거 순위·급상승 정정에 반영하며 운영 API/화면은 0 lag·미관측·만료를 구분한다. 구현과 로컬 검증은 완료했으며 Claude 승인·최종 CI·병합 이력은 [PR #19](https://github.com/joejaeyoung/jigeumini/pull/19)에 기록한다.
+
+합성 입력·단일 broker/RF=1 범위다. broker 전체 중단·네트워크 단절·복제 HA·새 live·고부하는 미검증이다. 오류 수정 검증은 별도 replay만 허용하며 자동 재투입하지 않는다. #11의 부하/확장/장시간 회복과 #16 replay 보완은 남는다.
+
+시험 설계에서 RF=1/min.insync.replicas=2로는 Kafka 4.1.2의 유효 최소 ISR 제한 때문에 발행이 거부되지 않음을 확인했다. 이를 장애 근거로 계산하지 않고 DLQ max.message.bytes=64의 실제 broker 거부로 교체했다. PR #18 push CI의 `describeConfigs` 단계 `UnknownTopicOrPartitionException`은 같은 HEAD 재실행에서 통과했으나 원인은 미확정이며 이번 작업에서 근본 원인을 수정하지 않았다.
 
 ## 코드 구조 리팩토링
 
 2026-10-25 · `refactor/module-boundaries` · [이슈 #17](https://github.com/joejaeyoung/jigeumini/issues/17).
-[구조 검토와 결정](REFACTORING.md)에 전체 영역의 후보와 선택 이유를 기록했다. CollectionQuality 추출, PostgresSupport 초기화 통합, 웹 API 계약·HTTP 모듈 분리를 구현했다. Java 단위 55개·하네스 16개·실제 Kafka/PostgreSQL 29개·웹 단위 17개·Chromium 22개와 JAR/웹 빌드가 통과했다. [정제 근거](poc/evidence/refactor-2026-10-25.json)의 코드 commit·JAR hash로 실행 범위를 고정했다. 구현·로컬 검증은 완료했으며 Claude 리뷰·CI·병합 이력은 [PR #18](https://github.com/joejaeyoung/jigeumini/pull/18)에 기록한다.
+[구조 검토와 결정](REFACTORING.md)에 전체 영역의 후보와 선택 이유를 기록했다. CollectionQuality 추출, PostgresSupport 초기화 통합, 웹 API 계약·HTTP 모듈 분리를 구현했다. Java 단위 55개·하네스 16개·실제 Kafka/PostgreSQL 29개·웹 단위 17개·Chromium 22개와 JAR/웹 빌드가 통과했다. [정제 근거](poc/evidence/refactor-2026-10-25.json)의 코드 commit·JAR hash로 실행 범위를 고정했다. [PR #18](https://github.com/joejaeyoung/jigeumini/pull/18)은 Claude 승인·최종 CI 통과 후 `b58d084`로 develop에 병합됐으며 #17은 완료다.
 
 F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목표 상태를 새로 승격하지 않는다. 외부 API·SQL·transaction/offset 경계·품질/시간 기준·DB schema는 유지했다. 서버/CLI의 Hikari 한도·초기화와 웹 요청 timeout/취소·Zod 검증도 동일하다. 새 live·고부하·HA 검증은 수행하지 않았다. #16의 replay 정책 변경과 #10·#11은 별도 범위다.
 
@@ -40,14 +44,14 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 <!-- tech-status:start -->
 | 기술 ID | 상태 | 검증 근거 | 확인한 범위 | 남은 문제·다음 행동 |
 |---|---|---|---|---|
-| T01 | 부분 검증 | [M1 자동 검사](pipeline/VERIFICATION.md#자동-검사), [재처리 격리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | BATCH의 DB 성공 이후 커밋·DB 실패 시 진행 차단; replay는 Kafka commit 없이 별도 DB progress 사용 | F11에서 Auto/BATCH/MANUAL 비교, 직접 ACK와 컨테이너 커밋 구분 |
-| T02 | 부분 검증 | [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위), [재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영; replay 배치 내부/간 중복·충돌·SQL rollback | 신규 trend의 충돌·rollback 장애별 전용 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
-| T03 | 검증됨 | [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사), [replay worker 종료](pipeline/REPLAY_VERIFICATION.md) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건; replay commit 후 JVM 종료·watchdog 실패·새 run 재실행 | F07 outbox의 별도 장애 경계 검증; 모든 장애·고부하 복구로 확대 해석하지 않음 |
+| T01 | 부분 검증 | [DLQ ACK·commit 경계](pipeline/DLQ_VERIFICATION.md), [M1 자동 검사](pipeline/VERIFICATION.md#자동-검사), [재처리 격리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | BATCH의 DB 성공 이후 커밋·DB 실패 시 진행 차단; DLQ ACK 전 원본 offset 차단; replay는 Kafka commit 없이 별도 DB progress 사용 | F11에서 Auto/BATCH/MANUAL 비교, 직접 ACK와 컨테이너 커밋 구분 |
+| T02 | 부분 검증 | [DLQ 멱등·충돌](pipeline/DLQ_VERIFICATION.md), [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위), [재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영; replay 배치 내부/간 중복·충돌·SQL rollback | 신규 trend의 SQL rollback 전용 장애 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
+| T03 | 검증됨 | [DLQ ACK·DB commit 직후 종료](pipeline/DLQ_VERIFICATION.md), [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사), [replay worker 종료](pipeline/REPLAY_VERIFICATION.md) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건; replay commit 후 JVM 종료·watchdog 실패·새 run 재실행; DLQ ACK 후 halt(93)·DB commit 후 halt(94), 재전달 격리 1건·집계 2건 | F07 outbox의 별도 장애 경계 검증; 모든 장애·고부하 복구로 확대 해석하지 않음 |
 | T04 | 검증됨 | [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변 | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
-| T05 | 부분 검증 | [DB 오류·malformed 검사](pipeline/VERIFICATION.md#자동-검사) | DB 복구 재시도, 잘못된 입력의 offset 차단 | #10 DLQ·실패 분류·ACK 경계와 정상 입력 진행 검증 |
+| T05 | 검증됨 | [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 미착수 | — | channelId·3 partition 설정 구현, 키별 순서 실험 미실행 | #11 동일 키 분포·다중 producer·증설 영향 실험 |
 | T07 | 미착수 | — | hot key 분포·shard 비교 근거 없음 | #11 균등/80% 편향과 키 분산 후보 비용 비교 |
-| T08 | 부분 검증 | [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
+| T08 | 부분 검증 | [복구 진단](pipeline/DLQ_VERIFICATION.md), [M2 독립 소비·freshness](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 빈 poll·partition별 end offset과 따라잡음 관측, ranking 중지 중 trend 계속 처리; 두 group의 partition lag·첫 미처리 offset 시각·격리/만료 진단 | #11 consumer 1/2/3/4·입력률·처리율·DB 병목·회복 시간 비교 |
 | T09 | 미착수 | — | timeout 설정 구현, 제한별 장애 실험 미실행 | #11 poll 초과·heartbeat 단절·consumer 추가/종료를 각각 재현 |
 | T10 | 부분 검증 | [실수신 ACK·DB 대조](pipeline/VERIFICATION.md#실제-공개-방송) | RF=1, acks=all에서 ACK와 DB 반영 대조 | F11 ACK 수준·재시도 비교; ISR·복제 내구성은 미검증 |
 | T11 | 부분 검증 | [버퍼 상한](pipeline/VERIFICATION.md#자동-검사), [M2 품질 관측](api/QUALITY_RANKINGS.md#검증-범위), [구조 변경 회귀](REFACTORING.md#회귀-검증) | in-flight 포함 상한·실패 계수, 채널별 미확인 나이·손실의 품질 제외와 DB 기록 | #11 지연 ACK·단절·실제 메모리·동시 채널 공정성·종료 경계 검증 |

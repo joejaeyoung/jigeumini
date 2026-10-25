@@ -1,18 +1,22 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `feat/quality-rankings`
+2026-10-25 · 브랜치 `feat/kafka-replay`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
 | M0 익명 수집 PoC | 기술 검증 통과: 2채널 30분·재접속, 최종 JAR 스모크·자동 테스트 | 공개 서비스 이용 조건·장기 운영 범위는 별도 확인 |
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
-| M2 순위·급증 기능 | #2 메타데이터·#3 수집 품질 기반 순위/급상승과 웹 연결 구현 | PR 검토·병합, 실방송 장기 관측·운영 확대 |
-| M3 장애·재처리 | 미착수 | 독립 소비·DLQ·고정 offset replay |
+| M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
+| M3 장애·재처리 | #9 고정 offset replay CLI 구현·검증, DLQ 미착수 | #9 리뷰·병합, #10 DLQ·복구 진단 |
 | M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
 M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
+
+## 고정 offset 재처리 #9
+
+`feat/kafka-replay` · F08 → T01/T02/T03/T04. [재처리 계약](pipeline/REPLAY.md)의 로컬 CLI로 manifest 생성·작업 생성/조회/취소·worker·watchdog·결과 비교를 구현했다. 원본 topic을 만들거나 운영 group offset·집계·snapshot·알림을 수정하지 않는다. 실패 run은 자동 재개하지 않고 새 run으로 재실행한다. 검증 근거 정리와 PR 리뷰·병합은 진행 중이며 이슈 #9는 In Progress다.
 
 ## 기술 목표 추적표
 
@@ -54,16 +58,13 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 
 ## 수집 품질·순위·급상승 구현
 
-최종 지연 예산 보완: 서버 순위/급상승과 웹의 STALE 경계를 30초로 통일했다. scheduler는 실행 후 벽시계의 다음 경계+8초를 다시 예약하고, 예약 후 시계가 뒤로 움직이면 예정 경계를 다시 기다린다. 300ms/3초/5초 평가 비용과 ±2초 시계 보정에서 120회씩 연속 tick을 확인했다. 아래 고정 주기·20초 만료 기록은 이전 단계이며 이 조건으로 대체한다. 첫 위험 표본을 건너뛰고 안전한 다음 drain까지 Kafka가 따라잡아야 정상인 경우와 telemetry의 표본 기록·120초 정리도 검사했다. 최종 서버 단위 52개·하네스 16개·실제 Kafka/DB 통합 **19개**·웹 단위 17개·Chromium 22개·JAR/웹 빌드 통과. 관측 위상 검증은 주입한 시각·offset 상태를 실제 DB로 평가한 것이며 실시간 고부하 시험으로 해석하지 않는다.
+선행 [PR #4](https://github.com/joejaeyoung/jigeumini/pull/4) → [PR #12](https://github.com/joejaeyoung/jigeumini/pull/12) → [PR #13](https://github.com/joejaeyoung/jigeumini/pull/13)을 Claude CLI 승인·최신 CI 통과 후 develop에 병합했다. #1·#2·#3과 보드는 완료다. #14 하네스도 #13을 통해 통합됐다.
 
-최종 관측 주기 보완: 10초 경계+8초에 7초 유예를 적용한 창을 평가한다. collector 5초·observer 1초 주기와 V3의 2분 버퍼 표본 보존으로 창 뒤 첫 안전한 drain을 고정하고 소비가 따라잡는지 확인한다. 위상 0~4초·소비 지연 2초·연속 입력에서 15개 tick이 모두 HEALTHY이며 기대 합계와 일치하는 DB 타이밍 시뮬레이션을 추가했다. 느린 관측은 제외하는 조건을 유지했다. 서버 기본 검사·실제 Kafka/PostgreSQL 통합 **18개** 통과. 다중 호스트 시계·고부하 실측은 검증하지 않았다. 아래 1초 평가 주기는 이전 리뷰 보완 단계의 기록이며 이 8초 기준으로 대체한다.
+최종 리뷰 반영: 집계 미확인과 빈 응답 구분, 서버 기준 상세 조회, 배수 내림 표시, 창 뒤 첫 안전한 버퍼 표본과 Kafka 따라잡음 대조. collector 5초·observer 1초, 2분 버퍼 표본, 경계+8초 평가 및 벽시계 재예약, STALE 30초가 현재 계약이다. 단위 52개·하네스 16개·실제 Kafka/PostgreSQL 19개·웹 단위 17개·Chromium 22개와 빌드 통과. 15 tick의 주입한 관측 위상·집계 기대값과 120 tick의 0.3/3/5초 비용·±2초 시계 보정을 구분해 시험했다. 실제 고부하·큰 시계 이동·다중 호스트·새 실방송은 미검증이며 상세 계약은 [품질 문서](api/QUALITY_RANKINGS.md)를 따른다.
 
-추가 리뷰 보완: 창 종료 이후의 버퍼 관측, 창 이전 미확인 발행 없음, 버퍼 표본 시점 이후의 Kafka 따라잡음을 모두 요구한다. 창 이전 또는 버퍼보다 오래된 처리 표본으로 정상 순위를 확정하지 않는다. broker 표본 시각은 RPC 요청 전에 잡는다. 오래된 caught-up·미확인 발행·창 이전 버퍼 표본·회복을 실제 DB에서 검증했고, 실제 store의 30/60개 연속 추이 point도 확인했다. 서버 기본 검사와 실제 Kafka/PostgreSQL 통합 **17개** 통과. 원천 전체 수집 완전성이나 무한 eventTime 지연 입력을 보장하지 않으며 보수적 품질 제외가 발생할 수 있다.
+아래 구현·검증 항목은 최초 M2 구현 당시 기록이다. 당시 테스트 개수와 만료 기준은 위 최종 리뷰 반영으로 갱신됐다.
 
-리뷰 보완(2026-10-25): 선행 PR #4·#12의 집계 미확인 표시를 통합했다. 평가 시작을 10초 경계+1초에 맞추고 고정 주기로 실행해 평가 비용에 따른 누적 drift를 제거했다. 합성 300ms 실행 비용으로 120회 tick 연속성을 검증했다. 상세 조회는 서버 기준 상대 기간으로 바꿔 브라우저 시계와 분 경계 이동에 의한 400 오류를 제거했고 범위·point 연속성을 검사한다. 2.96배는 2.9배 청록으로 내려 표시한다. `./scripts/check` 서버 단위 52개·하네스 16개·JAR, 웹 단위 17개·빌드 및 e2e 22개 통과. `./scripts/integration` 실제 Kafka·PostgreSQL 16개도 통과했다. 실제 10초 초과 평가 지연은 STALE·공백으로 유지하며 과거 tick을 추측해 복원하지 않는다.
-
-
-2026-10-25 · [이슈 #3](https://github.com/joejaeyoung/jigeumini/issues/3) · 브랜치 `feat/quality-rankings`. [메타데이터 PR #12](https://github.com/joejaeyoung/jigeumini/pull/12)의 브랜치에서 분기해 변경을 분리했다. #2·#3만 구현하며 #5~#11은 이번 범위에 포함하지 않는다. 보드는 In Progress, 검토·병합은 남겨둔다.
+2026-10-25 · [이슈 #3](https://github.com/joejaeyoung/jigeumini/issues/3) · 브랜치 `feat/quality-rankings`. [메타데이터 PR #12](https://github.com/joejaeyoung/jigeumini/pull/12)의 브랜치에서 분기해 변경을 분리했다. #2·#3만 구현하며 #5~#11은 이번 범위에 포함하지 않는다. Claude 승인·CI 통과 후 develop 병합을 완료했다.
 
 - 기술 매핑: F03 → T02·T08·T11. 동일 eventId 중복을 ranking/trend 각각 1건으로 반영하고, ranking 중지 중 trend 처리·빈 partition freshness·미확인 버퍼 품질 제외를 검증했다. 신규 trend의 충돌/rollback 전용 장애 시험, consumer 수별 확장·실제 메모리·채널 공정성은 남아 있어 해당 목표 전체 완료로 판정하지 않는다.
 - 수집 관측: 프로토콜 승인·원천 frame/pong 생존·종료·손실을 메모리에 기록하고 5초마다 DB에 flush한다. 연결 합집합, collector/source heartbeat 만료, 발행 대기·in-flight 적체, invalid 메시지와 미확인 발행을 품질에 반영한다. 일반 PoC는 DB 없이 유지한다.

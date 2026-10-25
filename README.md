@@ -78,6 +78,28 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests # 추적
 `./scripts/check`는 로컬 자동 테스트, `./scripts/integration`은 실제 Docker Kafka·DB 통합 테스트를 실행한다.
 실행 스크립트는 JAR를 `work/runtime/`에 별도로 복사하므로 재빌드 중에도 실행 파일이 바뀌지 않는다.
 
+## 고정 Kafka 입력 재처리
+
+[이슈 #9 재처리 계약](docs/pipeline/REPLAY.md)은 로컬 CLI로 사용한다. 운영 group offset·순위·알림을 바꾸지 않고 UUID run에 10초 bucket만 만든다. 기존 Kafka/PostgreSQL 접속 환경 변수를 사용한다.
+
+```bash
+./scripts/infra up
+# 현재 보존된 전체 partition의 시작·끝 offset 고정. 파일은 새 경로여야 한다.
+./scripts/replay capture work/replay-input.json
+# eventTime 필터를 쓸 경우 두 UTC 시각을 함께 지정한다. offset 범위는 보존 로그 전체다.
+# ./scripts/replay capture work/replay-filtered.json 2026-10-25T00:00:00Z 2026-10-25T01:00:00Z
+./scripts/replay create work/replay-input.json
+# create JSON의 runId를 사용한다. worker는 대기 작업 하나를 처리하고 종료한다.
+./scripts/replay worker
+./scripts/replay status <runId>
+./scripts/replay cancel <runId>
+./scripts/replay reap
+# 동일 manifest로 create → worker를 다시 실행한 두 COMPLETED run만 비교한다.
+./scripts/replay compare <첫-runId> <두번째-runId>
+```
+
+표준 출력은 JSON이고 빌드 출력은 stderr다. 실패는 종료 코드 2와 고정 오류 코드로 알린다. 비교 불일치도 코드 2이며 결과의 `equal=false`와 bucket 차이를 확인한다. manifest의 끝 이후 입력과 이미 삭제된 입력은 포함하지 못한다. 실패·취소 run은 자동 재개하지 않으며 새 run으로 다시 실행한다. `status`/`reap`가 죽은 worker의 30초 heartbeat 만료를 확인한다. 자세한 종료 한도·부분 결과·비교 제한은 계약 문서를 따른다. `./scripts/integration`은 실행 JAR를 만들고 실제 Kafka/DB와 별도 JVM으로 이 경로를 검증한다.
+
 ## Kafka 없이 수신만 검사
 
 ```bash

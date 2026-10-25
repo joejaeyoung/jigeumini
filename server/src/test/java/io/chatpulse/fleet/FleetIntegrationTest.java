@@ -25,9 +25,10 @@ import static org.awaitility.Awaitility.await;
 @Tag("integration") @Timeout(120)
 class FleetIntegrationTest {
     private static final String CHANNEL="a".repeat(32),SECOND="b".repeat(32);private static final JsonMapper JSON=JsonMapper.builder().build();
-    private String schema,topic,group;private com.zaxxer.hikari.HikariDataSource root,ds;private JdbcTemplate jdbc;private CollectorLeases leases;
+    private String schema,topic,group,scenario;private com.zaxxer.hikari.HikariDataSource root,ds;private JdbcTemplate jdbc;private CollectorLeases leases;
     private final List<Process> children=new ArrayList<>();private final List<Path> reports=new ArrayList<>();private SyntheticServer source;
-    @BeforeEach void setup() throws Exception {
+    @BeforeEach void setup(TestInfo info) throws Exception {
+        scenario=info.getTestMethod().orElseThrow().getName();
         String id=UUID.randomUUID().toString().replace("-","");schema="fleet_"+id;topic="fleet.chat."+id;group="fleet-group-"+id;
         root=PostgresSupport.open("jdbc:postgresql://localhost:15432/chatpulse","chatpulse","local-chatpulse",false);new JdbcTemplate(root).execute("CREATE SCHEMA "+schema);
         ds=PostgresSupport.openMigrated(url(15432),"chatpulse","local-chatpulse");jdbc=new JdbcTemplate(ds);leases=new CollectorLeases(ds);
@@ -37,7 +38,7 @@ class FleetIntegrationTest {
         for(Process child:children)if(child.isAlive()){signal(child,"CONT");child.destroy();if(!child.waitFor(35,TimeUnit.SECONDS))child.destroyForcibly().waitFor();}
         if(source!=null)source.close();if(ds!=null)ds.close();
         if(root!=null){new JdbcTemplate(root).execute("DROP SCHEMA "+schema+" CASCADE");root.close();}
-        try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}
+        try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){if(admin.listTopics().names().get(10,TimeUnit.SECONDS).contains(topic))admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}
     }
     private String url(int port){return "jdbc:postgresql://localhost:"+port+"/chatpulse?currentSchema="+schema;}
     private void plan(List<String> channels){leases.apply(new FleetPlan("a".repeat(64),SourceMode.SYNTHETIC,channels.size(),channels.size(),channels,120));}
@@ -68,6 +69,7 @@ class FleetIntegrationTest {
         stop(first);stop(second);assertEquals(0,((Number)leases.status().get("assigned")).intValue());
         var third=start(15432,2);awaitConnected(2);stop(third);
         assertEquals(2L,jdbc.queryForObject("SELECT min(epoch) FROM collector_lease WHERE selected",Long.class));
+        for(Path report:reports){var value=JSON.readTree(Files.readString(report));assertTrue(value.path("complete").asBoolean());assertTrue(value.path("released").asBoolean());}
         assertReconciled();
     }
     @Test void stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver() throws Exception {
@@ -107,6 +109,8 @@ class FleetIntegrationTest {
         try(var consumer=new ProjectionConsumer(KafkaSupport.consumerFactory("localhost:19092",group,"earliest"),topic,store)){consumer.start();await().atMost(Duration.ofSeconds(20)).untilAsserted(()->assertEquals((long)brokerIds.size(),store.totals().get("bucketTotal")));}
         assertEquals(brokerIds,new HashSet<>(jdbc.query("SELECT event_id FROM processed_event WHERE projection='fleet-test'",(rs,n)->rs.getObject(1,UUID.class))));
         for(Path path:reports)assertFalse(Files.readString(path).contains("PRIVATE_CANARY"));
+        var evidence=new LinkedHashMap<String,Object>();evidence.put("scenario",scenario);evidence.put("recordedAt",Instant.now().toString());evidence.put("accepted",accepted);evidence.put("acknowledged",acked);evidence.put("unconfirmed",accepted-acked);evidence.put("brokerPhysical",physical);evidence.put("brokerUnique",brokerIds.size());evidence.put("databaseUnique",brokerIds.size());evidence.put("brokerDatabaseDifference",0);evidence.put("children",reports.stream().map(path->{try{return JSON.readValue(Files.readString(path),Map.class);}catch(Exception failure){throw new RuntimeException(failure);}}).toList());
+        Files.writeString(Path.of("build","fleet-evidence-"+scenario+".json"),JSON.writerWithDefaultPrettyPrinter().writeValueAsString(evidence)+"\n");
     }
     private static final class SyntheticServer extends WebSocketServer implements AutoCloseable {
         final CountDownLatch ready=new CountDownLatch(1);final ScheduledExecutorService sender=Executors.newSingleThreadScheduledExecutor();

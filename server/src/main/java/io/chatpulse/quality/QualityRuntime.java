@@ -12,11 +12,11 @@ public final class QualityRuntime implements AutoCloseable {
     private final RankingStore ranking;
     private final ScheduledExecutorService evaluator = Executors.newSingleThreadScheduledExecutor();
     public QualityRuntime(PipelineProperties p, JdbcTemplate jdbc, TransactionTemplate tx, ProjectionConsumer rankingConsumer,
-            RankingStore ranking, String trendReset) {
+            RankingStore ranking, String trendReset, KafkaTopicPolicy policy) {
         String trend = p.projection() + "-trend", group = p.group() + "-trend";
         if (trend.length()>40 || group.length()>100 || !java.util.Set.of("none","earliest").contains(trendReset)) throw new IllegalArgumentException("TREND_CONFIGURATION");
         var store = new ProjectionStore(jdbc,tx,new EventCodec(),trend,p.runId());
-        trendRecovery = new DeadLetterRecovery(p.bootstrapServers(),p.topic(),jdbc,trend,p.runId());
+        trendRecovery = new DeadLetterRecovery(p.bootstrapServers(),p.topic(),jdbc,trend,p.runId(),policy);
         trendConsumer = new ProjectionConsumer(KafkaSupport.consumerFactory(p.bootstrapServers(),group,trendReset),p.topic(),store,trendRecovery);
         rankingObserver = new ProjectionObserver(p.bootstrapServers(),jdbc,rankingConsumer,p.projection(),p.runId());
         trendObserver = new ProjectionObserver(p.bootstrapServers(),jdbc,trendConsumer,trend,p.runId());

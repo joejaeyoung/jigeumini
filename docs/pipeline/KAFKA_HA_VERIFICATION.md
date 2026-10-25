@@ -41,3 +41,7 @@
 LocalKafkaCluster가소유UUID·6개컨테이너·전용네트워크·명시적데이터볼륨을관리한다. 이미지의다른VOLUME두경로는tmpfs이며정리전소유자라벨을검사한다. 최종조회에서실험컨테이너/볼륨0개,기존chat-pulse와다른프로젝트는유지됐다. KafkaTopicPolicy는생성/검사불변식을모으고각기능이같은정책을전달한다. 장애실험코드는테스트소스에만있다.
 
 실제3AZ·호스트손실·디스크손상·장기부하·원천수집완전성은미검증이다. ACK0/1/커밋대조는#31,이미지배포/DB복원은#30이다. 최종단위/실제통합/Claude/CI/병합상태는[STATUS](../STATUS.md)에서관리한다.
+
+## 전체 Spring 분석기 후속 검증
+
+배포 연결 점검에서 trend DLQ가 LOCAL 기본 생성자를 쓰는 호출을 발견했다. QualityConfiguration→QualityRuntime에 HA 정책을 명시 전달하도록 수정하고, a68011e의 다섯 번째 실행에서 기존10단계와 전체 분석기 조립1단계가 모두 통과했다. `fifth.json`은 clean tree 실행이며 합성10건 ACK·ranking10·trend10, 채팅/DLQ/관측/알림4개 토픽의 실제 HA 정책을 확인했다. 원천 metadata는 비활성이다. 전체 Spring analyzer 기능 조립은 검증했으며 HTTP 컨테이너 배포 검증은 #30에서 진행한다. 이전 네 실행은 당시 범위를 그대로 보존한다.

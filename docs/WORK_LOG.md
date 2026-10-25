@@ -113,6 +113,12 @@
 
 - #29 최종01e943e의6노드10단계모두통과했다. mainACK171=broker171=DB171·이행20일치·소유컨테이너/볼륨0. controller과반손실시metadata쓰기실패와기존topic1ACK를구분했다. 실패3회·성공1회를함께보존하고리팩토링소유권/정책경계를문서화했다.
 
+### #29 전체 분석기 HA 정책 전달 보완
+
+- 배포 코드 연결 점검에서 QualityRuntime의 trend DLQ 생성자가 기본 LOCAL 정책을 쓰는 호출을 발견했다. 기존 네 topic 초기화 검사는 통과해도 실제 HA 분석기 조립은 RF3 DLQ를 LOCAL로 재검사해 거부할 수 있었다.
+- QualityConfiguration→QualityRuntime→DeadLetterRecovery에 같은 KafkaTopicPolicy를 전달하도록 수정했다. 6노드 하네스에 전체 Spring 분석기 기동, 합성10건 ranking/trend 각각 반영, 네 topic의 실제 HA 정책 대조를 추가한다. 초기 리뷰/기존 좁은 하네스가 놓친 범위를 숨기지 않는다.
+- 실행 결과에 dirty tree 여부도 추가한다. 원인 진단은 원문 stderr를 보관하지 않고 고정 단계/타입을 유지한다.
+
 ## 2026-10-26 · 배포·복구 #30 구현과 경계 점검
 
 - 이미지 commit/실제 ID·비밀 파일·비특권 앱·내부망·readiness·분리 migration과 runtime 계정을 구현했다. RuntimeEnvironment가 비밀/CLI 정책을, RecoveryPlan이 원천 identity/보존/DB 진행/Kafka offset 대조를 소유한다. 여섯 group의 복구는 새 namespace에만 설정하며 기존 group 변경을 금지한다.

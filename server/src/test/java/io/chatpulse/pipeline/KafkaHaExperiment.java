@@ -33,6 +33,7 @@ public final class KafkaHaExperiment {
         output=output.toAbsolutePath();Files.createDirectories(output.getParent());Files.createFile(output);
         var result=new LinkedHashMap<String,Object>();result.put("startedAt",Instant.now().toString());
         result.put("codeCommit",LocalKafkaCluster.command(List.of("git","rev-parse","HEAD"),Map.of(),Duration.ofSeconds(10)).strip());
+        result.put("workingTreeDirty",!LocalKafkaCluster.command(List.of("git","status","--porcelain"),Map.of(),Duration.ofSeconds(10)).isBlank());
         result.put("scope","LOCAL_SIX_NODES_RF3_MINISR2_ELR1_NO_AZ_OR_DISK_CORRUPTION_CLAIM");
         var session=new Session(output,result);result.put("cluster",session.cluster.identity());result.put("schema",session.schema);result.put("topic",session.topic);
         result.put("policy",KafkaTopicPolicy.ha());result.put("phases",session.phases);Files.writeString(output,JSON.writeValueAsString(result));
@@ -123,6 +124,24 @@ public final class KafkaHaExperiment {
                 admin.incrementalAlterConfigs(Map.of(config,updates)).all().get(10,TimeUnit.SECONDS);KafkaSupport.ensureTopic(cluster.bootstrap(),migrationTopic,KafkaTopicPolicy.ha());
                 require(original.equals(description(migrationTopic).topicId()));var after=publish(migrationTopic,10);require(after.get("acknowledged").equals(10L));drain(migrationTopic,"ha-migration");
                 var row=snapshot(migrationTopic,after);row.put("before",before);row.put("topicIdPreserved",true);row.put("haStartupRejectedBeforeMigration",true);return row;
+            });
+            measure("FULL_ANALYZER_HA_WIRING",()->{
+                String wiringTopic="ha.wiring."+id;
+                try(var context=new org.springframework.boot.builder.SpringApplicationBuilder(io.chatpulse.poc.PocApplication.class)
+                        .web(org.springframework.boot.WebApplicationType.NONE).run(
+                            "--spring.profiles.active=pipeline", "--spring.main.banner-mode=off", "--logging.level.root=OFF",
+                            "--pipeline.role=analyzer", "--pipeline.kafka.durability=HA",
+                            "--pipeline.bootstrap-servers="+cluster.bootstrap(), "--pipeline.topic="+wiringTopic,
+                            "--pipeline.jdbc-url=jdbc:postgresql://localhost:15432/chatpulse?currentSchema="+schema,
+                            "--pipeline.group=ha-wiring-"+id, "--pipeline.projection=ha-wiring", "--pipeline.run-id="+id,
+                            "--pipeline.offset-reset=earliest", "--observations.topic=ha.observations."+id,
+                            "--metadata.enabled=false")) {
+                    var delivery=publish(wiringTopic,10);require(delivery.get("acknowledged").equals(10L));
+                    until(30,()->jdbc.queryForObject("SELECT count(*) FROM processed_event WHERE run_id=? AND projection='ha-wiring'",Long.class,id)==10
+                            &&jdbc.queryForObject("SELECT count(*) FROM processed_event WHERE run_id=? AND projection='ha-wiring-trend'",Long.class,id)==10);
+                    for(String name:List.of(wiringTopic,wiringTopic+".dlq",wiringTopic+".spikes","ha.observations."+id))KafkaSupport.ensureTopic(cluster.bootstrap(),name,KafkaTopicPolicy.ha());
+                    return Map.of("acknowledged",10,"ranking",10,"trend",10,"policyVerifiedTopics",4,"metadataEnabled",false);
+                }
             });
             measure("FINAL_BROKER_AND_DATABASE_RECONCILIATION",()->{
                 for(var consumer:consumers)consumer.close();

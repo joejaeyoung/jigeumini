@@ -156,5 +156,35 @@
       "nanosecond test expectation normalized to microseconds"
     ],
     "scope": "synthetic local Kafka/PostgreSQL; no live; web unchanged"
+  },
+  "finalCi": {
+    "implementationCommit": "e1980f67dd7f58c135868a8b8b957906fa5f9783",
+    "mergeCommit": "a69760ab9d4751a15f0c2c40db40a101b3382d0a",
+    "recordedAt": "2026-10-25T15:36:58.490080+00:00",
+    "pushRun": 40206632119,
+    "pullRequestRun": 40206635890,
+    "conclusion": "SUCCESS",
+    "suites": {
+      "test": {
+        "tests": 85,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "faa09deb467891f683a6acb1df203843d701e9205ef84025928ec523db19bad9"
+      },
+      "integrationTest": {
+        "tests": 71,
+        "failures": 0,
+        "errors": 0,
+        "xmlSha256": "66815b7b710e6418ce8809eb86e0338a4bbae2bdb924c6fda78e6392ccd64582"
+      }
+    },
+    "harnessTests": 16,
+    "webUnitTests": 29,
+    "chromiumTests": 31,
+    "review": {
+      "session": "a644e9f0-415a-409b-8a25-87370f8c518f",
+      "result": "APPROVE"
+    },
+    "scope": "GitHub Actions final HEAD synthetic Kafka/PostgreSQL; local final HEAD check only; no live or HA"
   }
 }

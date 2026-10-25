@@ -4,7 +4,7 @@ package io.chatpulse.replay;
 public final class ReplayFailure extends RuntimeException {
     public enum Code { INVALID_MANIFEST, TOPIC_CHANGED, PARTITIONS_CHANGED, RETENTION_EXPIRED, OFFSET_TRUNCATED,
         OFFSET_GAP, SOURCE_UNAVAILABLE, INVALID_EVENT, DB_UNAVAILABLE, CANCELLED, OWNER_LOST, WORKER_LOST,
-        INTERNAL_ERROR, NO_PROGRESS, TIME_LIMIT, INCOMPATIBLE_RUNS, RUN_NOT_FOUND, WORKER_BUSY, INVALID_COMMAND }
+        INTERNAL_ERROR, NO_PROGRESS, TIME_LIMIT, INCOMPATIBLE_RUNS, RUN_NOT_FOUND, WORKER_BUSY, INVALID_COMMAND, INVALID_DATE, TOPIC_NOT_FOUND, BUILD_UNAVAILABLE }
     private final Code code;
     public ReplayFailure(Code code) { super(code.name()); this.code = code; }
     public Code code() { return code; }

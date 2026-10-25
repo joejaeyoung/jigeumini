@@ -32,6 +32,35 @@ tasks.named('test') {
 }
 tasks.named('bootJar') { archiveFileName = 'chat-pulse-poc.jar' }
 
+// 소스·리소스·의존 JAR의 같은 내용을 같은 빌드 식별자로 고정한다. 시각·로컬 경로는 포함하지 않는다.
+def replayBuildDir = layout.buildDirectory.dir('generated/replay-build')
+tasks.register('replayBuildIdentity') {
+    inputs.files(fileTree('src/main'), file('build.gradle'), rootProject.file('settings.gradle'), configurations.runtimeClasspath)
+    outputs.dir(replayBuildDir)
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        def entries = [:]
+        fileTree('src/main').files.each { entries['source/' + projectDir.toPath().relativize(it.toPath()).toString()] = it }
+        entries['build.gradle'] = file('build.gradle')
+        entries['settings.gradle'] = rootProject.file('settings.gradle')
+        configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each {
+            entries['dependency/' + it.moduleVersion.id.toString() + '/' + it.file.name] = it.file
+        }
+        entries.sort().each { name, artifact ->
+            digest.update(name.getBytes('UTF-8')); digest.update((byte) 0)
+            artifact.withInputStream { input ->
+                byte[] buffer = new byte[65536]; int length
+                while ((length = input.read(buffer)) != -1) digest.update(buffer, 0, length)
+            }
+            digest.update((byte) 0)
+        }
+        def output = replayBuildDir.get().file('replay-build-id.txt').asFile
+        output.parentFile.mkdirs(); output.text = digest.digest().encodeHex().toString() + '\n'
+    }
+}
+sourceSets.main.resources.srcDir(replayBuildDir)
+tasks.named('processResources') { dependsOn tasks.named('replayBuildIdentity') }
+
 tasks.register('integrationTest', Test) {
     dependsOn tasks.named('bootJar')
     description = '로컬 Compose Kafka/PostgreSQL에서 격리된 통합 검증'

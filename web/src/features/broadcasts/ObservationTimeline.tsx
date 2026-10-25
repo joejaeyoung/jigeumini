@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { viewerSegments, type Observation, type Timeline } from '../../shared/api/observations';
+import type { Observation, Timeline } from '../../shared/api/observations';
+import { viewerSegments } from './observationModel';
 import { formatCount, formatTime } from './model';
 
 export function ObservationTimeline({ data }: { data: Timeline }) {

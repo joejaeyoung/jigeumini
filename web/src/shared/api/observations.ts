@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { channelIdSchema, count, timestamp } from './fields';
 import { activityPointSchema } from './quality';
 import { ApiError, read } from './transport';
+import { isMinuteTimeline } from './minuteTimeline';
 
 export const observationSchema = z.object({
   schemaVersion: z.literal(1), eventId: z.uuid(), runId: z.string().regex(/^[a-zA-Z0-9_-]{1,80}$/), channelId: channelIdSchema,
@@ -27,24 +28,10 @@ export async function fetchTimeline(id: string, seconds: number, signal: AbortSi
   if (seconds !== 1800 && seconds !== 3600) throw new ApiError('contract');
   const data = await read(`/api/v1/channels/${channelIdSchema.parse(id)}/timeline?seconds=${seconds}`, timelineSchema, signal);
   const from = Date.parse(data.from), to = Date.parse(data.to);
-  if (data.channelId !== id || from % 60000 !== 0 || to % 60000 !== 0 || to - from !== seconds * 1000 || to > Date.parse(data.asOf)
-    || data.chat.length !== seconds / 60 || data.chat.some((point, i) => Date.parse(point.from) !== from + i * 60000 || Date.parse(point.to) !== from + (i + 1) * 60000)
+  if (data.channelId !== id || to - from !== seconds * 1000 || to > Date.parse(data.asOf)
+    || !isMinuteTimeline(data.chat, from, to)
     || new Set(data.observations.map(point => point.eventId)).size !== data.observations.length
     || data.observations.some((point, i, all) => point.channelId !== id || Date.parse(point.observedAt) < from || Date.parse(point.observedAt) >= to
       || (i > 0 && Date.parse(point.observedAt) < Date.parse(all[i - 1].observedAt)))) throw new ApiError('contract');
   return data;
-}
-
-/** 관측점 사이만 연결한다. 실패 표본·TTL 초과·방송 변경에서는 연결하지 않는다. */
-export function viewerSegments(samples: Observation[]): Observation[][] {
-  const segments: Observation[][] = [];
-  let previous: Observation | undefined;
-  for (const sample of samples) {
-    if (sample.quality !== 'OBSERVED' || sample.viewerCount === null) { previous = undefined; continue; }
-    if (!previous || Date.parse(sample.observedAt) - Date.parse(previous.observedAt) > Math.min(previous.ttlSeconds, sample.ttlSeconds) * 1000
-      || previous.sourceBroadcastId !== sample.sourceBroadcastId) segments.push([]);
-    segments[segments.length - 1].push(sample);
-    previous = sample;
-  }
-  return segments;
 }

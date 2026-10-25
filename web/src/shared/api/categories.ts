@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { channelIdSchema, count, timestamp } from './fields';
 import { ApiError, read } from './transport';
+import { isMinuteTimeline } from './minuteTimeline';
 
 export const categoryKey = z.string().regex(/^[a-f0-9]{64}$|^unknown$/);
 const channel = z.object({ channelId: channelIdSchema, count: count.nullable(), referenceCount: count, quality: z.enum(['HEALTHY', 'INCOMPLETE']) });
@@ -29,9 +30,9 @@ export const categoryTimelineSchema = z.object({ categoryKey, name: z.string().m
   status, revision: count, scope: z.literal('COLLECTED_CHANNELS_ONLY'), truncated: z.boolean(),
   points: z.array(z.object({ from: timestamp, to: timestamp, count: count.nullable(), referenceCount: count, healthyChannels: count.max(20), observedChannels: count.max(20) })).length(60)
 }).superRefine((page, ctx) => {
-  if (Date.parse(page.to) - Date.parse(page.from) !== 3600000 || Date.parse(page.to) % 60000 !== 0 || Date.parse(page.asOf) < Date.parse(page.to) ||
-      page.points.some((p, i) => Date.parse(p.from) !== Date.parse(page.from) + i * 60000 || Date.parse(p.to) !== Date.parse(p.from) + 60000 ||
-        p.healthyChannels > p.observedChannels || (p.count === null) !== (p.healthyChannels === 0) || (p.count !== null && p.count > p.referenceCount) || (page.status === 'LAGGING' && p.count !== null)))
+  if (Date.parse(page.to) - Date.parse(page.from) !== 3600000 || Date.parse(page.asOf) < Date.parse(page.to) ||
+      !isMinuteTimeline(page.points, Date.parse(page.from), Date.parse(page.to)) ||
+      page.points.some(p => p.healthyChannels > p.observedChannels || (p.count === null) !== (p.healthyChannels === 0) || (p.count !== null && p.count > p.referenceCount) || (page.status === 'LAGGING' && p.count !== null)))
     ctx.addIssue({ code: 'custom', message: '카테고리 시간축 계약 불일치' });
 });
 export type CategoryEntry = z.infer<typeof entry>;

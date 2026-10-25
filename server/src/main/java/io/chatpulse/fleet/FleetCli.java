@@ -2,17 +2,10 @@ package io.chatpulse.fleet;
 
 import io.chatpulse.db.PostgresSupport;
 import io.chatpulse.discovery.SelectionPolicy;
-import io.chatpulse.pipeline.KafkaSupport;
-import io.chatpulse.poc.ChzzkHttpSource;
-import io.chatpulse.quality.CollectionTelemetry;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.time.*;
 import java.util.*;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
 /** 조회/미리보기와 활성화를 분리한 로컬 관리 CLI. 공식 채팅 어댑터는 아직 제공하지 않는다. */
@@ -43,30 +36,7 @@ public final class FleetCli {
             var limits=CollectorWorker.Limits.defaults(Integer.parseInt(args[1]),Duration.ofSeconds(Long.parseLong(args[2])));
             if(limits.capacity()>3)throw new IllegalArgumentException("FLEET_LIVE_LIMIT");
             Path output=Path.of(args[3]).toAbsolutePath();if(!Files.isDirectory(output.getParent()))throw new IllegalArgumentException("FLEET_OUTPUT_PARENT");Files.createFile(output);
-            String bootstrap=env.getOrDefault("PIPELINE_BOOTSTRAP_SERVERS","localhost:19092"),topic=env.getOrDefault("PIPELINE_TOPIC","chat.received.v1");var policy=io.chatpulse.operations.RuntimeEnvironment.policy(env);KafkaSupport.ensureTopic(bootstrap,topic,policy);
-            var observations=new java.util.concurrent.atomic.AtomicReference<LeasedObservations>();
-            var observationPublisher=new java.util.concurrent.atomic.AtomicReference<io.chatpulse.observations.ObservationPublisher>();
-            var factory=KafkaSupport.producerFactory(bootstrap);var telemetry=new java.util.concurrent.atomic.AtomicReference<CollectionTelemetry>();
-            Runnable closeRuntime=()->{if(observations.get()!=null)observations.get().close();if(observationPublisher.get()!=null)observationPublisher.get().close();if(telemetry.get()!=null)telemetry.get().close();factory.destroy();};
-            try {
-                var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
-                try(var worker=new CollectorWorker(store,SelectionPolicy.SourceMode.UNOFFICIAL_POC,limits,new ChzzkHttpSource(),kafka,topic,(publisher,budget)->{
-                    var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
-                    var observer=new CollectionTelemetry(new JdbcTemplate(ds),tx,publisher);telemetry.set(observer);observer.start();
-                    if(!"true".equals(env.get("OBSERVATIONS_ENABLED")))return observer;
-                    String observedTopic=env.getOrDefault("OBSERVATIONS_TOPIC","broadcast.observed.v1");
-                    if(observedTopic.equals(topic)||observedTopic.equals(topic+".dlq")||observedTopic.equals(topic+".spikes"))throw new IllegalArgumentException("OBSERVATION_TOPIC");
-                    KafkaSupport.ensureTopic(bootstrap,observedTopic,policy);
-                    var observedPublisher=new io.chatpulse.observations.ObservationPublisher(bootstrap,observedTopic);observationPublisher.set(observedPublisher);
-                    var observed=new LeasedObservations(budget,env.getOrDefault("PIPELINE_RUN_ID","live-v1"),
-                            Integer.parseInt(env.getOrDefault("OBSERVATIONS_INTERVAL_SECONDS","60")),Integer.parseInt(env.getOrDefault("OBSERVATIONS_TTL_SECONDS","120")),
-                            new io.chatpulse.metadata.ChzzkMetadataSource(budget::reserveFor)::observe,observedPublisher);observations.set(observed);
-                    return io.chatpulse.poc.CollectionObserver.combine(List.of(observer,observed));
-                })) {
-                    var report=worker.run(result->{try{closeRuntime.run();var diagnostic=new LinkedHashMap<>(result);if(observations.get()!=null)diagnostic.put("observations",observations.get().snapshot());Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(diagnostic)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
-                    System.out.println(JSON.writeValueAsString(Map.of("complete",report.get("complete"),"workerId",report.get("workerId"))));return Boolean.TRUE.equals(report.get("complete"))?0:2;
-                }
-            } finally {closeRuntime.run();}
+            return FleetRuntime.run(store, ds, limits, env, output);
         }
     }
 }

@@ -37,3 +37,67 @@ CollectionQuality는 package-private 내부 모듈이다. RankingStore와 같은
 | `./scripts/web test:e2e` | Chromium 22개 통과. 관심·상세·기간 전환·집계 미확인·품질/리본·반응형 표시 |
 
 내부 메서드 호출 횟수나 파일 배치를 복제하는 테스트는 추가하지 않았다. 기존 외부 interface를 통한 기대 동작으로 회귀를 확인했다. T01/T02/T04/T08/T11의 기존 범위를 보존한 근거이며 새 기술 목표 해결이나 처리량 향상 근거는 아니다. 실방송·새 플랫폼 프로토콜·HA·고부하·실기기는 이번 검증에 포함하지 않는다.
+
+## 2026-10-26 전체 코드 검토 #39
+
+기준 `c48a190dd8ffe122a1dac216bbf2f2ff76c8dc8c` · [이슈 #39](https://github.com/joejaeyoung/jigeumini/issues/39).
+서버 main Java 102개(6,346줄), 웹 src 38개(1,448줄), scripts 26개(1,009줄)의 구성과 호출 관계를 점검했다.
+각 영역의 interface, 상태·트랜잭션 소유, 반복되는 규칙을 검토하고 아래 네 영역을 변경 대상으로 정했다.
+전체 파일의 모든 분기를 새로 검증하거나 성능·보안 감사를 수행했다는 뜻은 아니다.
+
+### 영역별 결정
+
+| 영역 | 검토 결과와 결정 |
+|---|---|
+| `poc` | HTTP/프로토콜/연결 감독/EventSink/CollectionObserver 경계와 합성 대체 구현이 있다. 재접속과 heartbeat·공개3채널 제한을 유지한다. |
+| `pipeline` 소비 | 네 소비 구현에 같은 BATCH·동기 commit·1초 무제한 재시도·초기 earliest가 중복된다. `BatchConsumers`가 컨테이너 계약을 소유한다. 두 소비 구현의 poll proxy는 내부 `ConsumerPollTracker`로 모은다. |
+| `pipeline` 발행·DLQ | BufferedKafkaPublisher의 큐/ACK/종료 계수는 같은 lock의 불변식이다. 분할하면 여러 객체가 같은 상태를 조정해야 하므로 유지한다. DLQ의 ACK/DB 경계와 오류 분류도 각 listener에 둔다. |
+| `db`·`quality` | PostgresSupport·CollectionQuality는 앞선 리팩토링에서 경계가 마련됐다. migration/validate의 오류 의미, 품질 평가와 snapshot의 동일 transaction·clock 위치를 유지한다. |
+| `observations`·`notifications` | 공통 소비 설정만 공유한다. 관측의 시각/TTL 계약, 알림 outbox의 commit/ACK와 payload 충돌 정책은 별개다. 범용 Store 상속을 추가하지 않는다. |
+| `categories`·`reports` | DualTopicConsumer는 이미 공유한다. 귀속 보정, 활성 리포트 보존, cleanup lock·freshness 기준은 다르므로 SQL을 하나의 범용 projection으로 합치지 않는다. |
+| `replay` | manifest·source identity/retention·worker 상태·DB 저장이 나뉘어 있다. 조회/수정 명령의 DB 권한과 replay namespace를 유지한다. JAR 실행 수명 중복만 제거한다. |
+| `discovery`·`metadata` | 목록 pagination/부분 결과/요청 예산과 단일 방송 캐시/관측은 수명·오류 계약이 다르다. 임의의 공통 HTTP 프레임워크를 만들지 않는다. |
+| `fleet` | FleetCli가 명령 해석과 producer/telemetry/관측기 조립·종료·결과 저장까지 함께 소유했다. package-private `FleetRuntime`으로 실행 자원을 옮긴다. CollectorWorker의 임대 갱신·drain·SIGTERM 저장 동기화는 그대로 둔다. |
+| `operations` | RecoveryPlan은 복원 DB 위치·기존/새 group 검사를, DeploymentHealth는 비동기 표본·readiness를 소유한다. 두 책임을 합치지 않는다. 비밀 파일 처리·고정 진단·외부 JSON도 유지한다. |
+| 웹 `app`·`features` | 경로와 조회 상태는 화면별 의미가 있다. 반복된 분당 막대 geometry/null 음영만 `MinuteBars`에 모으고, 시청자 선 연결은 API 모듈에서 `observationModel`로 옮긴다. |
+| 웹 `shared/api` | 네 API의 연속 분 구간 검증을 `isMinuteTimeline`으로 모은다. 요청 기간·응답 identity·asOf·품질·최대360분 절단은 각 schema에 남긴다. transport/polling/로컬 저장 정책은 유지한다. |
+| 실행 스크립트·배포·CI | replay/selection/fleet의 동일한 임시 JAR·signal·정리 코드를 `scripts/lib/run-cli`가 소유한다. `exec java`로 동작하는 PoC/analyzer, 소유 자원만 정리하는 배포/HA 실험은 수명이 달라 유지한다. |
+
+### #39에서 보존할 계약
+
+- `BatchConsumers`는 재사용 가능한 소비 설정만 가진다. listener가 DB/DLQ 처리를 완료한 뒤 반환하며, 오류 코드는 기존 소비자가 정한다. 첫 earliest 배정에서 DB progress 초기화가 모두 성공한 뒤 미커밋 partition만 초기 commit한다. 기존 commit과 none 정책은 바꾸지 않는다.
+- `ConsumerPollTracker`는 성공한 빈 poll도 기록하고, 실패한 poll은 이전 snapshot을 갱신하지 않는다. revoke 시 시각/할당을 함께 비운다. ProjectionConsumer의 공개 PollState는 유지한다.
+- `FleetRuntime`은 같은 factory·telemetry·선택적 시청자 관측을 만든다. producer 준비 → worker 임대/수신 → 수신 종료/drain/임대 해제 → 관측기/발행기/telemetry/factory 종료 → 결과 저장의 기존 순서를 유지한다. 출력 파일 선점과 준비 실패 시 빈 파일 보존도 동일하다.
+- 웹은 같은 기간·응답과 동일한 DOM/SVG geometry를 사용한다. null 음영과 관측된0건을 구분하며, 채널/방송 identity·TTL에서 시청자 선을 끊는다. 표시 시각의 locale·시간대·문구를 바꾸지 않는다.
+- 관리 CLI는 같은 인자·stdout·exit code를 유지한다. build 출력은 stderr, 각 실행은 읽기 전용 JAR 복사본, signal은 자식에 TERM 전달·종료 대기 뒤 정리·130 반환이다. 동시 실행은 서로의 복사본을 삭제하지 않는다.
+
+### #39 검증 기준과 한계
+
+F01/F03/F04/F05/F06/F07/F08/F13/F16 → T01/T02/T03/T04/T05/T08/T11/T14/T16의 회귀 범위다. 처리량·HA·실방송 접근이나 기술 목표의 해결 범위를 새로 승격하지 않는다.
+
+기본 검증은 `./scripts/check`, `./scripts/integration`, `./scripts/web check`, `./scripts/web test:e2e`다. 추가 경계 시험은 초기 DB 실패 후 무커밋/기존 offset 보존, 성공한 빈 poll과 실패한 poll의 freshness 차이, 실행 JAR의 정상/관측 초기화 실패 종료, 관리 스크립트의 signal·동시 실행·build 실패를 확인한다. DB schema·SQL·부하 실험·배포 구성은 변경하지 않으며, 새 live·고부하·HA·이미지 배포 리허설을 실행한 근거로 사용하지 않는다.
+
+
+### #39 실제 회귀 결과
+
+[정제 근거](poc/evidence/refactor-2026-10-26.json)에 코드 commit, 현재 JAR/buildId, XML/log hash와 환경을 기록했다.
+
+| 실행 | 결과와 코드 범위 |
+|---|---|
+| `./scripts/check` | 최종 코드07021e4의 단위147·하네스20·JAR 통과 |
+| `./scripts/integration` | 최초 리팩토링e5222e0의 실제 Kafka/PostgreSQL94개 통과 |
+| `:server:integrationTest --tests io.chatpulse.fleet.FleetRuntimeIntegrationTest` | 07021e4의 실제3개 통과. 관측 활성/비활성 JAR, 초기화 실패, System.exit 없는 정상/실패 자연 종료 |
+| `fnm exec --using 24.20.0 ./scripts/web check` | 타입·단위29·빌드 통과 |
+| `fnm exec --using 24.20.0 ./scripts/web test:e2e` | Chromium31 통과. null/0·품질·기간 변경·모바일/데스크톱 표시 |
+
+최초 전체 실행 뒤 제품 코드의 후속 차이는 factory 속성 강제형변환 제거와 주석이다. 전체 최종 회귀와 병합 게이트의 정확한 HEAD·run은 [PR #40](https://github.com/joejaeyoung/jigeumini/pull/40)의 기록을 따른다. 최초94개 실행 JAR hash는 보관하지 않았고 현재 hash는07021e4의 실제 실행 JAR다. 초기 Node26 결과와 지정 Node24 재검사를 구분한다. TERM 외 shell 신호·실제 source 활성화는 새로 시험하지 않았다.
+
+### Standards
+
+고정 diff `c48a190…e5222e0`의 규칙 위반0·구조 차단0·별도 heuristic 권고0건. 공통 소비 계약과 실제 변형, DB/worker 자원 소유, API/표현 경계를 읽기 전용으로 검토했다.
+
+### Spec
+
+같은 diff의 지적0·차단0건. 초기 commit/none, poll freshness, Fleet 종료·결과 저장, null/0·360분 절단·TTL 선 연결, shell 인자/종료의 보존을 확인했다. 두 리뷰는 정적 검토이며 실제 실행이나 최종 CI를 대신하지 않는다.
+
+Claude 초기 승인의 비차단 의견에서 강제형변환·null initializer 설명·자연 종료 시험·README를 보완했다. 반복 close와 지역 JsonMapper는 기존 실패/재시도 계약을 보존하기 위해 유지했다. 최종 HEAD 승인은 PR40 게이트에 연결한다.

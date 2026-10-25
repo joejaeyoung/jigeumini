@@ -7,16 +7,16 @@ import java.util.function.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.BatchMessageListener;
-import org.springframework.kafka.listener.ContainerProperties;
-import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
-import org.springframework.util.backoff.FixedBackOff;
 
 public final class ProjectionConsumer implements AutoCloseable {
     private final KafkaMessageListenerContainer<String, byte[]> container;
     public record PollState(java.time.Instant at, java.util.Set<org.apache.kafka.common.TopicPartition> partitions) { }
-    private volatile PollState poll = new PollState(null, java.util.Set.of());
-    public PollState pollState() { return poll; }
+    private final ConsumerPollTracker poll = new ConsumerPollTracker();
+    public PollState pollState() {
+        var snapshot = poll.snapshot();
+        return new PollState(snapshot.at(), snapshot.partitions());
+    }
     private volatile String state = "STARTING";
     private volatile String lastErrorCode = "NONE";
     private final AtomicLong batches = new AtomicLong(), errors = new AtomicLong();
@@ -33,43 +33,12 @@ public final class ProjectionConsumer implements AutoCloseable {
     }
     ProjectionConsumer(DefaultKafkaConsumerFactory<String, byte[]> factory, String topic, ProjectionStore store,
             DeadLetterRecovery recovery, Consumer<List<ConsumerRecord<String, byte[]>>> afterDbCommit) {
-        factory.addPostProcessor(consumer -> {
-            @SuppressWarnings("unchecked")
-            var wrapped = (org.apache.kafka.clients.consumer.Consumer<String, byte[]>) java.lang.reflect.Proxy.newProxyInstance(
-                    org.apache.kafka.clients.consumer.Consumer.class.getClassLoader(),
-                    new Class<?>[] { org.apache.kafka.clients.consumer.Consumer.class }, (proxy, method, args) -> {
-                        try {
-                            Object result = method.invoke(consumer, args);
-                            if (method.getName().equals("poll")) poll = new PollState(java.time.Instant.now(), java.util.Set.copyOf(consumer.assignment()));
-                            return result;
-                        } catch (java.lang.reflect.InvocationTargetException e) { throw e.getCause(); }
-                    });
-            return wrapped;
-        });
-        var props = new ContainerProperties(topic);
-        props.setAckMode(ContainerProperties.AckMode.BATCH);
-        props.setConsumerRebalanceListener(new org.springframework.kafka.listener.ConsumerAwareRebalanceListener() {
-            @Override public void onPartitionsAssigned(org.apache.kafka.clients.consumer.Consumer<?, ?> consumer,
-                    java.util.Collection<org.apache.kafka.common.TopicPartition> partitions) {
-                var committed = consumer.committed(new java.util.HashSet<>(partitions));
-                var initial = new java.util.HashMap<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.consumer.OffsetAndMetadata>();
-                for (var partition : partitions) {
-                    long position = consumer.position(partition);
-                    if (committed.get(partition) == null && "earliest".equals(factory.getConfigurationProperties().get("auto.offset.reset"))) {
-                        initial.put(partition, new org.apache.kafka.clients.consumer.OffsetAndMetadata(position));
-                    }
-                    store.initializeProgress(partition.topic(), partition.partition(), position);
-                }
-                if (!initial.isEmpty()) consumer.commitSync(initial);
-            }
-            @Override public void onPartitionsRevoked(java.util.Collection<org.apache.kafka.common.TopicPartition> partitions) {
-                poll = new PollState(null, java.util.Set.of());
-            }
-        });
-        props.setSyncCommits(true);
-        props.setPollTimeout(1000);
-        props.setShutdownTimeout(10000);
-        props.setMessageListener((BatchMessageListener<String, byte[]>) records -> {
+        factory.addPostProcessor(poll::track);
+        String reset = "earliest".equals(factory.getConfigurationProperties().get("auto.offset.reset")) ? "earliest" : "none";
+        var rebalance = BatchConsumers.initialOffsets(reset,
+                (partition, position) -> store.initializeProgress(partition.topic(), partition.partition(), position),
+                poll::revoked);
+        BatchMessageListener<String, byte[]> listener = records -> {
             try {
                 if (recovery == null) store.apply(records);
                 else store.applyRecovering(records, recovery);
@@ -83,13 +52,8 @@ public final class ProjectionConsumer implements AutoCloseable {
                 lastErrorCode = e instanceof EventContractException || e instanceof ProjectionRetryException ? e.getMessage() : "DB_OR_PROCESSING_UNAVAILABLE";
                 throw new ProjectionRetryException(lastErrorCode);
             }
-        });
-        container = new KafkaMessageListenerContainer<>(factory, props);
-        container.setBeanName("chat-projection");
-        // 격리는 listener 안에서 ACK와 DB commit까지 끝낸다. 나머지 실패는 무제한 batch 재시도한다.
-        var handler = new DefaultErrorHandler(new FixedBackOff(1000, FixedBackOff.UNLIMITED_ATTEMPTS));
-        handler.setClassifications(Map.of(Exception.class, true), true);
-        container.setCommonErrorHandler(handler);
+        };
+        container = BatchConsumers.create(factory, "chat-projection", new String[] { topic }, rebalance, listener);
     }
     public void start() { container.start(); }
     public Map<String, Object> status() {

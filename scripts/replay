@@ -5,22 +5,4 @@ case "${1:-help}" in
   migrate|capture|retention|create|status|cancel|worker|reap|compare) ;;
   *) echo './scripts/replay migrate | capture <새 manifest.json> [eventFrom eventTo] | retention <manifest.json> | create <manifest.json> | status <runId> | cancel <runId> | worker | reap | compare <runId> <runId>'; exit 1 ;;
 esac
-./gradlew --console=plain :server:bootJar >&2
-mkdir -p work/runtime
-runtime_jar="$(mktemp "$PWD/work/runtime/replay.XXXXXX")"
-runtime_pid=''
-cleanup() { rm -f -- "$runtime_jar"; }
-stop() {
-  trap '' INT TERM HUP
-  if [[ -n "$runtime_pid" ]]; then kill -TERM "$runtime_pid" 2>/dev/null || true; wait "$runtime_pid" || true; fi
-  exit 130
-}
-trap cleanup EXIT
-trap stop INT TERM HUP
-cp server/build/libs/chat-pulse-poc.jar "$runtime_jar"
-chmod 400 "$runtime_jar"
-java -jar "$runtime_jar" replay "$@" &
-runtime_pid=$!
-set +e
-wait "$runtime_pid"
-exit "$?"
+exec ./scripts/lib/run-cli replay "$@"

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { channelIdSchema, count, timestamp as time } from './fields';
 import { ApiError, read } from './transport';
+import { isMinuteTimeline } from './minuteTimeline';
 export const qualityStatus = z.enum(['HEALTHY', 'DISABLED', 'OFFLINE', 'INCOMPLETE', 'WARMING_UP', 'LAGGING', 'UNKNOWN']);
 export const rankingEntrySchema = z.object({
   channelId: channelIdSchema, rank: z.number().int().positive().nullable(), count: count.nullable(), referenceCount: count,
@@ -45,8 +46,7 @@ export async function fetchActivity(id: string, seconds: number, signal: AbortSi
   if (seconds !== 1800 && seconds !== 3600) throw new ApiError('contract');
   const data = await read(`/api/v1/channels/${channelIdSchema.parse(id)}/activity?seconds=${seconds}`, activitySchema, signal);
   const from = Date.parse(data.from), to = Date.parse(data.to);
-  if (data.channelId !== id || from % 60000 !== 0 || to % 60000 !== 0 || to - from !== seconds * 1000
-    || data.points.length !== seconds / 60 || data.points.some((point, i) => Date.parse(point.from) !== from + i * 60000 || Date.parse(point.to) !== from + (i + 1) * 60000)) throw new ApiError('contract');
+  if (data.channelId !== id || to - from !== seconds * 1000 || !isMinuteTimeline(data.points, from, to)) throw new ApiError('contract');
   return data;
 }
 export function rankingStale(data: Rankings, now = Date.now()) { return data.status === 'STALE' || Boolean(data.evaluatedAt && now >= Date.parse(data.evaluatedAt) + 30000); }

@@ -1,0 +1,572 @@
+{
+  "recordedAt": "2026-10-25T23:13:58.927504+00:00",
+  "issue": 39,
+  "pullRequest": "https://github.com/joejaeyoung/jigeumini/pull/40",
+  "baseCommit": "c48a190dd8ffe122a1dac216bbf2f2ff76c8dc8c",
+  "initialRefactorCommit": "e5222e0fd68984b99d92de779257b47594f541d6",
+  "reviewedCodeCommit": "07021e475f5dcb2aea3ff1fd8ecfac5534bacc63",
+  "reviewedJarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+  "reviewedBuildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+  "scope": "SYNTHETIC_LOCAL_SINGLE_BROKER_REGRESSION",
+  "technicalGoals": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T08",
+    "T11",
+    "T14",
+    "T16"
+  ],
+  "environment": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "java": "openjdk version \"21.0.11\" 2026-04-21 LTS",
+    "python": "3.14.4",
+    "dockerServer": "29.5.3",
+    "initialShellNode": "v26.3.1",
+    "verifiedNode": "v24.20.0",
+    "kafka": "apache/kafka:4.1.2",
+    "postgresql": "postgres:16.14-alpine"
+  },
+  "unit": {
+    "totals": {
+      "tests": 147,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "io.chatpulse.categories.CategoryQueriesTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "59a915e3b428cd62bb85953f659fa3ee16c28206dd3f395a6afa3ef823a5ab50"
+      },
+      {
+        "name": "io.chatpulse.discovery.OfficialBroadcastCatalogTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "45dc84b8b256fa7b394b1cc57aecf83428f6f78cc8c877cff86734f5bebd6b52"
+      },
+      {
+        "name": "io.chatpulse.discovery.SelectionCliTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "d1e1d839c37a2b7e3baa90e520df1ce95755ea8c4ddc7c7e39c2065879c5c295"
+      },
+      {
+        "name": "io.chatpulse.discovery.SelectionPolicyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "5930bc068a61229f99257fb9e3cf84f1c230f702d782e4d4422313044b7342fc"
+      },
+      {
+        "name": "io.chatpulse.fleet.FleetCliTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "97f6dca90e64b246ad7e8912f14f98de2be8c4054c17cd0c9805e70e2ce3dc3a"
+      },
+      {
+        "name": "io.chatpulse.fleet.FleetPlanTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "10e3c4f702af5d0fd665694fc727737d014ab24331616ee1085288d2979bad2b"
+      },
+      {
+        "name": "io.chatpulse.fleet.LeaseAuthorityTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "60ebbde5503eafa34a1edae7672e0fcd21b9f300dac3615db3f7ff34b262dba4"
+      },
+      {
+        "name": "io.chatpulse.fleet.LeasedObservationsTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "b15a152cac0496530b8d6a6984ee3f8e066f0ec69aa6fc2d9d675a7a8ce5de9d"
+      },
+      {
+        "name": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "ad414f3f3a0425830fa1cc170fa22cd2b175e6c306c611f9247316d6a9458cc1"
+      },
+      {
+        "name": "io.chatpulse.metadata.MetadataControllerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "2bc48b379800d69d7e4a63694f4778fa6b695b8a8dda794166bae8c0acca41c5"
+      },
+      {
+        "name": "io.chatpulse.metadata.MetadataServiceTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "b1c407996c0f952b5a288e68d339020d2409e494df3ff2d2c9fc88be6fda6bc9"
+      },
+      {
+        "name": "io.chatpulse.notifications.NotificationControllerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "a05680806bf907fa27f7b6cf2666de5383076d6d8ce4605665f9bc91a02d83e9"
+      },
+      {
+        "name": "io.chatpulse.notifications.SpikeDetectedTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "fbe26fb98e0bf731a1b4e0e892046cca18a1d921dc0c07331cecf48309eb95c3"
+      },
+      {
+        "name": "io.chatpulse.observations.BroadcastObservedTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "bb47165ac3649aec561cb374c3695641cd6ce839e38702383d6e59ac981430c9"
+      },
+      {
+        "name": "io.chatpulse.observations.ObservationCollectorTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "693f505d4caf4a7a9f16969a8415a8ff9bfe9080df52e44aae29994e209f15f0"
+      },
+      {
+        "name": "io.chatpulse.observations.ObservationControllerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "144d0563d8786c046e6650527020d069564ccd7506b4fd10731e0c197a9da784"
+      },
+      {
+        "name": "io.chatpulse.operations.RuntimeEnvironmentTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "49d173358f67a6f9c32c9e0d2cb77b8f8e6a0a52853b88d2b49398683716b702"
+      },
+      {
+        "name": "io.chatpulse.pipeline.BatchConsumersTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "5b4e3c620dd977010c05f330d8e22f5a11f1a07a9b4595b087584ee85c956cf8"
+      },
+      {
+        "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "0c4428802057af263261efc883ec966c28d83b2497b0285567cc396ed8d3a819"
+      },
+      {
+        "name": "io.chatpulse.pipeline.DeadLetterTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "8c7a77460e221d08b609c1c9e10120a5b0aa33a90d25846f2a2eb6698ee7d47e"
+      },
+      {
+        "name": "io.chatpulse.pipeline.EventCodecTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "6f31b930169c62c56673f35c10dbd56870014abe0aa90787d6106baf68032b58"
+      },
+      {
+        "name": "io.chatpulse.pipeline.ExperimentPublisherTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "9e7b58481e9ac2b525612a51836debfa5e06c7732493e49c43f4f0216bec79eb"
+      },
+      {
+        "name": "io.chatpulse.pipeline.ExperimentSamplerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "00b843640ce51fb8d08cd0e83ee476604812f179f70eb2c19b0f9aa7fa4f0fff"
+      },
+      {
+        "name": "io.chatpulse.pipeline.KafkaSupportTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "2ee6d90ffca29dd92b4c8c30a2edbbb741a23882eafd14705b1402427602f5b0"
+      },
+      {
+        "name": "io.chatpulse.pipeline.KafkaTopicPolicyTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "a8db65d91ca219fea0e8a61f4e09b4d9748f3f9d369c5aa6f95d4bd19b566ebc"
+      },
+      {
+        "name": "io.chatpulse.poc.ChannelProbeTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "006c867191d8a63f8c58861e52a08cd5c6b60fe9756a2ed7559868970bd48b9b"
+      },
+      {
+        "name": "io.chatpulse.poc.ChatProtocolTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "fa30ddcde7fa6f61b2857be21e28b32e4636400e9c18af0dbe1e9777bf032bfd"
+      },
+      {
+        "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "1296fe8ef484e89aa8c4ab3523336725f50c3ca97b1213a0c258b49abafa17a1"
+      },
+      {
+        "name": "io.chatpulse.quality.QualityPolicyTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "beac4480b958c6ef93903d4a1f42196a2e7821fd94e326675bf0e08bed9d3ac5"
+      },
+      {
+        "name": "io.chatpulse.quality.QualityScheduleTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "f8d2a040bd461c845578d514e4cf20aada869983fbb4e583ccf208c2bae96182"
+      },
+      {
+        "name": "io.chatpulse.quality.RankingControllerTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "a8a3e54c50102e30f6c7bba1d85b54bd34239a161034a685a5f2ad4cf3e2337e"
+      },
+      {
+        "name": "io.chatpulse.quality.TrendPolicyTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "2406097c1c9717de288ffa8722c2e981596da5e0933bb4d81c7e03500fcdd852"
+      },
+      {
+        "name": "io.chatpulse.replay.ReplayManifestTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "663af42a97f4016c707c2a515eb1ed096d5cc61f24246bc11e83b13aae5edcb7"
+      },
+      {
+        "name": "io.chatpulse.reports.ReportPolicyTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "9cecd449425a5e693ff409a242231b0cf2695a68c971dc82c48e2a202b2d0128"
+      }
+    ]
+  },
+  "initialFullIntegration": {
+    "totals": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "io.chatpulse.categories.CategoryIntegrationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "488ec7b5a2d3ddb21029d69369904d3fbe40973d2a96249788497c0eb57fec21"
+      },
+      {
+        "name": "io.chatpulse.fleet.FleetIntegrationTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "0c6bcace22d77a95fd2431aafcda372dd183d8b3e046106e6c74ce21b0c0a16d"
+      },
+      {
+        "name": "io.chatpulse.fleet.FleetRuntimeIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "e91fe3633aa6c6fc548ba3ac6ca61e4be200f5aaa4daa3d394592f66def78097"
+      },
+      {
+        "name": "io.chatpulse.notifications.NotificationIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "e7b98b4ad2cf5d5104db858ec72c7680b416b4a0f8fa39019e6cbd74f13e8b09"
+      },
+      {
+        "name": "io.chatpulse.observations.ObservationIntegrationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "2cd00b545f16d240502ff3eaea5f06281958816c348baa0b8190caa7f1dbabea"
+      },
+      {
+        "name": "io.chatpulse.operations.RecoveryPlanIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "085d2a254fd998863fb4180ce5f8923a7b001700c8fb8a49cc60acef8ec573ba"
+      },
+      {
+        "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "9189adb2a0f350f0779fec1791f95b42f6bcc5e02e9c1cd6b71ca6063278f488"
+      },
+      {
+        "name": "io.chatpulse.pipeline.KafkaSupportIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "f4de93d0ead7f83f325295c7ca296d9ba106ff1f00b3827c1e1cd464dd32c9a2"
+      },
+      {
+        "name": "io.chatpulse.pipeline.LoadExperimentIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "7d2874b7fe00f707e963d4b4892ce2876187bea15d3cfa124190b25fef6e661b"
+      },
+      {
+        "name": "io.chatpulse.pipeline.PartitionExpansionIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "1bcdba7b324c0f146c991615c0d7c632fea9ad5b9f20a9dfe8714e850a6153fa"
+      },
+      {
+        "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "5b498e3ed6c35fccffd5b0bccb7f1dafa1a81ee9d355a8cf763239d9b6b89e93"
+      },
+      {
+        "name": "io.chatpulse.pipeline.RankingIntegrationTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "15ab8928a5c074e475887807b8fe5ae200f2621f508bdbaf8122e19fadb51624"
+      },
+      {
+        "name": "io.chatpulse.replay.ReplayIntegrationTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "8db704d98b7155cbc74b1ed9bcf9a7256eb59f845288800999740b002438cb1c"
+      },
+      {
+        "name": "io.chatpulse.reports.ReportIntegrationTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "0266907a3ef49ef85900ec9a1abeef9908541e1f4a11e6cf50644f7e40f00937"
+      }
+    ]
+  },
+  "followupFocusedIntegration": {
+    "totals": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "name": "io.chatpulse.fleet.FleetRuntimeIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "xmlSha256": "c9502eb8f3e79b3c2bf7286a0e397241afd6ca41ab26e37408b6bb564585260d"
+      }
+    ]
+  },
+  "harness": {
+    "tests": 20,
+    "failures": 0,
+    "newScenarios": [
+      "인자·종료코드·stdout/stderr·읽기전용복사본",
+      "TERM 후 자식 종료 대기·복사본 정리",
+      "동시 실행 복사본 독립·재빌드 불변",
+      "빌드 실패 시 Java 미실행"
+    ]
+  },
+  "web": {
+    "unit": 29,
+    "chromium": 31,
+    "node": "24.20.0",
+    "typecheck": true,
+    "build": true,
+    "screenshots": [
+      {
+        "file": "categories-1440.png",
+        "sha256": "8f1d20fae0f273f2ef3ca6a001b55afd451bc25aa13da58c14b0f52d9644e501"
+      },
+      {
+        "file": "categories-320.png",
+        "sha256": "4123e959f211950bb6b6c6d4a80e9236b982105b7cf84364e36cbb65d71d182e"
+      },
+      {
+        "file": "observations-1440.png",
+        "sha256": "1c9c31da110b9b40cf5624fb9b70961994187543d6b501cfb4726e43881dd68a"
+      },
+      {
+        "file": "observations-320.png",
+        "sha256": "f66a7060019857bb357e5b14610d799fe3971b89b62bf5176c640cd885bd8f55"
+      },
+      {
+        "file": "reports-1440.png",
+        "sha256": "c2ba13b93bef0e104e8fee3b3997a07dc86c6977a3950c7f23f432e642e06af3"
+      },
+      {
+        "file": "reports-320.png",
+        "sha256": "9a3d3935655c194103a74b62c384aaf341e3b13cf89254540ac19613b8ab9694"
+      }
+    ]
+  },
+  "commands": [
+    {
+      "command": "./scripts/check",
+      "exitCode": 0,
+      "logSha256": "5d2d2ff77c8d254bf0adcd0420e6036993bece0304d679e3a9164ce6b882b8c9"
+    },
+    {
+      "command": "./scripts/integration",
+      "exitCode": 0,
+      "logSha256": "bb192a0273212b72e025c17a200521c840b2a5470c3865eac7a63e259d6109be"
+    },
+    {
+      "command": "./gradlew --console=plain :server:integrationTest --tests io.chatpulse.fleet.FleetRuntimeIntegrationTest",
+      "exitCode": 0,
+      "logSha256": "fddc88fc837ba18f1f74a7ae7118c35d2fdb8555a246f96c28d80b458f5d0a8c"
+    },
+    {
+      "command": "fnm exec --using 24.20.0 ./scripts/web check",
+      "exitCode": 0,
+      "logSha256": "920f4af6c3d547eb871e5b0ececf77c86c80f2223f6e5a7bd590f486bbdba5f3"
+    },
+    {
+      "command": "fnm exec --using 24.20.0 ./scripts/web test:e2e",
+      "exitCode": 0,
+      "logSha256": "1d324c6519f996f471ad355ba888ea6a6fa0b9e6c307fcfd178c2c188f4e4bc8"
+    }
+  ],
+  "staticReviews": {
+    "head": "e5222e0fd68984b99d92de779257b47594f541d6",
+    "base": "c48a190dd8ffe122a1dac216bbf2f2ff76c8dc8c",
+    "Standards": {
+      "hardViolations": 0,
+      "blocking": 0,
+      "heuristics": 0,
+      "scope": "공통 소비 계약·실행 자원·API/표현 분리·shell 수명"
+    },
+    "Spec": {
+      "findings": 0,
+      "blocking": 0,
+      "scope": "초기 commit/none·poll freshness·Fleet 종료·null/0·360분 절단·shell 종료 계약"
+    },
+    "method": "code-review 스킬의 두 독립 읽기 전용 에이전트; 테스트 실행 없음"
+  },
+  "initialClaudeReview": {
+    "commit": "e5222e0fd68984b99d92de779257b47594f541d6",
+    "sessionId": "91fc0a46-c2a7-4b9e-a1a7-377aa06bc55f",
+    "model": "sonnet",
+    "decision": "APPROVE",
+    "method": "제공된 diff·문서·호출 경계의 정적 검토. 리뷰어 도구/테스트 실행 없음",
+    "followups": [
+      "factory 속성의 String 강제형변환 제거",
+      "null initializer의 position 조회 의미 문서화",
+      "System.exit 없는 별도 JVM 자연 종료 검증",
+      "루트 README에 공통 실행 수명 설명"
+    ]
+  },
+  "input": "합성 HTTP/WS/API, UUID topic/group/schema, 외부 요청 없는 빈 선정 계획; 공개 방송 요청 없음",
+  "limitations": [
+    "최초 전체94개는 e5222e0, 후속 단위147/수집기3개는 reviewedCodeCommit의 소스에 실행했다. 최종 전체 CI의 정확한 HEAD·run·결과는 PR40 통합 게이트 기록을 참조한다.",
+    "최초94개 실행 JAR hash는 후속 빌드 전에 보관하지 않았다. 현 JAR hash/buildId는 reviewedCodeCommit에 해당한다.",
+    "자연 종료 검증은 non-daemon 실행기 누수와 명령 반환을 확인하며 모든 native/daemon 자원의 무누수를 증명하지 않는다.",
+    "관리 shell signal 실험은 TERM만 수행했다. INT/HUP/SIGKILL 경합은 새로 검증하지 않았다.",
+    "새 live·고부하·Kafka HA·컨테이너 이미지 배포·새 migration 복구 리허설은 실행하지 않았다.",
+    "초기 Node26 통과는 보조 결과다. 지정 Node24.20.0에서29/31을 다시 확인했다."
+  ],
+  "localCleanup": {
+    "stopped": [
+      "chat-pulse-kafka-1",
+      "chat-pulse-postgres-1"
+    ],
+    "dataVolumesPreserved": true,
+    "otherWorktreeHead": "707230a26438ddbc0150a7fc2b4d78d23bd23e15",
+    "unrelatedServicesModified": false
+  }
+}

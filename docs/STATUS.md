@@ -1,6 +1,15 @@
 # 진행 상태
 
-2026-10-26 · 기능 이슈의 develop 병합 완료 기준
+2026-10-26 · 기능 이슈 병합·후속 구조 개선 회귀 기준
+
+## 전체 코드 구조 개선 #39
+
+`refactor/codebase-depth` · 기준 `c48a190` · [이슈 #39](https://github.com/joejaeyoung/jigeumini/issues/39).
+서버·웹·실행 스크립트를 검토하고 소비 공통 계약, 수집기 실행 자원, 웹 시간축/표현, 관리 CLI의 JAR 수명을 정리한다.
+F01/F03/F04/F05/F06/F07/F08/F13/F16 → T01/T02/T03/T04/T05/T08/T11/T14/T16의 기존 계약 보존 작업이다.
+구현·로컬 회귀 완료. [구조 결정](REFACTORING.md#2026-10-26-전체-코드-검토-39)과 [정제 근거](poc/evidence/refactor-2026-10-26.json)에 기준/후속 commit·JAR hash·실행 범위를 연결했다.
+최초 `e5222e0`의 실제 Kafka/DB94개, 리뷰 반영 `07021e4`의 단위147·하네스20·수집기 집중3개, 지정 Node24.20.0의 웹29·Chromium31이 통과했다.
+Standards/Spec 정적 검토는 각각 지적0건이고 최초 코드의 Claude 승인을 확인했다. 최종 통합 근거는 [PR #40](https://github.com/joejaeyoung/jigeumini/pull/40)의 정확한 최종 HEAD Claude 승인·push/PR CI·병합 기록이다. 기존 기술 목표의 검증 범위는 승격하지 않는다.
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -16,7 +25,7 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 ## 이슈 완료 요약
 
-요청한 기존 이슈 7건과 운영 확장 이슈 6건을 각각 구현·검증하고 develop에 병합했다. 각 최종 HEAD에 Claude APPROVE와 push/PR CI SUCCESS를 확인했으며, 2026-10-26 저장소의 열린 이슈는 0건이다. 아래 이력의 테스트 수는 당시 실행 범위로 보존한다.
+요청한 기존 이슈 7건과 운영 확장 이슈 6건을 각각 구현·검증하고 develop에 병합했다. 각 최종 HEAD에 Claude APPROVE와 push/PR CI SUCCESS를 확인했으며, 2026-10-26 기능 작업 종료 시 열린 이슈0건을 확인했다. 이후 사용자 요청의 구조 개선은 위 #39에서 별도로 추적한다. 아래 이력의 테스트 수는 당시 실행 범위로 보존한다.
 
 | 이슈 | 작업·기능 | 기술 목표 | 병합 PR |
 |---|---|---|---|
@@ -38,7 +47,7 @@ M1 실행·결정: [Kafka·PostgreSQL 파이프라인](pipeline/README.md).
 
 공개 채널3개는 익명 PoC의 자체 상한이다. 전체 목록 발견과 채팅 접근 권한을 분리했고, 팔로워1,000명은 민감도 비교가 가능한 검토안이다. 실제 공식 인증·동의/전체 수집(T13), 새 migration을 포함한 릴리스 복구·외부 운영(T16)은 부분 검증으로 유지한다. [원천 조사](research/CHZZK_SCALE.md)·[선정 계약](discovery/README.md)·[Kafka/인프라 조사](research/KAFKA_DEPLOYMENT.md)·[배포 운영안](DEPLOYMENT_OPERATIONS.md)에 재개 조건을 기록했다.
 
-로컬 PoC/API/웹과 테스트 Kafka/PostgreSQL은 정지했다. 테스트 데이터 볼륨은 보존했고 리허설 소유 자원·생성 비밀·dump는 정리했다. 다른 worktree와 `phone-*` 서비스는 변경하지 않았다. main 릴리스와 외부 배포는 실행하지 않았다.
+기능 작업 종료 시 로컬 PoC/API/웹과 테스트 Kafka/PostgreSQL을 정지했다. #39의 실제 회귀에서 테스트 Kafka/PostgreSQL만 재기동하고 검증 후 다시 정지했다. 테스트 데이터 볼륨은 보존했고 리허설 소유 자원·생성 비밀·dump는 정리했다. 다른 worktree와 `phone-*` 서비스는 변경하지 않았다. main 릴리스와 외부 배포는 실행하지 않았다.
 
 ### 관심 방송 알림 #8
 
@@ -109,22 +118,22 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 <!-- tech-status:start -->
 | 기술 ID | 상태 | 검증 근거 | 확인한 범위 | 남은 문제·다음 행동 |
 |---|---|---|---|---|
-| T01 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md) | 실제 AUTO/BATCH/MANUAL 각3개 종료 경계·재시작 대조, 정상9건 누락0/중복0, 잘못된 다음 poll 순서에서누락1 재현 | 합성 단일 입력·지정 client/container 버전 범위, 제품BATCH 유지 |
-| T02 | 부분 검증 | [리포트 귀속·중복·rollback](api/REPORTS_VERIFICATION.md), [관측 중복·역순·rollback](api/OBSERVATIONS_VERIFICATION.md), [알림 멱등·rollback](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ 멱등·충돌](pipeline/DLQ_VERIFICATION.md), [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위), [재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영; replay 배치 내부/간 중복·충돌·SQL rollback; 알림 spikeId 중복·충돌·SQL rollback | 신규 trend의 SQL rollback 전용 장애 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
-| T03 | 검증됨 | [Outbox commit·ACK 직후 종료](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ ACK·DB commit 직후 종료](pipeline/DLQ_VERIFICATION.md), [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사), [replay worker 종료](pipeline/REPLAY_VERIFICATION.md) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건; replay commit 후 JVM 종료·watchdog 실패·새 run 재실행; DLQ ACK 후 halt(93)·DB commit 후 halt(94), 재전달 격리 1건·집계 2건; F07 outbox commit halt(95)·ACK halt(96) 후 물리2/feed1 | 모든 장애·고부하 복구로 확대 해석하지 않음 |
-| T04 | 검증됨 | [재처리 후속 진단](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md), [리포트 active 보호·정리](api/REPORTS_VERIFICATION.md), [관측7일 보존](api/OBSERVATIONS_VERIFICATION.md), [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변 | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
-| T05 | 검증됨 | [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
+| T01 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 실제 AUTO/BATCH/MANUAL 각3개 종료 경계·재시작 대조, 정상9건 누락0/중복0, 잘못된 다음 poll 순서에서누락1 재현 | 합성 단일 입력·지정 client/container 버전 범위, 제품BATCH 유지 |
+| T02 | 부분 검증 | [리포트 귀속·중복·rollback](api/REPORTS_VERIFICATION.md), [관측 중복·역순·rollback](api/OBSERVATIONS_VERIFICATION.md), [알림 멱등·rollback](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ 멱등·충돌](pipeline/DLQ_VERIFICATION.md), [M1 중복·rollback](pipeline/VERIFICATION.md#자동-검사), [M2 독립 소비](api/QUALITY_RANKINGS.md#검증-범위), [재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | M1 재전달·충돌·SQL rollback, ranking/trend의 동일 eventId 중복 입력을 각각 1건 반영; replay 배치 내부/간 중복·충돌·SQL rollback; 알림 spikeId 중복·충돌·SQL rollback | 신규 trend의 SQL rollback 전용 장애 실행은 남음; 원천 중복·전체 Exactly-once는 범위 밖 |
+| T03 | 검증됨 | [Outbox commit·ACK 직후 종료](pipeline/NOTIFICATIONS_VERIFICATION.md), [DLQ ACK·DB commit 직후 종료](pipeline/DLQ_VERIFICATION.md), [JVM 종료·재시작](pipeline/VERIFICATION.md#자동-검사), [replay worker 종료](pipeline/REPLAY_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | DB commit 직후 halt(91), 동일 group 재전달 뒤 집계 1건; replay commit 후 JVM 종료·watchdog 실패·새 run 재실행; DLQ ACK 후 halt(93)·DB commit 후 halt(94), 재전달 격리 1건·집계 2건; F07 outbox commit halt(95)·ACK halt(96) 후 물리2/feed1 | 모든 장애·고부하 복구로 확대 해석하지 않음 |
+| T04 | 검증됨 | [재처리 후속 진단](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md), [리포트 active 보호·정리](api/REPORTS_VERIFICATION.md), [관측7일 보존](api/OBSERVATIONS_VERIFICATION.md), [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변 | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
+| T05 | 검증됨 | [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 검증됨 | [고정/증설·복수 producer·늦은 시각](pipeline/EXPERIMENTS_VERIFICATION.md), [카테고리 결합](api/CATEGORIES_VERIFICATION.md) | 로컬3partition에서 채널 배치·append/eventTime 차이, 동일UUID 재전달·두producer bucket 정합성, 실제3→6증설의 키 이동·기존manifest 거부 | 실방송 전역 순서/외부 원천 중복 제거 보장이 아님; 운영 증설은 별도 이행 |
 | T07 | 검증됨 | [균등/80% 편향·shard 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 동일입력30000/물리30300, channelId/shard3의 partition·lag·p95/p99·DB/replay 대조; 현재 제품키 channelId 유지 결정 | 단일호스트·단회 측정. shard는 품질/offset 계약 이행 전 제품 채택 안 함 |
-| T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | 전체 제품 projection의 동시 부하·자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인 |
+| T08 | 검증됨 | [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | 전체 제품 projection의 동시 부하·자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인 |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절 | 원래디스크복귀범위; 유일replica디스크영구손실·AZ내구성미검증 |
-| T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
+| T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의/공식 채팅 수신은 미검증. 수집기 임대 연결은 T14 근거 참조 |
-| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json) | 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
+| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
-| T16 | 부분 검증 | [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 로컬RF1·합성·동일V12 이미지 범위; 외부배포/운영SLA/PITR/파괴적migration 미검증. 실제 새 migration 전후 rollback은 미검증. 최종 이미지17단계·PR37 회귀 완료. 새 migration 릴리스 전에 추가 복구 리허설 필요 |
+| T16 | 부분 검증 | [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 로컬RF1·합성·동일V12 이미지 범위; 외부배포/운영SLA/PITR/파괴적migration 미검증. 실제 새 migration 전후 rollback은 미검증. 최종 이미지17단계·PR37 회귀 완료. 새 migration 릴리스 전에 추가 복구 리허설 필요 |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.

@@ -1,3 +1,4 @@
+import { MinuteBars } from '../../shared/ui/MinuteBars';
 import { Link, useParams } from 'react-router';
 import { fetchCategories, fetchCategoryTimeline, type CategoryEntry, type CategoryTimeline } from '../../shared/api/categories';
 import { usePolling } from '../../shared/api/usePolling';
@@ -46,7 +47,7 @@ function CategoryChart({ timeline }: { timeline: CategoryTimeline }) {
     {timeline.status === 'LAGGING' && <p className="notice">분석 진행 미확인 · 건수를 보류했어요.</p>}
     {timeline.truncated && <p className="notice">최근 관측한 20개 채널 범위예요.</p>}
     <svg viewBox="0 0 600 150" role="img" aria-label="분당 채팅 막대그래프. 공백은 음영으로 표시하며 수치는 아래 표에서 확인할 수 있어요.">
-      {timeline.points.map((point, i) => <rect key={point.from} x={i * 10 + 1} width="8" y={point.count === null ? 0 : 140 - point.count / max * 130} height={point.count === null ? 140 : point.count / max * 130} className={point.count === null ? 'category-gap' : 'category-bar'}><title>{time(point.from)} {point.count === null ? '미확인' : `${number(point.count)}건`}</title></rect>)}
+      <MinuteBars points={timeline.points} formatTime={time}/>
       <line x1="0" y1="140" x2="600" y2="140" stroke="currentColor"/>
     </svg><div className="category-axis"><span>{time(timeline.from)}</span><span>{time(timeline.to)}</span></div>
     <p>음영은 미확인 구간이에요. 정상 관측된 0건과 구분해요.</p>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { BroadcastMetadata } from '../../shared/api/client';
+import type { BroadcastMetadata } from '../../shared/api/metadata';
 import { Icon } from '../../shared/ui/Icon';
 import { metadataLabel } from './model';
 export function BroadcastImage({ metadata }: { metadata?: BroadcastMetadata }) {

@@ -31,6 +31,7 @@ jigeumini/
 | `develop` | `main` | `release/<버전>` 분기 | 다음 릴리스 통합 |
 | `feat/<주제>` | `develop` | `develop` | 제품 기능 |
 | `fix/<주제>` | `develop` | `develop` | 일반 수정 |
+| `refactor/<주제>` | `develop` | `develop` | 동작·처리 계약을 유지하는 구조 개선 |
 | `technicaltest/<주제>` | `develop` | `develop` | 검증 실험 |
 | `release/<버전>` | `develop` | `main`, 이후 `develop` 동기화 | 릴리스 안정화 |
 | `fix/hotfix-<주제>` | `main` | `main`, 이후 `develop` 동기화 | 긴급 수정 |

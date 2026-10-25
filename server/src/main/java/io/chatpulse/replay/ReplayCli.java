@@ -1,10 +1,10 @@
 package io.chatpulse.replay;
 
-import com.zaxxer.hikari.*;
+import com.zaxxer.hikari.HikariDataSource;
+import io.chatpulse.db.PostgresSupport;
 import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;
-import org.flywaydb.core.Flyway;
 import tools.jackson.databind.json.JsonMapper;
 import static io.chatpulse.replay.ReplayFailure.Code.*;
 
@@ -28,7 +28,7 @@ public final class ReplayCli {
                 }
             }
             try(var ds=dataSource()) {
-                Flyway.configure().dataSource(ds).load().migrate();var store=new ReplayStore(ds);
+                var store=new ReplayStore(ds);
                 switch(args[0]) {
                     case "create" -> {
                         require(args,2);var path=Path.of(args[1]);
@@ -58,10 +58,8 @@ public final class ReplayCli {
     private static void print(Object value) {System.out.println(JSON.writeValueAsString(value));}
     private static String env(String name,String fallback) {return System.getenv().getOrDefault(name,fallback);}
     private static HikariDataSource dataSource() {
-        var config=new HikariConfig();config.setJdbcUrl(env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"));
-        config.setUsername(env("PIPELINE_DB_USER","chatpulse"));config.setPassword(env("PIPELINE_DB_PASSWORD","local-chatpulse"));
-        config.setMaximumPoolSize(4);config.setConnectionTimeout(3000);config.setValidationTimeout(2000);
-        config.addDataSourceProperty("connectTimeout","3");config.addDataSourceProperty("socketTimeout","10");
-        return new HikariDataSource(config);
+        return PostgresSupport.openMigrated(
+                env("PIPELINE_JDBC_URL","jdbc:postgresql://127.0.0.1:15432/chatpulse"),
+                env("PIPELINE_DB_USER","chatpulse"), env("PIPELINE_DB_PASSWORD","local-chatpulse"));
     }
 }

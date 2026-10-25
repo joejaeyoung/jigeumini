@@ -87,10 +87,47 @@ class ObservationIntegrationTest {
         var boundary = BroadcastObservedTest.sample(clock.instant().minusSeconds(7 * 86400), 0L);
         var expired = BroadcastObservedTest.sample(boundary.observedAt().minusNanos(1), 5L);
         store.apply(List.of(record(boundary,0),record(expired,1)));
-        assertEquals(1, count()); assertEquals(2, progress()); assertEquals(0, store.cleanup());
+        var old=BroadcastObserved.observed("old-run",CHANNEL,expired.observedAt(),120,
+                new io.chatpulse.metadata.PublicBroadcastObservation(io.chatpulse.metadata.BroadcastMetadata.LiveStatus.LIVE,5L,null,null,null,io.chatpulse.metadata.PublicBroadcastObservation.Quality.OBSERVED));
+        jdbc.update("INSERT INTO broadcast_observation VALUES (?,?,?,?,?,?::jsonb)",old.runId(),old.eventId(),CHANNEL,
+                java.sql.Timestamp.from(old.observedAt()),java.sql.Timestamp.from(old.observedAt()),new String(old.encode(),java.nio.charset.StandardCharsets.UTF_8));
+        jdbc.update("INSERT INTO processed_event(projection,run_id,event_id,channel_id,collection_session_id,event_time,received_at,source_topic,source_partition,source_offset,payload_hash) VALUES ('ranking','live-v1',?,?,?,now(),now(),?,0,0,?)",
+                UUID.randomUUID(),CHANNEL,UUID.randomUUID(),topic,"a".repeat(64));
+        assertEquals(2, count()); assertEquals(2, progress()); assertEquals(1, store.cleanup()); assertEquals(1,count());
         clock.advance(1); assertEquals(1, store.cleanup());
         store.apply(List.of(record(boundary,0),record(expired,1))); assertEquals(0, count()); assertEquals(2, progress());
-        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM processed_event", Integer.class));
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM processed_event", Integer.class));
+    }
+    @Test void springCollectorConfigurationConnectsFreshHttpThroughKafkaToHistory() throws Exception {
+        try(var http=new io.chatpulse.metadata.ObservationHttpFixture(CHANNEL);
+            var context=new org.springframework.context.annotation.AnnotationConfigApplicationContext();
+            var consumer=new ObservationConsumer(BOOTSTRAP,topic,group,"earliest",store)) {
+            var pipeline=org.mockito.Mockito.mock(io.chatpulse.pipeline.PipelineProperties.class);
+            org.mockito.Mockito.when(pipeline.bootstrapServers()).thenReturn(BOOTSTRAP);
+            org.mockito.Mockito.when(pipeline.runId()).thenReturn("test-v1");
+            context.getEnvironment().setActiveProfiles("pipeline");
+            context.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("role",Map.of("pipeline.role","collector")));
+            context.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.SystemEnvironmentPropertySource("synthetic-env",
+                    Map.of("OBSERVATIONS_ENABLED","true","OBSERVATIONS_INTERVAL_SECONDS","90","OBSERVATIONS_TTL_SECONDS","240")));
+            context.registerBean(io.chatpulse.pipeline.PipelineProperties.class,()->pipeline);
+            context.registerBean(io.chatpulse.poc.PocProperties.class,()->new io.chatpulse.poc.PocProperties(List.of(CHANNEL),Duration.ofSeconds(3),Duration.ZERO,Path.of("build","synthetic-poc.json")));
+            context.registerBean(ObservationTopic.class,()->new ObservationTopic(topic));
+            context.registerBean(io.chatpulse.metadata.PublicObservationSource.class,http::source);
+            context.registerBean(io.chatpulse.poc.ChatSource.class,()->org.mockito.Mockito.mock(io.chatpulse.poc.ChatSource.class));
+            var telemetry=org.mockito.Mockito.mock(io.chatpulse.poc.CollectionObserver.class);
+            context.registerBean("telemetryFixture",io.chatpulse.poc.CollectionObserver.class,()->telemetry);
+            context.register(ObservationConfiguration.CollectorConfiguration.class,io.chatpulse.poc.PocRunner.class);
+            context.refresh(); assertNotNull(context.getBean(io.chatpulse.poc.PocRunner.class));
+            var observers=context.getBeanProvider(io.chatpulse.poc.CollectionObserver.class).orderedStream().toList();
+            assertEquals(2,observers.size()); assertEquals(0,http.requests.get());
+            consumer.start(); awaitCommitted(0);
+            var combined=io.chatpulse.poc.CollectionObserver.combine(observers); combined.start(CHANNEL);
+            await().atMost(Duration.ofSeconds(20)).untilAsserted(()->assertEquals(1,count()));
+            combined.stopped(CHANNEL); awaitCommitted(1);
+            var sample=history().samples().getFirst(); assertEquals(73L,sample.viewerCount()); assertEquals("123",sample.sourceBroadcastId());
+            assertEquals(240,sample.ttlSeconds()); assertEquals(1,http.requests.get());
+            org.mockito.Mockito.verify(telemetry).start(CHANNEL); org.mockito.Mockito.verify(telemetry).stopped(CHANNEL);
+        }
     }
     @Test void realKafkaPublisherRestartAndDbRetryCommitOnlyPersistedObservations() throws Exception {
         try (var first = new ObservationConsumer(BOOTSTRAP,topic,group,"earliest",store)) {

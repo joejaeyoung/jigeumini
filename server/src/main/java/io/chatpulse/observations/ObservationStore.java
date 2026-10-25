@@ -55,7 +55,7 @@ public final class ObservationStore {
         // 정리된 입력을 재전달해도 apply의 보존 기준이 과거 이력을 다시 만들지 않는다.
         return jdbc.update("""
                 DELETE FROM broadcast_observation WHERE (run_id,event_id) IN (
-                    SELECT run_id,event_id FROM broadcast_observation WHERE run_id=? AND observed_at<? ORDER BY observed_at LIMIT 10000)
-                """, run, Timestamp.from(clock.instant().minusSeconds(7 * 86400)));
+                    SELECT run_id,event_id FROM broadcast_observation WHERE observed_at<? ORDER BY observed_at LIMIT 10000)
+                """, Timestamp.from(clock.instant().minusSeconds(7 * 86400)));
     }
 }

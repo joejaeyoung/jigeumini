@@ -10,7 +10,7 @@ import tools.jackson.databind.json.JsonMapper;
 import static io.chatpulse.metadata.BroadcastMetadata.*;
 
 /** 익명 공개 조회 어댑터. 인증·쿠키·리디렉션이나 접근 제한 우회는 사용하지 않는다. */
-public final class ChzzkMetadataSource implements MetadataSource {
+public final class ChzzkMetadataSource implements MetadataSource, PublicObservationSource {
     private final RestClient client;
     private final String base;
     private final JsonMapper json = JsonMapper.builder().build();
@@ -37,7 +37,7 @@ public final class ChzzkMetadataSource implements MetadataSource {
             return empty(id, LiveStatus.UNKNOWN, Reason.UPSTREAM_ERROR);
         }
     }
-    public PublicBroadcastObservation observe(String id) {
+    @Override public PublicBroadcastObservation observe(String id) {
         try {
             var document = readLive(id);
             var live = document.live();
@@ -50,7 +50,7 @@ public final class ChzzkMetadataSource implements MetadataSource {
             Long viewers = value.isIntegralNumber() && value.canConvertToLong() && value.asLong() >= 0
                     && value.asLong() <= 9007199254740991L ? value.asLong() : null;
             return new PublicBroadcastObservation(LiveStatus.LIVE, viewers, broadcast,
-                    text(live, "liveCategory", 120), text(live, "liveCategoryValue", 120),
+                    category(live, "liveCategory"), category(live, "liveCategoryValue"),
                     viewers == null ? PublicBroadcastObservation.Quality.MISSING_VIEWER_COUNT : PublicBroadcastObservation.Quality.OBSERVED);
         } catch (Failure failure) {
             var status = failure.reason == Reason.RESTRICTED ? LiveStatus.RESTRICTED
@@ -62,6 +62,10 @@ public final class ChzzkMetadataSource implements MetadataSource {
         }
     }
     private record LiveDocument(JsonNode channel, JsonNode live, LiveStatus status) { }
+    private static String category(JsonNode live, String field) {
+        String value = text(live, field, 120);
+        return value == null || value.codePoints().anyMatch(Character::isISOControl) ? null : value;
+    }
     private LiveDocument readLive(String id) {
         if (id == null || !id.matches("[a-f0-9]{32}")) throw new Failure(Reason.INVALID_RESPONSE);
         var live = get("/service/v2/channels/" + id + "/live-detail");

@@ -2,12 +2,14 @@ package io.chatpulse.observations;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.chatpulse.metadata.ChzzkMetadataSource;
+import io.chatpulse.metadata.PublicObservationSource;
 import io.chatpulse.pipeline.*;
 import io.chatpulse.poc.PocProperties;
 import java.time.Clock;
 import java.util.concurrent.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -29,14 +31,16 @@ class ObservationConfiguration {
     @ConditionalOnProperty(name="pipeline.role", havingValue="collector")
     @ConditionalOnProperty(name="observations.enabled", havingValue="true", matchIfMissing=true)
     static class CollectorConfiguration {
+        @Bean @ConditionalOnMissingBean(PublicObservationSource.class)
+        PublicObservationSource publicObservationSource() { return new ChzzkMetadataSource(); }
         @Bean(destroyMethod="close") ObservationPublisher observationPublisher(PipelineProperties p, ObservationTopic topic) {
             return new ObservationPublisher(p.bootstrapServers(), topic.name());
         }
         @Bean(initMethod="start", destroyMethod="close")
-        ObservationCollector observationCollector(PocProperties selected, PipelineProperties pipeline, ObservationPublisher publisher,
+        ObservationCollector observationCollector(PocProperties selected, PipelineProperties pipeline, ObservationPublisher publisher, PublicObservationSource source,
                 @Value("${observations.interval-seconds:60}") int interval, @Value("${observations.ttl-seconds:120}") int ttl) {
             selected.validate();
-            return new ObservationCollector(selected.channels(), pipeline.runId(), interval, ttl, new ChzzkMetadataSource()::observe, publisher);
+            return new ObservationCollector(selected.channels(), pipeline.runId(), interval, ttl, source::observe, publisher);
         }
     }
     @Bean

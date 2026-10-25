@@ -11,6 +11,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class ObservationControllerTest {
+    @Test void nonemptyServerSerializationMatchesSharedWebContractFixture() throws Exception {
+        String fixture;
+        try(var input=getClass().getResourceAsStream("/observation-timeline.json")) {
+            fixture=new String(java.util.Objects.requireNonNull(input).readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);
+        }
+        var expected=tools.jackson.databind.json.JsonMapper.builder().build().readValue(fixture,ObservationController.Timeline.class);
+        var observations=mock(ObservationStore.class);var ranking=mock(RankingStore.class);var consumer=mock(ObservationConsumer.class);
+        Instant from=Instant.parse(expected.from()),to=Instant.parse(expected.to());
+        when(observations.history(expected.channelId(),from,to)).thenReturn(new ObservationStore.History(expected.observations(),false));
+        when(ranking.activity(expected.channelId(),from,to)).thenReturn(new RankingStore.ActivityResponse(expected.channelId(),expected.asOf(),expected.from(),expected.to(),expected.chat()));
+        var mvc=MockMvcBuilders.standaloneSetup(new ObservationController(observations,ranking,consumer,Clock.fixed(Instant.parse(expected.asOf()),ZoneOffset.UTC))).build();
+        mvc.perform(get("/api/v1/channels/"+expected.channelId()+"/timeline")).andExpect(status().isOk()).andExpect(content().json(fixture));
+    }
     @Test void timelineUsesOneCompletedMinuteWindowAndRejectsInvalidInput() throws Exception {
         var observations = mock(ObservationStore.class); var ranking = mock(RankingStore.class); var consumer = mock(ObservationConsumer.class);
         var at = Instant.parse("2026-10-25T12:00:59Z"); var end = Instant.parse("2026-10-25T12:00:00Z"); var start = end.minusSeconds(3600);

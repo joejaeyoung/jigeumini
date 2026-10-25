@@ -14,24 +14,26 @@
 
 - 기존 collector에 선택한 채널만 새 HTTP 요청한다. 일반 `scripts/poc`와 analyzer의 화면 캐시는 이력을 생성하지 않는다.
 - 기본60초, 설정 `observations.interval-seconds`는60~900초. 표본 TTL `observations.ttl-seconds`는 기본120초이며 주기 이상·최대1800초다. 해당 표본보다 세밀한 측정을 주장하지 않는다.
-- HTTP connect3초/read5초, 응답1MiB, 요청 worker2개·대기20개. 채널별 한 요청만 진행한다. 429는60/120/240/480/900초 대기하며 성공·다른 응답 후 기본 주기로 돌아간다. 다음 시도는 응답 관측 시각 기준이다.
+- HTTP connect3초/read5초, 응답1MiB, 요청 worker2개·대기20개. 채널별 한 요청만 진행한다. 기본60초 주기에서429는60/120/240/480/900초 대기하며 성공·다른 응답 후 기본 주기로 돌아간다. 설정 주기가 더 길면 그 주기와 backoff 중 큰 값을 쓴다. 다음 시도는 응답 관측 시각 기준이다.
 - `CollectionObserver.start/stopped`가 채널 활성 범위를 정한다. PoC 파일 잠금을 얻기 전에는 조회하지 않고 해당 채널이 중단된 뒤 새 관측을 예약하지 않는다. 진행 중 요청의 정리는 컨텍스트 종료에서 최대15초 기다린다. WebSocket 콜백은 활성 집합만 바꾸고 HTTP/DB를 호출하지 않는다.
-- `observations.enabled=false`로 collector의 관측을 끌 수 있다. Spring 환경 변수 `OBSERVATIONS_ENABLED=false`, `OBSERVATIONS_INTERVAL_SECONDS`, `OBSERVATIONS_TTL_SECONDS`로 스크립트 실행에도 설정한다.
+- `observations.enabled=false`로 collector의 HTTP 관측을 끌 수 있다. 공통 이력 토픽 초기화와 analyzer 소비는 이 플래그와 별개로 유지한다. Spring 환경 변수 `OBSERVATIONS_ENABLED=false`, `OBSERVATIONS_INTERVAL_SECONDS`, `OBSERVATIONS_TTL_SECONDS`로 스크립트 실행에도 설정한다.
 - 중복 방지는 한 프로세스의 채널 요청과 같은 checkout의 수집기 파일 잠금 범위다. 서로 다른 checkout/호스트의 분산 lease는 없다. 그 범위는 운영 확대 전에 보완한다. 현재 live 하네스는 최대3채널 제한을 유지한다.
 
 ## 이벤트와 저장
 
 `broadcast.observed.v1`은 key=channelId, CreateTime=observedAt, 3 partitions/RF=1의 **비압축 이력** 토픽이다. `observations.topic`으로 별도 이름을 지정한다. 채팅/알림/DLQ 토픽과 같은 이름은 거부한다. 공통 초기화는 cleanup.policy=delete를 명시·검사하고 compact 기존 토픽을 변경 없이 거부한다. 생성·기존 설정 확인은 [공통 기동 계약](../pipeline/TOPIC_READINESS.md)을 따른다.
 
-이벤트는 schemaVersion=1, UUID eventId, runId, channelId, observedAt, ttlSeconds, nullable viewerCount, liveStatus, quality, nullable sourceBroadcastId, broadcastIdentity, nullable categoryId/categoryName이다. 최대4KiB, 정수 문자열·소수 건수·음수·JS 안전 정수 초과를 거부한다. 실제0명은 OBSERVED/0, 없는 수치는 MISSING_VIEWER_COUNT/null이다. 실패·제한·오프라인에서는 이전 수치를 복사하지 않는다. 방송 ID가 없으면 UNAVAILABLE이며 내부 ID를 원천 ID처럼 꾸미지 않는다.
+이벤트는 schemaVersion=1, UUID eventId, runId, channelId, observedAt, ttlSeconds, nullable viewerCount, liveStatus, quality, nullable sourceBroadcastId, broadcastIdentity, nullable categoryId/categoryName이다. 최대4KiB, 정수 문자열·소수 건수·음수·JS 안전 정수 초과를 거부한다. 실제0명은 OBSERVED/0, 없는 수치는 MISSING_VIEWER_COUNT/null이다. 실패·제한·오프라인에서는 이전 수치를 복사하지 않는다. 제어문자 등 계약에 맞지 않는 카테고리 필드는 null로 내리고 유효한 시청자 수는 유지한다. 방송 ID가 없으면 UNAVAILABLE이며 내부 ID를 원천 ID처럼 꾸미지 않는다.
 
-별도 `<pipeline.group>-observations` consumer가 V7 `broadcast_observation`과 `observation_progress`를 같은 DB 트랜잭션에 저장한다. (runId,eventId) 중복은 한 번, 내용 충돌은 배치 실패다. DB commit 뒤 Spring BATCH 동기 offset commit이다. 기본 reset=none이며 새 그룹의 최초 실행만 `--observations.offset-reset=earliest`를 쓴다. 유효한 기존 offset을 되감지 않는다. 실패는 고정 코드와 RETRYING으로 노출하고1초 재시도한다. 내부 관측 계약 오류를 자동으로 건너뛰거나 원문 DLQ에 넣지 않는다.
+별도 `<pipeline.group>-observations` consumer가 V7 `broadcast_observation`과 `observation_progress`를 같은 DB 트랜잭션에 저장한다. (runId,eventId) 중복은 한 번, 내용 충돌은 배치 실패다. DB commit 뒤 Spring BATCH 동기 offset commit이다. `observations.offset-reset`을 우선하고 생략하면 `pipeline.offset-reset`을 상속한다. 둘 다 생략한 기본값은none이며 새 그룹의 최초 실행만 `--observations.offset-reset=earliest`를 쓴다. 유효한 기존 offset을 되감지 않는다. 실패는 고정 코드와 RETRYING으로 노출하고1초 재시도한다. 내부 관측 계약 오류를 자동으로 건너뛰거나 원문 DLQ에 넣지 않는다. 형식 오류·같은 ID의 내용 충돌은 같은 배치를 영구 차단할 수 있다. 생산자/소비 계약의 결함을 수정한 뒤 같은 group에서 재시도하며, 실제 내용 충돌처럼 수정으로 해소되지 않는 경우는 별도 격리 절차를 마련하기 전까지 보류한다. 이 버전에는 관측용 안전 격리·offset 강제 이동 기능이 없다.
 
-역순으로 도착한 값은 실제 observedAt 위치에 저장한다. 서버 시각보다5초 넘는 미래는 거부한다. 조회의 현재값으로 과거를 채우지 않는다. ACK 실패는 OBSERVATION_PUBLISH_UNCONFIRMED와 이력 공백으로 남고 재시도한 새 HTTP 관측을 이전 시각에 붙이지 않는다. 메모리 입력의 강제 종료 복원과 원천 중복 제거는 보장하지 않는다.
+역순으로 도착한 값은 실제 observedAt 위치에 저장한다. 서버 시각보다5초 넘는 미래는 거부한다. 조회의 현재값으로 과거를 채우지 않는다. 이벤트 구성 오류는 OBSERVATION_CONTRACT_INVALID, ACK 실패는 OBSERVATION_PUBLISH_UNCONFIRMED와 이력 공백으로 남고 재시도한 새 HTTP 관측을 이전 시각에 붙이지 않는다. 메모리 입력의 강제 종료 복원과 원천 중복 제거는 보장하지 않는다.
+
+충돌 비교는 현재 계약으로 정규화한 payload를 사용한다. 직렬화나 시각 정밀도를 변경할 때 이전 버전으로 저장한 행과 재전달 payload가 충돌할 수 있으므로, 실제 저장 데이터의 버전 이행을 먼저 확인해야 한다. 이번 기능은 아직 외부 배포하지 않았으며 기존 나노초 관측 행의 자동 변환은 구현하지 않았다.
 
 ## 보존과 용량
 
-Kafka24시간/partition당256MiB/segment32MiB는 시간·용량 중 먼저 제한되는 보존 정책이다. 정확한24시간 가용성이나 용량 상한을 보장하지 않는다. DB 이력은 observedAt 기준7일이며 매60초 최대10,000행 정리한다. 7일 경계는 포함하고 그 이전만 삭제한다. 삭제된 과거 입력이 재전달되면 이력을 다시 만들지 않고 진행 위치만 기록한다. live 채팅 ledger·다른 projection은 삭제하지 않는다.
+Kafka24시간/partition당256MiB/segment32MiB는 시간·용량 중 먼저 제한되는 보존 정책이다. 정확한24시간 가용성이나 용량 상한을 보장하지 않는다. DB 이력은 이전 run을 포함해 observedAt 기준7일이며 매60초 최대10,000행 정리한다. 7일 경계는 포함하고 그 이전만 삭제한다. 삭제된 과거 입력이 재전달되면 이력을 다시 만들지 않고 진행 위치만 기록한다. live 채팅 ledger·다른 projection은 삭제하지 않는다.
 
 | 입력 가정 | 하루 이벤트 | 7일 이벤트 | 최대4KiB payload만 계산한7일 크기 |
 |---|---:|---:|---:|
@@ -44,7 +46,7 @@ Kafka24시간/partition당256MiB/segment32MiB는 시간·용량 중 먼저 제�
 
 `GET /api/v1/channels/{id}/timeline?seconds=3600`은 서버가 정한 완료된 분의 `[from,to)` 창을 반환한다. 1800/3600초만 허용한다. chat은 기존 품질 판정을 따른30/60개 완료1분 point, observations는 실제 관측 시각 순서의 최대1,000개다. 많으면 최근1,000개와 truncated=true를 반환한다. 두 자료는 같은 시간 범위지만 각각 조회하므로 DB 전체의 단일 원자 snapshot이라는 보장은 없다. `asOf`와 no-store, 잘못된 인자400·조회 실패503을 구분한다.
 
-상세 기본 창은1시간이다. 시청자(명)와 분당 채팅(건)을 별도의 세로축, 동일한 가로 시간축으로 표시한다. 시청자 점을 키보드/클릭으로 선택할 수 있다. 실패/null 표본, 두 표본 TTL 중 짧은 값 초과, 원천 방송 ID 변경에서는 선을 끊는다. 첫 관측 이전/마지막 관측 이후로 연장하지 않는다. 선은 표본 사이의 변화 표시이며 그 사이 실제 수치를 측정한 것이 아니다. 채팅 품질 미확인은 음영과 `—`, 관측 정상0건은0으로 표시한다. 갱신 실패에는 이전 조회 결과라고 안내한다.
+상세 기본 창은1시간이다. 시청자(명)와 분당 채팅(건)을 별도의 세로축, 동일한 가로 시간축으로 표시한다. 시청자 점을 클릭하거나 최소44px 높이의 기본 선택 메뉴로 관측값을 고를 수 있다. 실패/null 표본, 두 표본 TTL 중 짧은 값 초과, 원천 방송 ID 변경에서는 선을 끊는다. 첫 관측 이전/마지막 관측 이후로 연장하지 않는다. 선은 표본 사이의 변화 표시이며 그 사이 실제 수치를 측정한 것이 아니다. 채팅 품질 미확인은 음영과 `—`, 관측 정상0건은0으로 표시한다. 갱신 실패에는 이전 조회 결과라고 안내한다.
 
 `GET /api/operations/observations`는 consumer 실행·할당·성공 배치·실패 시도·고정 오류 코드를 제공한다. RUNNING은 전체 입력의 completeness나 낮은 lag의 증거가 아니다.
 

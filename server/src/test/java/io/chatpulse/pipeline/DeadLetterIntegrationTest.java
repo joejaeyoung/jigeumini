@@ -243,10 +243,20 @@ class DeadLetterIntegrationTest {
             var observationStatus=http.send(java.net.http.HttpRequest.newBuilder(endpoint.resolve("/api/operations/observations")).timeout(Duration.ofSeconds(2)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
             assertEquals(200,observationStatus.statusCode());
             assertEquals(3,JsonMapper.builder().build().readTree(observationStatus.body()).path("assignedPartitions").asInt());
+            var observed=io.chatpulse.observations.BroadcastObserved.observed("test-v1",EventCodecTest.CHANNEL,Instant.now().minusSeconds(120),120,
+                    new io.chatpulse.metadata.PublicBroadcastObservation(io.chatpulse.metadata.BroadcastMetadata.LiveStatus.LIVE,0L,"123",null,null,io.chatpulse.metadata.PublicBroadcastObservation.Quality.OBSERVED));
+            try(var observationPublisher=new io.chatpulse.observations.ObservationPublisher(IntegrationSupport.BOOTSTRAP,topic+".observations")) { observationPublisher.accept(observed); }
+            await().atMost(Duration.ofSeconds(15)).untilAsserted(()->{
+                var response=http.send(java.net.http.HttpRequest.newBuilder(endpoint.resolve("/api/v1/channels/"+EventCodecTest.CHANNEL+"/timeline?seconds=3600")).timeout(Duration.ofSeconds(5)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+                assertEquals(200,response.statusCode());
+                var sample=JsonMapper.builder().build().readTree(response.body()).path("observations").get(0);
+                assertNotNull(sample); assertTrue(sample.path("observedAt").isString()); assertEquals(observed.observedAt().toString(),sample.path("observedAt").asText());
+                assertTrue(sample.path("viewerCount").isIntegralNumber()); assertEquals(0,sample.path("viewerCount").asInt());
+            });
             var timeline=http.send(java.net.http.HttpRequest.newBuilder(endpoint.resolve("/api/v1/channels/"+EventCodecTest.CHANNEL+"/timeline?seconds=3600")).timeout(Duration.ofSeconds(5)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
             assertEquals(200,timeline.statusCode());
             var timelineJson=JsonMapper.builder().build().readTree(timeline.body());
-            assertEquals(60,timelineJson.path("chat").size()); assertTrue(timelineJson.path("observations").isEmpty());
+            assertEquals(60,timelineJson.path("chat").size()); assertEquals(1,timelineJson.path("observations").size());
             assertStored(2,1);
         } finally {
             process.destroy(); if(!process.waitFor(20,TimeUnit.SECONDS))process.destroyForcibly().waitFor();

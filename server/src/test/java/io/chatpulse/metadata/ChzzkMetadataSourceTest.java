@@ -121,6 +121,11 @@ class ChzzkMetadataSourceTest {
         }
         body = live("false", "OPEN", "").replace("\"adult\"", "\"concurrentUserCount\":0,\"adult\"");
         assertThat(source.observe(ID).viewerCount()).isZero();
+        body = body.replace("test-game", "test\\ncategory").replace("테스트 게임", "test\\nname");
+        var malformedCategory = source.observe(ID);
+        assertThat(malformedCategory.viewerCount()).isZero();
+        assertThat(malformedCategory.categoryId()).isNull();
+        assertThat(malformedCategory.categoryName()).isNull();
         assertThat(credentials).isEmpty();
     }
     @Test void failedOrClosedObservationContainsNoPreviousMeasurements() {

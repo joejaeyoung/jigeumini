@@ -101,7 +101,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T12 | 미착수 | — | 직렬 ACK worker 기준선만 존재 | #11 bounded async 후보와 처리량·메모리·실패 추적 비교 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
 | T14 | 미착수 | — | 수집기별 파일 잠금만 존재 | #28 DB 임대·인계·오래된 소유자 차단 |
-| T15 | 미착수 | [HA 조사](research/KAFKA_DEPLOYMENT.md) | 복제/ISR/quorum 운영 후보 조사; RF1 로컬 검증과 구분 | #29 격리 복제 클러스터 장애 시험 |
+| T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
 | T16 | 미착수 | [배포 조사](research/KAFKA_DEPLOYMENT.md) | 외부 배포 미실행; 컨테이너/복구 리허설 설계 | #30 이미지·rollback·DB/offset 복원 대조 |
 <!-- tech-status:end -->
 
@@ -198,3 +198,7 @@ F12 → T13/T08/T11. fae9531에서 Java101·하네스16·JAR와 실행JAR cutoff
 ### Kafka 복제 HA #29
 
 F15 → T04/T08/T10/T15. [운영 계약](pipeline/KAFKA_HA.md)의 전용controller3/broker3·RF3/minISR2·ELR1을 선택하고 생성/기존 토픽 검사를 KafkaTopicPolicy로 모았다. 기본 LOCAL/RF1을 유지하며 채팅/DLQ/관측/알림에 같은 정책을 전달한다. 실제6노드 장애·재배치·DB 대조와 최종 검증은 진행 전이다.
+
+### Kafka HA #29 실제 검증
+
+F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA_HA_VERIFICATION.md)·[정제근거](poc/evidence/kafka-ha-2026-10-26/summary.json). 01e943e에서실제6노드의broker1/2대손실·controller1/2대손실·복구·RF1→3이행·최종ACK/broker/DB대조10단계통과. main172시도/171ACK=broker=DB,이행20일치,정리완료. 처음3실패와보완도보존했다. 최종통합/Claude/CI후병합하며실제AZ/디스크손상/외부배포는미검증이다.

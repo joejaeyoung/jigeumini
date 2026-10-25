@@ -56,11 +56,21 @@
       "cleanupComplete": true,
       "phases": 17,
       "sensitiveArtifactsRemoved": true
+    },
+    {
+      "file": "sixth.json",
+      "sha256": "5f356fed6657c8a82ebe0bd6ff2c964744d064076c8e7ae398b312278e6f24b3",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "1bde2b779a265932a2e37aaaa179171a7777aca2",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 17,
+      "sensitiveArtifactsRemoved": true
     }
   ],
   "observedRecovery": {
-    "startedAt": "2026-10-25T17:36:38.345648+00:00",
-    "secondsToVerifiedCatchup": 24.187962916999822,
+    "startedAt": "2026-10-25T17:49:42.229408+00:00",
+    "secondsToVerifiedCatchup": 18.89992650001659,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
@@ -96,8 +106,8 @@
     "Some diagnostic counts/old-group invariance fields were literals; final followup measures them"
   ],
   "reviewFollowup": {
-    "startedAt": "2026-10-25T17:36:38.345648+00:00",
-    "secondsToVerifiedCatchup": 24.187962916999822,
+    "startedAt": "2026-10-25T17:49:42.229408+00:00",
+    "secondsToVerifiedCatchup": 18.89992650001659,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
@@ -112,8 +122,8 @@
       "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
     }
   },
-  "latestVerifiedCommit": "a0283bc3803e2a80a75fc1d770bcd55323564636",
-  "latestCommand": "./scripts/deploy-rehearsal work/images-baseline.json work/images-operational.json work/deploy-fifth",
+  "latestVerifiedCommit": "1bde2b779a265932a2e37aaaa179171a7777aca2",
+  "latestCommand": "./scripts/deploy-rehearsal work/images-baseline.json work/images-finalized.json work/deploy-sixth",
   "priorLocalArtifactsCleanup": {
     "directories": [
       "work/deploy-first",
@@ -123,12 +133,12 @@
     "generatedSecretAndDumpFilesDeleted": 6
   },
   "localCheck": {
-    "tests": 140,
+    "tests": 142,
     "failures": 0,
     "harness": 16,
     "jarBuilt": true,
-    "sortedXmlSha256": "9405df0e16ec5ffb45eff9c0131b8d49711e27b83ff69e83c41211ce207ec43f",
-    "codeCommit": "a0283bc3803e2a80a75fc1d770bcd55323564636"
+    "sortedXmlSha256": "a29fc1dbf7971509603a2c4924bd503d64e43fde0a77783bb18c68df4af8a4a1",
+    "codeCommit": "1bde2b779a265932a2e37aaaa179171a7777aca2"
   },
   "localFullRegression": {
     "tests": 91,
@@ -160,11 +170,33 @@
       {
         "file": "fifth.json",
         "seconds": 24.187962916999822
+      },
+      {
+        "file": "sixth.json",
+        "seconds": 18.89992650001659
       }
     ],
-    "count": 5,
+    "count": 6,
     "minSeconds": 17.105119707994163,
     "maxSeconds": 24.187962916999822,
     "scope": "Different code revisions; first two runs had weaker assertions; not production RTO or latency distribution"
-  }
+  },
+  "priorCi": [
+    {
+      "head": "4e34119024a5d3bda6836647ea6ca5508943586e",
+      "push": 40216828653,
+      "pullRequest": 40216854044,
+      "conclusion": "SUCCESS",
+      "unit": 139,
+      "integration": 91
+    },
+    {
+      "head": "e0db6a251334d6b94671936b78d1c1d3fa0d1220",
+      "push": 40217443569,
+      "pullRequest": 40217448083,
+      "conclusion": "SUCCESS",
+      "unit": 140,
+      "integration": 91
+    }
+  ]
 }

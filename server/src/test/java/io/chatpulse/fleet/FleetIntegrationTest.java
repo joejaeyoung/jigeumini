@@ -38,12 +38,12 @@ class FleetIntegrationTest {
     }
     @AfterEach void cleanup() throws Exception {
         for(Process child:children)if(child.isAlive()){signal(child,"CONT");child.destroy();if(!child.waitFor(35,TimeUnit.SECONDS))child.destroyForcibly().waitFor();}
-        for(Path path:reports)if(Files.exists(path)) {
+        for(Path path:reports)if(Files.exists(path))try {
             var report=JSON.readTree(Files.readString(path));var delivery=report.path("delivery");
             System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"worker",report.path("workerId").asText(),"complete",report.path("complete").asBoolean(),
                     "failureCode",report.path("failureCode").asText(),"deliveryCode",delivery.path("failureCode").asText(),"accepted",delivery.path("accepted").asLong(),
                     "acknowledged",delivery.path("acknowledged").asLong(),"rejected",delivery.path("rejected").asLong())));
-        }
+        } catch(java.io.IOException|RuntimeException invalidReport){System.out.println("FLEET_CHILD_REPORT_INVALID");}
         if(source!=null)source.close();if(ds!=null)ds.close();
         if(root!=null){new JdbcTemplate(root).execute("DROP SCHEMA "+schema+" CASCADE");root.close();}
         try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){if(admin.listTopics().names().get(10,TimeUnit.SECONDS).contains(topic))admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}

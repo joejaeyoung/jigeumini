@@ -5,10 +5,10 @@
 ## 실행 식별
 
 - 이전 이미지 commit: `4f85f1ded5bd51f85be9a4fb842ae85144cde458`.
-- 최신 이미지/하네스 commit: `a0283bc3803e2a80a75fc1d770bcd55323564636`, clean tree.
-- 명령: `./scripts/deploy-images work/images-operational.json`, `./scripts/deploy-rehearsal work/images-baseline.json work/images-operational.json work/deploy-fifth`, `./scripts/check`.
+- 최신 이미지/하네스 commit: `1bde2b779a265932a2e37aaaa179171a7777aca2`, clean tree.
+- 명령: `./scripts/deploy-images work/images-finalized.json`, `./scripts/deploy-rehearsal work/images-baseline.json work/images-finalized.json work/deploy-sixth`, `./scripts/check`.
 - 단일 호스트 Docker, Kafka4.1.2/RF1·PostgreSQL16.14, 합성 seed20261026. eventTime은 관측 기준120초 전부터 두 배치10건씩 사용한다. 실제 원천 호출·외부 배포·registry push는 없다.
-- Git/image ID/JAR SHA/buildId·UTC시각·phase별 계수는 [다섯 번째 원본](poc/evidence/deployment-2026-10-26/fifth.json), 파일 hash/이전 실행·제한은 [정제 요약](poc/evidence/deployment-2026-10-26/summary.json)에 있다. 기준 이미지와 후보는 모두 V12 migration 집합이다.
+- Git/image ID/JAR SHA/buildId·UTC시각·phase별 계수는 [여섯 번째 원본](poc/evidence/deployment-2026-10-26/sixth.json), 파일 hash/이전 실행·제한은 [정제 요약](poc/evidence/deployment-2026-10-26/summary.json)에 있다. 기준 이미지와 후보는 모두 V12 migration 집합이다.
 
 ## 결과
 
@@ -23,11 +23,11 @@
 | 웹 | 정상8경로 heading/새로고침·리포트 상세20건, 정상 API응답26개 전부200, 503 오류 표시·재시도 회복, static/SPA/revision nosniff, 375px overflow없음·pageerror0 |
 | 새DB 복원 | 백업10건/pending outbox1개, 최신 원래DB20건/알림2개. 복원DB+기존group 시작은 RECOVERY_ALIGNMENT_REQUIRED·exit2·OOM없음 |
 | DB/Kafka 위치 복구 | 새group6개를 DB next에 준비. 최종20건·피드2개·미발행0·선택한 ledger/집계 hash차이0. 기존group offsets 전후일치·chatpulse와restored DB이름 차이 확인 |
-| 종료/정리 | 최종SIGTERM1.310초·exit143·OOM없음, 소유컨테이너/볼륨 제거. 생성 secret/dump 삭제. 진행중 HTTP요청완료 시험은 아님 |
+| 종료/정리 | 최종SIGTERM1.255초·exit143·OOM없음, 소유컨테이너/볼륨 제거. 생성 secret/dump 삭제. 진행중 HTTP요청완료 시험은 아님 |
 
-17단계 모두 통과했다. 마지막 `./scripts/check`는 Java140·하네스16·JAR가 통과했다. 전체 실제 Kafka/DB 회귀와 최종 CI 결과는 STATUS/정제요약에 이어 기록한다.
+17단계 모두 통과했다. 마지막 `./scripts/check`는 Java142·하네스16·JAR가 통과했다. 전체 실제 Kafka/DB 회귀와 최종 CI 결과는 STATUS/정제요약에 이어 기록한다.
 
-최신5차의 복원 후 검증 완료까지 **24.188초**였다. 서로 다른 코드/검사 강도의5회 범위는17.105~24.188초이며 분포나 운영RTO 추정으로 사용하지 않는다. 기존 API 정지 후 새DB 생성 직전부터 dump복원·거부진단·새group준비·readiness·집계 및 기존offset 대조까지 포함한다. 장애감지/운영자 판단/클라우드 provisioning은 제외한다. 보존 Kafka가 있는 합성20건의 누락10→0이며 실제 원천 RPO0 또는 운영 RTO 보장이 아니다.
+최신6차의 복원 후 검증 완료까지 **18.900초**였다. 서로 다른 코드/검사 강도의6회 범위는17.105~24.188초이며 분포나 운영RTO 추정으로 사용하지 않는다. 기존 API 정지 후 새DB 생성 직전부터 dump복원·거부진단·새group준비·readiness·집계 및 기존offset 대조까지 포함한다. 장애감지/운영자 판단/클라우드 provisioning은 제외한다. 보존 Kafka가 있는 합성20건의 누락10→0이며 실제 원천 RPO0 또는 운영 RTO 보장이 아니다.
 
 snapshot은 ledger eventId/원천offset, 채팅·category·report bucket, observation eventId, notification/spike ID, outbox발행상태를 정규화해 hash 대조한다. 모든 payload 열·updatedAt·snapshot/evaluation 과거 이력을 완전 비교한 것은 아니다. synthetic spike/outbox를 SQL로 주입했으므로 급상승 탐지 전체 경로 검증으로 확대하지 않는다.
 
@@ -44,3 +44,5 @@ FailureDiagnostics로 startup/CLI 허용코드와 예외 타입명을 공유하�
 T16은 부분검증이다. 동일V12 이미지 복귀와strict미래migration거부만 시험했고 실제새migration을포함한릴리스의복원/재생까지연결한시험은아직없다. 해당작업을시작할때이전schema백업/보존입력/실행이미지로추가리허설한다. 외부TLS·다중AZ·DBstandby/PITR·중앙경보·비밀회전·실제동의/전체방송수집은이로컬실행범위밖이다.
 
 다섯번째는운영진단코드확대·FLEET_LIVE_DISABLED실제확인·로컬관측요청생략계약을반영한이미지다. 첫네실행을보존한다. UI503은브라우저요청모의이며실제프록시503은DB중단HTTP단계에서별도로검증한다. 로컬전체91개통과실행은종료직전후속빌드와겹쳤으므로고정commit최종근거에서제외하고최종CI를사용한다.
+
+여섯 번째는 수집 전 Kafka 준비, 예상한 SourceFailure만 관측 생략, 종료 후 생략 횟수 보존까지 통합한 이미지다. 단위142개와17단계 리허설을 통과했다. 서로 다른 코드의 복구6회 표본은17.105~24.188초이며 운영 SLA로 해석하지 않는다. 관측 활성 FleetCli의 실제 원천 호출은 실행하지 않았다.

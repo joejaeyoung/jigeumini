@@ -50,3 +50,5 @@ status의discovered/eligible/selected와유효assigned/connected를분리한다.
 ## Kafka 준비 후 수집 시작
 
 worker는 producer 생성과 `partitionsFor` 성공을 먼저 확인한 뒤 임대 획득·원천 연결을 시작한다. 준비 실패는 `FLEET_KAFKA_NOT_READY`로 거부하며 HTTP/소켓/임대를 만들지 않는다. metadata 대기는 producer의 `max.block.ms=2000` 설정을 따른다. 이 값이 JVM의 producer 생성 전체 시간을 제한한다는 뜻은 아니다. 실행 중 장애에는 기존 유한 큐·미확인 계수·실패 종료 계약을 적용하며 큐 크기를 늘려 감추지 않는다.
+
+CLI는 결과 경로를 배타 생성하므로 준비 실패 때 빈 파일이 남을 수 있다. 진단 코드는 stdout에서 확인하고 다음 실행에는 새 결과 경로를 사용한다. 기존 결과 파일을 자동 덮어쓰지 않는다. 배포 통합의 FailureDiagnostics는 `FLEET_KAFKA_NOT_READY`와 예외 타입명을 허용하며 원인 메시지는 남기지 않는다.

@@ -48,3 +48,5 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 배포 또는 VALIDATE 모드에서 비밀 파일이 없으면 `SECRET_FILE_REQUIRED`로 거부한다. 로컬 리허설은 생성한 secret 파일을0700 디렉터리 안에0444로 두어 UID10001/컨테이너DB가 읽게 한다. 실제 운영은 비밀 관리자의 서비스별 UID/GID·접근 권한으로 주입한다. init-db.sh는 새 PG 데이터 디렉터리에서만 실행되며 기존 볼륨 역할 생성이나 비밀 회전을 수행하지 않는다. 비밀은 psql argv에 전달하지 않는다. 성공적인 소유 자원 정리 뒤 생성 secret과 dump도 삭제하고 hash/숫자만 남긴다. 정리 실패 시 로컬 work를0700 경계 안에서 보관하고 소유 자원 확인 후 수동 정리한다.
 
 현재 `/readyz` 상세 본문은 loopback 로컬 진단용이다. 외부 gateway에서는 내부 운영 접근으로 제한하거나 상태 코드만 공개한다. Kafka 인증/TLS·PG standby·중앙 지표·pager·비밀 회전은 실제 공급자 환경의 별도 운영 구성이다.
+
+최신 실행의 명령·이미지·원인코드·실제API/화면·복구 대조·리뷰 보완은 [배포 검증](../docs/DEPLOYMENT_VERIFICATION.md)을 참조한다.

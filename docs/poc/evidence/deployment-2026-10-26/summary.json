@@ -36,17 +36,34 @@
       "cleanupComplete": true,
       "phases": 17,
       "sensitiveArtifactsRemoved": true
+    },
+    {
+      "file": "fourth.json",
+      "sha256": "db93d29597ee79ce9a5911e62cdb3b5b9bfc38131c9df058e737502543e5e2b3",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "89879bd3b32f16b99bd75d24ca6153a6be1868b5",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 17,
+      "sensitiveArtifactsRemoved": true
     }
   ],
   "observedRecovery": {
-    "startedAt": "2026-10-25T17:12:56.055788+00:00",
-    "secondsToVerifiedCatchup": 17.105119707994163,
+    "startedAt": "2026-10-25T17:29:16.765846+00:00",
+    "secondsToVerifiedCatchup": 18.387081207998563,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
     "newGroups": 6,
     "oldGroupsModified": false,
-    "restoredIntoNewDatabase": true
+    "restoredIntoNewDatabase": true,
+    "originalDatabase": "chatpulse",
+    "restoredDatabase": "restored",
+    "alignmentStartRejected": {
+      "exitCode": 2,
+      "oomKilled": false,
+      "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+    }
   },
   "limitations": [
     "Single host RF1 synthetic fixture; not external deployment or AZ failover",
@@ -54,7 +71,7 @@
     "RTO begins after old API stop and excludes outage detection, provisioning and operator time",
     "Both image versions use V12 schema; checksum failure is not a destructive forward migration rollback",
     "Synthetic pending outbox injected directly; not a full live spike detection experiment",
-    "Secret files and database dump retained only in ignored local work directory, not evidence"
+    "Generated secret files and dump are deleted after owned resources are cleaned; only hash/numeric evidence remains"
   ],
   "initialIntegrationFailure": {
     "cases": 4,
@@ -69,8 +86,8 @@
     "Some diagnostic counts/old-group invariance fields were literals; final followup measures them"
   ],
   "reviewFollowup": {
-    "startedAt": "2026-10-25T17:26:29.857153+00:00",
-    "secondsToVerifiedCatchup": 18.536133666988462,
+    "startedAt": "2026-10-25T17:29:16.765846+00:00",
+    "secondsToVerifiedCatchup": 18.387081207998563,
     "backupChatGap": 10,
     "chatGapAfterRecovery": 0,
     "businessSnapshotDifferences": [],
@@ -84,5 +101,22 @@
       "oomKilled": false,
       "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
     }
+  },
+  "latestVerifiedCommit": "89879bd3b32f16b99bd75d24ca6153a6be1868b5",
+  "latestCommand": "./scripts/deploy-rehearsal work/images-baseline.json work/images-integrated.json work/deploy-fourth",
+  "priorLocalArtifactsCleanup": {
+    "directories": [
+      "work/deploy-first",
+      "work/deploy-second"
+    ],
+    "ownedContainerAndVolumeAbsenceVerified": true,
+    "generatedSecretAndDumpFilesDeleted": 6
+  },
+  "localCheck": {
+    "tests": 139,
+    "failures": 0,
+    "harness": 16,
+    "jarBuilt": true,
+    "sortedXmlSha256": "f752233649fbec2c225c8d10adbc4b31e4a5119d0dc001bea815a67a44f948c1"
   }
 }

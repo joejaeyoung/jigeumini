@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chat Pulse · 다음에 볼 방송을 발견하는 곳</title>
+  <title>지금이니 · 다음에 볼 방송을 발견하는 곳</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
   <a class="skip" href="#/home">본문으로 바로가기</a>
   <header class="website-header">
     <div class="platform-topbar">
-      <a class="topbar-wordmark" href="#/home" aria-label="Chat Pulse 홈">chatpulse.</a>
+      <a class="topbar-wordmark" href="#/home" aria-label="지금이니 홈">지금이니</a>
       <nav class="website-nav" data-navigation aria-label="주요 메뉴"></nav>
       <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg><span class="sr-only">전체 방송 검색</span><input id="channel-search" type="search" placeholder="방송, 채널 검색" autocomplete="off"><kbd aria-hidden="true">/</kbd></label>
       <div class="topbar-meta"><span class="preview-label">미리보기</span><button data-open-info aria-label="서비스 안내" class="topbar-help">?</button></div>
@@ -31,8 +31,8 @@
     </section>
     <section id="surges" class="reaction-rail" aria-labelledby="surge-heading"><div class="rail-label"><h2 id="surge-heading">지금 반응 급상승 <span aria-hidden="true">↗</span></h2><p>평소보다 채팅이 늘어난 방송</p></div><div id="surge-list" class="surge-channels"></div><button class="rail-info" data-open-info aria-label="반응 급상승 기준">i</button></section>
     <section id="ranking" class="explore-section" aria-labelledby="ranking-heading"><div class="explore-heading"><div><h2 id="ranking-heading">오늘은 어떤 방송 볼까요?</h2><p id="results-description">수집 대상 중 채팅이 활발한 순서로 모았어요.</p></div><a href="#/explore" id="home-explore-link">전체 방송 보기 ↗</a><div class="segments" role="group" aria-label="순위 집계 시간"><button data-window="1" aria-pressed="false">최근 1분</button><button data-window="5" aria-pressed="true">최근 5분</button></div></div><div class="discovery-tools"><div class="filters" role="group" aria-label="방송 카테고리"><button data-category="전체" aria-pressed="true">전체</button><button data-category="게임" aria-pressed="false">게임</button><button data-category="토크" aria-pressed="false">토크</button><button data-category="음악" aria-pressed="false">음악</button></div><span id="result-count">6개 방송</span></div><ol id="channel-list" class="broadcast-grid" aria-label="채팅량 순 방송 목록"></ol><div id="empty-state" class="empty-state" hidden><h3>조건에 맞는 방송이 없어요</h3><p>검색어나 카테고리를 바꿔서 다시 둘러보세요.</p><button id="reset-filters" class="browse-button">전체 방송 보기 ↗</button></div><div class="scope-note"><span>수집 대상 내 순위 · 예시 기준 21:40 KST</span><button class="text-button" id="coverage-toggle" aria-expanded="false" aria-controls="coverage-panel">집계에서 제외된 방송 2개 ⌄</button></div><div id="coverage-panel" class="coverage-panel" hidden><strong>수집이 불완전한 방송은 순위에서 제외해요.</strong><p>예시 채널 G · 수집 중단 / 예시 채널 H · 집계 지연</p><small>수집하지 못한 구간은 채팅 0건으로 계산하지 않습니다.</small></div></section>
-    <section class="closing-note" hidden><div><h2>시청자 수 너머,<br>지금 모이는 반응.</h2><p>채팅의 움직임을 따라 새로운 방송을 발견해보세요.<br>채팅 수는 반응의 양을 보여주며, 만족도를 뜻하지 않습니다.</p></div><button class="about-link" data-open-info>Chat Pulse는 어떻게 고르나요? <span aria-hidden="true">↗</span></button></section>
-    <footer><a class="brand footer-brand" href="#/home">chatpulse.</a><span>다음 방송을 만나는 새로운 방법.</span><button class="text-button" data-open-info>서비스와 집계 기준</button><span class="footer-note">디자인 시안 · 실제 방송에 연결되지 않습니다.</span></footer>
+    <section class="closing-note" hidden><div><h2>시청자 수 너머,<br>지금 모이는 반응.</h2><p>채팅의 움직임을 따라 새로운 방송을 발견해보세요.<br>채팅 수는 반응의 양을 보여주며, 만족도를 뜻하지 않습니다.</p></div><button class="about-link" data-open-info>지금이니는 어떻게 고르나요? <span aria-hidden="true">↗</span></button></section>
+    <footer><a class="brand footer-brand" href="#/home">지금이니</a><span>다음 방송을 만나는 새로운 방법.</span><button class="text-button" data-open-info>서비스와 집계 기준</button><span class="footer-note">디자인 시안 · 실제 방송에 연결되지 않습니다.</span></footer>
   </main>
   <dialog id="channel-dialog" class="channel-dialog" aria-labelledby="detail-heading"><div class="channel-dialog-top"><span>방송 살펴보기</span><button class="dialog-close" aria-label="방송 상세 닫기">✕</button></div><div id="detail-image" class="thumbnail scene-adventure"><span class="scene-caption">AI 제작 가상 방송 이미지</span></div><div class="detail-broadcast-title"><h2 id="broadcast-title">저 문 너머엔 뭐가 있을까?</h2><p>가상 방송 · 디자인 미리보기</p><button class="browse-button" id="watch-button">방송 보러 가기 ↗</button><p id="watch-note" role="status" hidden>이 방송은 디자인용 예시라 연결할 실제 방송이 없어요.</p></div>
         <section class="detail surface" id="detail" aria-labelledby="detail-heading">

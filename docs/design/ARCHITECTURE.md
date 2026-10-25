@@ -1,4 +1,4 @@
-# Chat Pulse — 전체 아키텍처
+# 지금이니 — 전체 아키텍처
 
 2026-10-25 · v0.2 · 기술 기준: Spring Boot + Apache Kafka + PostgreSQL
 

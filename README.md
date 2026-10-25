@@ -1,4 +1,4 @@
-# 지금이니 · Chat Pulse — 서버·웹 모노레포
+# 지금이니 — 서버·웹 모노레포
 
 치지직 공개 채팅을 익명 READ WebSocket으로 수신해 **Spring에서 데이터 소스를 확보할 수 있는지** 검증한다.
 Java 21 + Spring Boot 4.0.9 + Gradle 9.4.1로 구현했다. Kafka 4.1.2 → PostgreSQL 16.14의 10초 집계와 조회 화면까지 연결한다.

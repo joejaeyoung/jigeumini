@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chat Pulse · 수집 집계</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>지금이니 · 수집 집계</title>
 <style>
 body{max-width:1000px;margin:50px auto;padding:0 24px;background:#f8fafc;color:#1f2937;font:16px/1.6 system-ui,sans-serif}h1{margin-bottom:0}p{color:#475569}section{background:white;border:1px solid #cbd5e1;border-radius:10px;padding:24px;margin:24px 0}.metrics{display:flex;gap:48px;flex-wrap:wrap}strong{display:block;font-size:32px}table{width:100%;border-collapse:collapse;text-align:left}td,th{padding:10px 0;border-bottom:1px solid #e2e8f0}td:first-child{font-family:monospace;font-size:13px}#notice{color:#b45309}small{color:#64748b}</style></head>
-<body><h1>Chat Pulse</h1><p>수집한 채널의 채팅 발생 건수 · 최근 5분</p>
+<body><h1>지금이니</h1><p>수집한 채널의 채팅 발생 건수 · 최근 5분</p>
 <p id="notice">연결 확인 중…</p><section class="metrics"><div>누적 반영 이벤트<strong id="total">—</strong></div><div>10초 버킷 합계<strong id="sum">—</strong></div><div>분석 상태<strong id="state" style="font-size:20px">—</strong></div></section>
 <section><h2>채널별 채팅 수</h2><small>진행 중인 10초 구간 포함. 연결 공백·수집 범위는 아직 측정하지 않아 전체 방송 순위를 뜻하지 않습니다. 데이터가 없다고 정상 수집 0건을 의미하지 않습니다.</small><table><thead><tr><th>채널 ID</th><th>최근 5분</th><th>최근 이벤트 구간</th></tr></thead><tbody id="rows"></tbody></table></section><p id="updated"></p>
 <script>

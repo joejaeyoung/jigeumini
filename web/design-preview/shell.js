@@ -30,7 +30,7 @@ function renderPlatformNavigation() {
 function updatePlatformShell(viewId, savedCount) {
   const view = platformViews[viewId];
   document.body.dataset.view = viewId;
-  document.title = `${view.label} · Chat Pulse`;
+  document.title = `${view.label} · 지금이니`;
   document.querySelector('#page-title').textContent = view.title;
   document.querySelector('#page-description').textContent = view.description;
   document.querySelector('.discovery-hero').hidden = !view.hero;

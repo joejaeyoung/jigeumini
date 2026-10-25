@@ -92,3 +92,6 @@
   .platform .surge-channel { flex-wrap: wrap; }
   .platform .surge-channel .multiplier { margin-left: 48px; }
 }
+
+/* 확정 서비스명: 한글 워드마크 */
+.platform .topbar-wordmark, .platform .footer-brand { font-family: var(--font-body); }

@@ -31,3 +31,7 @@ Claude 초기 리뷰55726f0은 부분 보존 정리와 재계산의 충돌, earl
 보완 구현976f88e에서 `./scripts/check` Java85·하네스16·JAR와 `./scripts/integration` 실제Kafka/DB70(리포트9)이 통과했다. 위1만행 경계 회귀·3일 입력 재개·공유fixture DB동일성 검사를 포함한다. 웹 코드/fixture는55726f0 이후 바꾸지 않아29/31 근거를 유지한다. 정제 JSON의reviewCorrections에 코드/JAR/XML hash를 추가했다.
 
 976f88e는 Claude APPROVE를 받았다. 비차단 항목도 보완해 만료 관측을 배정/coverage에서 제외하고, 같은 원천ID 재등장 시 부분 삭제된 집계를 되살리지 않고 정리 뒤 재시도하게 했다. anchor 삭제를 명시해 부분 정리 회귀를 결정적으로 만들었다. 새 실제DB시험은 부분 bucket 삭제→입력 rollback→cleanup→동일입력재시도1건을 확인한다. 이 추가 보완의 최종검증은 별도로 기록한다.
+
+## 최종 HEAD의 원격 회귀
+
+`e1980f6`의 push40206632119 / PR40206635890은 모두 성공했다. push artifact에서 Java85·실제Kafka/DB71(리포트10)·실패/오류0을 확인했고 정제 근거에 XML 묶음 hash를 남겼다. 웹29/Chromium31과 하네스16·기술 목표도 통과했다. 로컬 최종HEAD는check만 재실행했으며 실제DB 최종회귀는 위 CI에서 수행했다. Claude APPROVE 후 PR #23을a69760a로 develop에 병합했다.

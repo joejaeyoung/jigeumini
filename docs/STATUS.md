@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `fix/replay-diagnostics`
+2026-10-26 · 브랜치 `fix/replay-diagnostics`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -46,15 +46,15 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 ### 방송 요약 #7
 
-`feat/broadcast-reports`, F06 → T02/T04/T08. #5 병합98fe3a3에서 시작했고 승인된 #6/PR #22 병합5a419e3을 통합했다. [계약](api/REPORTS.md)·[검증 기록](api/REPORTS_VERIFICATION.md): 독립 관측 세션/귀속/별칭/집계, DB 원자 보정과 BATCH commit, 품질 완료 분/피크, API/웹 목록→요약, 종료7일 정리와 active/작업 보호를 구현했다. 최종구현55726f0에서 Java84·하네스16·실제Kafka/DB68·웹29·Chromium31과 JAR/웹 빌드가 통과했다. 순수정책4개·report실제검사7개·category회귀8개·같은SQLsnapshot 품질 조회·320/1440px 화면을 확인했다. [정제 근거](poc/evidence/reports-2026-10-25.json)를 고정했고 Claude 리뷰·최종CI를 진행한다. 채팅 침묵/HTTP실패/TTL만료로 종료하지 않으며 원문·닉네임·사용자 ID·토큰을 저장하지 않는다. #16은 별도 작업 폴더의61784de Claude APPROVE·기존base67/16/53 검증까지 마쳤고 이 변경 통합 뒤 최종 검증한다.
+`feat/broadcast-reports`, F06 → T02/T04/T08. [계약](api/REPORTS.md)·[검증 기록](api/REPORTS_VERIFICATION.md)·[정제 근거](poc/evidence/reports-2026-10-25.json). 독립 관측 세션/별칭/귀속/집계, DB 원자 보정·BATCH commit, 품질 완료 분·피크, API/웹과 종료7일 보존을 구현했다. 초기55726f0의 Java84·하네스16·실제Kafka/DB68·웹29·Chromium31 이후 리뷰로 부분 정리 잔여 관측 재계산과48시간 재개 충돌을 수정했다. 976f88e의85/16/70에 이어 최종e1980f6 로컬Java85/하네스16/JAR, 최종CI 실제Kafka/DB71(리포트10)/웹29/Chromium31이 통과했다.
 
-#7 [PR #23](https://github.com/joejaeyoung/jigeumini/pull/23) 최초 PR CI40204570648은 기존 pong 미응답 fixture에서 WS_CLOSED 뒤 timeout 관측이 없어 실패했다. 연결 종료의 내부 원인은 미확정이다. 별도1.2초 승인 지연으로 기존1초 시험 예산 결함을 재현했고 실제 채팅/ping/pong0/timeout을 기다리도록 보완했다. 운영 수집 코드는 바꾸지 않았으며 ChannelProbeTest7개 통과 뒤 최종단위/CI를 다시 진행한다.
+[PR #23](https://github.com/joejaeyoung/jigeumini/pull/23)은 최종e1980f6 Claude APPROVE·push40206632119/PR40206635890 성공 후 `a69760a`로 develop에 병합했다. #7·보드는 완료다. 공통 소비 수명주기 추출과 세션/품질/피크 경계의 [리팩토링 점검](WORK_LOG.md)을 남겼다. 단일broker/RF1·합성 입력 범위이며 장기 미종료 세션 비용·전체 원천 수집·HA는 별도다.
 
-#7 초기 Claude REQUEST_CHANGES의 두 항목을 보완 중이다. 부분 보존 정리 뒤 잔여 관측을 재계산에서 제외하고, 리포트 입력에7일 eventTime 기준을 적용해48시간 이상 중단 뒤에도 이어간다. CI40205131666·40205136741의 관측 시각 정밀도 기대값도 마이크로초 계약에 맞췄다. 보완976f88e의 Java85·하네스16·실제Kafka/DB70(리포트9)·JAR가 통과했다. 976f88e Claude APPROVE를 확인했다. 비차단 항목인 만료 원천ID 재등장과 잔여 관측의 배정도 보완했다. 추가 보완은 단위85·하네스16·JAR를 통과했고 실제DB 회귀를 포함한 최종CI·Claude 승인을 기다린다.
+CI40204570648의 pong 미응답 fixture는 WS_CLOSED 뒤 timeout 관측이 없어 실패했다. 1.2초 승인 지연으로 기존1초 예산 결함을 재현하고 실제 채팅/ping/pong0/timeout을 기다리도록 보완했으나 원래 연결 종료의 내부 원인은 미확정이다. CI40205131666·40205136741의 나노초 기대값은 PostgreSQL 마이크로초 계약에 맞췄다. 만료 원천ID 재등장도 부분 정리 후 합산하지 않고 rollback→정리→재시도로 검증했다.
 
 ## 재처리 CLI 후속 보완 #16
 
-`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 선행#7의heartbeat fixture 보완을 통합한63ff05d에서도 Java84·하네스16이 통과했으며 a8ef43a(63ff05d 이후 문서 변경만)의 Claude 최종 APPROVE를 받았다. CI40205388582·40205422320은 선행리포트의 시각 정밀도 시험에서 실패했다. #7의976f88e 수정과791ff1a 근거를 통합해 최종CI·병합을 진행한다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
+`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 선행#7의heartbeat fixture 보완을 통합한63ff05d에서도 Java84·하네스16이 통과했으며 a8ef43a(63ff05d 이후 문서 변경만)의 Claude 최종 APPROVE를 받았다. CI40205388582·40205422320은 선행리포트의 시각 정밀도 시험에서 실패했다. #7의976f88e 수정과791ff1a 근거를 통합한 c222ee6 push40206443045/PR40206447239가 성공했다. 승인·병합된 최종#7(e1980f6/a69760a)을537b3cc에서 통합했고 [작업 로그](WORK_LOG.md)에 리팩토링 점검을 기록했다. 이 최종 통합의 Claude·CI 뒤 병합한다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
 
 
 ## 오류 격리·복구 진단 #10

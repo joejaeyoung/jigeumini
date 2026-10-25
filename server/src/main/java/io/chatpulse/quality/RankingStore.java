@@ -35,7 +35,7 @@ public final class RankingStore {
         tx.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
         tx.setTimeout(20);
     }
-    public void evaluate() { evaluate(Instant.ofEpochSecond(Math.floorDiv(clock.instant().getEpochSecond(), 10) * 10)); }
+    public void evaluate() { evaluate(Instant.ofEpochSecond(Math.floorDiv(clock.instant().minusSeconds(7).getEpochSecond(), 10) * 10)); }
     public void evaluate(Instant at) {
         if (at.getNano() != 0 || at.getEpochSecond() % 10 != 0 || at.isAfter(clock.instant())) throw new IllegalArgumentException("EVALUATION_TIME");
         tx.executeWithoutResult(transaction -> {
@@ -80,6 +80,14 @@ public final class RankingStore {
         boolean bufferFresh = !buffers.isEmpty() && fresh(buffers.getFirst()[0],15,now)
                 && !buffers.getFirst()[0].isBefore(to);
         boolean bufferLag = bufferFresh && buffers.getFirst()[1] != null && (buffers.getFirst()[1].isBefore(to) || now.isAfter(buffers.getFirst()[1].plusSeconds(10)));
+        // 최신 표본을 계속 쫓으면 정상 연속 입력도 끝없이 제외된다. 창 뒤의 첫 안전한 drain을 고정한다.
+        var drains = jdbc.query("""
+                SELECT observed_at FROM collector_buffer_observation
+                WHERE channel_id=? AND collector_id=? AND observed_at>=? AND observed_at<=?
+                  AND (oldest_unacked_at IS NULL OR oldest_unacked_at>=?)
+                ORDER BY observed_at LIMIT 1
+                """,(rs,n)->instant(rs,1),c.id,c.collector,ts(to),ts(now),ts(to));
+        bufferFresh = bufferFresh && !drains.isEmpty();
         int partition = Utils.toPositive(Utils.murmur2(c.id.getBytes(java.nio.charset.StandardCharsets.UTF_8))) % 3;
         var observations = jdbc.query("SELECT observed_at,last_caught_up_at,poll_heartbeat_at,blocked FROM projection_observation WHERE projection=? AND run_id=? AND topic=? AND partition=?",
                 (rs,n) -> new Observation(instant(rs,1),instant(rs,2),instant(rs,3),rs.getBoolean(4)),projection,run,topic,partition);
@@ -88,7 +96,7 @@ public final class RankingStore {
         // 창 끝 이후 수집 버퍼를 관측한 시점까지의 broker 표본이 DB에 반영돼야 한다.
         // 버퍼 ACK 이후에 DB에 미반영된 이벤트를 오래된 caught-up 관측으로 정상 확정하지 않는다.
         boolean analysisFresh = known && bufferFresh && observation.caught != null
-                && !observation.caught.isBefore(buffers.getFirst()[0])
+                && !observation.caught.isBefore(drains.getFirst())
                 && !now.isAfter(observation.caught.plusSeconds(10));
         return new Health(QualityPolicy.evaluate(c.enabled,c.state,c.since,from,to,intervals,loss,fresh(c.updated,15,now),sourceFresh,
                 bufferFresh,bufferLag,known,analysisFresh,observation != null && observation.blocked),intervals,loss);

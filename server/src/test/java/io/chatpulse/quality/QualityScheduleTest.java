@@ -32,11 +32,11 @@ class QualityScheduleTest {
         };
         try {
             QualityRuntime.scheduleEvaluation(scheduler, clock, () -> {
-                ticks.add(Math.floorDiv(clock.millis(), 10000) * 10);
+                ticks.add(Math.floorDiv(clock.millis() - 7000, 10000) * 10);
                 millis.addAndGet(300); // 합성 DB 평가 비용. fixed delay라면 약 34회마다 tick을 건너뛴다.
             });
             assertEquals(120, ticks.size());
-            for (int i = 0; i < ticks.size(); i++) assertEquals((i + 1) * 10L, ticks.get(i));
+            for (int i = 0; i < ticks.size(); i++) assertEquals(i * 10L, ticks.get(i));
         } finally { scheduler.shutdownNow(); }
     }
 }

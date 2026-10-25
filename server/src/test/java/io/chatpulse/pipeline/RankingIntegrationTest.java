@@ -43,6 +43,7 @@ class RankingIntegrationTest {
         jdbc.update("INSERT INTO collection_channel VALUES (?,?,true,?,'CONNECTED',?) ON CONFLICT(channel_id) DO UPDATE SET updated_at=excluded.updated_at",id,collector,ts(t.minusSeconds(600)),ts(clock.now));
         jdbc.update("INSERT INTO collection_session VALUES (?,?,?,?,?,?,NULL,NULL)",UUID.randomUUID(),id,collector,ts(t.minusSeconds(600)),ts(clock.now),ts(clock.now));
         jdbc.update("INSERT INTO collector_channel_buffer VALUES (?,?,?,NULL,0) ON CONFLICT(channel_id) DO UPDATE SET observed_at=excluded.observed_at",id,collector,ts(clock.now));
+        jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,NULL) ON CONFLICT DO NOTHING",id,collector,ts(clock.now));
         for(String projection:List.of("ranking","ranking-trend"))for(int partition=0;partition<3;partition++)
             jdbc.update("INSERT INTO projection_observation VALUES (?,?,?,?,?,0,?,?,false) ON CONFLICT(projection,run_id,topic,partition) DO UPDATE SET observed_at=excluded.observed_at,last_caught_up_at=excluded.last_caught_up_at,poll_heartbeat_at=excluded.poll_heartbeat_at",projection,"test-v1",topic,partition,ts(clock.now),ts(clock.now),ts(clock.now));
     }
@@ -70,6 +71,23 @@ class RankingIntegrationTest {
             }
         }
         clock.now=t.plusSeconds(21);assertThat(store.rankings(60,20).status()).isEqualTo("STALE");
+    }
+    @Test void independentObservationPhasesKeepNormalTicksHealthyWithGrace() {
+        // collector는 5초 간격(위상 0~4), observer는 1초 간격·소비 지연 2초, 평가 유예 8초.
+        for (int tick=0;tick<15;tick++) {
+            var end=t.plusSeconds(tick*10L);clock.now=end.plusSeconds(8);healthy(a);
+            bucket("ranking",a,end.minusSeconds(10),10);
+            int phase=tick%5;
+            for (int delta=phase;delta<=8;delta+=5)
+                jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,NULL) ON CONFLICT DO NOTHING",a,collector,ts(end.plusSeconds(delta)));
+            jdbc.update("UPDATE projection_observation SET last_caught_up_at=?",ts(end.plusSeconds(6)));
+            store.evaluate();
+            var result=store.rankings(60,20);
+            assertThat(result.evaluatedAt()).isEqualTo(end.toString());
+            assertThat(result.entries()).hasSize(1);
+            assertThat(result.entries().getFirst().status()).isEqualTo("HEALTHY");
+            assertThat(result.entries().getFirst().count()).isEqualTo(Math.min(tick+1,6)*10L);
+        }
     }
     @Test void windowEndRequiresDrainedBufferAndCaughtUpSampleAfterBufferObservation() {
         healthy(a);healthy(b);healthy(c);

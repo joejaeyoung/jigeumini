@@ -64,15 +64,16 @@ public final class CollectionTelemetry implements CollectionObserver, AutoClosea
         var old = channels.get(channel);
         if (old != null && !Set.of("OFFLINE", "UNAVAILABLE").contains(old.state)) channels.put(channel, new Channel(old.since, "STOPPED", false));
     }
-    private void safeFlush() { try { flush(Instant.now()); } catch (RuntimeException ignored) { /* heartbeat 만료가 품질을 하향한다. */ } }
+    private void safeFlush() { try { flush(null); } catch (RuntimeException ignored) { /* heartbeat 만료가 품질을 하향한다. */ } }
     public void flush(Instant at) { synchronized (flushLock) { flushOnce(at); } }
     private void flushOnce(Instant at) {
         Map<String, Channel> cs; Map<UUID, Session> ss; List<Loss> ls;
         synchronized (this) { cs = Map.copyOf(channels); ss = Map.copyOf(sessions); ls = List.copyOf(losses); }
         var buffers = publisher.bufferSnapshot();
+        final Instant observed = at == null ? Instant.now() : at;
         if (publisher.deliveryFailed()) {
             synchronized (this) {
-                for (var item : buffers.entrySet()) loss(item.getKey(), item.getValue().oldest(), at, "UNCONFIRMED_DELIVERY");
+                for (var item : buffers.entrySet()) loss(item.getKey(), item.getValue().oldest(), observed, "UNCONFIRMED_DELIVERY");
                 ls = List.copyOf(losses);
             }
         }
@@ -84,21 +85,24 @@ public final class CollectionTelemetry implements CollectionObserver, AutoClosea
                         INSERT INTO collection_channel VALUES (?, ?, ?, ?, ?, ?)
                         ON CONFLICT(channel_id) DO UPDATE SET collector_id=excluded.collector_id, enabled=excluded.enabled,
                         observed_since=excluded.observed_since, state=excluded.state, updated_at=excluded.updated_at
-                        """, item.getKey(), collector, c.enabled, ts(c.since), c.state, ts(at));
+                        """, item.getKey(), collector, c.enabled, ts(c.since), c.state, ts(observed));
                 var buffer = buffers.get(item.getKey());
                 jdbc.update("""
                         INSERT INTO collector_channel_buffer VALUES (?, ?, ?, ?, ?)
                         ON CONFLICT(channel_id) DO UPDATE SET collector_id=excluded.collector_id, observed_at=excluded.observed_at,
                         oldest_unacked_at=excluded.oldest_unacked_at, buffer_count=excluded.buffer_count
-                        """, item.getKey(), collector, ts(at), buffer == null ? null : ts(buffer.oldest()), buffer == null ? 0 : buffer.count());
+                        """, item.getKey(), collector, ts(observed), buffer == null ? null : ts(buffer.oldest()), buffer == null ? 0 : buffer.count());
+                jdbc.update("INSERT INTO collector_buffer_observation VALUES (?,?,?,?) ON CONFLICT DO NOTHING",
+                        item.getKey(),collector,ts(observed),buffer == null ? null : ts(buffer.oldest()));
             }
+            jdbc.update("DELETE FROM collector_buffer_observation WHERE observed_at<?",ts(observed.minusSeconds(120)));
             for (var item : ss.entrySet()) {
                 var s = item.getValue();
                 jdbc.update("""
                         INSERT INTO collection_session VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT(session_id) DO UPDATE SET heartbeat_at=excluded.heartbeat_at, source_alive_at=excluded.source_alive_at,
                         ended_at=excluded.ended_at, end_reason=excluded.end_reason
-                        """, item.getKey(), s.channel, collector, ts(s.start), ts(at), ts(s.alive), ts(s.end), s.reason);
+                        """, item.getKey(), s.channel, collector, ts(s.start), ts(observed), ts(s.alive), ts(s.end), s.reason);
             }
             for (var l : writtenLosses) jdbc.update("INSERT INTO collection_loss VALUES (?, ?, ?, ?, ?) ON CONFLICT(loss_id) DO UPDATE SET start_at=least(collection_loss.start_at,excluded.start_at), end_at=greatest(collection_loss.end_at,excluded.end_at), reason=excluded.reason",
                     l.id, l.channel, ts(l.from), ts(l.to), l.reason);

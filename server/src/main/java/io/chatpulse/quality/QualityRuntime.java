@@ -26,8 +26,8 @@ public final class QualityRuntime implements AutoCloseable {
     }
     static void scheduleEvaluation(ScheduledExecutorService scheduler, java.time.Clock clock, Runnable task) {
         long now = clock.millis();
-        long next = (Math.floorDiv(now - 1000, 10000) + 1) * 10000 + 1000;
-        // 완료 경계 1초 뒤, 실행 소요 시간과 무관한 고정 주기. 10초 초과 지연은 STALE로 남긴다.
+        long next = (Math.floorDiv(now - 8000, 10000) + 1) * 10000 + 8000;
+        // 완료 경계 8초 뒤, 실행 소요 시간과 무관한 고정 주기. 10초 초과 지연은 STALE로 남긴다.
         scheduler.scheduleAtFixedRate(task, next - now, 10000, TimeUnit.MILLISECONDS);
     }
     @Override public void close() {

@@ -22,7 +22,7 @@ public final class ProjectionObserver implements AutoCloseable {
         this.admin = Admin.create(Map.of("bootstrap.servers", bootstrap, "request.timeout.ms", 3000, "default.api.timeout.ms", 4000));
         this.jdbc = jdbc; this.consumer = consumer; this.projection = projection; this.run = run;
     }
-    public void start() { worker.scheduleWithFixedDelay(() -> { try { observe(); } catch (Exception ignored) { /* 미관측은 정상으로 갱신하지 않는다. */ } }, 0, 5, TimeUnit.SECONDS); }
+    public void start() { worker.scheduleWithFixedDelay(() -> { try { observe(); } catch (Exception ignored) { /* 미관측은 정상으로 갱신하지 않는다. */ } }, 0, 1, TimeUnit.SECONDS); }
     public void observe() throws Exception {
         var poll = consumer.pollState();
         if (poll.partitions().isEmpty()) return;
@@ -36,7 +36,7 @@ public final class ProjectionObserver implements AutoCloseable {
         for (var tp : poll.partitions()) {
             var history = samples.computeIfAbsent(tp, key -> new ArrayDeque<>());
             history.addLast(new Sample(sampledAt, ends.get(tp).offset()));
-            while (history.size() > 3) history.removeFirst();
+            while (history.size() > 15) history.removeFirst();
             long resolved = jdbc.queryForObject("SELECT coalesce(max(next_resolved_offset),-1) FROM projection_progress WHERE projection=? AND run_id=? AND topic=? AND partition=?",
                     Long.class, projection, run, tp.topic(), tp.partition());
             Instant caught = history.stream().filter(sample -> resolved >= sample.end).map(Sample::at).max(Instant::compareTo).orElse(null);

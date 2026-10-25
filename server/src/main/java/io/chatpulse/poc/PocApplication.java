@@ -8,6 +8,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties(PocProperties.class)
 public class PocApplication {
     public static void main(String[] args) throws InterruptedException {
+        if (args.length > 0 && "ops".equals(args[0])) {
+            System.exit(io.chatpulse.operations.OperationsCli.run(java.util.Arrays.copyOfRange(args,1,args.length)));return;
+        }
         if (args.length > 0 && "fleet".equals(args[0])) {
             System.exit(io.chatpulse.fleet.FleetCli.run(java.util.Arrays.copyOfRange(args,1,args.length)));return;
         }
@@ -24,6 +27,8 @@ public class PocApplication {
                 new java.util.concurrent.CountDownLatch(1).await();
             }
             code = context.getBean(PocRunner.class).run();
+        } catch(RuntimeException failure) {
+            io.chatpulse.operations.FailureDiagnostics.startupFailed(failure);code=2;
         }
         System.exit(code);
     }

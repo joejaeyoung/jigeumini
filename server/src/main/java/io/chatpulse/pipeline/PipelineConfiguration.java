@@ -2,6 +2,8 @@ package io.chatpulse.pipeline;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.chatpulse.db.PostgresSupport;
+import io.chatpulse.operations.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -35,8 +37,24 @@ public class PipelineConfiguration {
         return new BufferedKafkaPublisher(new KafkaTemplate<>(factory), readyTopic, codec, p.publisherLimits());
     }
     @Bean(destroyMethod = "close")
-    HikariDataSource dataSource(PipelineProperties p) {
-        return PostgresSupport.openMigrated(p.jdbcUrl(), p.dbUser(), p.dbPassword());
+    HikariDataSource dataSource(PipelineProperties p,KafkaTopicPolicy policy,
+            @Value("${pipeline.schema-mode:MIGRATE}") String schemaMode,
+            @Value("${pipeline.db-password-file:}") String secretFile,
+            @Value("${deployment.recovery-guard:false}") boolean recoveryGuard,
+            @Value("${deployment.enabled:false}") boolean deploymentEnabled,
+            @Value("${observations.topic:broadcast.observed.v1}") String observationTopic,
+            @Value("${notifications.topic:}") String notificationTopic) {
+        String password=RuntimeEnvironment.secret(p.dbPassword(),secretFile,deploymentEnabled||schemaMode.equals("VALIDATE"));
+        if(!java.util.Set.of("MIGRATE","VALIDATE").contains(schemaMode))throw new IllegalArgumentException("SCHEMA_MODE");
+        var ds=schemaMode.equals("VALIDATE")?PostgresSupport.openValidated(p.jdbcUrl(),p.dbUser(),password):PostgresSupport.openMigrated(p.jdbcUrl(),p.dbUser(),password);
+        try {
+            if(recoveryGuard && p.role().equals("analyzer")) {
+                var config=new RuntimeEnvironment(p.jdbcUrl(),p.dbUser(),password,p.bootstrapServers(),p.topic(),observationTopic,
+                        notificationTopic.isEmpty()?p.topic()+".spikes":notificationTopic,p.group(),p.projection(),p.runId(),policy);
+                try(var planner=new RecoveryPlan(new JdbcTemplate(ds),config)) {planner.requireSafeStartup();}
+            }
+            return ds;
+        } catch(RuntimeException|Error failure){ds.close();throw failure;}
     }
     @Bean
     @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")

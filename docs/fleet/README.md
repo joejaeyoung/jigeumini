@@ -39,7 +39,7 @@
 
 정상종료는새획득중단→WS종료→최대10초발행drain→heartbeat종료→임대해제순서다. drain동안임대를계속갱신한다. DB장애/만료면permit을취소하고미확인을남긴다. DB해제실패시새소유자는원래만료를기다린다. 진단 파일은 정상 종료와 SIGTERM hook이 저장 전체를 동기화하고 파일 쓰기가 끝난 뒤 hook을 제거한다. CLI의 telemetry 마지막 flush와 producer 정리도 hook이 기다리는 저장 경로에 포함한다. released=true는 owner/epoch를 확인한 해제 명령이 DB에서 성공했다는 뜻이며, 이미 새 소유자라 실제 변경0행이어도 true다. 강제SIGKILL/전원손실의메모리입력과결과파일은복원하지못한다.
 
-status의discovered/eligible/selected와유효assigned/connected를분리한다. connected는최근heartbeat의연결관측이고건강한집계구간의증명이아니다. healthyWindow는null이며[품질API](../api/QUALITY_RANKINGS.md)에서별도판정한다. 운영worker는CollectionTelemetry에수신·종료·손실·buffer관측을연결한다. 시청자메타데이터수집기는이새CLI에아직합성하지않았다. 원천API/토큰/채팅원문은파일과로그에기록하지않는다.
+status의discovered/eligible/selected와유효assigned/connected를분리한다. connected는최근heartbeat의연결관측이고건강한집계구간의증명이아니다. healthyWindow는null이며[품질API](../api/QUALITY_RANKINGS.md)에서별도판정한다. 운영worker는CollectionTelemetry에수신·종료·손실·buffer관측을연결한다. 시청자 관측은 임대한 채널만 활성화하며 채팅과 HTTP 예산·권한을 공유한다. 응답 뒤/발행 직전 재검사하며 OBSERVATIONS_ENABLED=false로 끌 수 있다. HA 정책도 채팅/관측 토픽에 같은 환경 설정을 전달한다. 원천API/토큰/채팅원문은파일과로그에기록하지않는다.
 
 ## 근거·리팩토링
 
@@ -50,3 +50,5 @@ status의discovered/eligible/selected와유효assigned/connected를분리한다.
 ## Kafka 준비 후 수집 시작
 
 worker는 producer 생성과 `partitionsFor` 성공을 먼저 확인한 뒤 임대 획득·원천 연결을 시작한다. 준비 실패는 `FLEET_KAFKA_NOT_READY`로 거부하며 HTTP/소켓/임대를 만들지 않는다. metadata 대기는 producer의 `max.block.ms=2000` 설정을 따른다. 이 값이 JVM의 producer 생성 전체 시간을 제한한다는 뜻은 아니다. 실행 중 장애에는 기존 유한 큐·미확인 계수·실패 종료 계약을 적용하며 큐 크기를 늘려 감추지 않는다.
+
+CLI는 결과 경로를 배타 생성하므로 준비 실패 때 빈 파일이 남을 수 있다. 진단 코드는 stdout에서 확인하고 다음 실행에는 새 결과 경로를 사용한다. 기존 결과 파일을 자동 덮어쓰지 않는다. 배포 통합의 FailureDiagnostics는 `FLEET_KAFKA_NOT_READY`와 예외 타입명을 허용하며 원인 메시지는 남기지 않는다.

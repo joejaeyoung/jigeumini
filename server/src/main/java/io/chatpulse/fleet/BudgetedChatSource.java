@@ -21,6 +21,8 @@ public final class BudgetedChatSource implements ChatSource {
         }
         requests++;next=System.nanoTime()+interval;
     }
+    public io.chatpulse.pipeline.PublishingAuthority.Permit authorize(String channel){return authority.acquire(channel);}
+    public void reserveFor(String channel){authority.acquire(channel).check();reserve();authority.acquire(channel).check();}
     @Override public String resolveRoom(String channel){authority.acquire(channel).check();reserve();return source.resolveRoom(channel);}
     @Override public String readToken(String room){reserve();return source.readToken(room);}
     @Override public URI socketUri(String room){authority.checkAll();return source.socketUri(room);}

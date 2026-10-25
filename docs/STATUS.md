@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-26 · 브랜치 `feat/collector-leases`
+2026-10-26 · 브랜치 `feat/deployment-rehearsal`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -102,7 +102,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의는 미검증; #28 배정/정상 수집 범위 연결 |
 | T14 | 부분 검증 | [임대 검증](fleet/VERIFICATION.md) | 실제 두 JVM·합성 WS·DB/Kafka에서 배타 획득·정상/만료 인계·DB 소켓 단절, 기존 전체87 통과·SIGTERM 저장 회귀·재개 후 기존session 입력0; Linux 간헐 인계 실패 후 시작 준비 보완·실제 임대7개 통과, 최종 CI 대기 | 협력 worker의 유효 DB 임대와 로컬 permit 범위; broker fencing·물리 소켓 즉시 종료·원천 무공백 보장은 아님 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
-| T16 | 미착수 | [배포 조사](research/KAFKA_DEPLOYMENT.md) | 외부 배포 미실행; 컨테이너/복구 리허설 설계 | #30 이미지·rollback·DB/offset 복원 대조 |
+| T16 | 부분 검증 | [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 로컬RF1·합성·동일V12 이미지 범위; 외부배포/운영SLA/PITR/파괴적migration 미검증. 실제 새 migration 전후 rollback은 미검증. 보강 이미지 재검증·최종 리뷰/CI 진행 |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.
@@ -215,3 +215,7 @@ F15 → T04/T08/T10/T15. [계약](pipeline/KAFKA_HA.md)·[검증](pipeline/KAFKA
 ### ACK·commit 경계 #31
 
 F11 → T01/T10. 472908f의 실제6노드/별도JVM commit10사례·ACK3수준 대조가 통과했다. [검증·결정](pipeline/ACK_COMMIT.md)과 [원본3회](poc/evidence/ack-commit-2026-10-26/summary.json)에 첫 실패와 보완, 위험한 AUTO poll 순서의 누락1·정상9사례누락0·복구broker/DB차이0을 기록했다. 제품BATCH/acks=all 설정은 유지한다. 최신49a3834 clean tree 재실행도13사례·정리 통과했고 물리/고유/DB 및 실제 설정을 기록했다. 최종cb5fa38 Claude APPROVE·push40215140028/PR40215143544 SUCCESS 후 PR36을50cd6ad로 develop에 병합했다. CI단위124·실제81·하네스16·웹29/31이며 #31·보드 완료다.
+
+### 배포·복구 #30
+
+F16 → T04/T08/T16. 공급자 독립 이미지와 로컬 Compose, 복원 DB의 여섯 group 위치 검사·새 group 준비를 구현한다. 원천 identity/보존 만료·offset 앞섬·schema 호환성4개 실제 검증을 통과했다. 88b30e6의 첫 이미지 리허설16단계가 통과했다. 4f85f1d→88b30e6→4f85f1d 교체/복귀, schema checksum 실패 중단, 새DB복원·새group6개 재개 후20건/알림2개·집계 차이0, 첫 browser는 shell 범위였으며 등록되지 않은/reports를 기능 성공으로 계산하지 않는다. 230852b 보강17단계는 실제8경로+리포트20건·API2xx/503재시도·원인코드/DDL42501·기존groupoffset불변·자원정리를 확인했다. 관측복구6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님)의 범위는 [운영안](DEPLOYMENT_OPERATIONS.md)에 명시했다. 최신1bde2b7 통합 이미지17단계·단위142/하네스16/JAR 통과와 [배포 검증](DEPLOYMENT_VERIFICATION.md)을 기록했다. 전체 회귀·최종 리뷰/CI를 진행하며 외부 배포는 실행하지 않는다.

@@ -23,6 +23,8 @@ public final class ObservationCollector implements AutoCloseable, io.chatpulse.p
     private final Map<String, Instant> next = new HashMap<>();
     private final Map<String, Integer> rateLimits = new HashMap<>();
     private volatile boolean closed;
+    private final java.util.concurrent.atomic.AtomicLong skippedRequests=new java.util.concurrent.atomic.AtomicLong();
+    public long skippedRequests(){return skippedRequests.get();}
     public ObservationCollector(List<String> channels, String run, int interval, int ttl,
             Function<String, PublicBroadcastObservation> source, Consumer<BroadcastObserved> publisher) {
         this(channels, run, interval, ttl, source, publisher, Clock.systemUTC(),
@@ -53,6 +55,10 @@ public final class ObservationCollector implements AutoCloseable, io.chatpulse.p
         if (closed || !active.contains(channel)) { synchronized (this) { pending.remove(channel); } return; }
         PublicBroadcastObservation data;
         try { data = Objects.requireNonNull(source.apply(channel)); }
+        catch (io.chatpulse.metadata.PublicObservationSource.Skipped skipped) {
+            skippedRequests.incrementAndGet();
+            synchronized(this){pending.remove(channel);next.put(channel,clock.instant().plusSeconds(interval));}return;
+        }
         catch (RuntimeException ignored) { data = new PublicBroadcastObservation(LiveStatus.UNKNOWN, null, null, null, null, Quality.UPSTREAM_ERROR); }
         Instant at = clock.instant();
         try {

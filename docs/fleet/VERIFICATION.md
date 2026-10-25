@@ -43,3 +43,5 @@ DB 소유권·만료와 로컬 단조시계 권한을 분리했다. 동일 epoch
 별도로 producer 첫 생성에3초를 넣고 합성 입력10건/초·채널 큐20을 유지하자, 수락20/ACK20/거절1과 `PUBLISH_CHANNEL_LIMIT`→`CHANNEL_ENDED` 종료를 재현했다. 이 실패 후30초 재시도 대기는 기존 인계 시험의25초보다 길다. [원본](../poc/evidence/fleet-2026-10-26/startup/reproduction.json)은 기존 코드+지연 fixture 작업 트리에서 얻었으며 과거 CI와 원인이 같다는 증거는 아니다.
 
 수집 전에 producer/metadata 준비를 완료하도록 수정했다. 지연 중 DB 임대0·WebSocket0, 준비 뒤 정상 연결·거절0·수락/ACK/broker/DB 일치를 확인하는 회귀를 추가했다. 단위134·하네스16·JAR와 실제 임대7개가 통과했다. 부모가 준비 진행을 명시 해제하는 barrier로 검사 스케줄의 경합도 제거했다. 대기열 상한은30/채널20/동시4를 유지한다. 시작 이후 broker 장애나 모든 스케줄 지연을 해결한 것으로 확대하지 않는다. 최종 HEAD CI와 리뷰는 별도 게이트다.
+
+위 로컬 임대7개 실행 뒤 부모 해제 barrier를 추가했고 해당 지연 회귀1개를 다시 실행했다. 변경된 전체 시험 조합은 최종 CI가 검증한다. 재현용 `slowProducerStartupReproduction` 명령은 당시 임시 fixture 이름이며 현재 저장소에는 없다. 커밋된 회귀는 `slowProducerStartupCompletesBeforeLeaseAndSourceAdmission`이며 재현 입력/정제 결과와 임시 시험을 구분한다. CI 업로드 단계는 `if: always()`로 정제 자식 결과를 보관한다.

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 1 ]] || { echo '사용법: ./scripts/deploy-images <새 manifest.json>'; exit 2; }
+[[ -z "$(git status --porcelain)" ]] || { echo 'DEPLOY_REQUIRES_CLEAN_COMMIT'; exit 2; }
+./gradlew --console=plain :server:bootJar >&2
+./scripts/web install >&2
+./scripts/web build >&2
+exec python3 scripts/deploy-images.py "$1"

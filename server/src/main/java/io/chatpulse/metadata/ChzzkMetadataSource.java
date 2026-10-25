@@ -13,11 +13,14 @@ import static io.chatpulse.metadata.BroadcastMetadata.*;
 public final class ChzzkMetadataSource implements MetadataSource, PublicObservationSource {
     private final RestClient client;
     private final String base;
+    private final java.util.function.Consumer<String> beforeRequest;
     private final JsonMapper json = JsonMapper.builder().build();
 
     public ChzzkMetadataSource() { this("https://api.chzzk.naver.com"); }
-    ChzzkMetadataSource(String base) {
-        this.base = base;
+    public ChzzkMetadataSource(java.util.function.Consumer<String> beforeRequest) { this("https://api.chzzk.naver.com",beforeRequest); }
+    ChzzkMetadataSource(String base) { this(base,ignored->{ }); }
+    ChzzkMetadataSource(String base,java.util.function.Consumer<String> beforeRequest) {
+        this.base = base;this.beforeRequest=java.util.Objects.requireNonNull(beforeRequest);
         var http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3))
                 .followRedirects(HttpClient.Redirect.NEVER).build();
         var factory = new JdkClientHttpRequestFactory(http);
@@ -52,6 +55,7 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
             return new PublicBroadcastObservation(LiveStatus.LIVE, viewers, broadcast,
                     category(live, "liveCategory"), category(live, "liveCategoryValue"),
                     viewers == null ? PublicBroadcastObservation.Quality.MISSING_VIEWER_COUNT : PublicBroadcastObservation.Quality.OBSERVED);
+        } catch (PublicObservationSource.Skipped skipped) { throw skipped;
         } catch (Failure failure) {
             var status = failure.reason == Reason.RESTRICTED ? LiveStatus.RESTRICTED
                     : failure.reason == Reason.NOT_FOUND ? LiveStatus.NOT_FOUND : LiveStatus.UNKNOWN;
@@ -68,9 +72,9 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
     }
     private LiveDocument readLive(String id) {
         if (id == null || !id.matches("[a-f0-9]{32}")) throw new Failure(Reason.INVALID_RESPONSE);
-        var live = get("/service/v2/channels/" + id + "/live-detail");
+        var live = get(id,"/service/v2/channels/" + id + "/live-detail");
         if (live.isNull()) {
-            var channel = get("/service/v1/channels/" + id);
+            var channel = get(id,"/service/v1/channels/" + id);
             if (!id.equals(channel.path("channelId").asText()) || !channel.path("openLive").isBoolean()
                     || channel.path("openLive").asBoolean()) throw new Failure(Reason.INVALID_RESPONSE);
             return new LiveDocument(channel, null, LiveStatus.OFFLINE);
@@ -120,7 +124,8 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
         String text = value.asText().strip();
         return text.isEmpty() || text.length() > max ? null : text;
     }
-    private JsonNode get(String path) {
+    private JsonNode get(String channel,String path) {
+        try{beforeRequest.accept(channel);}catch(io.chatpulse.poc.SourceFailure skipped){throw new PublicObservationSource.Skipped();}
         return client.get().uri(base + path).exchange((request, response) -> {
             int status = response.getStatusCode().value();
             if (status != 200) throw new Failure(reason(status));

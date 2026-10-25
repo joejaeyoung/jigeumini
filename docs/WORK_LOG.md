@@ -155,6 +155,41 @@
 
 - #31 최종cb5fa38 Claude APPROVE·push40215140028/PR40215143544 SUCCESS를 확인해 PR36을50cd6ad로 병합했다. CI artifact 단위124/실제81, 로그 하네스16·웹29/31이다. 문서의 원본2회를3회로 정정하고 요약의 대표 command/eventTimeBase를 최신third로 맞췄다.
 
+## 2026-10-26 · 배포·복구 #30 구현과 경계 점검
+
+- 이미지 commit/실제 ID·비밀 파일·비특권 앱·내부망·readiness·분리 migration과 runtime 계정을 구현했다. RuntimeEnvironment가 비밀/CLI 정책을, RecoveryPlan이 원천 identity/보존/DB 진행/Kafka offset 대조를 소유한다. 여섯 group의 복구는 새 namespace에만 설정하며 기존 group 변경을 금지한다.
+- 실제 Kafka/DB의 시작 위치 불일치·새 group 복구·보존 만료·동명 topic 재생성·schema checksum/미래 migration 거부4개가 통과했다. 첫 실행은 테스트 Admin의 timeout 설정 충돌로 setup4개가 실패했다. XML에 남은 정확한 schema/원천ID16개를 대조해 소유 자원만 정리했고 설정/실패정리를 보완했다.
+- fleet에 시청자 관측을 결합하며 임대한 채널만 활성화하고 채팅 HTTP 예산·권한을 공유한다. metadata 응답 뒤와 발행 직전에 권한을 확인한다. 공개live는 실행하지 않았다.
+- 전체 이미지·롤백·백업 복원·브라우저 리허설과 최종 리팩토링/Claude/CI는 진행 중이다.
+
+### #30 첫 이미지 리허설·수집기 통합·리팩토링
+
+- 4f85f1d와88b30e6의 실제 image ID/JAR/buildId를 고정해16단계가 통과했다. 웹7경로 새로고침·375px overflow0·pageError0, DB 장애503/프로세스200, checksum 불일치 기동 거부·이미지 복귀, 새DB 복원과 Kafka 위치 차이 거부·새group6개 재개를 확인했다. 백업10→최종20건/알림2·미발행0·선택한 집계/ledger hash 차이0이며 관측복구17.105초다. 소유 컨테이너·볼륨만 정리했다.
+- #28의 shutdown hook 결과 저장 보완을 통합했다. CLI 종료 callback에 관측/producer/telemetry 정리를 모아 SIGTERM에서도 기다리고, worker에 배포 schema VALIDATE를 연결했다. 관측 응답 후 권한 상실 검증은 종료 동작이 발행을 막는 오탐을 피하도록 실제 늦은 응답 future의 SourceFailure와 발행 경계를 각각 단언한다. 기존 ObservationCollector 수명을 재사용한다.
+- 관리형/자체운영 후보와 비용 입력·수집 확대 중단·경보·복구 시작/끝의 정의를 DEPLOYMENT_OPERATIONS에 추가했다. 단가·전체채널 수·운영 RPO/RTO를 측정값 없이 확정하지 않았다. 이미지 CLI status/비활성 worker를 추가 리허설한다. 원천live/외부배포는 실행하지 않았다.
+
+### #30 Claude 초기 변경 요청과 검증 보강
+
+- Claude 6ca20c20은88b30e6에 REQUEST_CHANGES를 냈다. NGINX location별 add_header 상속 때문에 static의 nosniff가 빠졌고, 첫 browser는 API/실제 heading을 보지 않아 없는 /reports의 fallback도 통과했다. 응답·heading·실제20건 리포트·503/재시도·헤더 단언을 추가했다.
+- startup 실패가 단순 exit!=0이던 시험에 허용 목록의 고정 실패코드와 OOM 여부를 추가하고 DDL은42501을 확인한다. 복구 gap/DB분리/기존group불변·초기 group/source 수는 실제 조회로 계산한다. 첫 두 원본과 검증 한계를 삭제하지 않는다.
+- migrate를 maintenance profile로 옮겨 API 시작이 migration을 자동 실행하지 않게 했다. 동일V12 이미지 rollback·checksum 손상을 실제 새 migration/파괴적 변경 복구로 확대하지 않으며 T16은부분검증으로 표시한다.
+- 배포 비밀 파일 누락은 fail-closed, init SQL의 비밀 argv를 제거했다. cleanup 성공 후 생성 비밀/dump를 삭제한다. fleet 관측은 opt-in으로 바꾸고 offline fallback의두 HTTP 모두 공유 예산에 반영한다. SourceFailure/고정 진단·HTTP예산 회귀를 추가했다.
+
+- 230852b의 보강 이미지 리허설17단계가 통과했다. SCHEMA_NOT_READY/RECOVERY_ALIGNMENT_REQUIRED·DDL42501·실제 기존groupoffset 불변과8개 정상경로+리포트 상세20건·API2xx/503재시도·헤더를 단언했다. 생성 secret/dump도 정리했다. 후속 안정화는 fixture를120초 전으로 옮겨 완료된1분 구간의 경계에 따라 API참고건수가 달라지지 않게 하고 결과 디렉터리권한0700을 명시한다. 이는 정상 입력의 분석 시각 경계를 고정하는 하네스 변경이다.
+
+- 89879bd clean 이미지/하네스17단계도 통과했다. 실제API26응답200·정상8경로+리포트20건·503재시도·복구18.387초·기존groupoffset불변·집계차이0·secret/dump삭제를 확인했다. Java139·하네스16·JAR도 통과했다. 최초두실행의검증한계와후속보강을 DEPLOYMENT_VERIFICATION에 함께 정리했다.
+
+### #30 재리뷰 후 운영 진단·관측 의미 보완
+
+89879bd diff는Claude APPROVE를받았고최종HEAD/CI는별도게이트다. 비차단의견중Kafka/fleet기동코드빈배열과HTTP요청생략의UPSTREAM_ERROR오인을수정했다. 고정코드목록과메시지없는예외타입으로진단하고FLEET_LIVE_DISABLED를실제단언한다. PublicObservationSource.Skipped는원천관측을만들지않고다음간격까지기다리는계약이며offline2회예산·다음interval회귀를연결했다. 종료/스케줄경계1회여유까지포함한관측186+최초채팅6≤500의예산식을기록하고남은상수BACKUP chat도DB에서계산한다.
+
+- 로컬전체실제91개는통과했지만종료전14초에후속단위빌드가같은클래스/JAR를갱신한사실을mtime으로확인했다. 이실행을고정commit의최종회귀근거로사용하지않고격리된최종CI로대조한다. 후속단위140·하네스16·JAR는별도로통과했다.
+
+- a0283bc clean이미지의다섯번째17단계도통과했다. 후보이미지의FLEET_LIVE_DISABLED·고정기동코드·DDL42501·실제DB/groupoffset/집계·실제웹20건을다시대조했고관측복구24.188초·소유자원/비밀삭제를기록했다.
+
+### 2026-10-26 · #30 관측 생략 진단 보완
+
+a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 모든 RuntimeException을 생략하던 범위를 SourceFailure로 좁혔다. 관측 생략 횟수는 ObservationCollector에서 계수하고 LeasedObservations가 종료 후에도 합산해 FleetCli 최종 결과에 남긴다. hook 버그가 조용히 생략되지 않는 사례와 종료 후 계수 보존을 추가했다. 허용 코드/예외 타입 설명을 정정하고30분/500회 강제 범위를 명시했다. 새 이미지와 회귀 검증은 #28 시작 준비 보완을 통합한 뒤 진행한다.
 ### #28 Linux 후속 CI 연결/인계 실패 조사
 
 1cd8476의 push40216093203/PR40216096733에서 저장 경합 회귀는 통과했지만 정상 두JVM 연결2개 대기와 SIGSTOP 인계의 owner 대조가 실패했다. 로컬87개 통과와 다르며 초기 파일누락과 같은 원인으로 단정하지 않는다. 당시 CI artifact에 자식진단JSON이 없어 실패/발행buffer 코드를 확보할 수 없다. 정제된 자식진단을 artifact와 JUnit 출력에 연결하고 임시로 수집기6개를 전체회귀보다 먼저 실행해 Linux의 실제실패코드를 수집한다. 정상경로의 작은 fixturebuffer30/20와 cold producer 지연은 가설이며 아직확정하지않았다.
@@ -162,3 +197,9 @@
 ### 2026-10-26 · #28 producer 준비 경계와 Linux 진단
 
 1cd8476 CI의 인계2개 실패는 자식 결과 미보관으로 내부 원인을 확정하지 못했다. 진단 추가4603c53의 push/PR은 단독6개+전체87개 통과했으나 원인 해결로 기록하지 않는다. ProducerFactory 생성3초 지연을 주입해 채널 큐20 초과·거절1·CHANNEL_ENDED를 별도로 재현했다. CollectorWorker는 producer/metadata 준비 후 임대·소켓을 시작하도록 바꿨다. 실제7개와 단위134/하네스16/JAR 통과, 지연 동안 무임대/무수신·완료 후 계수 일치 회귀를 추가했다. 최종 fixture는 부모 해제 barrier를 사용한다. 책임은 worker의 수명 시작 경계에 두고 BufferedKafkaPublisher의 큐/실행 중 장애 계약은 유지했다. 중복 CI 단독 실행은 제거하고 정제 자식 JSON 업로드는 유지한다. 과거 CI와 재현 원인의 동일성, producer 생성 시간 상한은 주장하지 않는다.
+
+### 2026-10-26 · #30 여섯 번째 통합 이미지와 리팩토링 점검
+
+1bde2b7 clean tree에서 이미지 생성·단위142/하네스16/JAR·17단계 리허설을 통과했다. 수집 전 Kafka 준비와 관측 생략 계수까지 통합했고, 리포트20건/API26개/새 group6개·복구 후 차이0을 다시 확인했다. 마지막 복구 표본18.900초와 종료1.255초는 운영 SLA가 아니다. 로컬 복구6회(서로 다른 코드와 검사 강도)의 범위17.105~24.188초를 기록했다. 소유 컨테이너/볼륨과 생성 비밀/dump를 모두 정리했다.
+
+리팩토링 점검에서는 관측 카운터를 기존 ObservationCollector에 두고 LeasedObservations가 종료 합계를 소유하도록 했다. HTTP/임대 예산과 원천 오류 분류, 운영 허용 코드 책임을 유지했다. 수집기 리뷰의 비차단 사항 중 깨진 자식 JSON이 테스트 자원 정리를 막는 경계는 고정 진단으로 보완했고 임시 재현 명령·로컬 검증 순서·빈 출력 파일 재실행 계약을 문서화했다. 이미지 생성 뒤 변경은 문서와 테스트 정리 코드이며 실제 이미지 입력은 그대로다.

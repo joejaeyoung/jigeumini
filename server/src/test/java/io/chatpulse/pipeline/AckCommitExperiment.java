@@ -32,7 +32,7 @@ public final class AckCommitExperiment {
         var result=new LinkedHashMap<String,Object>();result.put("codeCommit",LocalKafkaCluster.command(List.of("git","rev-parse","HEAD"),Map.of(),Duration.ofSeconds(10)).strip());result.put("startedAt",Instant.now());result.put("seed",20261026);result.put("eventTimeBase",INPUT_BASE);result.put("phase","OPEN");
         try(var session=new Session(output,result)) {
             result.put("cluster",session.cluster.identity());session.open();session.commitCases(session.cluster.bootstrap());session.ackCases();result.put("correct",true);
-        } catch(Exception failure){result.put("correct",false);result.put("failureType",failure.getClass().getSimpleName());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}
+        } catch(Exception failure){result.put("correct",false);result.put("failureType",failure.getClass().getSimpleName());if(failure.getMessage()!=null&&failure.getMessage().matches("ACK_[A-Z_]+"))result.put("failureCode",failure.getMessage());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}
         if(!Boolean.TRUE.equals(result.get("cleanupComplete")))result.put("correct",false);result.put("finishedAt",Instant.now());Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");return result;
     }
     private static final class Session implements AutoCloseable {
@@ -85,8 +85,16 @@ public final class AckCommitExperiment {
             cluster.stopBroker(2);cluster.stopBroker(3);
             for(var row:rows){String topic=(String)row.get("topic");until(30,()->description(topic).partitions().getFirst().isr().size()==1);row.put("beforeFaultPartitions",partitions(topic));
                 try(var producer=producer(cluster.bootstrap(),(String)row.get("acks"))){row.put("isrOne",send(producer,topic,20,5,(String)row.get("acks")));}checkpoint();}
+            result.put("operation","LAST_ISR_LEADER_LOSS");checkpoint();
             cluster.stopBroker(1);cluster.startBroker(2);cluster.startBroker(3);
-            for(String topic:topics.values())until(40,()->{var p=description(topic).partitions().getFirst();return p.leader()!=null&&p.leader().id()>0&&p.leader().id()!=1&&p.isr().size()>=2;});
+            long electionDeadline=System.nanoTime()+Duration.ofSeconds(15).toNanos();
+            while(System.nanoTime()<electionDeadline) {
+                boolean allWritable=true;
+                for(String topic:topics.values())try{var p=description(topic).partitions().getFirst();allWritable&=p.leader()!=null&&p.leader().id()>0&&p.leader().id()!=1&&p.isr().size()>=2;}catch(ExecutionException|TimeoutException pending){allWritable=false;}
+                if(allWritable)break;Thread.sleep(200);
+            }
+            for(var row:rows)row.put("whileOriginalLeaderAbsent",partitions((String)row.get("topic")));
+            result.put("operation","RESTORE_ORIGINAL_LEADER");checkpoint();
             cluster.startBroker(1);for(String topic:topics.values())until(40,()->description(topic).partitions().stream().allMatch(p->p.isr().size()==3));
             for(var row:rows) {
                 String topic=(String)row.get("topic"),level=(String)row.get("acks");Set<UUID> retained=read(topic);var healthy=new HashSet<UUID>();for(int i=0;i<20;i++)healthy.add(event(i).eventId());require(retained.containsAll(healthy));
@@ -104,7 +112,7 @@ public final class AckCommitExperiment {
             return Map.of("attempted",count,"apiSuccess",success,"apiFailureOrTimeout",failed,"brokerAcknowledged",level.equals("0")?0:success,"brokerConfirmationMeaning",level.equals("0")?"NONE":"BROKER_RESPONSE_NOT_REPLICA_LOSS_IMMUNITY","returnedOffsets",offsets,"seconds",(System.nanoTime()-begin)/1e9);
         }
         TopicDescription description(String topic) throws Exception{return admin.describeTopics(List.of(topic)).allTopicNames().get(8,TimeUnit.SECONDS).get(topic);}
-        List<Map<String,Object>> partitions(String topic) throws Exception{return description(topic).partitions().stream().map(p->Map.<String,Object>of("partition",p.partition(),"leader",p.leader()==null?-1:p.leader().id(),"isr",p.isr().stream().map(n->n.id()).toList(),"replicas",p.replicas().stream().map(n->n.id()).toList())).toList();}
+        List<Map<String,Object>> partitions(String topic) throws Exception{return description(topic).partitions().stream().map(p->Map.<String,Object>of("partition",p.partition(),"leader",p.leader()==null?-1:p.leader().id(),"isr",p.isr().stream().map(n->n.id()).toList(),"replicas",p.replicas().stream().map(n->n.id()).toList(),"eligibleLeaderReplicas",p.elr().stream().map(n->n.id()).toList(),"lastKnownElr",p.lastKnownElr().stream().map(n->n.id()).toList())).toList();}
         Set<UUID> read(String topic) throws Exception {
             var ids=new HashSet<UUID>();try(var source=new ReplaySource(cluster.bootstrap(),topic,UUID.randomUUID())) {
                 var manifest=source.capture(null,null);source.assign(manifest);var positions=new HashMap<Integer,Long>();manifest.partitions().forEach(p->positions.put(p.partition(),p.start()));long deadline=System.nanoTime()+Duration.ofSeconds(15).toNanos();

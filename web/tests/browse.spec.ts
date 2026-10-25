@@ -82,3 +82,22 @@ for (const width of [320, 375, 414, 768, 1440]) {
     await expect(page.getByRole('button', { name: '서비스와 집계 기준' })).toBeFocused();
   });
 }
+
+test('관심 방송 조회 중·실패를 최근 집계 없음으로 표시하지 않는다', async ({ page }) => {
+  await mockApi(page);
+  await page.addInitScript(id => localStorage.setItem('jigeumini.saved-channels.v1', JSON.stringify([id])), a);
+  let release!: () => void;
+  const pending = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/buckets?**', async route => { await pending; await route.fulfill({ status: 503, body: '' }); });
+  await page.goto('/saved');
+  await expect(page.getByText('수집된 방송을 불러오는 중…')).toBeVisible();
+  await expect(page.locator('.broadcast-card')).toHaveCount(0);
+  await expect(page.getByText('최근 집계 없음')).toHaveCount(0);
+  release();
+  await expect(page.getByRole('alert')).toContainText('불러오지 못했어요');
+  await expect(page.getByText('최근 집계 없음')).toHaveCount(0);
+  await page.unroute('**/api/buckets?**');
+  await mockApi(page, 'empty');
+  await page.getByRole('button', { name: '다시 시도' }).click();
+  await expect(page.locator('.broadcast-card')).toContainText('최근 집계 없음');
+});

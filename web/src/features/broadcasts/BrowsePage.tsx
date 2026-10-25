@@ -20,7 +20,7 @@ export function BrowsePage({ view, saved, toggle }: { view: BrowseView; saved: s
   const channels = (view === 'saved' ? withSavedChannels(summaries, saved) : summaries).filter(channel => channel.id.includes(query));
   const consumer = result.data?.status.consumer;
   const healthy = consumer?.running && consumer.assignedPartitions > 0 && ['RUNNING', 'WAITING_FOR_EVENTS'].includes(consumer.state);
-  const showCards = Boolean(result.data) || view === 'saved';
+  const showCards = Boolean(result.data) || (view === 'saved' && saved.length === 0);
   function changeWindow(value: number) {
     const next = new URLSearchParams(params); next.set('window', String(value)); setParams(next, { replace: true, preventScrollReset: true });
   }
@@ -31,7 +31,7 @@ export function BrowsePage({ view, saved, toggle }: { view: BrowseView; saved: s
       <div className="list-tools"><span className="category-tag">전체</span><span>{showCards ? `${channels.length}개 채널` : '조회 중'}</span></div>
       {result.error && <div className="notice error" role="alert"><span>{result.data ? '갱신하지 못했어요. 아래 내용은 이전 조회 결과입니다.' : '방송 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'}</span><button onClick={result.retry}>다시 시도</button></div>}
       {result.data && !healthy && <div className="notice" role="status">새 채팅 반영 상태를 확인하고 있어요. 표시된 건수는 최신 반응과 다를 수 있어요.</div>}
-      {result.loading && !result.data && view !== 'saved' && <div className="loading-state" role="status"><Icon name="broadcast"/><p>수집된 방송을 불러오는 중…</p></div>}
+      {result.loading && !result.data && <div className="loading-state" role="status"><Icon name="broadcast"/><p>수집된 방송을 불러오는 중…</p></div>}
       {showCards && (channels.length ? <ul className="broadcast-grid">{channels.map(channel => <BroadcastCard key={channel.id} channel={channel} seconds={seconds} saved={saved.includes(channel.id)} onSave={toggle}/>)}</ul> : <div className="empty-state"><Icon name={view === 'saved' ? 'bookmark' : 'broadcast'}/><h3>{view === 'saved' ? '다시 보고 싶은 방송을 저장해보세요' : query ? '검색한 채널을 찾지 못했어요' : '아직 이 시간대에 수집된 방송이 없어요'}</h3><p>{view === 'saved' ? '방송 카드의 북마크를 누르면 이곳에서 다시 찾을 수 있어요.' : query ? '채널 ID를 다시 확인하거나 전체 방송을 둘러보세요.' : '새 기록이 들어오면 자동으로 보여드릴게요. 기록 없음은 채팅 0건을 뜻하지 않아요.'}</p>{view === 'saved' || query ? <Link className="primary-button" to="/explore">방송 둘러보기 <Icon name="arrow"/></Link> : <button className="secondary-button" onClick={result.retry}>다시 확인</button>}</div>)}
       {result.data && <div className="scope-note"><span>조회 <time dateTime={result.data.counts.asOf}>{formatTime(result.data.counts.asOf)}</time> · 5초마다 갱신</span><span>진행 중인 구간 {result.data.counts.includesOpenBucket ? '포함' : '제외'} · 수집 공백 미측정</span></div>}
     </section>

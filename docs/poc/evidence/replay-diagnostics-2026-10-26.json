@@ -98,5 +98,11 @@
     "different actual dependency builds in separate JARs",
     "worker claim with missing build resource",
     "full Kafka timestamp range or atomic broker snapshot"
-  ]
+  ],
+  "unitAfterHeartbeatFixtureCommit": "63ff05d",
+  "unitAfterHeartbeatFixture": {
+    "tests": 84,
+    "harness": 16,
+    "passed": true
+  }
 }

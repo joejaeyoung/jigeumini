@@ -52,7 +52,7 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 
 ## 재처리 CLI 후속 보완 #16
 
-`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 이후선행#7의heartbeat fixture 보완을 단위검증으로 확인하고 최종HEAD리뷰·CI·병합을 진행한다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
+`fix/replay-diagnostics`, F08 → T01/T02/T03/T04. [진단 검증](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md)·[정제 근거](poc/evidence/replay-diagnostics-2026-10-26.json): 조회의 migration/watchdog 분리·readonly, 명시적migrate, 동일run/다른workerbuild 비교 거부, 보존offset과제한된Kafka시각 표본, 오류구분, runtimeJAR 정리를 구현했다. #5/#6/#7 통합ff5c30f에서 Java84·하네스16·실제Kafka/DB74·JAR 통과,8ac4f77/61784de Claude APPROVE를 확인했다. 선행#7의heartbeat fixture 보완을 통합한63ff05d에서도 Java84·하네스16이 통과했으며 최종HEAD리뷰·CI·병합을 진행한다. 실제controlrecord꼬리/중간·전역workerlock·readonly상태조회·변조JAR코드를 검증했으며 서로다른build비교는 DB값을 바꾼 합성주입이다. SIGKILL/HUP종료·변조JAR workerclaim은 미검증이며 live/외부배포는 수행하지 않았다.
 
 ## 오류 격리·복구 진단 #10
 

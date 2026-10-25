@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { BrowsePage } from '../features/broadcasts/BrowsePage';
+import { NotificationsPage } from '../features/notifications/NotificationsPage';
 import { SurgesPage } from '../features/broadcasts/SurgesPage';
 import { ChannelPage } from '../features/broadcasts/ChannelPage';
 import { useSavedChannels } from '../features/saved/useSavedChannels';
 import { Icon } from '../shared/ui/Icon';
 import { Modal } from '../shared/ui/Modal';
-const navigation = [{ to: '/', label: '홈' }, { to: '/explore', label: '방송 탐색' }, { to: '/surges', label: '반응 급상승' }, { to: '/saved', label: '관심 방송' }];
+const navigation = [{ to: '/', label: '홈' }, { to: '/explore', label: '방송 탐색' }, { to: '/surges', label: '반응 급상승' }, { to: '/saved', label: '관심 방송' }, { to: '/notifications', label: '알림' }];
 export function App() {
   const { saved, toggle, storageError } = useSavedChannels();
   const [info, setInfo] = useState(false);
@@ -44,6 +45,7 @@ export function App() {
         <Route path="/explore" element={<BrowsePage view="explore" saved={saved} toggle={toggle}/>}/>
         <Route path="/saved" element={<BrowsePage view="saved" saved={saved} toggle={toggle}/>}/>
         <Route path="/search" element={<BrowsePage view="search" saved={saved} toggle={toggle}/>}/>
+        <Route path="/notifications" element={<NotificationsPage saved={saved}/>}/>
         <Route path="/surges" element={<SurgesPage saved={saved} toggle={toggle}/>}/>
         <Route path="/channels/:channelId" element={<ChannelPage saved={saved} toggle={toggle}/>}/>
         <Route path="*" element={<section className="empty-state"><h1>페이지를 찾을 수 없어요</h1><p>주소를 확인하거나 홈으로 돌아가주세요.</p><Link className="primary-button" to="/">홈으로 돌아가기</Link></section>}/>

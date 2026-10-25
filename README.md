@@ -90,6 +90,19 @@ curl --fail http://127.0.0.1:18080/api/operations/recovery
 
 미관측은 0으로 표시하지 않는다. DLQ에 원본 payload를 보관하거나 live로 자동 재투입하지 않으며, 수정 검증은 보존된 원본의 별도 replay run을 사용한다. [격리·품질·진단 계약](docs/pipeline/DLQ.md)을 참고한다.
 
+## 관심 방송 알림
+
+제품 웹 `/notifications`에서 저장한 관심 방송의 급상승 피드를 조회한다. 읽음 상태는 브라우저에 저장하며 10분 넘게 늦게 도착한 기록과 품질 정정은 새 반응으로 강조하지 않는다.
+
+새 알림 그룹의 최초 시작만 다음 옵션을 지정한다. 이후에는 기존 분석기 실행 명령을 사용한다.
+
+```bash
+./scripts/pipeline analyzer --notifications.offset-reset=earliest
+curl --fail http://127.0.0.1:18080/api/operations/notifications
+```
+
+급상승/outbox의 DB 원자 저장, ACK 뒤 전달 완료, 독립 소비와 사후 품질 반영은 [알림 처리 계약](docs/pipeline/NOTIFICATIONS.md)을 따른다. 외부 알림 전송은 없으며 기본 토픽은 `chat.received.v1.spikes`다.
+
 ## 고정 Kafka 입력 재처리
 
 [이슈 #9 재처리 계약](docs/pipeline/REPLAY.md)은 로컬 CLI로 사용한다. 운영 group offset·순위·알림을 바꾸지 않고 UUID run에 10초 bucket만 만든다. 기존 Kafka/PostgreSQL 접속 환경 변수를 사용한다.

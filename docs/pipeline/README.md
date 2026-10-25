@@ -52,12 +52,17 @@ Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC
 
 [재처리 계약](REPLAY.md)의 로컬 CLI는 V4 작업 상태와 `replay/<UUID>` namespace를 사용한다. 운영 offset을 커밋하거나 순위·급상승을 재발행하지 않는다. M2의 V3는 창 종료 후 버퍼 표본을 짧게 보존하는 migration이다. 아래 M1 표는 최초 수직 구현의 범위이며 현재 재처리는 별도 계약을 따른다.
 
+## 알림 확장
+
+V6는 확정 spike와 같은 트랜잭션의 outbox, Kafka ACK 뒤 전달 완료, 별도 알림 group과 멱등 피드를 추가한다. [알림 계약](NOTIFICATIONS.md)을 따른다.
+
 ## 저장과 처리 계약
 
 아래는 M1 기준선이다. 현재 analyzer의 영구 오류 격리·품질 표시·진단은 [M3 DLQ 계약](DLQ.md)을 따른다. DB 성공 후 BATCH offset commit 경계는 유지하며, M1의 전체 배치 차단 정책은 안전한 격리 후 진행으로 확장했다.
 
 - `chat.received.v1`: 3 partitions, 개발용 RF=1, key=`channelId`, timestamp=`receivedAt`의 epoch milliseconds, CreateTime 정책.
 - Kafka 보존 설정은 시간 24h, partition당 256MiB, segment 32MiB다. segment 단위 삭제이므로 정확한 시각·용량 상한이나 24h 전체 가용성을 보장하지 않는다.
+- 모든 토픽 초기화에서 생성 응답 뒤 토픽·설정 조회의 `UnknownTopicOrPartitionException`만 50ms 간격으로 재시도한다. 두 조회·재시도는 공통10초 기한을 쓰고, 생성 요청은 별도10초·Admin 종료는1초 상한이다. 권한 오류·다른 예외·partition 수/시각 설정 불일치는 즉시 실패하며 기존 토픽 설정을 바꾸지 않는다. [생성 후 조회 준비 계약·검증](TOPIC_READINESS.md)을 따른다.
 - `acks=all`, idempotent producer, in-flight request=1. 전용 worker가 ACK를 기다리며 callback은 큐에만 넣는다. Kafka client는 delivery timeout 10초 안에서 같은 record를 재시도한다.
 - 발행 큐는 미확인 in-flight를 포함해 기본·최대 1,000개, 이벤트당 16KiB다. payload 상한은 약 16MiB이고 객체 overhead는 별도다. 채널별 공정성 제어는 아직 없다.
 - frame 전체를 담을 수 없으면 전부 거절하고 수집을 실패 처리한다. 발행 오류도 수집을 중단하며 `rejected`, `unconfirmed`를 결과에 남긴다. 종료 drain은 최대 10초다. 메모리 버퍼의 강제 종료·전원 손실은 복원하지 않는다.

@@ -103,6 +103,10 @@ curl --fail http://127.0.0.1:18080/api/operations/notifications
 
 급상승/outbox의 DB 원자 저장, ACK 뒤 전달 완료, 독립 소비와 사후 품질 반영은 [알림 처리 계약](docs/pipeline/NOTIFICATIONS.md)을 따른다. 외부 알림 전송은 없으며 기본 토픽은 `chat.received.v1.spikes`다.
 
+## 카테고리 반응
+
+`/categories`에서 완료5분의 수집 대상 내 카테고리별 채팅·비중·품질 충족 채널 수를 보고, 선택하면 최근1시간과 기여 방송을 확인한다. 카테고리 관측은 최대120초 유효하며 미상/만료를 분리한다. 최초 새 그룹은 `./scripts/pipeline analyzer --categories.offset-reset=earliest`로 시작하고 이후에는 기본none으로 재시작한다. 처음부터 전체 그룹을 만드는 경우 기존 `--pipeline.offset-reset=earliest`를 상속한다. [카테고리 계약](docs/api/CATEGORIES.md)을 따른다.
+
 ## 시청자 관측과 채팅 비교
 
 방송 상세에서 최근1시간의 시청자 관측점과 완료된1분 채팅을 같은 시간축으로 비교한다. 시청자 표본은 기본60초, 누락/TTL 초과/방송 변경에서 선을 끊으며 실제0과 미관측을 구분한다. collector가 선택한 채널만 새 관측을 생성한다.

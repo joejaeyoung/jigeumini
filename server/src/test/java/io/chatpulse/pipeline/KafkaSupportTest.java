@@ -30,7 +30,7 @@ class KafkaSupportTest {
         when(admin.describeTopics(anyCollection())).thenReturn(topics);
         when(admin.describeTopics(anyCollection(),any(DescribeTopicsOptions.class))).thenReturn(topics);
         var configs = mock(DescribeConfigsResult.class);
-        when(configs.all()).thenReturn(KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"),new ConfigEntry(TopicConfig.CLEANUP_POLICY_CONFIG,"delete"))))));
+        when(configs.all()).thenReturn(KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(KafkaTopicPolicy.local().configurations().entrySet().stream().map(e -> new ConfigEntry(e.getKey(),e.getValue())).toList()))));
         when(admin.describeConfigs(anyCollection())).thenReturn(configs);
         when(admin.describeConfigs(anyCollection(),any(DescribeConfigsOptions.class))).thenReturn(configs);
         return admin;
@@ -38,7 +38,7 @@ class KafkaSupportTest {
     @Test void creationAndTopicDescriptionCanSucceedBeforeConfigIsVisible() {
         var admin = readyAdmin(); var configs = mock(DescribeConfigsResult.class);
         when(configs.all()).thenReturn(failed(new UnknownTopicOrPartitionException("synthetic not visible")),
-                KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(List.of(new ConfigEntry(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG,"CreateTime"),new ConfigEntry(TopicConfig.CLEANUP_POLICY_CONFIG,"delete"))))));
+                KafkaFuture.completedFuture(Map.of(RESOURCE,new Config(KafkaTopicPolicy.local().configurations().entrySet().stream().map(e -> new ConfigEntry(e.getKey(),e.getValue())).toList()))));
         when(admin.describeConfigs(anyCollection())).thenReturn(configs);
         when(admin.describeConfigs(anyCollection(),any(DescribeConfigsOptions.class))).thenReturn(configs);
         try (var factory = mockStatic(Admin.class)) {
@@ -57,6 +57,16 @@ class KafkaSupportTest {
                 .isInstanceOf(java.util.concurrent.TimeoutException.class).hasMessage("TOPIC_VISIBILITY_DEADLINE");
         assertThat(nanos[0]).isEqualTo(100000000);
         verify(configs,times(2)).all();
+    }
+    @Test void missingIsrIsBoundedByTheSameReadinessDeadline() {
+        var admin=readyAdmin();var topics=mock(DescribeTopicsResult.class);var node=new Node(1,"localhost",19092);
+        var parts=java.util.stream.IntStream.range(0,3).mapToObj(i->new TopicPartitionInfo(i,node,List.of(node),List.of())).toList();
+        when(topics.allTopicNames()).thenReturn(KafkaFuture.completedFuture(Map.of(TOPIC,new TopicDescription(TOPIC,false,parts))));
+        when(admin.describeTopics(anyCollection(),any(DescribeTopicsOptions.class))).thenReturn(topics);
+        long[] nanos={0};
+        assertThatThrownBy(()->KafkaSupport.awaitTopic(admin,TOPIC,java.time.Duration.ofMillis(100),()->nanos[0],millis->nanos[0]+=millis*1000000))
+                .isInstanceOf(java.util.concurrent.TimeoutException.class).hasMessage("TOPIC_VISIBILITY_DEADLINE");
+        verify(topics,times(2)).allTopicNames();assertThat(nanos[0]).isEqualTo(100000000);
     }
     @Test void authorityFailuresAndWrongConfigurationAreNeverRetried() {
         var admin = readyAdmin(); var configs = mock(DescribeConfigsResult.class);

@@ -29,11 +29,17 @@ public final class DeadLetterRecovery implements AutoCloseable {
     private final JsonMapper json = JsonMapper.builder().build();
 
     public DeadLetterRecovery(String bootstrap, String topic, JdbcTemplate jdbc, String projection, String run) {
-        this(bootstrap, topic, jdbc, projection, run, failure -> { });
+        this(bootstrap, topic, jdbc, projection, run, KafkaTopicPolicy.local(), failure -> { });
+    }
+    public DeadLetterRecovery(String bootstrap, String topic, JdbcTemplate jdbc, String projection, String run, KafkaTopicPolicy policy) {
+        this(bootstrap, topic, jdbc, projection, run, policy, failure -> { });
     }
     // ACK 직후 DB commit 전 JVM 종료를 재현하는 seam.
     DeadLetterRecovery(String bootstrap, String topic, JdbcTemplate jdbc, String projection, String run, Consumer<DeadLetter> afterAck) {
-        KafkaSupport.ensureTopic(bootstrap, topic + ".dlq");
+        this(bootstrap, topic, jdbc, projection, run, KafkaTopicPolicy.local(), afterAck);
+    }
+    private DeadLetterRecovery(String bootstrap, String topic, JdbcTemplate jdbc, String projection, String run, KafkaTopicPolicy policy, Consumer<DeadLetter> afterAck) {
+        KafkaSupport.ensureTopic(bootstrap, topic + ".dlq", policy);
         this.topic = topic; this.jdbc = jdbc; this.projection = projection; this.run = run; this.afterAck = afterAck;
         admin = Admin.create(Map.of("bootstrap.servers", bootstrap, "default.api.timeout.ms", 4000, "request.timeout.ms", 3000));
         try { topicId = currentTopicId(); }

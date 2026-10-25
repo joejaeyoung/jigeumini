@@ -24,21 +24,23 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
 public final class KafkaSupport {
     private KafkaSupport() { }
-    public static void ensureTopic(String bootstrap, String topic) {
+    public static void ensureTopic(String bootstrap, String topic) { ensureTopic(bootstrap, topic, KafkaTopicPolicy.local()); }
+    public static void ensureTopic(String bootstrap, String topic, KafkaTopicPolicy policy) {
         try {
             var admin = Admin.create(Map.of("bootstrap.servers", bootstrap, "default.api.timeout.ms", 10000, "request.timeout.ms", 3000));
             try {
-                var definition = new NewTopic(topic, 3, (short) 1).configs(Map.of(
-                        TopicConfig.CLEANUP_POLICY_CONFIG, "delete",
-                        TopicConfig.RETENTION_MS_CONFIG, "86400000",
-                        TopicConfig.RETENTION_BYTES_CONFIG, "268435456",
-                        TopicConfig.SEGMENT_BYTES_CONFIG, "33554432",
-                        TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG, "CreateTime"));
+                if (policy.durability() == KafkaTopicPolicy.Durability.HA) {
+                    var features = admin.describeFeatures().featureMetadata().get(10, TimeUnit.SECONDS).finalizedFeatures();
+                    var elr = features.get("eligible.leader.replicas.version");
+                    if (elr == null || elr.minVersionLevel() != 1 || elr.maxVersionLevel() != 1)
+                        throw new IllegalStateException("KAFKA_ELR_CONTRACT_MISMATCH");
+                }
+                var definition = new NewTopic(topic, policy.partitions(), policy.replicationFactor()).configs(policy.configurations());
                 try { admin.createTopics(List.of(definition)).all().get(10, TimeUnit.SECONDS); }
                 catch (ExecutionException e) {
                     if (!(e.getCause() instanceof TopicExistsException)) throw e;
                 }
-                awaitTopic(admin, topic, Duration.ofSeconds(10), System::nanoTime, Thread::sleep);
+                awaitTopic(admin, topic, policy, Duration.ofSeconds(10), System::nanoTime, Thread::sleep);
             } finally { admin.close(Duration.ofSeconds(1)); }
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt(); throw new IllegalStateException("KAFKA_TOPIC_INIT_FAILED", interrupted);
@@ -46,6 +48,9 @@ public final class KafkaSupport {
     }
     @FunctionalInterface interface Sleeper { void sleep(long millis) throws InterruptedException; }
     static void awaitTopic(Admin admin, String topic, Duration timeout, LongSupplier nanoTime, Sleeper sleeper) throws Exception {
+        awaitTopic(admin, topic, KafkaTopicPolicy.local(), timeout, nanoTime, sleeper);
+    }
+    static void awaitTopic(Admin admin, String topic, KafkaTopicPolicy policy, Duration timeout, LongSupplier nanoTime, Sleeper sleeper) throws Exception {
         long deadline = nanoTime.getAsLong() + timeout.toNanos();
         while (true) {
             try {
@@ -55,13 +60,10 @@ public final class KafkaSupport {
                         org.apache.kafka.common.config.ConfigResource.Type.TOPIC, topic);
                 var config = admin.describeConfigs(List.of(resource), new DescribeConfigsOptions().timeoutMs(remainingMillis(deadline,nanoTime)))
                         .all().get(remainingNanos(deadline,nanoTime), TimeUnit.NANOSECONDS).get(resource);
-                if (!"CreateTime".equals(config.get(TopicConfig.MESSAGE_TIMESTAMP_TYPE_CONFIG).value())) {
-                    throw new IllegalStateException("M1 requires CreateTime timestamps");
-                }
-                if (config.get(TopicConfig.CLEANUP_POLICY_CONFIG) == null || !"delete".equals(config.get(TopicConfig.CLEANUP_POLICY_CONFIG).value()))
-                    throw new IllegalStateException("History requires delete cleanup policy");
-                if (actual.partitions().size() != 3) throw new IllegalStateException("M1 requires 3 partitions");
+                policy.verify(actual, config);
                 return;
+            } catch (KafkaTopicPolicy.NotReady notWritable) {
+                sleeper.sleep(Math.min(50,remainingMillis(deadline,nanoTime)));
             } catch (ExecutionException error) {
                 // 생성 ACK와 broker의 조회 가능 시점은 다르다. 관측한 일시 오류만 다시 조회한다.
                 if (!(error.getCause() instanceof UnknownTopicOrPartitionException)) throw error;

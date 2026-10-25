@@ -31,4 +31,11 @@ class ReplayManifestTest {
         var changed=new ReplayManifest(1,m.topic(),Uuid.randomUuid().toString(),m.partitions(),m.eventFrom(),m.eventTo(),1,m.algorithmVersion(),m.capturedAt());
         assertThat(m.sameInput(changed)).isFalse();
     }
+    @Test void unorderedSourcePartitionsAreCanonicalizedWithTheirOwnOffsetBounds() {
+        var m=example();
+        var reversed=new ReplayManifest(1,m.topic(),m.topicId(),List.of(new ReplayManifest.Range(2,30,35),
+                new ReplayManifest.Range(0,10,12),new ReplayManifest.Range(1,20,23)),null,null,1,m.algorithmVersion(),m.capturedAt());
+        assertThat(ReplayManifest.parse(reversed.json()).partitions()).containsExactly(
+                new ReplayManifest.Range(0,10,12),new ReplayManifest.Range(1,20,23),new ReplayManifest.Range(2,30,35));
+    }
 }

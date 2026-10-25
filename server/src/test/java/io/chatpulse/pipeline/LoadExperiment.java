@@ -26,39 +26,17 @@ public final class LoadExperiment {
     static final String BOOTSTRAP="localhost:19092",JDBC="jdbc:postgresql://localhost:15432/chatpulse",USER="chatpulse",PASSWORD="local-chatpulse";
     static final long SEED=20261025;
     private static final JsonMapper JSON=JsonMapper.builder().build();
-    record Plan(String name,int rate,int seconds,int consumers,boolean hot,boolean sharded,boolean serial,boolean independent,int pauseSeconds,String fault,boolean membership,boolean pollStall,boolean duplicates,boolean twoProducers) {
-        Plan { if(rate<1||rate>2000||seconds<1||seconds>600||rate*(long)seconds>400000||consumers<1||consumers>4||pauseSeconds<0||pauseSeconds>60||!Set.of("none","delay","failure").contains(fault))throw new IllegalArgumentException("EXPERIMENT_PLAN"); }
-    }
-    static Plan plan(String name) {
-        if(name.matches("(uniform|hot)-[1-4]"))return new Plan(name,2000,15,Integer.parseInt(name.substring(name.length()-1)),name.startsWith("hot"),false,false,false,0,"none",false,false,false,false);
-        return switch(name) {
-            case "smoke" -> new Plan(name,100,2,1,false,false,false,true,0,"none",false,false,true,false);
-            case "serial-control","async-control" -> new Plan(name,100,15,1,false,false,name.equals("serial-control"),false,0,"none",false,false,false,false);
-            case "baseline" -> new Plan(name,500,30,1,false,false,true,false,0,"none",false,false,false,false);
-            case "async-baseline" -> new Plan(name,500,30,1,false,false,false,false,0,"none",false,false,false,false);
-            case "steady" -> new Plan(name,500,600,3,false,false,false,true,0,"none",false,false,false,false);
-            case "burst" -> new Plan(name,2000,60,3,false,false,false,false,0,"none",false,false,false,false);
-            case "recovery" -> new Plan(name,500,100,1,false,false,false,true,60,"none",false,false,false,false);
-            case "db-delay","db-failure" -> new Plan(name,500,30,1,false,false,false,true,0,name.equals("db-delay")?"delay":"failure",false,false,false,false);
-            case "membership" -> new Plan(name,500,40,1,false,false,false,true,0,"none",true,false,true,true);
-            case "heartbeat" -> new Plan(name,500,35,1,false,false,false,true,0,"none",false,false,true,false);
-            case "poll-stall" -> new Plan(name,500,30,2,false,false,false,true,0,"none",false,true,true,false);
-            case "sharded-3" -> new Plan(name,2000,15,3,true,true,false,false,0,"none",false,false,true,true);
-            case "hot-duplicates" -> new Plan(name,2000,15,3,true,false,false,false,0,"none",false,false,true,true);
-            default -> throw new IllegalArgumentException("EXPERIMENT_PROFILE");
-        };
-    }
     public static void main(String[] args) {
         quiet();
         try {
             if(args.length<2||args.length>3)throw new IllegalArgumentException("EXPERIMENT_ARGUMENTS");
-            var result=args[0].equals("broker-fault")?PublisherFaultExperiment.run(Path.of(args[1])):run(plan(args[0]),Path.of(args[1]),args.length==3?Instant.parse(args[2]):null,true);
+            var result=args[0].equals("broker-fault")?PublisherFaultExperiment.run(Path.of(args[1])):run(ExperimentPlan.named(args[0]),Path.of(args[1]),args.length==3?Instant.parse(args[2]):null,true);
             System.out.println(JSON.writeValueAsString(Map.of("profile",args[0],"outcome",result.get("outcome"),"report",args[1])));
             if(!Boolean.TRUE.equals(result.get("correct")))System.exit(2);
         } catch(Exception failure) {System.out.println("{\"error\":\"EXPERIMENT_FAILED\"}");System.exit(2);}
     }
     static void quiet() { if(org.slf4j.LoggerFactory.getILoggerFactory() instanceof ch.qos.logback.classic.LoggerContext context)context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).setLevel(ch.qos.logback.classic.Level.OFF); }
-    static Map<String,Object> run(Plan plan,Path output,Instant requestedBase,boolean resources) throws Exception {
+    static Map<String,Object> run(ExperimentPlan plan,Path output,Instant requestedBase,boolean resources) throws Exception {
         output=output.toAbsolutePath();Files.createDirectories(output.getParent());
         for(String suffix:List.of("",".progress.json",".html"))if(Files.exists(output.resolveSibling(output.getFileName()+suffix)))throw new IllegalArgumentException("EXPERIMENT_OUTPUT_EXISTS");
         Files.createFile(output);
@@ -85,7 +63,7 @@ public final class LoadExperiment {
             var codes=session.events.stream().map(e->e.get("code")).toList();boolean scenarioComplete=(plan.pauseSeconds()==0||codes.containsAll(List.of("ANALYZER_STOPPED","ANALYZER_RESTARTED")))
                     &&(plan.fault().equals("none")||codes.containsAll(List.of("DB_FAULT_BEGIN","DB_FAULT_END")))&&(!plan.membership()||codes.containsAll(List.of("CONSUMERS_TWO","CONSUMERS_FOUR","CONSUMER_REMOVED")))
                     &&(!plan.pollStall()||codes.containsAll(List.of("POLL_STALL_BEGIN","POLL_STALL_END")))
-                    &&(!plan.name().equals("heartbeat")||codes.containsAll(List.of("HEARTBEAT_STOPPED","HEARTBEAT_REASSIGNED","HEARTBEAT_RESUMED","HEARTBEAT_REJOINED")));result.put("scenarioComplete",scenarioComplete);
+                    &&(!plan.name().equals("heartbeat")||codes.containsAll(List.of("HEARTBEAT_STOPPED","HEARTBEAT_REASSIGNED","HEARTBEAT_RESUMED","HEARTBEAT_REJOINED")))&&codes.stream().noneMatch(code->code.toString().endsWith("_EXPERIMENT_FAILED"));result.put("scenarioComplete",scenarioComplete);
             long accepted=session.accepted(),acknowledged=session.acknowledged(),rejected=((Number)session.producerStats().get("rejected")).longValue(),unconfirmed=((Number)session.producerStats().get("unconfirmed")).longValue();
             boolean conserved=session.attemptedRecords==accepted+rejected&&accepted==acknowledged+unconfirmed;
             result.put("countConservation",conserved);
@@ -100,14 +78,9 @@ public final class LoadExperiment {
             result.putIfAbsent("samples",List.copyOf(session.samples));result.putIfAbsent("events",List.copyOf(session.events));result.putIfAbsent("metricsA",session.metricsA.snapshot());result.putIfAbsent("metricsB",session.metricsB.snapshot());
             session.close();Runtime.getRuntime().removeShutdownHook(hook);result.put("cleanupComplete",session.cleaned);result.put("finishedAt",Instant.now().toString());
             if(!session.cleaned){result.put("correct",false);result.put("outcome","CLEANUP_FAILED");}
-            Files.writeString(output,JSON.writeValueAsString(result)+"\n");writeHtml(output,result);
+            Files.writeString(output,JSON.writeValueAsString(result)+"\n");ExperimentReport.writeHtml(output,result);
         }
         return result;
-    }
-    static void writeHtml(Path output,Map<String,Object> result) throws Exception {
-        String pretty=JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;");
-        String html="<!doctype html><html lang=ko><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>지금이니 합성 부하 실험</title><style>body{max-width:1100px;margin:40px auto;padding:0 20px;font:16px/1.7 system-ui;color:#173c30}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f0f7f4;padding:20px}h1{font-size:28px}summary{cursor:pointer}</style><h1>합성 부하 실험</h1><p>목표 수치와 실제 결과를 구분합니다. 단일 broker·RF1이며 외부 플랫폼에 요청하지 않았습니다.</p><h2>"+result.get("outcome")+"</h2><details open><summary>환경·입력·계수·지연·partition·자원·검증 결과</summary><pre>"+pretty+"</pre></details></html>";
-        Files.writeString(output.resolveSibling(output.getFileName()+".html"),html,StandardOpenOption.CREATE_NEW);
     }
     private static String runtimeHash() throws Exception {
         var hash=java.security.MessageDigest.getInstance("SHA-256");Path classes=Path.of(LoadExperiment.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -115,7 +88,7 @@ public final class LoadExperiment {
         return HexFormat.of().formatHex(hash.digest());
     }
     private static final class Session implements AutoCloseable {
-        final Plan plan;final String suffix=UUID.randomUUID().toString().replace("-",""),schema="exp_"+suffix,topic="exp.chat."+suffix,groupA="exp.a."+suffix,groupB="exp.b."+suffix;
+        final ExperimentPlan plan;final String suffix=UUID.randomUUID().toString().replace("-",""),schema="exp_"+suffix,topic="exp.chat."+suffix,groupA="exp.a."+suffix,groupB="exp.b."+suffix;
         final EventCodec codec=new EventCodec();final ExperimentMetrics metricsA=new ExperimentMetrics(),metricsB=new ExperimentMetrics();
         final CopyOnWriteArrayList<ProjectionConsumer> consumersA=new CopyOnWriteArrayList<>(),consumersB=new CopyOnWriteArrayList<>();
         final List<Map<String,Object>> samples=new CopyOnWriteArrayList<>(),events=new CopyOnWriteArrayList<>();
@@ -126,7 +99,7 @@ public final class LoadExperiment {
         ExperimentPublisher async,secondAsync;BufferedKafkaPublisher serial;Map<String,Object> serialStats=Map.of(),liveBefore=Map.of();
         Process child;boolean childStopped;
         boolean schemaCreated,topicCreated,cleaned;long started,generatedUnique,attemptedRecords;Instant eventBase;int serialHighWater;double serialOldest;Path progressFile;boolean guardResources;Path outputDirectory;
-        Session(Plan plan){this.plan=plan;}
+        Session(ExperimentPlan plan){this.plan=plan;}
         void open() throws Exception {
             try(var root=PostgresSupport.open(JDBC,USER,PASSWORD,false)) {var rootJdbc=new JdbcTemplate(root);liveBefore=live(rootJdbc);rootJdbc.execute("CREATE SCHEMA "+schema);schemaCreated=true;}
             ds=PostgresSupport.openMigrated(JDBC+"?currentSchema="+schema,USER,PASSWORD);jdbc=new JdbcTemplate(ds);
@@ -214,16 +187,19 @@ public final class LoadExperiment {
                     until(20,()->child.isAlive()&&assigned(consumersA)>0&&assigned(consumersA)<3);event("HEARTBEAT_REJOINED");
                 } catch(Exception failed){abort.set(true);event("HEARTBEAT_EXPERIMENT_FAILED");}
             },8,TimeUnit.SECONDS);
-            if(plan.pauseSeconds()>0)scheduler.schedule(()->{for(var c:consumersA)c.close();consumersA.clear();event("ANALYZER_STOPPED");scheduler.schedule(()->{add(false);event("ANALYZER_RESTARTED");},plan.pauseSeconds(),TimeUnit.SECONDS);},10,TimeUnit.SECONDS);
+            if(plan.pauseSeconds()>0)schedule("RECOVERY",10,()->{for(var c:consumersA)c.close();consumersA.clear();event("ANALYZER_STOPPED");schedule("RECOVERY",plan.pauseSeconds(),()->{add(false);event("ANALYZER_RESTARTED");});});
             if(!plan.fault().equals("none")) {
-                scheduler.schedule(()->{jdbc.update("UPDATE experiment_fault SET enabled=?,delay_seconds=?",plan.fault().equals("failure"),plan.fault().equals("delay")?.25:0);event("DB_FAULT_BEGIN");},8,TimeUnit.SECONDS);
-                scheduler.schedule(()->{jdbc.update("UPDATE experiment_fault SET enabled=false,delay_seconds=0");event("DB_FAULT_END");},18,TimeUnit.SECONDS);
+                schedule("DB_FAULT",8,()->{jdbc.update("UPDATE experiment_fault SET enabled=?,delay_seconds=?",plan.fault().equals("failure"),plan.fault().equals("delay")?.25:0);event("DB_FAULT_BEGIN");});
+                schedule("DB_FAULT",18,()->{jdbc.update("UPDATE experiment_fault SET enabled=false,delay_seconds=0");event("DB_FAULT_END");});
             }
             if(plan.membership()) {
-                scheduler.schedule(()->{add(false);event("CONSUMERS_TWO");},8,TimeUnit.SECONDS);
-                scheduler.schedule(()->{add(false);add(false);event("CONSUMERS_FOUR");},16,TimeUnit.SECONDS);
-                scheduler.schedule(()->{consumersA.removeFirst().close();event("CONSUMER_REMOVED");},28,TimeUnit.SECONDS);
+                schedule("MEMBERSHIP",8,()->{add(false);event("CONSUMERS_TWO");});
+                schedule("MEMBERSHIP",16,()->{add(false);add(false);event("CONSUMERS_FOUR");});
+                schedule("MEMBERSHIP",28,()->{consumersA.removeFirst().close();event("CONSUMER_REMOVED");});
             }
+        }
+        void schedule(String kind,long delay,Runnable action) {
+            scheduler.schedule(()->{try{action.run();}catch(RuntimeException failure){abort.set(true);event(kind+"_EXPERIMENT_FAILED");}},delay,TimeUnit.SECONDS);
         }
         synchronized void sample(Path directory,boolean resources) throws Exception {
             var sample=new LinkedHashMap<String,Object>();sample.put("seconds",elapsed());sample.put("sourceEnd",ends());
@@ -253,11 +229,12 @@ public final class LoadExperiment {
             var replayResources=new ArrayList<Map<String,Object>>();
             try(var source=new ReplaySource(BOOTSTRAP,topic,id)) {
                 var manifest=source.capture(null,null);result.put("replayManifest",manifest);result.put("replayKeyNormalization",plan.sharded()?"EXPERIMENT_SHARD_PREFIX_REMOVAL":"NONE");source.assign(manifest);
+                var ranges=new HashMap<Integer,ReplayManifest.Range>();manifest.partitions().forEach(range->ranges.put(range.partition(),range));
                 var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);var replay=new ProjectionStore(jdbc,tx,codec,"replay",id.toString());var next=new HashMap<Integer,Long>();for(var range:manifest.partitions())next.put(range.partition(),range.start());
                 while(manifest.partitions().stream().anyMatch(r->next.get(r.partition())<r.end())) {
                     if((System.nanoTime()-begin)>TimeUnit.SECONDS.toNanos(300))throw new IllegalStateException("EXPERIMENT_REPLAY_TIMEOUT");if(guardResources&&System.nanoTime()>=nextResourceCheck){replayResources.add(ExperimentResources.sample(admin,topic,jdbc,schema,outputDirectory));nextResourceCheck=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);}
                     source.validate(manifest);var batch=new ArrayList<ConsumerRecord<String,byte[]>>();
-                    for(var record:source.poll()) {var range=manifest.partitions().get(record.partition());if(record.offset()>=range.end())continue;if(record.offset()!=next.get(record.partition()))throw new IllegalStateException("EXPERIMENT_OFFSET_GAP");var normalized=normalize(record);var event=codec.decode(normalized.value(),normalized.key());
+                    for(var record:source.poll()) {var range=ranges.get(record.partition());if(range==null)throw new IllegalStateException("EXPERIMENT_PARTITION_CHANGED");if(record.offset()>=range.end())continue;if(record.offset()!=next.get(record.partition()))throw new IllegalStateException("EXPERIMENT_OFFSET_GAP");var normalized=normalize(record);var event=codec.decode(normalized.value(),normalized.key());
                         String sequenceKey=event.channelId()+"/"+record.partition();Instant previous=maximumEventTimes.get(sequenceKey);
                         if(previous!=null&&event.eventTime().isBefore(previous))regressions++;
                         maximumEventTimes.merge(sequenceKey,event.eventTime(),(a,b)->a.isAfter(b)?a:b);

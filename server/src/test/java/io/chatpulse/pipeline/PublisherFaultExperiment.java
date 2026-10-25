@@ -48,7 +48,7 @@ final class PublisherFaultExperiment {
             boolean cleaned=false;try{command("docker","rm","-f",name);cleaned=true;}catch(Exception ignored){}
             Runtime.getRuntime().removeShutdownHook(cleanup);result.put("cleanupComplete",cleaned);if(!cleaned)result.put("correct",false);
             result.put("finishedAt",Instant.now().toString());result.put("outcome",Boolean.TRUE.equals(result.get("correct"))?"RECONCILED":"EXPERIMENT_FAILED");
-            Files.writeString(output,JSON.writeValueAsString(result)+"\n");LoadExperiment.writeHtml(output,result);
+            Files.writeString(output,JSON.writeValueAsString(result)+"\n");ExperimentReport.writeHtml(output,result);
         }
         return result;
     }

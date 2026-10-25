@@ -26,8 +26,8 @@ class ExperimentPublisherTest {
         }
     }
     @Test void profilesAndFiniteLimitsAreExplicit() {
-        assertThat(LoadExperiment.plan("steady").rate()).isEqualTo(500);assertThat(LoadExperiment.plan("steady").seconds()).isEqualTo(600);assertThat(LoadExperiment.plan("burst").rate()).isEqualTo(2000);
-        assertThatThrownBy(()->LoadExperiment.plan("unbounded")).hasMessage("EXPERIMENT_PROFILE");
-        assertThatThrownBy(()->new LoadExperiment.Plan("invalid",2001,60,1,false,false,false,false,0,"none",false,false,false,false)).hasMessage("EXPERIMENT_PLAN");
+        assertThat(ExperimentPlan.named("steady").rate()).isEqualTo(500);assertThat(ExperimentPlan.named("steady").seconds()).isEqualTo(600);assertThat(ExperimentPlan.named("burst").rate()).isEqualTo(2000);
+        assertThatThrownBy(()->ExperimentPlan.named("unbounded")).hasMessage("EXPERIMENT_PROFILE");
+        assertThatThrownBy(()->new ExperimentPlan("invalid",2001,60,1,false,false,false,false,0,"none",false,false,false,false)).hasMessage("EXPERIMENT_PLAN");
     }
 }

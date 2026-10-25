@@ -10,7 +10,7 @@ class LoadExperimentIntegrationTest {
     @Test void isolatedSyntheticLoadReconcilesDuplicatesIndependentGroupsAndFixedRangeReplay() throws Exception {
         Path output=Path.of("../work/experiment-test-"+UUID.randomUUID()+".json");LoadExperiment.quiet();
         try {
-            var result=LoadExperiment.run(LoadExperiment.plan("smoke"),output,null,false);
+            var result=LoadExperiment.run(ExperimentPlan.named("smoke"),output,null,false);
             assertThat(result.get("correct")).isEqualTo(true);assertThat(result.get("cleanupComplete")).isEqualTo(true);
             assertThat(result.get("generatedUnique")).isEqualTo(200L);assertThat(result.get("attemptedRecords")).isEqualTo(202L);assertThat(result.get("replayBucketDifferences")).isEqualTo(0L);
             assertThat(((Map<?,?>)result.get("databaseA")).get("processedEvents")).isEqualTo(200L);

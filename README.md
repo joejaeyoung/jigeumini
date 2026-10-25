@@ -103,6 +103,25 @@ curl --fail http://127.0.0.1:18080/api/operations/notifications
 
 급상승/outbox의 DB 원자 저장, ACK 뒤 전달 완료, 독립 소비와 사후 품질 반영은 [알림 처리 계약](docs/pipeline/NOTIFICATIONS.md)을 따른다. 외부 알림 전송은 없으며 기본 토픽은 `chat.received.v1.spikes`다.
 
+## 카테고리 반응
+
+`/categories`에서 완료5분의 수집 대상 내 카테고리별 채팅·비중·품질 충족 채널 수를 보고, 선택하면 최근1시간과 기여 방송을 확인한다. 카테고리 관측은 최대120초 유효하며 미상/만료를 분리한다. 최초 새 그룹은 `./scripts/pipeline analyzer --categories.offset-reset=earliest`로 시작하고 이후에는 기본none으로 재시작한다. 처음부터 전체 그룹을 만드는 경우 기존 `--pipeline.offset-reset=earliest`를 상속한다. [카테고리 계약](docs/api/CATEGORIES.md)을 따른다.
+
+## 시청자 관측과 채팅 비교
+
+방송 상세에서 최근1시간의 시청자 관측점과 완료된1분 채팅을 같은 시간축으로 비교한다. 시청자 표본은 기본60초, 누락/TTL 초과/방송 변경에서 선을 끊으며 실제0과 미관측을 구분한다. collector가 선택한 채널만 새 관측을 생성한다.
+
+```bash
+# 새 관측 그룹 최초 시작만. 다음에는 기존 analyzer 명령을 쓴다.
+./scripts/pipeline analyzer --observations.offset-reset=earliest
+# 관측 주기·TTL 조절 또는 끄기 (수집기 실행 예)
+OBSERVATIONS_INTERVAL_SECONDS=120 OBSERVATIONS_TTL_SECONDS=240 ./scripts/pipeline collector <채널ID> 120s 0s
+# OBSERVATIONS_ENABLED=false ./scripts/pipeline collector <채널ID> 120s 0s
+curl --fail http://127.0.0.1:18080/api/operations/observations
+```
+
+비압축 Kafka 이력·DB7일 보존·원천 필드·관측 한계는 [시청자 관측 계약](docs/api/OBSERVATIONS.md)을 따른다. 과거에 쌓지 않은 시청자 수는 제공하지 않는다.
+
 ## 고정 Kafka 입력 재처리
 
 [이슈 #9 재처리 계약](docs/pipeline/REPLAY.md)은 로컬 CLI로 사용한다. 운영 group offset·순위·알림을 바꾸지 않고 UUID run에 10초 bucket만 만든다. 기존 Kafka/PostgreSQL 접속 환경 변수를 사용한다.
@@ -190,3 +209,9 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 
 재처리 조회의 후속 진단(#16): `./scripts/replay retention <manifest.json>`으로 현재 가용 offset 폭과 receivedAt 경계 표본을 확인한다. `status/compare`는 migration/watchdog을 수행하지 않으며 watchdog은 `reap`으로 실행한다. 생성/실행 빌드를 기록하고 다른 실행 빌드나 같은 run끼리의 비교를 거부한다. [진단 계약](docs/pipeline/REPLAY.md#조회와-migration빌드-이력-16)을 따른다.
+
+## 방송 관측 리포트
+
+채널 상세의 **방송별 요약 기록 보기**에서 최근7일 관측과 미종료 기록을 조회한다. 누적 참고 채팅·품질 충족 완료 분·분당 최대·시청자 관측 최고값·상위3개 피크를 구분한다. 실제 방송 시작/종료를 추정하지 않으며 내부 관측 세션과 미확정 상태를 표시한다. [리포트 계약](docs/api/REPORTS.md)을 따른다.
+
+새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.

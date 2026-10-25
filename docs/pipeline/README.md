@@ -56,6 +56,18 @@ Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC
 
 V6는 확정 spike와 같은 트랜잭션의 outbox, Kafka ACK 뒤 전달 완료, 별도 알림 group과 멱등 피드를 추가한다. [알림 계약](NOTIFICATIONS.md)을 따른다.
 
+## 시청자 관측 확장
+
+V7은 별도 `broadcast.observed.v1` 이력과 독립 consumer/DB 진행 위치·7일 정리를 추가한다. [시청자 관측·채팅 비교 계약](../api/OBSERVATIONS.md)을 따른다. 모든 공통 토픽 초기화는 cleanup.policy=delete를 명시·검사하며 compact 설정의 기존 토픽은 변경 없이 거부한다.
+
+## 카테고리 반응 확장
+
+V8의 독립 category group은 채팅·관측을 시각 기준으로 결합하며 자체 ledger/bucket/progress와 지연 보정을 저장한다. [카테고리 계약](../api/CATEGORIES.md)을 따른다.
+
+## 방송 리포트 확장
+
+V9의 독립 report group은 같은 두 입력에서 관측 세션·별칭·채팅 귀속·요약을 만든다. [리포트 계약](../api/REPORTS.md)의 DB 원자 보정·품질·7일 종료 기록 정리와 active 보호를 따른다.
+
 ## 저장과 처리 계약
 
 아래는 M1 기준선이다. 현재 analyzer의 영구 오류 격리·품질 표시·진단은 [M3 DLQ 계약](DLQ.md)을 따른다. DB 성공 후 BATCH offset commit 경계는 유지하며, M1의 전체 배치 차단 정책은 안전한 격리 후 진행으로 확장했다.

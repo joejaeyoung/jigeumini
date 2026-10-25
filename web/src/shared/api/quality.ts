@@ -37,9 +37,10 @@ export type Spikes = z.infer<typeof spikesSchema>;
 export async function fetchSpikes(signal: AbortSignal, cursor = ''): Promise<Spikes> {
   return read(`/api/v1/spikes?${new URLSearchParams({ cursor, limit: '20' })}`, spikesSchema, signal);
 }
-const activitySchema = z.object({ channelId: channelIdSchema, asOf: time, from: time, to: time, points: z.array(z.object({
+export const activityPointSchema = z.object({
   from: time, to: time, count: count.nullable(), referenceCount: count, coverage: z.number().min(0).max(1), status: qualityStatus, reasons: z.array(z.string()),
-}).refine(point => point.status === 'HEALTHY' ? point.count !== null && point.coverage >= .95 : point.count === null)).max(60) });
+}).refine(point => point.status === 'HEALTHY' ? point.count !== null && point.coverage >= .95 : point.count === null);
+const activitySchema = z.object({ channelId: channelIdSchema, asOf: time, from: time, to: time, points: z.array(activityPointSchema).max(60) });
 export async function fetchActivity(id: string, seconds: number, signal: AbortSignal) {
   if (seconds !== 1800 && seconds !== 3600) throw new ApiError('contract');
   const data = await read(`/api/v1/channels/${channelIdSchema.parse(id)}/activity?seconds=${seconds}`, activitySchema, signal);

@@ -105,6 +105,43 @@ class ChzzkMetadataSourceTest {
         assertThat(ChzzkMetadataSource.safeImage("https://other.akamaized.net/a.jpg")).isNull();
         assertThat(source.fetch(ID).thumbnailUrl()).isNull();
     }
+    @Test void observationUsesOnlyVerifiedNumericFieldsAndNeverGuessesMissingValues() {
+        body = live("false", "OPEN", "").replace("\"adult\"", "\"liveId\":123,\"concurrentUserCount\":456,\"openDate\":\"2026-10-25 12:00:00\",\"adult\"");
+        var value = source.observe(ID);
+        assertThat(value.viewerCount()).isEqualTo(456L);
+        assertThat(value.sourceBroadcastId()).isEqualTo("123");
+        assertThat(value.quality()).isEqualTo(PublicBroadcastObservation.Quality.OBSERVED);
+        assertThat(value.toString()).doesNotContain("합성 채널", "합성 모험 방송", "SYNTHETIC_SECRET", "2026-10-25");
+        for (String invalid : List.of("null", "\"456\"", "-1", "456.5", "9007199254740992")) {
+            body = live("false", "OPEN", "").replace("\"adult\"", "\"concurrentUserCount\":" + invalid + ",\"adult\"");
+            var missing = source.observe(ID);
+            assertThat(missing.viewerCount()).isNull();
+            assertThat(missing.sourceBroadcastId()).isNull();
+            assertThat(missing.quality()).isEqualTo(PublicBroadcastObservation.Quality.MISSING_VIEWER_COUNT);
+        }
+        body = live("false", "OPEN", "").replace("\"adult\"", "\"concurrentUserCount\":0,\"adult\"");
+        assertThat(source.observe(ID).viewerCount()).isZero();
+        body = body.replace("test-game", "test\\ncategory").replace("테스트 게임", "test\\nname");
+        var malformedCategory = source.observe(ID);
+        assertThat(malformedCategory.viewerCount()).isZero();
+        assertThat(malformedCategory.categoryId()).isNull();
+        assertThat(malformedCategory.categoryName()).isNull();
+        assertThat(credentials).isEmpty();
+    }
+    @Test void failedOrClosedObservationContainsNoPreviousMeasurements() {
+        body = live("false", "CLOSE", "");
+        assertThat(source.observe(ID).quality()).isEqualTo(PublicBroadcastObservation.Quality.OFFLINE);
+        body = "SYNTHETIC_SECRET";
+        for (int code : List.of(429, 500, 403)) {
+            status = code;
+            var value = source.observe(ID);
+            assertThat(value.viewerCount()).isNull();
+            assertThat(value.sourceBroadcastId()).isNull();
+            assertThat(value.categoryName()).isNull();
+            assertThat(value.toString()).doesNotContain(body);
+            assertThat(value.quality().name()).isEqualTo(code == 429 ? "RATE_LIMITED" : code == 403 ? "RESTRICTED" : "UPSTREAM_ERROR");
+        }
+    }
     private void assertHidden(BroadcastMetadata result, LiveStatus status) {
         assertThat(result.liveStatus()).isEqualTo(status);
         assertThat(result.channelName()).isNull();

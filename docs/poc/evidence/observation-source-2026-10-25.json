@@ -1,0 +1,65 @@
+{
+  "checkedAt": "2026-10-25T12:58:52.066061+00:00",
+  "command": "python3 work/observation-source-probe.py",
+  "endpoint": "https://api.chzzk.naver.com/service/v2/channels/{id}/live-detail",
+  "sampling": "three public non-adult channels; one observation each",
+  "rows": [
+    {
+      "channelId": "792acf9ca28b42918710327e14b06b68",
+      "status": "OPEN",
+      "concurrentUserCount": {
+        "present": true,
+        "integer": true,
+        "value": 16083
+      },
+      "liveId": {
+        "present": true,
+        "integer": true,
+        "value": 21842019
+      },
+      "categoryPresent": true,
+      "sourceTimeHasOffset": false,
+      "sourceTimeUsed": false
+    },
+    {
+      "channelId": "49d2c3cf8f0b2843d934ec15e82bb54c",
+      "status": "OPEN",
+      "concurrentUserCount": {
+        "present": true,
+        "integer": true,
+        "value": 15410
+      },
+      "liveId": {
+        "present": true,
+        "integer": true,
+        "value": 21847263
+      },
+      "categoryPresent": true,
+      "sourceTimeHasOffset": false,
+      "sourceTimeUsed": false
+    },
+    {
+      "channelId": "7ce8032370ac5121dcabce7bad375ced",
+      "status": "OPEN",
+      "concurrentUserCount": {
+        "present": true,
+        "integer": true,
+        "value": 11983
+      },
+      "liveId": {
+        "present": true,
+        "integer": true,
+        "value": 21846140
+      },
+      "categoryPresent": true,
+      "sourceTimeHasOffset": false,
+      "sourceTimeUsed": false
+    }
+  ],
+  "limits": [
+    "no source time-zone assumption",
+    "no real offline or 429 transition",
+    "no raw payload or public name stored",
+    "no new chat collection"
+  ]
+}

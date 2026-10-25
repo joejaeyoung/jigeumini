@@ -10,12 +10,12 @@ import tools.jackson.databind.json.JsonMapper;
 import static io.chatpulse.metadata.BroadcastMetadata.*;
 
 /** 익명 공개 조회 어댑터. 인증·쿠키·리디렉션이나 접근 제한 우회는 사용하지 않는다. */
-final class ChzzkMetadataSource implements MetadataSource {
+public final class ChzzkMetadataSource implements MetadataSource, PublicObservationSource {
     private final RestClient client;
     private final String base;
     private final JsonMapper json = JsonMapper.builder().build();
 
-    ChzzkMetadataSource() { this("https://api.chzzk.naver.com"); }
+    public ChzzkMetadataSource() { this("https://api.chzzk.naver.com"); }
     ChzzkMetadataSource(String base) {
         this.base = base;
         var http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3))
@@ -27,25 +27,8 @@ final class ChzzkMetadataSource implements MetadataSource {
     }
     @Override public BroadcastMetadata fetch(String id) {
         try {
-            var live = get("/service/v2/channels/" + id + "/live-detail");
-            if (live.isNull()) {
-                var channel = get("/service/v1/channels/" + id);
-                if (!id.equals(channel.path("channelId").asText()) || !channel.path("openLive").isBoolean()) {
-                    throw new Failure(Reason.INVALID_RESPONSE);
-                }
-                if (channel.path("openLive").asBoolean()) throw new Failure(Reason.INVALID_RESPONSE);
-                return publicData(id, channel, null, LiveStatus.OFFLINE);
-            }
-            if (!live.isObject()) throw new Failure(Reason.INVALID_RESPONSE);
-            if (live.path("adult").asBoolean(false) || restricted(live)) throw new Failure(Reason.RESTRICTED);
-            if (!live.path("adult").isBoolean()) throw new Failure(Reason.INVALID_RESPONSE);
-            var channel = live.path("channel");
-            if (!id.equals(channel.path("channelId").asText())) throw new Failure(Reason.INVALID_RESPONSE);
-            return switch (live.path("status").asText()) {
-                case "OPEN" -> publicData(id, channel, live, LiveStatus.LIVE);
-                case "CLOSE", "CLOSED" -> publicData(id, channel, null, LiveStatus.OFFLINE);
-                default -> throw new Failure(Reason.INVALID_RESPONSE);
-            };
+            var document = readLive(id);
+            return publicData(id, document.channel(), document.status() == LiveStatus.LIVE ? document.live() : null, document.status());
         } catch (Failure failure) {
             return empty(id, failure.reason == Reason.RESTRICTED ? LiveStatus.RESTRICTED
                     : failure.reason == Reason.NOT_FOUND ? LiveStatus.NOT_FOUND : LiveStatus.UNKNOWN, failure.reason);
@@ -53,6 +36,56 @@ final class ChzzkMetadataSource implements MetadataSource {
             // 예외 메시지/원천 body를 로그나 HTTP 응답에 포함하지 않는다.
             return empty(id, LiveStatus.UNKNOWN, Reason.UPSTREAM_ERROR);
         }
+    }
+    @Override public PublicBroadcastObservation observe(String id) {
+        try {
+            var document = readLive(id);
+            var live = document.live();
+            String broadcast = null;
+            if (live != null && live.path("liveId").isIntegralNumber() && live.path("liveId").canConvertToLong()
+                    && live.path("liveId").asLong() > 0) broadcast = live.path("liveId").asText();
+            if (document.status() == LiveStatus.OFFLINE)
+                return new PublicBroadcastObservation(LiveStatus.OFFLINE, null, broadcast, null, null, PublicBroadcastObservation.Quality.OFFLINE);
+            var value = live.path("concurrentUserCount");
+            Long viewers = value.isIntegralNumber() && value.canConvertToLong() && value.asLong() >= 0
+                    && value.asLong() <= 9007199254740991L ? value.asLong() : null;
+            return new PublicBroadcastObservation(LiveStatus.LIVE, viewers, broadcast,
+                    category(live, "liveCategory"), category(live, "liveCategoryValue"),
+                    viewers == null ? PublicBroadcastObservation.Quality.MISSING_VIEWER_COUNT : PublicBroadcastObservation.Quality.OBSERVED);
+        } catch (Failure failure) {
+            var status = failure.reason == Reason.RESTRICTED ? LiveStatus.RESTRICTED
+                    : failure.reason == Reason.NOT_FOUND ? LiveStatus.NOT_FOUND : LiveStatus.UNKNOWN;
+            return new PublicBroadcastObservation(status, null, null, null, null,
+                    PublicBroadcastObservation.Quality.valueOf(failure.reason.name()));
+        } catch (Exception ignored) {
+            return new PublicBroadcastObservation(LiveStatus.UNKNOWN, null, null, null, null, PublicBroadcastObservation.Quality.UPSTREAM_ERROR);
+        }
+    }
+    private record LiveDocument(JsonNode channel, JsonNode live, LiveStatus status) { }
+    private static String category(JsonNode live, String field) {
+        String value = text(live, field, 120);
+        return value == null || value.codePoints().anyMatch(Character::isISOControl) ? null : value;
+    }
+    private LiveDocument readLive(String id) {
+        if (id == null || !id.matches("[a-f0-9]{32}")) throw new Failure(Reason.INVALID_RESPONSE);
+        var live = get("/service/v2/channels/" + id + "/live-detail");
+        if (live.isNull()) {
+            var channel = get("/service/v1/channels/" + id);
+            if (!id.equals(channel.path("channelId").asText()) || !channel.path("openLive").isBoolean()
+                    || channel.path("openLive").asBoolean()) throw new Failure(Reason.INVALID_RESPONSE);
+            return new LiveDocument(channel, null, LiveStatus.OFFLINE);
+        }
+        if (!live.isObject()) throw new Failure(Reason.INVALID_RESPONSE);
+        if (live.path("adult").asBoolean(false) || restricted(live)) throw new Failure(Reason.RESTRICTED);
+        if (!live.path("adult").isBoolean()) throw new Failure(Reason.INVALID_RESPONSE);
+        var channel = live.path("channel");
+        if (!id.equals(channel.path("channelId").asText())) throw new Failure(Reason.INVALID_RESPONSE);
+        var status = switch (live.path("status").asText()) {
+            case "OPEN" -> LiveStatus.LIVE;
+            case "CLOSE", "CLOSED" -> LiveStatus.OFFLINE;
+            default -> throw new Failure(Reason.INVALID_RESPONSE);
+        };
+        return new LiveDocument(channel, live, status);
     }
     private boolean restricted(JsonNode live) {
         String blind = live.path("blindType").asText("");

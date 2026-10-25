@@ -66,3 +66,89 @@ dialog { border: 1px solid var(--color-rule); padding: 0; border-radius: 16px; c
 .notification-item.is-new .notification-meta span { color: var(--color-accent); font-weight: 700; }
 .notification-item button { flex-shrink: 0; }
 @media (max-width: 600px) { .notification-item { flex-direction: column; align-items: stretch; padding: 18px; } }
+
+.observation-timeline { margin: 1.5rem 0; padding: 1.25rem; background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb); border-radius: 16px; }
+.chart-heading, .chart-times { display: flex; justify-content: space-between; gap: 1rem; font-size: .8rem; }
+.chart-heading span { color: #65756e; }
+.observation-chart { display: block; width: 100%; height: 130px; margin-top: .8rem; overflow: visible; }
+.chart-axis { stroke: #d6ded9; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viewer-line { fill: none; stroke: #0e8775; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.viewer-point { fill: #0e8775; cursor: pointer; stroke: #fff; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viewer-point:focus { fill: #164dc7; stroke: #164dc7; }
+.chat-bar { fill: #e6805a; }
+.chat-gap { fill: #e7eae8; }
+.observation-selection, .observation-empty { color: #5a6b63; font-size: .85rem; }
+.chart-times { margin-top: .4rem; color: #65756e; }
+@media (max-width: 480px) { .observation-timeline { padding: .8rem; } .chart-heading { font-size: .72rem; gap: .4rem; } }
+
+/* 카테고리 반응: 숫자와 품질을 같은 행에서 비교한다. */
+.categories-page { padding-top: 32px; }
+.category-context { color: var(--color-muted); font-size: 13px; margin: 22px 0; line-height: 1.8; }
+.category-list { border-top: 1px solid var(--color-rule); }
+.category-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr) 100px; gap: 24px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--color-rule); }
+.category-row > div:first-child { display: flex; gap: 18px; align-items: center; min-width: 0; }
+.category-row a { font-size: 20px; font-weight: 700; overflow-wrap: anywhere; }
+.category-rank { width: 22px; flex-shrink: 0; color: var(--color-muted); }
+.category-row strong { display: block; font-size: 23px; font-variant-numeric: tabular-nums; }
+.category-row small, .category-row div > span:last-child:not(.category-rank) { font-size: 12px; font-weight: 400; color: var(--color-muted); }
+.category-back { display: inline-flex; min-height: 44px; align-items: center; margin: 12px 0; }
+.category-chart { margin: 24px 0 40px; }
+.category-chart > p { color: var(--color-muted); font-size: 13px; line-height: 1.7; }
+.category-chart svg { display: block; width: 100%; height: auto; margin-top: 20px; color: var(--color-muted); }
+.category-bar { fill: var(--color-accent); }
+.category-gap { fill: var(--color-rule-soft); }
+.category-axis { display: flex; justify-content: space-between; font-size: 12px; }
+.category-chart summary { cursor: pointer; min-height: 44px; padding: 12px 0; }
+.category-table { overflow: auto; max-height: 360px; }
+.category-table table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
+.category-table th, .category-table td { text-align: left; padding: 12px 6px; border-bottom: 1px solid var(--color-rule); }
+.category-table td:first-child { width: auto; }
+.category-table th { white-space: nowrap; font-size: 12px; }
+.category-contributors { list-style: none; padding: 0; }
+.category-contributors li { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--color-rule); padding: 16px 0; font-size: 14px; }
+.category-contributors a { min-height: 44px; display: inline-flex; align-items: center; }
+.category-contributors span { color: var(--color-muted); font-size: 12px; }
+@media (max-width: 640px) {
+  .category-row { grid-template-columns: minmax(0, 1fr) 90px; gap: 12px; }
+  .category-row > div:first-child { grid-column: 1 / -1; }
+  .category-row a { font-size: 19px; }
+  .category-row strong { font-size: 21px; }
+  .category-contributors li { gap: 12px; }
+}
+.observation-picker { display: grid; gap: .4rem; margin-top: 1rem; font-size: .8rem; }
+.observation-picker select { width: 100%; min-height: 44px; font: inherit; padding: .5rem; border: 1px solid var(--color-rule); border-radius: 6px; background: var(--color-surface); }
+.report-history-link { display: inline-flex; min-height: 44px; align-items: center; margin: 0 0 20px 20px; font-weight: 700; }
+.report-list { list-style: none; padding: 0; display: grid; gap: 16px; }
+.report-list li { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 24px; border: 1px solid var(--color-rule); border-radius: 16px; background: white; }
+.report-list li > div:last-child { display: grid; gap: 8px; flex-shrink: 0; }
+.report-list h2 { margin: 8px 0; font-size: 20px; }
+.report-list strong { font-size: 28px; }
+.reports-page small { font-size: 14px; font-weight: 500; }
+.report-state, .report-version, .report-list p { color: var(--color-muted); }
+.report-range { border-left: 4px solid var(--color-accent); padding: 12px 20px; margin: 20px 0; }
+.report-range strong { font-size: 20px; }
+.report-range p { margin: 8px 0 0; }
+.report-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 24px 0 12px; }
+.report-metrics > div { background: white; border: 1px solid var(--color-rule); border-radius: 16px; padding: 20px; }
+.report-metrics dt { font-size: 13px; }
+.report-metrics dd { margin: 12px 0 0; font-size: 30px; font-weight: 750; overflow-wrap: anywhere; }
+.report-peaks { display: grid; gap: 12px; padding-left: 24px; }
+.report-peaks li { padding: 8px; }
+.report-peaks span { display: block; margin-top: 6px; }
+.report-chart { padding: 20px; background: white; border: 1px solid var(--color-rule); border-radius: 16px; margin-top: 24px; }
+.report-chart svg { width: 100%; height: 180px; display: block; margin: 24px 0 12px; }
+.report-chart summary { min-height: 44px; padding: 12px 0; cursor: pointer; }
+.report-chart .category-table th:first-child, .report-chart .category-table td:first-child { width: auto; }
+.report-version { font-size: 12px; line-height: 1.8; margin-top: 24px; overflow-wrap: anywhere; }
+.reports-page > h2 { margin-top: 24px; margin-bottom: 8px; }
+.reports-page > .scope-note { font-size: 12px; margin-top: 16px; padding-top: 16px; }
+.report-chart table { min-width: 420px; }
+@media (max-width: 700px) {
+  .report-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .report-metrics > div { padding: 14px; }
+  .report-list li { display: block; padding: 18px; }
+  .report-list li > div:last-child { margin-top: 16px; }
+  .report-range { padding: 10px 14px; }
+  .report-chart { padding: 14px; }
+  .report-history-link { margin-left: 0; }
+}

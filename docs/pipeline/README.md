@@ -48,6 +48,10 @@ Compose의 DB 계정은 로컬 개발 전용이다. 앱 설정은 `PIPELINE_JDBC
 
 기존 채팅 이벤트의 ledger·bucket 원자 반영 계약은 유지한다. analyzer에 별도 trend consumer group과 ledger/bucket, 5초 end-offset/poll 관측, 완료 구간 평가 scheduler를 추가했다. 첫 그룹 초기화는 [루트 README](../../README.md), 상태·API·제외·정정 규칙은 [품질 계약](../api/QUALITY_RANKINGS.md)을 따른다. V2 migration은 수집 관측·snapshot·급상승 상태 테이블만 추가한다. 아래 M1 표는 첫 수직 구현의 범위를 설명하며 현재 추가 범위는 해당 품질 계약을 참고한다.
 
+## 고정 입력 재처리 확장
+
+[재처리 계약](REPLAY.md)의 로컬 CLI는 V4 작업 상태와 `replay/<UUID>` namespace를 사용한다. 운영 offset을 커밋하거나 순위·급상승을 재발행하지 않는다. M2의 V3는 창 종료 후 버퍼 표본을 짧게 보존하는 migration이다. 아래 M1 표는 최초 수직 구현의 범위이며 현재 재처리는 별도 계약을 따른다.
+
 ## 저장과 처리 계약
 
 - `chat.received.v1`: 3 partitions, 개발용 RF=1, key=`channelId`, timestamp=`receivedAt`의 epoch milliseconds, CreateTime 정책.

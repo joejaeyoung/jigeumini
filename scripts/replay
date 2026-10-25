@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+case "${1:-help}" in
+  capture|create|status|cancel|worker|reap|compare) ;;
+  *) echo './scripts/replay capture <새 manifest.json> [eventFrom eventTo] | create <manifest.json> | status <runId> | cancel <runId> | worker | reap | compare <runId> <runId>'; exit 1 ;;
+esac
+./gradlew --console=plain :server:bootJar >&2
+mkdir -p work/runtime
+runtime_jar="$(mktemp "$PWD/work/runtime/replay.XXXXXX")"
+cp server/build/libs/chat-pulse-poc.jar "$runtime_jar"
+chmod 400 "$runtime_jar"
+exec java -jar "$runtime_jar" replay "$@"

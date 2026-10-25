@@ -34,13 +34,19 @@ public final class ProjectionStore {
         jdbc.update("INSERT INTO projection_progress(projection,run_id,topic,partition,next_resolved_offset) VALUES (?,?,?,?,?) ON CONFLICT DO NOTHING",
                 projection, runId, topic, partition, position);
     }
-    public long apply(List<ConsumerRecord<String, byte[]>> records) {
+    public long apply(List<ConsumerRecord<String, byte[]>> records) { return apply(records,true); }
+    public long applyReplay(List<ConsumerRecord<String, byte[]>> records) {
+        if (!"replay".equals(projection)) throw new IllegalArgumentException("REPLAY_NAMESPACE_REQUIRED");
+        UUID.fromString(runId);
+        return apply(records,false);
+    }
+    private long apply(List<ConsumerRecord<String, byte[]>> records, boolean live) {
         var unique = new LinkedHashMap<UUID, Input>();
         var offsets = new HashMap<TopicPartition, Long>();
         Instant now = Instant.now();
         for (var r : records) {
             var event = codec.decode(r.value(), r.key());
-            codec.validateLiveAge(event, now);
+            if (live) codec.validateLiveAge(event, now);
             var input = new Input(event, codec.hash(event), r);
             var previous = unique.putIfAbsent(event.eventId(), input);
             if (previous != null && !previous.hash.equals(input.hash)) throw new EventContractException("EVENT_ID_CONFLICT");

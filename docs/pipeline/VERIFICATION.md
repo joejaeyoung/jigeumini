@@ -46,3 +46,7 @@
 ## 범위
 
 로컬 단일 Kafka broker(RF=1) 기능 검증이다. HA, 대용량 성능, 원천 중복 제거·접속 공백 복원, coverage, DLQ, retention 자동 정리, 운영 replay와 정식 순위 snapshot은 미구현이다. [실행·처리 계약](README.md)에 HLD 대비 범위를 명시했다.
+
+## 고정 offset 재처리 추가 검증
+
+2026-10-25 F08 → T01/T02/T03/T04의 CLI·실제 Kafka/PostgreSQL 검증은 [재처리 검증 기록](REPLAY_VERIFICATION.md)에 분리했다. 위 M1 수치와 당시 미구현 목록은 최초 실행 시점의 기록이다.

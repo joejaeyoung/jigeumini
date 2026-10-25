@@ -33,6 +33,7 @@ tasks.named('test') {
 tasks.named('bootJar') { archiveFileName = 'chat-pulse-poc.jar' }
 
 tasks.register('integrationTest', Test) {
+    dependsOn tasks.named('bootJar')
     description = '로컬 Compose Kafka/PostgreSQL에서 격리된 통합 검증'
     group = 'verification'
     testClassesDirs = sourceSets.test.output.classesDirs

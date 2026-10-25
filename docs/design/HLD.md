@@ -262,15 +262,15 @@ snapshot 생성 시 품질 판정은 다음 우선순위를 따른다. API는 �
 
 ## 9. 재처리 설계
 
-1. 관리자가 분석 버전과 입력 범위를 선택한다. API는 허용된 source topic의 topic ID, earliest/end offsets를 조회하고 partition별 `[startOffset,endOffset)`를 고정한다. manifest에 시간 필터, schema/algorithm version, 생성 시각을 포함한다. 이미 삭제된 범위는 거부한다.
-2. DB에 QUEUED 작업을 저장한 후 202를 반환한다. 별도 replay 프로필 worker 1개가 짧은 DB 트랜잭션의 `FOR UPDATE SKIP LOCKED`로 하나를 가져와 RUNNING으로 바꾸고 commit한다. 장시간 Kafka 처리는 이 잠금 트랜잭션 밖에서 수행한다.
+1. 관리자가 분석 버전과 입력 범위를 선택한다. 관리 명령은 허용된 source topic의 topic ID, earliest/end offsets를 조회하고 partition별 `[startOffset,endOffset)`를 고정한다. manifest에 시간 필터, schema/algorithm version, 생성 시각을 포함한다. 이미 삭제된 범위는 거부한다.
+2. 현재 #9는 로컬 CLI로 DB에 QUEUED 작업을 저장한 후 runId·상태를 반환한다. replay worker 1개가 짧은 DB 트랜잭션의 `FOR UPDATE SKIP LOCKED`로 하나를 가져와 RUNNING으로 바꾸고 commit한다. 장시간 Kafka 처리는 이 잠금 트랜잭션 밖에서 수행한다.
 3. worker는 UUID runId·전용 consumer group으로 고정 partition을 assign/seek하고 끝 offset을 늘리지 않는다. 메인 입력 외의 임의 topic/group은 요청받지 않는다. replay 버킷은 목표 projection 및 새 run으로 격리한다.
 4. 진행 offset은 ledger/bucket과 함께 commit한다. 5초마다 작업 heartbeat를 기록한다. 실패 시 FAILED, 사용자 취소 시 CANCELLED다. heartbeat가 30초 이상 없으면 watchdog이 worker 생존을 확인하고 실패 처리한다. MVP는 중간 run 자동 재개 대신 새 run으로 다시 실행한다. 완료 commit은 소유 worker와 RUNNING 상태를 조건으로 검사해 실패 처리된 작업이 COMPLETED로 덮어쓰지 못하게 한다.
 5. 모든 partition에서 end offset까지 처리했을 때만 COMPLETED다. 실행 중 retention 만료·topic 재생성·스키마 해석 불가가 생기면 FAILED이며 부분 결과는 진단용으로 남긴다. 취소/실패한 worker는 다음 배치 전에 상태를 확인하고 멈춘다.
 6. 결과에 읽은 건수, 시간 조건 제외, 중복, 유효 고유 이벤트 수, bucket 합계, 실제 offsets와 알고리즘 버전을 남긴다. 하나의 알고리즘 검증에서는 채널/10초 bucket별 결과를 고정 fixture 또는 동일 manifest의 완료된 기준 run과 비교한다. 계속 바뀌는 live bucket과 직접 비교하지 않는다.
 7. MVP replay는 **bucket 정확성 비교**다. 운영 snapshot·연결 상태·과거 알림은 재현하거나 덮어쓰지 않는다. DLQ 수정 검증도 원본 record를 보존 범위에서 다시 읽는다. 영구 오류가 남아 있으면 완전 검증 성공으로 표시하지 않는다.
 
-작업 상태 전이: `QUEUED → RUNNING → COMPLETED | FAILED | CANCELLED`; 대기 중 취소도 가능하다. 초기 배포는 replay worker를 필요할 때 실행하며, 실행되지 않으면 QUEUED 상태가 유지된다. API에서 실제 처리 완료 전에 성공 결과를 반환하지 않는다.
+작업 상태 전이: `QUEUED → RUNNING → COMPLETED | FAILED | CANCELLED`; 대기 중 취소도 가능하다. 초기 배포는 replay worker를 필요할 때 실행하며, 실행되지 않으면 QUEUED 상태가 유지된다. CLI에서 대기 작업 생성 성공을 실제 처리 완료로 표시하지 않는다.
 
 정확성 시험은 **알려진 고정 offsets 전체**를 읽는다. 기간 지정 도우미가 쓰는 Kafka timestamp는 receivedAt이고 eventTime과 다르다. timestamp lookup만으로 이벤트 발생 기간의 완전한 범위를 보장하지 않는다. 엄밀한 기간 검증은 현재 보존된 전체 offset 범위를 읽고 eventTime으로 필터하며, 그 이전에 삭제된 입력이나 미래에 도착할 지연 입력은 포함할 수 없음을 결과에 표시한다.
 

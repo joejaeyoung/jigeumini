@@ -72,3 +72,15 @@ tasks.register('integrationTest', Test) {
     shouldRunAfter test
     testLogging { events 'passed', 'failed', 'skipped' }
 }
+
+tasks.register('loadExperiment', JavaExec) {
+    description = '격리된 로컬 합성 부하 실험과 정제 리포트'
+    group = 'verification'
+    dependsOn tasks.named('testClasses'), tasks.named('bootJar')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.pipeline.LoadExperiment'
+    maxHeapSize = '768m'
+    workingDir = rootProject.projectDir
+    args providers.gradleProperty('experimentProfile').getOrElse('smoke'), providers.gradleProperty('experimentOutput').getOrElse('work/experiment-smoke.json')
+    if (providers.gradleProperty('experimentBase').isPresent()) args providers.gradleProperty('experimentBase').get()
+}

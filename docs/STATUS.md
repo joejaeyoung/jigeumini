@@ -1,6 +1,6 @@
 # 진행 상태
 
-2026-10-25 · 브랜치 `fix/replay-diagnostics`
+2026-10-26 · 브랜치 `technicaltest/load-recovery`
 
 | 단계 | 현재 상태 | 다음 통과 조건 |
 |---|---|---|
@@ -8,7 +8,7 @@
 | M1 한 채널 수직 구현 | 완료: 실수신→Kafka→DB→조회, 34개 테스트·재시작 검증 통과 | M2 집계 품질·순위 정책 구현 |
 | M2 순위·급증 기능 | #4·#12·#13 Claude 승인·CI 통과 후 develop 병합 완료 | 실방송 장기 관측·운영 확대·고부하 평가 비용 |
 | M3 장애·재처리 | #9·PR #15 병합 완료, #10·PR #19 develop 병합 완료 | #8 outbox 병합 완료, #16 replay 후속 보완 |
-| M4 성능 검증 | 미착수 | 합성 부하·디스크·지연·복구 시간 보고 |
+| M4 성능 검증 | 진행 중: 격리된 합성 하네스 | 합성 부하·디스크·지연·복구 시간 보고 |
 
 세부 근거: [PoC 검증 기록](poc/VERIFICATION.md). 제품 범위: [PRD](design/PRD.md).
 
@@ -51,6 +51,10 @@ PR #20의 `3977d34`는 Claude 승인·push CI를 통과했으나 PR CI run `4019
 ## 재처리 CLI 후속 보완 #16
 
 `fix/replay-diagnostics`, F08 → T01/T02/T03/T04. #5/#6 최종 CI·리뷰를 기다리는 동안 독립 범위를 진행한다. 조회의 migration/watchdog 제거·명시적migrate, 동일 run 및 다른 worker 빌드 비교 거부, 보존 offset 폭과 경계 Kafka timestamp 표본, 잘못된 날짜/없는 토픽/접속 실패 구분, runtime JAR 종료 정리를 구현했다. 실제 control record 꼬리/중간과 전역 worker lock의 watchdog 지연을 합성 Kafka/DB에서 검증 중이다. 최종 근거·검증·Claude 승인·CI는 아직 완료하지 않았다.
+
+## 합성 부하·복구 실험 #11
+
+`technicaltest/load-recovery`, F10 → T06/T07/T08/T09/T11/T12. #7/#16 구현 기준을 별도 작업 폴더에 통합해 전용UUID topic/group/schema, 유한 생성·자원 guard, 직렬 ACK/실험용 bounded async 후보, 독립group·DB 지연/장애·재할당·편향·고정offset replay와 정제 JSON/HTML을 구현 중이다. 합성200개+중복2개→양쪽DB200→replay차이0·live불변·자원정리의 실제 스모크가 통과했다. 실제500/s600초·2,000/s60초 목표와 긴 실험 수치는 아직 측정 전이며 완료로 계산하지 않는다. 운영 발행기를 변경하지 않았다.
 
 ## 오류 격리·복구 진단 #10
 

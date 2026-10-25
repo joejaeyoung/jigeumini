@@ -215,3 +215,11 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 채널 상세의 **방송별 요약 기록 보기**에서 최근7일 관측과 미종료 기록을 조회한다. 누적 참고 채팅·품질 충족 완료 분·분당 최대·시청자 관측 최고값·상위3개 피크를 구분한다. 실제 방송 시작/종료를 추정하지 않으며 내부 관측 세션과 미확정 상태를 표시한다. [리포트 계약](docs/api/REPORTS.md)을 따른다.
 
 새 report group의 첫 실행에서는 `--reports.offset-reset=earliest`를 지정한다. 이후 기본none으로 저장된 offset을 이어간다. `GET /api/v1/channels/{채널ID}/reports`, `GET /api/v1/reports/{UUID}`, 운영 진행 `GET /api/operations/reports`를 제공한다.
+
+## 격리된 합성 부하 실험
+
+`./scripts/experiment smoke work/experiment-smoke.json`으로 먼저 실행한다. `baseline`은 직렬 ACK 기준선, `steady`는500건/초600초, `burst`는2,000건/초60초의 bounded async 실험 후보다. 운영 발행기 설정은 바꾸지 않는다. 출력 경로는 새 파일이어야 하며 JSON·진행JSON·HTML을 만든다. 목표 달성과 실제 입력/ACK/DB/replay 대조를 구분한다. 공개 플랫폼에 요청하지 않는다.
+
+`uniform-1`~`uniform-4`, `hot-1`~`hot-4`, `recovery`(분석 group60초중단), `db-delay`, `db-failure`, `membership`, `poll-stall`, `hot-duplicates`, `sharded-3`를 비교한다. 동일 seed와 optional UTC eventTime 기준을 입력 manifest에 기록한다. 동시 실험은 자원 간섭을 만들므로 순서대로 실행한다.
+
+기본 로컬 Kafka19092/DB15432의 UUID 전용 topic/group/schema만 만들고 종료 시 정리한다. host·Kafka/DB 파일시스템 각각2GiB 여유를 확인하고 실험 토픽+DB2GiB 상한을5초마다 관측한다. 생성 최대600초/400,000개·drain180초·replay300초, client heap768MiB이다. 삭제는 이 실행의 자원만 대상이며 다른 worktree나 live ledger를 수정하지 않는다. 강제종료로 cleanupComplete가false이면 결과의 정확한 UUID 자원만 확인해 정리한다.

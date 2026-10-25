@@ -5,7 +5,7 @@ ROOT=pathlib.Path(__file__).resolve().parents[1]
 class Rehearsal:
     def __init__(self,baseline,candidate,directory):
         self.baseline=json.loads(pathlib.Path(baseline).read_text());self.candidate=json.loads(pathlib.Path(candidate).read_text())
-        self.directory=pathlib.Path(directory).resolve();self.directory.mkdir(parents=True,exist_ok=False)
+        self.directory=pathlib.Path(directory).resolve();self.directory.mkdir(parents=True,exist_ok=False,mode=0o700)
         self.owner=uuid.uuid4().hex;self.project='jigeumini-deploy-'+self.owner
         self.envfile=self.directory/'compose.env';self.deadline=time.monotonic()+1800;self.cleaning=False;self.started=False;self.base=None
         self.result={'scope':'SINGLE_HOST_RF1_SYNTHETIC_LOCAL_REHEARSAL','owner':self.owner,'project':self.project,'startedAt':self.now(),'baseline':self.baseline,'candidate':self.candidate,'phases':[]}
@@ -182,7 +182,7 @@ class Rehearsal:
     def run(self):
         try:
             self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit);self.phase('COLLECTOR_CLI_PREFLIGHT',self.collector_preflight)
-            self.event_base=(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(seconds=60)).replace(microsecond=0).isoformat()
+            self.event_base=(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(seconds=120)).replace(microsecond=0).isoformat()
             self.result['syntheticEventBase']=self.event_base
             self.phase('SEED_BEFORE_BACKUP',lambda:self.probe('seed','0',self.event_base));self.phase('BASELINE_DATA',lambda:self.snapshot(10,1));self.phase('DATABASE_OUTAGE',self.database_fault)
             self.phase('BACKUP',self.backup);self.phase('UPGRADE_IMAGE',lambda:self.up_apps(self.candidate));self.phase('SEED_AFTER_BACKUP',lambda:self.probe('seed','1',self.event_base))

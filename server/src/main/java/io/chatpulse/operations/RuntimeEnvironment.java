@@ -1,6 +1,5 @@
 package io.chatpulse.operations;
 
-import io.chatpulse.db.PostgresSupport;
 import io.chatpulse.pipeline.KafkaTopicPolicy;
 import java.nio.file.*;
 import java.util.Map;

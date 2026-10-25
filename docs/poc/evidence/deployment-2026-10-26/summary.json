@@ -26,6 +26,16 @@
       "correct": true,
       "cleanupComplete": true,
       "phases": 17
+    },
+    {
+      "file": "third.json",
+      "sha256": "1c9ae51278c52bf21f9bcf9743a0ee39530b34cd19844523ac0cf8b05dff17b7",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "230852b62f26d37eb28f012afe39c784ecbea4af",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 17,
+      "sensitiveArtifactsRemoved": true
     }
   ],
   "observedRecovery": {
@@ -57,5 +67,22 @@
     "First two runs only checked nonzero exit, not the stable startup failure code",
     "First two browser runs checked SPA shell/layout, not API success/data rendering",
     "Some diagnostic counts/old-group invariance fields were literals; final followup measures them"
-  ]
+  ],
+  "reviewFollowup": {
+    "startedAt": "2026-10-25T17:26:29.857153+00:00",
+    "secondsToVerifiedCatchup": 18.536133666988462,
+    "backupChatGap": 10,
+    "chatGapAfterRecovery": 0,
+    "businessSnapshotDifferences": [],
+    "newGroups": 6,
+    "oldGroupsModified": false,
+    "restoredIntoNewDatabase": true,
+    "originalDatabase": "chatpulse",
+    "restoredDatabase": "restored",
+    "alignmentStartRejected": {
+      "exitCode": 2,
+      "oomKilled": false,
+      "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+    }
+  }
 }

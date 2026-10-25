@@ -22,7 +22,7 @@ final class PublisherFaultExperiment {
         var result=new LinkedHashMap<String,Object>();result.put("profile","broker-fault");result.put("startedAt",Instant.now().toString());
         result.put("codeCommit",command("git","rev-parse","HEAD").strip());result.put("environment",Map.of("image","apache/kafka:4.1.2","replicationFactor",1,"acks","all","minInSyncReplicas",1,"applicationCapacity",30,"containerMemoryBytes",536870912,"containerName",name,"bootstrap","localhost:"+port));
         result.put("scope","SYNTHETIC_OWNED_BROKER_NO_DATABASE_OR_HA_CLAIM");
-        var rows=new ArrayList<Map<String,Object>>();result.put("cases",rows);
+        var rows=new ArrayList<Map<String,Object>>();result.put("cases",rows);Files.writeString(output,JSON.writeValueAsString(result)+"\n");
         var cleanup=new Thread(()->{try{command("docker","rm","-f",name);}catch(Exception ignored){}},"fault-broker-cleanup");Runtime.getRuntime().addShutdownHook(cleanup);
         try {
             var args=new ArrayList<>(List.of("docker","run","-d","--name",name,"--memory","512m","--label","io.chatpulse.experiment=publisher-fault","-p","127.0.0.1:"+port+":"+port));
@@ -38,8 +38,9 @@ final class PublisherFaultExperiment {
             String bootstrap="localhost:"+port;ready(bootstrap);
             result.put("imageId",command("docker","inspect","--format","{{.Image}}",name).strip());
             for(boolean serial:List.of(true,false))for(boolean disconnect:List.of(false,true)) {
-                String topic="exp.fault."+UUID.randomUUID().toString().replace("-","");KafkaSupport.ensureTopic(bootstrap,topic);
-                var row=new LinkedHashMap<String,Object>();rows.add(row);scenario(bootstrap,name,topic,serial,disconnect,row);
+                String topic="exp.fault."+UUID.randomUUID().toString().replace("-","");
+                var row=new LinkedHashMap<String,Object>();rows.add(row);row.put("publisher",serial?"SERIAL":"BOUNDED_ASYNC");row.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");row.put("phase","TOPIC_READY");
+                KafkaSupport.ensureTopic(bootstrap,topic);scenario(bootstrap,name,topic,serial,disconnect,row);
             }
             result.put("correct",rows.stream().allMatch(row->Boolean.TRUE.equals(row.get("conserved"))&&Boolean.TRUE.equals(row.get("bounded"))&&Boolean.TRUE.equals(row.get("brokerCountWithinAckRange"))));
         } catch(Exception failure){result.put("correct",false);result.put("failureCode","EXPERIMENT_BROKER_FAULT_FAILED");result.put("failureType",failure.getClass().getSimpleName());if(failure.getCause()!=null)result.put("causeType",failure.getCause().getClass().getSimpleName());}

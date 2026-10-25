@@ -17,6 +17,7 @@ python3 scripts/summarize-experiments.py work/report work/steady.json work/burst
 | 프로필 | 입력·실패 조건 |
 |---|---|
 | smoke | 100/s·2초, 두 독립 group, 1% 같은 eventId 재발행 |
+| serial-control / async-control | 100/s·15초, 동일 입력을 두 방식 모두 완료하는 비교 |
 | baseline / async-baseline | 500/s·30초, 동일20채널·seed·eventTime을 선택해 직렬 발행과 bounded async 비교 |
 | steady | 500/s·600초, A3명·B1명 독립 소비 |
 | burst | 2,000/s·60초, A3명 |
@@ -58,3 +59,5 @@ seed20261025, eventId=`UUID(seed/index)`, eventTime=`base+index/rate`이며 매1
 측정용 UUID 집합/지연 표본도 JVM 메모리를 쓴다. 실제 메모리를 발행 버퍼 단독 사용량으로 표현하지 않는다. Docker 자원은 공유 서비스 전체이며 독립 group은 자원까지 격리된 것이 아니다. consumer4명은3partition에서 한 명 이상 유휴지만 재할당 중 표본은 순간 상태다.
 
 직렬 발행기는 운영 코드 그대로며 bounded async는 테스트 소스에만 둔다. async도 ACK 대기 포함1,000개·frame 전체 수락/거절·실패 후 수집 중단을 유지한다. 두 producer 프로필은 각1,000개로 총2,000개다. 전역 버퍼는 채널별 예약 용량이 없어서 먼저 온 채널이 공간을 차지할 수 있다. 생산 채택/키 분산/확장 판단은 실측 결과와 미검증 경계를 함께 적는다.
+
+producer의 request-rate/record-send-rate는 Kafka client의 시간 창 평균이다. 짧은 실패 실행과30초 완료 실행의 raw rate를 직접 처리량으로 비교하지 않는다. `producerSettledSeconds`와 `acknowledgedPerSecondIncludingDrain`은 생성 시작부터 producer close 뒤 ACK 계수가 확정된 시각까지를 사용한다. 그 필드가 없는 초기 실행에는 사후 추정값을 채우지 않는다. `pendingObservedAfterRejection`은 거절 직후 읽은 값이며 그 사이 ACK가 진행될 수 있다. 주기적으로 표본한 highWater와 실제 최댓값을 구분한다.

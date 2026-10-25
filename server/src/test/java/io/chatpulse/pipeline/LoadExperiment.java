@@ -33,6 +33,7 @@ public final class LoadExperiment {
         if(name.matches("(uniform|hot)-[1-4]"))return new Plan(name,2000,15,Integer.parseInt(name.substring(name.length()-1)),name.startsWith("hot"),false,false,false,0,"none",false,false,false,false);
         return switch(name) {
             case "smoke" -> new Plan(name,100,2,1,false,false,false,true,0,"none",false,false,true,false);
+            case "serial-control","async-control" -> new Plan(name,100,15,1,false,false,name.equals("serial-control"),false,0,"none",false,false,false,false);
             case "baseline" -> new Plan(name,500,30,1,false,false,true,false,0,"none",false,false,false,false);
             case "async-baseline" -> new Plan(name,500,30,1,false,false,false,false,0,"none",false,false,false,false);
             case "steady" -> new Plan(name,500,600,3,false,false,false,true,0,"none",false,false,false,false);
@@ -180,13 +181,18 @@ public final class LoadExperiment {
                 try {
                     if(serial!=null)serial.accept(batch);else (secondAsync!=null&&(first/frameSize)%2==1?secondAsync:async).accept(batch,first);
                     var ids=new HashSet<UUID>();for(var input:batch)if(ids.add(input.eventId()))expected.merge(input.channelId()+"/"+Math.floorDiv(input.eventTime().getEpochSecond(),10)*10,1L,Long::sum);
-                } catch(RuntimeException failure){rejected=true;event("PUBLISH_REJECTED");break;}
+                } catch(RuntimeException failure){
+                    rejected=true;event("PUBLISH_REJECTED");
+                    result.put("pendingObservedAfterRejection",serial!=null?serial.bufferSnapshot().values().stream().mapToInt(BufferedKafkaPublisher.BufferState::count).sum():async.pending()+(secondAsync==null?0:secondAsync.pending()));
+                    break;
+                }
                 if(producerFailed()){event("PUBLISH_FAILED");break;}
             }
             if(!rejected&&!producerFailed()&&!abort.get())while(elapsed()<plan.seconds())LockSupport.parkNanos(5_000_000L);
             result.put("generatorSeconds",elapsed());result.put("generatedUnique",generatedUnique);result.put("attemptedRecords",attemptedRecords);result.put("generatorScheduleLagMillis",ExperimentMetrics.percentiles(generatorLags));
+            long publisherDrainStarted=System.nanoTime();
             if(serial!=null)serialStats=serial.finish();if(async!=null)async.close();if(secondAsync!=null)secondAsync.close();result.put("producerMetrics",producerMetrics(kafka));if(secondKafka!=null)result.put("secondProducerMetrics",producerMetrics(secondKafka));
-            producerFactory.destroy();producerFactory=null;if(secondFactory!=null){secondFactory.destroy();secondFactory=null;}if(serial!=null)serialStats=serial.finish();result.put("producer",producerStats());
+            producerFactory.destroy();producerFactory=null;if(secondFactory!=null){secondFactory.destroy();secondFactory=null;}if(serial!=null)serialStats=serial.finish();result.put("producer",producerStats());result.put("publisherDrainSeconds",(System.nanoTime()-publisherDrainStarted)/1_000_000_000d);result.put("producerSettledSeconds",elapsed());result.put("acknowledgedPerSecondIncludingDrain",acknowledged()/elapsed());
             if(abort.get())throw new IllegalStateException("EXPERIMENT_RESOURCE_OR_SAMPLE_FAILED");
             // 멈춘 group의 예약 재개와 DB 장애 해제 뒤에도 입력 종료로부터180초만 기다린다.
             long drainStarted=System.nanoTime();until(180,()->caughtUp(groupA)&&(!plan.independent()||caughtUp(groupB)));

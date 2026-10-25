@@ -1,0 +1,145 @@
+{
+  "issue": 26,
+  "feature": "F12",
+  "technicalGoals": [
+    "T13",
+    "T08",
+    "T11"
+  ],
+  "implementationCommit": "fae95319b04870287b56c1fed0ac12f2df7cdb70",
+  "recordedAt": "2026-10-25T15:52:25.832502+00:00",
+  "input": "synthetic HTTP/normalized catalog; no official credentials or live calls",
+  "command": [
+    "./scripts/check",
+    "./scripts/selection fixture <policy> docs/discovery/synthetic-catalog.json <new-output>"
+  ],
+  "javaUnit": {
+    "tests": 101,
+    "errors": 0,
+    "failures": 0
+  },
+  "harnessTests": 16,
+  "xmlSha256": "be27240b1f5d741d22e22a69a2093d232c5f15ba0d2a71f020ceb1913a81cf1c",
+  "jarSha256": "c5918642bda1954c7aefdebc1b7c1a8e02bc45bbc399ed5b181ef775f36f7786",
+  "sensitivity": [
+    {
+      "minFollowers": null,
+      "counts": {
+        "discovered": 8,
+        "eligible": 4,
+        "selected": 3,
+        "assigned": null,
+        "connected": null,
+        "healthyWindow": null
+      },
+      "selected": [
+        "00000000000000000000000000000001",
+        "00000000000000000000000000000003",
+        "00000000000000000000000000000002"
+      ],
+      "exclusionCounts": {
+        "ADULT_OR_UNKNOWN": 1,
+        "EXCLUDED": 1,
+        "ACCESS_NOT_DECLARED": 2,
+        "CAPACITY": 1
+      },
+      "activationAllowed": false
+    },
+    {
+      "minFollowers": 0,
+      "counts": {
+        "discovered": 8,
+        "eligible": 3,
+        "selected": 3,
+        "assigned": null,
+        "connected": null,
+        "healthyWindow": null
+      },
+      "selected": [
+        "00000000000000000000000000000001",
+        "00000000000000000000000000000003",
+        "00000000000000000000000000000002"
+      ],
+      "exclusionCounts": {
+        "ADULT_OR_UNKNOWN": 1,
+        "EXCLUDED": 1,
+        "ACCESS_NOT_DECLARED": 2,
+        "FOLLOWERS_UNKNOWN": 1
+      },
+      "activationAllowed": false
+    },
+    {
+      "minFollowers": 1000,
+      "counts": {
+        "discovered": 8,
+        "eligible": 2,
+        "selected": 2,
+        "assigned": null,
+        "connected": null,
+        "healthyWindow": null
+      },
+      "selected": [
+        "00000000000000000000000000000003",
+        "00000000000000000000000000000002"
+      ],
+      "exclusionCounts": {
+        "ADULT_OR_UNKNOWN": 1,
+        "EXCLUDED": 1,
+        "ACCESS_NOT_DECLARED": 2,
+        "FOLLOWERS_UNKNOWN": 1,
+        "FOLLOWERS_BELOW_MINIMUM": 1
+      },
+      "activationAllowed": false
+    },
+    {
+      "minFollowers": 5000,
+      "counts": {
+        "discovered": 8,
+        "eligible": 1,
+        "selected": 1,
+        "assigned": null,
+        "connected": null,
+        "healthyWindow": null
+      },
+      "selected": [
+        "00000000000000000000000000000003"
+      ],
+      "exclusionCounts": {
+        "ADULT_OR_UNKNOWN": 1,
+        "EXCLUDED": 1,
+        "ACCESS_NOT_DECLARED": 2,
+        "FOLLOWERS_UNKNOWN": 1,
+        "FOLLOWERS_BELOW_MINIMUM": 2
+      },
+      "activationAllowed": false
+    },
+    {
+      "minFollowers": 10000,
+      "counts": {
+        "discovered": 8,
+        "eligible": 0,
+        "selected": 0,
+        "assigned": null,
+        "connected": null,
+        "healthyWindow": null
+      },
+      "selected": [],
+      "exclusionCounts": {
+        "ADULT_OR_UNKNOWN": 1,
+        "EXCLUDED": 1,
+        "ACCESS_NOT_DECLARED": 2,
+        "FOLLOWERS_UNKNOWN": 1,
+        "FOLLOWERS_BELOW_MINIMUM": 3
+      },
+      "activationAllowed": false
+    }
+  ],
+  "notVerified": [
+    "official app authentication",
+    "real full catalog scan or quota",
+    "streamer consent or chat access",
+    "live collection",
+    "fleet assignment",
+    "platform completeness or representativeness"
+  ]
+}

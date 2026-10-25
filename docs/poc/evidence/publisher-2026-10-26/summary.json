@@ -1,0 +1,1477 @@
+{
+  "issue": 27,
+  "technicalGoals": [
+    "T02",
+    "T06",
+    "T10",
+    "T11",
+    "T12"
+  ],
+  "recordedAt": "2026-10-25T16:27:45.455777+00:00",
+  "runs": [
+    {
+      "file": "baseline.json",
+      "sha256": "677ee2e04f5f536a4f35c368d5534d0b912e0463cb6b7c2d48acf86322557e1b",
+      "codeCommit": "1c2c3ba2784377f1ace8d9fb2f4a094621999a50",
+      "publisherImplementation": "LEGACY_SERIAL_CF4049E",
+      "outcome": "TARGET_INPUT_NOT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "acknowledged": 1440,
+        "complete": false,
+        "rejected": 10,
+        "unconfirmed": 0,
+        "mode": "KAFKA",
+        "accepted": 1440,
+        "sampledHighWater": 204
+      },
+      "receivedToDbMillis": {
+        "samples": 1440,
+        "p95": 5857.56,
+        "p50": 3162.511,
+        "p99": 6099.478,
+        "maximum": 6159.761
+      },
+      "databaseA": {
+        "processedEvents": 1440,
+        "bucketTotal": 1440,
+        "runId": "experiment",
+        "projection": "load-a"
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 159.9219077513855,
+      "recordsPerRequest": 1.0,
+      "peakLag": 5,
+      "peakHeap": 39232272,
+      "peakRss": 240336896,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    },
+    {
+      "file": "broker-fault.json",
+      "sha256": "1cba497f1c21b5c6c2f80d54e59e6149416f621a072f6c983bc0f5a201f6fee3",
+      "codeCommit": "0791dc1fc6f8ca41b065ed1261c3315064847638",
+      "publisherImplementation": null,
+      "outcome": "RECONCILED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {},
+      "receivedToDbMillis": null,
+      "databaseA": null,
+      "replayBucketDifferences": null,
+      "acknowledgedPerSecondIncludingDrain": null,
+      "recordsPerRequest": null,
+      "peakLag": null,
+      "peakHeap": null,
+      "peakRss": null,
+      "cases": [
+        {
+          "publisher": "LEGACY_SERIAL_CF4049E",
+          "fault": "BROKER_PAUSE",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 0.001904667,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 0.000668666,
+              "code": "ACCEPTED",
+              "pendingAfter": 30,
+              "accepted": 10,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 2.3125e-05,
+              "code": "PUBLISH_REJECTED",
+              "pendingAfter": 30,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1509.0,
+          "clientHeapUsedBytes": 27790584,
+          "clientRssBytes": 145997824,
+          "producer": {
+            "accepted": 31,
+            "acknowledged": 31,
+            "complete": false,
+            "rejected": 1,
+            "unconfirmed": 0,
+            "mode": "KAFKA"
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 31,
+          "brokerCountWithinAckRange": true,
+          "seconds": 2.027521542
+        },
+        {
+          "publisher": "LEGACY_SERIAL_CF4049E",
+          "fault": "BROKER_STOP",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 0.002339459,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 0.000533833,
+              "code": "ACCEPTED",
+              "pendingAfter": 30,
+              "accepted": 10,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 9.875e-06,
+              "code": "PUBLISH_REJECTED",
+              "pendingAfter": 30,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1512.0,
+          "clientHeapUsedBytes": 34606328,
+          "clientRssBytes": 152551424,
+          "producer": {
+            "accepted": 31,
+            "acknowledged": 1,
+            "complete": false,
+            "rejected": 1,
+            "unconfirmed": 30,
+            "mode": "KAFKA"
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 1,
+          "brokerCountWithinAckRange": true,
+          "seconds": 21.812008791
+        },
+        {
+          "publisher": "EXPERIMENT_ASYNC_CANDIDATE",
+          "fault": "BROKER_PAUSE",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 0.001492458,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 0.000680666,
+              "code": "ACCEPTED",
+              "pendingAfter": 30,
+              "accepted": 10,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 3.1792e-05,
+              "code": "EXPERIMENT_REJECTED",
+              "pendingAfter": 30,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1510.108,
+          "clientHeapUsedBytes": 13582696,
+          "clientRssBytes": 165937152,
+          "producer": {
+            "rejected": 1,
+            "failedCallbacks": 0,
+            "highWater": 30,
+            "unconfirmed": 0,
+            "accepted": 31,
+            "acknowledged": 31,
+            "complete": false,
+            "capacity": 30
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 31,
+          "brokerCountWithinAckRange": true,
+          "seconds": 1.729252792
+        },
+        {
+          "publisher": "EXPERIMENT_ASYNC_CANDIDATE",
+          "fault": "BROKER_STOP",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 40.144822292,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 3.5e-06,
+              "code": "EXPERIMENT_REJECTED",
+              "pendingAfter": 20,
+              "accepted": 0,
+              "rejected": 10
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 1.459e-06,
+              "code": "EXPERIMENT_REJECTED",
+              "pendingAfter": 20,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 20,
+          "probeFrameRejected": true,
+          "capacityReached": false,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 41648.574,
+          "clientHeapUsedBytes": 18553112,
+          "clientRssBytes": 167788544,
+          "producer": {
+            "rejected": 11,
+            "failedCallbacks": 20,
+            "highWater": 20,
+            "unconfirmed": 20,
+            "accepted": 21,
+            "acknowledged": 1,
+            "complete": false,
+            "capacity": 30
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 1,
+          "brokerCountWithinAckRange": true,
+          "seconds": 53.854321833
+        },
+        {
+          "publisher": "PRODUCT_BOUNDED_ASYNC",
+          "fault": "BROKER_PAUSE",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 0.001211334,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 0.000462333,
+              "code": "ACCEPTED",
+              "pendingAfter": 30,
+              "accepted": 10,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 0.000242041,
+              "code": "PUBLISH_REJECTED",
+              "pendingAfter": 30,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1512.0,
+          "clientHeapUsedBytes": 28619624,
+          "clientRssBytes": 168853504,
+          "producer": {
+            "complete": false,
+            "accepted": 31,
+            "acknowledged": 31,
+            "peakPending": 30,
+            "rejected": 1,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 30,
+            "channels": {
+              "00000000000000000000000000000000": {
+                "accepted": 21,
+                "acknowledged": 21,
+                "rejected": 0,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              },
+              "00000000000000000000000000000001": {
+                "accepted": 10,
+                "acknowledged": 10,
+                "rejected": 1,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 32,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 30,
+              "maxInFlight": 30
+            },
+            "queued": 0,
+            "failureCode": "PUBLISH_BUFFER_REJECTED",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 0
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 31,
+          "brokerCountWithinAckRange": true,
+          "seconds": 1.721667333
+        },
+        {
+          "publisher": "PRODUCT_BOUNDED_ASYNC",
+          "fault": "BROKER_STOP",
+          "phase": "COMPLETED",
+          "admissions": [
+            {
+              "channel": 0,
+              "attempted": 20,
+              "seconds": 0.000963167,
+              "code": "ACCEPTED",
+              "pendingAfter": 20,
+              "accepted": 20,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 10,
+              "seconds": 0.000538667,
+              "code": "ACCEPTED",
+              "pendingAfter": 30,
+              "accepted": 10,
+              "rejected": 0
+            },
+            {
+              "channel": 1,
+              "attempted": 1,
+              "seconds": 2.125e-05,
+              "code": "PUBLISH_REJECTED",
+              "pendingAfter": 30,
+              "accepted": 0,
+              "rejected": 1
+            }
+          ],
+          "pendingAtCapacity": 30,
+          "probeFrameRejected": true,
+          "capacityReached": true,
+          "publisherFailedDuringAdmission": true,
+          "oldestUnackedMillis": 1509.0,
+          "clientHeapUsedBytes": 32184488,
+          "clientRssBytes": 169476096,
+          "producer": {
+            "complete": false,
+            "accepted": 31,
+            "acknowledged": 1,
+            "peakPending": 30,
+            "rejected": 1,
+            "unconfirmed": 30,
+            "untrackedRejected": 0,
+            "peakInFlight": 1,
+            "channels": {
+              "00000000000000000000000000000000": {
+                "accepted": 21,
+                "acknowledged": 1,
+                "rejected": 0,
+                "pending": 20,
+                "oldest": "2026-10-25T16:23:46.974175Z",
+                "stopped": false,
+                "reason": "NONE"
+              },
+              "00000000000000000000000000000001": {
+                "accepted": 10,
+                "acknowledged": 0,
+                "rejected": 1,
+                "pending": 10,
+                "oldest": "2026-10-25T16:23:46.975377Z",
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 32,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 30,
+              "maxInFlight": 30
+            },
+            "queued": 29,
+            "failureCode": "PUBLISH_BUFFER_REJECTED",
+            "failedCallbacks": 1,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 1
+          },
+          "conserved": true,
+          "bounded": true,
+          "brokerOffsetSpan": 1,
+          "brokerCountWithinAckRange": true,
+          "seconds": 14.830767792
+        }
+      ],
+      "cleanupEvidenceScope": "CONTAINER_AND_LABELLED_DATA_VOLUME"
+    },
+    {
+      "file": "product-baseline.json",
+      "sha256": "d784509e22313fac23791c3b3a2ace1072be77221134e61fdc98159bb01a1ee5",
+      "codeCommit": "1c2c3ba2784377f1ace8d9fb2f4a094621999a50",
+      "publisherImplementation": "PRODUCT_BOUNDED_ASYNC",
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "complete": true,
+        "accepted": 15000,
+        "acknowledged": 15000,
+        "peakPending": 20,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 20,
+        "channels": {
+          "c019fe98bc063e77be36a6b3dc4b4f0d": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b396fc0c2609354a811db084de6197ce": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c40a81fa59883bea82deed3a7bdef89b": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2a0e67eaf7933440b0a09cfcaaf923af": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "7c732f6ba286321aa16a92627f758ccd": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "37bc73829832358695552b9e3ff0848d": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "11a44908ebac3c5da6244e2216b7b0ac": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bab9bf529dd338a58f3a68fd412b8fb3": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2ea264e906a23175825a13862526bb14": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "73ade6d6861b3074b44d763ce3a6aca4": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bd54af9553283349974e8bcdf2a93895": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "572ed5f1a4673501a2e599fd5a6133b5": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b38b63daab7e32e7a859c5b499c825d2": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "69f69fae09483d51bcac18983a6f7677": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "dfdb0e0ccec03076b8cb9b2f1a274175": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "e111a88873b53802962ffba37a509fdc": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "a3771d31a03135caba0faed4a6125bcb": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "01e1880424863bd4aacb8d2be3532478": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "58263511becc33f4acb3d059ec6da31c": {
+            "accepted": 750,
+            "acknowledged": 750,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 15000,
+        "limits": {
+          "capacity": 1000,
+          "channelCapacity": 500,
+          "maxInFlight": 64
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "sampledHighWater": 10
+      },
+      "receivedToDbMillis": {
+        "samples": 15000,
+        "p99": 62.182,
+        "p95": 30.043,
+        "p50": 15.718,
+        "maximum": 101.832
+      },
+      "databaseA": {
+        "runId": "experiment",
+        "projection": "load-a",
+        "processedEvents": 15000,
+        "bucketTotal": 15000
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 499.8618201478994,
+      "recordsPerRequest": 10.00667111407605,
+      "peakLag": 10,
+      "peakHeap": 38295472,
+      "peakRss": 240386048,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    },
+    {
+      "file": "product-burst.json",
+      "sha256": "6639c3a5763c2efca81ad7767acd05f99fa0fd5ba1979990ff39b9682d5cf39e",
+      "codeCommit": "1c2c3ba2784377f1ace8d9fb2f4a094621999a50",
+      "publisherImplementation": "PRODUCT_BOUNDED_ASYNC",
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "accepted": 120000,
+        "acknowledged": 120000,
+        "peakPending": 120,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 64,
+        "channels": {
+          "bab9bf529dd338a58f3a68fd412b8fb3": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2ea264e906a23175825a13862526bb14": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "73ade6d6861b3074b44d763ce3a6aca4": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bd54af9553283349974e8bcdf2a93895": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "572ed5f1a4673501a2e599fd5a6133b5": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b38b63daab7e32e7a859c5b499c825d2": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "69f69fae09483d51bcac18983a6f7677": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "dfdb0e0ccec03076b8cb9b2f1a274175": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "e111a88873b53802962ffba37a509fdc": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "a3771d31a03135caba0faed4a6125bcb": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "01e1880424863bd4aacb8d2be3532478": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "58263511becc33f4acb3d059ec6da31c": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c019fe98bc063e77be36a6b3dc4b4f0d": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b396fc0c2609354a811db084de6197ce": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c40a81fa59883bea82deed3a7bdef89b": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2a0e67eaf7933440b0a09cfcaaf923af": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "7c732f6ba286321aa16a92627f758ccd": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "11a44908ebac3c5da6244e2216b7b0ac": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "37bc73829832358695552b9e3ff0848d": {
+            "accepted": 6000,
+            "acknowledged": 6000,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 120000,
+        "limits": {
+          "capacity": 1000,
+          "channelCapacity": 500,
+          "maxInFlight": 64
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "complete": true,
+        "sampledHighWater": 40
+      },
+      "receivedToDbMillis": {
+        "samples": 120000,
+        "p95": 57.872,
+        "p50": 18.074,
+        "p99": 80.801,
+        "maximum": 171.981
+      },
+      "databaseA": {
+        "projection": "load-a",
+        "processedEvents": 120000,
+        "bucketTotal": 120000,
+        "runId": "experiment"
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 1999.759913524218,
+      "recordsPerRequest": 40.01333777925975,
+      "peakLag": 58,
+      "peakHeap": 276714560,
+      "peakRss": 518012928,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    },
+    {
+      "file": "product-control.json",
+      "sha256": "4d2f891caddf63e7660640c7b984cca6a89e0ebabbd2dfb77f14c929c658daa8",
+      "codeCommit": "1c2c3ba2784377f1ace8d9fb2f4a094621999a50",
+      "publisherImplementation": "PRODUCT_BOUNDED_ASYNC",
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "accepted": 1500,
+        "acknowledged": 1500,
+        "peakPending": 4,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 4,
+        "channels": {
+          "73ade6d6861b3074b44d763ce3a6aca4": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bd54af9553283349974e8bcdf2a93895": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "572ed5f1a4673501a2e599fd5a6133b5": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b38b63daab7e32e7a859c5b499c825d2": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "69f69fae09483d51bcac18983a6f7677": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "dfdb0e0ccec03076b8cb9b2f1a274175": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "e111a88873b53802962ffba37a509fdc": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "01e1880424863bd4aacb8d2be3532478": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "a3771d31a03135caba0faed4a6125bcb": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "58263511becc33f4acb3d059ec6da31c": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c019fe98bc063e77be36a6b3dc4b4f0d": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b396fc0c2609354a811db084de6197ce": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c40a81fa59883bea82deed3a7bdef89b": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "37bc73829832358695552b9e3ff0848d": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2a0e67eaf7933440b0a09cfcaaf923af": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "7c732f6ba286321aa16a92627f758ccd": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "11a44908ebac3c5da6244e2216b7b0ac": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bab9bf529dd338a58f3a68fd412b8fb3": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2ea264e906a23175825a13862526bb14": {
+            "accepted": 75,
+            "acknowledged": 75,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 1500,
+        "limits": {
+          "capacity": 1000,
+          "channelCapacity": 500,
+          "maxInFlight": 64
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "complete": true,
+        "sampledHighWater": 2
+      },
+      "receivedToDbMillis": {
+        "samples": 1500,
+        "p95": 14.372,
+        "p50": 11.786,
+        "p99": 25.863,
+        "maximum": 73.538
+      },
+      "databaseA": {
+        "processedEvents": 1500,
+        "bucketTotal": 1500,
+        "runId": "experiment",
+        "projection": "load-a"
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 99.95621001735981,
+      "recordsPerRequest": 2.0026702269692924,
+      "peakLag": 0,
+      "peakHeap": 40692304,
+      "peakRss": 225869824,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    },
+    {
+      "file": "product-hot.json",
+      "sha256": "234baff26aceed10d0cf3c245ee218502d8839bfbdc568047270ebc8f3a32fad",
+      "codeCommit": "0791dc1fc6f8ca41b065ed1261c3315064847638",
+      "publisherImplementation": "PRODUCT_BOUNDED_ASYNC",
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "complete": true,
+        "accepted": 30300,
+        "acknowledged": 30300,
+        "peakPending": 81,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 64,
+        "channels": {
+          "c019fe98bc063e77be36a6b3dc4b4f0d": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b396fc0c2609354a811db084de6197ce": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "c40a81fa59883bea82deed3a7bdef89b": {
+            "accepted": 315,
+            "acknowledged": 315,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2a0e67eaf7933440b0a09cfcaaf923af": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "7c732f6ba286321aa16a92627f758ccd": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "37bc73829832358695552b9e3ff0848d": {
+            "accepted": 24300,
+            "acknowledged": 24300,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "11a44908ebac3c5da6244e2216b7b0ac": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bab9bf529dd338a58f3a68fd412b8fb3": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "2ea264e906a23175825a13862526bb14": {
+            "accepted": 315,
+            "acknowledged": 315,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "73ade6d6861b3074b44d763ce3a6aca4": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "bd54af9553283349974e8bcdf2a93895": {
+            "accepted": 315,
+            "acknowledged": 315,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "572ed5f1a4673501a2e599fd5a6133b5": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b38b63daab7e32e7a859c5b499c825d2": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "69f69fae09483d51bcac18983a6f7677": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "dfdb0e0ccec03076b8cb9b2f1a274175": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "e111a88873b53802962ffba37a509fdc": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "01e1880424863bd4aacb8d2be3532478": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "a3771d31a03135caba0faed4a6125bcb": {
+            "accepted": 315,
+            "acknowledged": 315,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          },
+          "58263511becc33f4acb3d059ec6da31c": {
+            "accepted": 316,
+            "acknowledged": 316,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 30300,
+        "limits": {
+          "capacity": 1000,
+          "channelCapacity": 500,
+          "maxInFlight": 64
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "sampledHighWater": 41
+      },
+      "receivedToDbMillis": {
+        "samples": 30000,
+        "p99": 317.437,
+        "p95": 276.49,
+        "p50": 101.683,
+        "maximum": 341.599
+      },
+      "databaseA": {
+        "runId": "experiment",
+        "projection": "load-a",
+        "processedEvents": 30000,
+        "bucketTotal": 30000
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 2019.2116829322192,
+      "recordsPerRequest": 26.302083333333332,
+      "peakLag": 290,
+      "peakHeap": 44771408,
+      "peakRss": 278102016,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    },
+    {
+      "file": "serial-control.json",
+      "sha256": "798008786fdc9e3e0b3be6ff081b56f7df36ec8c8061e82273179bfba533fba7",
+      "codeCommit": "1c2c3ba2784377f1ace8d9fb2f4a094621999a50",
+      "publisherImplementation": "LEGACY_SERIAL_CF4049E",
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "producer": {
+        "unconfirmed": 0,
+        "rejected": 0,
+        "complete": true,
+        "acknowledged": 1500,
+        "accepted": 1500,
+        "mode": "KAFKA",
+        "sampledHighWater": 2
+      },
+      "receivedToDbMillis": {
+        "samples": 1500,
+        "p95": 34.783,
+        "p99": 42.257,
+        "p50": 19.928,
+        "maximum": 82.964
+      },
+      "databaseA": {
+        "processedEvents": 1500,
+        "projection": "load-a",
+        "runId": "experiment",
+        "bucketTotal": 1500
+      },
+      "replayBucketDifferences": 0,
+      "acknowledgedPerSecondIncludingDrain": 99.30867014096394,
+      "recordsPerRequest": 1.0,
+      "peakLag": 3,
+      "peakHeap": 36661664,
+      "peakRss": 236240896,
+      "cases": null,
+      "cleanupEvidenceScope": null
+    }
+  ],
+  "localChecks": {
+    "unitAfterWorkerFailureFix": {
+      "tests": 120,
+      "failures": 0,
+      "errors": 0,
+      "xmlSha256": "dce4b3c635e42ffebf73cc707846cf3ea3c81914b8e3b8e53b9683399798e47c"
+    },
+    "integrationAt1c2c3ba": {
+      "tests": 81,
+      "failures": 0,
+      "errors": 0,
+      "xmlSha256": "776b5f946bb1e427c9972e9af0b5ed8a6b38e9d8aef6327a1f0751d188dd9417"
+    },
+    "harness": 16
+  },
+  "scope": "SYNTHETIC_LOCAL_RF1; no live/source completeness/HA claim",
+  "notVerified": [
+    "external source full coverage",
+    "multi-host or HA",
+    "JVM crash memory buffer recovery",
+    "network fairness SLA",
+    "all product projections concurrent load"
+  ]
+}

@@ -102,5 +102,31 @@
     "failures": 0,
     "errors": 0,
     "xmlSha256": "218716ac1f141eb27d678a4341c5d6cec7c83211cc0d3f1fd3bf889c0f4b31ba"
-  }
+  },
+  "finalCi": {
+    "head": "1617bdb140ddb80f10c06ee4854b53811b8440e8",
+    "push": 40211847614,
+    "pullRequest": 40211851666,
+    "conclusion": "SUCCESS",
+    "suites": {
+      "test": {
+        "tests": 107,
+        "failures": 0,
+        "errors": 0,
+        "sha256": "0fe573d4ff138cbf2ab97a72d8998ff7e347d322e9d097501cf8b072de393fd3"
+      },
+      "integrationTest": {
+        "tests": 80,
+        "failures": 0,
+        "errors": 0,
+        "sha256": "478fa52af474de0cac26679068709f745a67d3070b5adcfa4bed51eec062eebc"
+      }
+    }
+  },
+  "finalReview": {
+    "head": "1617bdb140ddb80f10c06ee4854b53811b8440e8",
+    "verdict": "APPROVE",
+    "sessionId": "1cb45706-dd53-4b7d-a7b8-ef96e9b16acf"
+  },
+  "mergedAs": "f94fc38fc220ad4d27101b16aac25deb9393a09d"
 }

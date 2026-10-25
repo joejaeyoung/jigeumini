@@ -235,6 +235,8 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 합성 실험의 전체 프로필·자원 상한·계수/지연 정의는 [실험 계약](docs/pipeline/EXPERIMENTS.md), 실제 수치와 한계는 [검증 기록](docs/pipeline/EXPERIMENTS_VERIFICATION.md)을 따른다. `python3 scripts/summarize-experiments.py work/report <완료 결과.json>...`으로 표·정제 JSON·독립 HTML을 만든다.
 
 
+수집기 #27의 기본 발행 한도는 전체1,000·채널500·비동기 창64다. 채널별 초과/거절·ACK 미확인·종료 정책은 [발행 계약](docs/pipeline/PUBLISHER.md)을 따른다.
+
 ## Kafka HA 로컬 장애 리허설
 
 ```bash

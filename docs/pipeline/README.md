@@ -75,9 +75,9 @@ V9의 독립 report group은 같은 두 입력에서 관측 세션·별칭·채�
 - `chat.received.v1`: 3 partitions, 개발용 RF=1, key=`channelId`, timestamp=`receivedAt`의 epoch milliseconds, CreateTime 정책.
 - Kafka 보존 설정은 시간 24h, partition당 256MiB, segment 32MiB다. segment 단위 삭제이므로 정확한 시각·용량 상한이나 24h 전체 가용성을 보장하지 않는다.
 - 모든 토픽 초기화에서 생성 응답 뒤 토픽·설정 조회의 `UnknownTopicOrPartitionException`만 50ms 간격으로 재시도한다. 두 조회·재시도는 공통10초 기한을 쓰고, 생성 요청은 별도10초·Admin 종료는1초 상한이다. 권한 오류·다른 예외·partition 수/시각 설정 불일치는 즉시 실패하며 기존 토픽 설정을 바꾸지 않는다. [생성 후 조회 준비 계약·검증](TOPIC_READINESS.md)을 따른다.
-- `acks=all`, idempotent producer, in-flight request=1. 전용 worker가 ACK를 기다리며 callback은 큐에만 넣는다. Kafka client는 delivery timeout 10초 안에서 같은 record를 재시도한다.
-- 발행 큐는 미확인 in-flight를 포함해 기본·최대 1,000개, 이벤트당 16KiB다. payload 상한은 약 16MiB이고 객체 overhead는 별도다. 채널별 공정성 제어는 아직 없다.
-- frame 전체를 담을 수 없으면 전부 거절하고 수집을 실패 처리한다. 발행 오류도 수집을 중단하며 `rejected`, `unconfirmed`를 결과에 남긴다. 종료 drain은 최대 10초다. 메모리 버퍼의 강제 종료·전원 손실은 복원하지 않는다.
+- `acks=all`, idempotent producer, 연결당 in-flight request=1. #27의 [유한 비동기 발행](PUBLISHER.md)은 전용 dispatcher와 앱 ACK 대기 창64를 사용한다. Kafka client는 delivery timeout 10초 안에서 같은 record를 재시도한다.
+- 발행 큐는 미확인 in-flight를 포함해 기본·최대1,000개, 채널별 기본500개, 이벤트당16KiB다. payload 상한은 약16MiB이고 객체 overhead는 별도다. 대기 채널을 한 건씩 순환 배분한다.
+- frame 전체를 담을 수 없으면 전부 거절한다. 채널 한도는 그 채널, 전역 한도·발행 오류는 전체 수집을 중단한다. `rejected`, `unconfirmed`와 채널별 진단을 결과에 남긴다. 종료 drain은 최대10초며 종료 결과는 늦은 ACK에도 고정한다. 메모리 버퍼의 강제 종료·전원 손실은 복원하지 않는다.
 - 수집기 성공 결과의 `delivery.complete`는 Kafka ACK까지 의미한다. DB 반영은 `/api/status` 또는 아래 대조 스크립트로 별도 확인한다.
 
 소비자는 `max.poll.records=200`, auto commit=false, AckMode.BATCH, sync commit을 사용한다. 한 poll의 이벤트를 검증한 뒤 아래 작업을 한 PostgreSQL 트랜잭션에서 수행하고, commit이 끝나야 listener가 반환한다.

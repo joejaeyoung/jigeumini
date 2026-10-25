@@ -89,17 +89,17 @@ def main():
     rows = [summarize(path) for path in args.inputs]
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / 'summary.json').write_text(json.dumps({'formatVersion': 1, 'experiments': rows}, ensure_ascii=False, indent=2)+'\n')
-    header = ['프로필', '결과', '입력/목표', 'ACK', 'DB A/B', 'p95/p99 A (ms)', '최대 lag A', '입력 후 drain (s)', 'replay 차이']
+    header = ['실행 파일', '결과', '입력/목표', 'ACK', 'DB A/B', 'p95/p99 A (ms)', '최대 lag A', '입력 후 drain (s)', 'replay 차이']
     table = []
     labels = {'TARGET_INPUT_COMPLETED': '목표 완료', 'TARGET_INPUT_NOT_COMPLETED': '목표 미달', 'RECONCILIATION_FAILED': '대조 실패', 'EXPERIMENT_FAILED': '실험 실패', 'CLEANUP_FAILED': '정리 실패', 'RECONCILED': '대조 완료'}
     for row in rows:
         if row['profile'] == 'broker-fault':
-            table.append([row['profile'], labels.get(row['outcome'], row['outcome'])] + ['—'] * (len(header)-2))
+            table.append([row['file'], labels.get(row['outcome'], row['outcome'])] + ['—'] * (len(header)-2))
             continue
         latency = row.get('metricsA', {}).get('receivedToDbMillis', {})
         db_a, db_b = row.get('databaseA') or {}, row.get('databaseB') or {}
         outcome_label = '계측 확인 필요' if row['measurementIssueCodes'] else labels.get(row['outcome'], row['outcome'])
-        table.append([row['profile'], outcome_label, f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
+        table.append([row['file'], outcome_label, f"{row['generatedUnique']}/{row['targets']['uniqueEvents']}",
                       str(row['producer'].get('acknowledged', '—')), f"{db_a.get('processedEvents', '—')}/{db_b.get('processedEvents', '—')}",
                       f"{number(latency.get('p95'))}/{number(latency.get('p99'))}",
                       str(row['groupMeasurements'].get('groupA', {}).get('maximumLagTotal', '—')),

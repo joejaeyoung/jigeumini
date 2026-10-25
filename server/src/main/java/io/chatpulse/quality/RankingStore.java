@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.time.*;
 import java.util.*;
 import java.math.BigDecimal;
-import org.apache.kafka.common.utils.Utils;
+import io.chatpulse.quality.CollectionQuality.Channel;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
@@ -23,15 +23,15 @@ public final class RankingStore {
     public record SpikeResponse(String asOf, String status, List<Spike> events, String nextCursor) { }
     public record ActivityPoint(String from, String to, Long count, long referenceCount, double coverage, String status, List<String> reasons) { }
     public record ActivityResponse(String channelId, String asOf, String from, String to, List<ActivityPoint> points) { }
-    private record Channel(String id, boolean enabled, String state, Instant since, Instant updated, UUID collector) { }
-    private record Health(QualityPolicy.Result result, List<QualityPolicy.Interval> intervals, boolean loss) { }
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
-    private final String ranking, trend, run, topic;
+    private final String ranking, trend, run;
+    private final CollectionQuality quality;
     private final Clock clock;
     private final JsonMapper json = JsonMapper.builder().build();
     public RankingStore(JdbcTemplate jdbc, TransactionTemplate tx, String ranking, String trend, String run, String topic, Clock clock) {
-        this.jdbc = jdbc; this.tx = tx; this.ranking = ranking; this.trend = trend; this.run = run; this.topic = topic; this.clock = clock;
+        this.jdbc = jdbc; this.tx = tx; this.ranking = ranking; this.trend = trend; this.run = run; this.clock = clock;
+        this.quality = new CollectionQuality(jdbc, run, topic, clock);
         tx.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
         tx.setTimeout(20);
     }
@@ -42,66 +42,13 @@ public final class RankingStore {
             Boolean locked = jdbc.queryForObject("SELECT pg_try_advisory_xact_lock(hashtext(?),hashtext(?))", Boolean.class, ranking, run);
             if (!Boolean.TRUE.equals(locked)) return;
             jdbc.execute("SET LOCAL statement_timeout = '5s'");
-            var channels = channels();
+            var channels = quality.channels();
             reviseQuality(channels);
             for (int window : List.of(60, 300)) snapshot(channels, at, window);
             // trend 소비자는 ranking과 별도 group/ledger/bucket을 사용한다.
             for (var channel : channels) evaluateTrend(channel, at);
         });
     }
-    private List<Channel> channels() {
-        return jdbc.query("SELECT channel_id,enabled,state,observed_since,updated_at,collector_id FROM collection_channel ORDER BY channel_id",
-                (rs,n) -> new Channel(rs.getString(1),rs.getBoolean(2),rs.getString(3),instant(rs,4),instant(rs,5),rs.getObject(6, UUID.class)));
-    }
-    private List<QualityPolicy.Interval> intervals(String channel, Instant from, Instant to) {
-        Instant now = clock.instant();
-        return jdbc.query("SELECT connected_at,heartbeat_at,source_alive_at,ended_at FROM collection_session WHERE channel_id=? AND connected_at<? AND (ended_at IS NULL OR ended_at>?)",
-                (rs,n) -> {
-                    Instant end = instant(rs,4);
-                    if (end == null) {
-                        end = to;
-                        if (!fresh(instant(rs,2),15,now)) end = min(end,instant(rs,2));
-                        if (!fresh(instant(rs,3),30,now)) end = min(end,instant(rs,3));
-                    }
-                    return new QualityPolicy.Interval(instant(rs,1), end);
-                }, channel, ts(to), ts(from));
-    }
-    private boolean hasLoss(String channel, Instant from, Instant to) {
-        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM collection_loss WHERE channel_id=? AND start_at<? AND end_at>?)", Boolean.class, channel,ts(to),ts(from)));
-    }
-    private Health health(Channel c, Instant from, Instant to, String projection) {
-        Instant now = clock.instant();
-        var intervals = intervals(c.id,from,to); boolean loss = hasLoss(c.id,from,to);
-        var live = jdbc.query("SELECT heartbeat_at,source_alive_at FROM collection_session WHERE channel_id=? AND collector_id=? AND ended_at IS NULL",
-                (rs,n) -> List.of(instant(rs,1),instant(rs,2)), c.id,c.collector);
-        boolean sourceFresh = live.stream().anyMatch(s -> fresh(s.get(0),15,now) && fresh(s.get(1),30,now));
-        var buffers = jdbc.query("SELECT observed_at,oldest_unacked_at FROM collector_channel_buffer WHERE channel_id=? AND collector_id=?",
-                (rs,n) -> new Instant[]{instant(rs,1),instant(rs,2)},c.id,c.collector);
-        boolean bufferFresh = !buffers.isEmpty() && fresh(buffers.getFirst()[0],15,now)
-                && !buffers.getFirst()[0].isBefore(to);
-        boolean bufferLag = bufferFresh && buffers.getFirst()[1] != null && (buffers.getFirst()[1].isBefore(to) || now.isAfter(buffers.getFirst()[1].plusSeconds(10)));
-        // 최신 표본을 계속 쫓으면 정상 연속 입력도 끝없이 제외된다. 창 뒤의 첫 안전한 drain을 고정한다.
-        var drains = jdbc.query("""
-                SELECT observed_at FROM collector_buffer_observation
-                WHERE channel_id=? AND collector_id=? AND observed_at>=? AND observed_at<=?
-                  AND (oldest_unacked_at IS NULL OR oldest_unacked_at>=?)
-                ORDER BY observed_at LIMIT 1
-                """,(rs,n)->instant(rs,1),c.id,c.collector,ts(to),ts(now),ts(to));
-        bufferFresh = bufferFresh && !drains.isEmpty();
-        int partition = Utils.toPositive(Utils.murmur2(c.id.getBytes(java.nio.charset.StandardCharsets.UTF_8))) % 3;
-        var observations = jdbc.query("SELECT observed_at,last_caught_up_at,poll_heartbeat_at,blocked FROM projection_observation WHERE projection=? AND run_id=? AND topic=? AND partition=?",
-                (rs,n) -> new Observation(instant(rs,1),instant(rs,2),instant(rs,3),rs.getBoolean(4)),projection,run,topic,partition);
-        var observation = observations.isEmpty() ? null : observations.getFirst();
-        boolean known = observation != null && fresh(observation.observed,15,now) && fresh(observation.poll,15,now);
-        // 창 끝 이후 수집 버퍼를 관측한 시점까지의 broker 표본이 DB에 반영돼야 한다.
-        // 버퍼 ACK 이후에 DB에 미반영된 이벤트를 오래된 caught-up 관측으로 정상 확정하지 않는다.
-        boolean analysisFresh = known && bufferFresh && observation.caught != null
-                && !observation.caught.isBefore(drains.getFirst())
-                && !now.isAfter(observation.caught.plusSeconds(10));
-        return new Health(QualityPolicy.evaluate(c.enabled,c.state,c.since,from,to,intervals,loss,fresh(c.updated,15,now),sourceFresh,
-                bufferFresh,bufferLag,known,analysisFresh,observation != null && observation.blocked),intervals,loss);
-    }
-    private record Observation(Instant observed, Instant caught, Instant poll, boolean blocked) { }
     private long count(String projection,String channel,Instant from,Instant to) {
         return jdbc.queryForObject("SELECT coalesce(sum(chat_count),0)::bigint FROM chat_bucket_10s WHERE projection=? AND run_id=? AND channel_id=? AND bucket_start>=? AND bucket_start<?",
                 Long.class,projection,run,channel,ts(from),ts(to));
@@ -112,9 +59,9 @@ public final class RankingStore {
         if (inserted == 0) return;
         var entries = new ArrayList<Entry>();
         for (var channel : channels) {
-            var health = health(channel,at.minusSeconds(window),at,ranking).result;
-            long count = count(ranking,channel.id,at.minusSeconds(window),at);
-            entries.add(new Entry(channel.id,null,health.healthy()?count:null,count,health.coverage(),health.status(),health.reasons(),null,null));
+            var health = quality.evaluate(channel,at.minusSeconds(window),at,ranking);
+            long count = count(ranking,channel.id(),at.minusSeconds(window),at);
+            entries.add(new Entry(channel.id(),null,health.healthy()?count:null,count,health.coverage(),health.status(),health.reasons(),null,null));
         }
         entries.sort(Comparator.comparingLong(Entry::referenceCount).reversed().thenComparing(Entry::channelId));
         int ordinal = 0, rank = 0; Long previousCount = null;
@@ -140,22 +87,22 @@ public final class RankingStore {
     private record Previous(Integer rank,String status,String revision) { }
     private void evaluateTrend(Channel channel,Instant at) {
         var states = jdbc.query("SELECT last_evaluated_at,consecutive_hits,last_alert_at FROM channel_alert_state WHERE run_id=? AND channel_id=? AND algorithm_version=? FOR UPDATE",
-                (rs,n) -> new TrendPolicy.State(instant(rs,1),rs.getInt(2),instant(rs,3)),run,channel.id,TrendPolicy.VERSION);
+                (rs,n) -> new TrendPolicy.State(instant(rs,1),rs.getInt(2),instant(rs,3)),run,channel.id(),TrendPolicy.VERSION);
         var previous = states.isEmpty()?null:states.getFirst();
         // 재시작 시 누락 tick을 소급 평가하지 않는다.
         if (previous != null && !at.isAfter(previous.evaluatedAt())) return;
-        boolean healthy = health(channel,at.minusSeconds(360),at,trend).result.healthy();
-        long current = count(trend,channel.id,at.minusSeconds(60),at);
-        long baseline = count(trend,channel.id,at.minusSeconds(360),at.minusSeconds(60));
+        boolean healthy = quality.evaluate(channel,at.minusSeconds(360),at,trend).healthy();
+        long current = count(trend,channel.id(),at.minusSeconds(60),at);
+        long baseline = count(trend,channel.id(),at.minusSeconds(360),at.minusSeconds(60));
         var result = TrendPolicy.evaluate(previous,at,current,baseline,healthy);
         var state = result.state();
         jdbc.update("""
                 INSERT INTO channel_alert_state VALUES (?,?,?,?,?,?)
                 ON CONFLICT(run_id,channel_id,algorithm_version) DO UPDATE SET last_evaluated_at=excluded.last_evaluated_at,
                 consecutive_hits=excluded.consecutive_hits,last_alert_at=excluded.last_alert_at
-                """,run,channel.id,TrendPolicy.VERSION,ts(at),state.hits(),ts(state.lastAlertAt()));
+                """,run,channel.id(),TrendPolicy.VERSION,ts(at),state.hits(),ts(state.lastAlertAt()));
         if (result.alert()) jdbc.update("INSERT INTO spike_event VALUES (?,?,?,?,?,?,?,?,NULL) ON CONFLICT DO NOTHING",
-                UUID.randomUUID(),run,channel.id,ts(at),TrendPolicy.VERSION,current,result.baseline(),result.ratio());
+                UUID.randomUUID(),run,channel.id(),ts(at),TrendPolicy.VERSION,current,result.baseline(),result.ratio());
     }
     private void reviseQuality(List<Channel> channels) {
         Instant now=clock.instant();
@@ -170,11 +117,11 @@ public final class RankingStore {
                         AND s.evaluated_at<=x.heartbeat_at+interval '30 seconds'
                         AND s.evaluated_at>least(coalesce(x.ended_at,x.heartbeat_at),x.source_alive_at)
                         AND ((x.ended_at IS NOT NULL AND x.end_reason<>'CLOSED') OR (x.ended_at IS NULL AND (x.heartbeat_at<=? OR x.source_alive_at<=?)))))
-                    """,(rs,n)->new Candidate(rs.getObject(1,UUID.class),instant(rs,2),rs.getInt(3)),run,ranking,c.id,ts(now.minusSeconds(7*86400)),ts(now.minusSeconds(15)),ts(now.minusSeconds(30)));
+                    """,(rs,n)->new Candidate(rs.getObject(1,UUID.class),instant(rs,2),rs.getInt(3)),run,ranking,c.id(),ts(now.minusSeconds(7*86400)),ts(now.minusSeconds(15)),ts(now.minusSeconds(30)));
             for(var s:candidates) {
                 Instant from=s.at.minusSeconds(s.window);
-                if(hasLoss(c.id,from,s.at) || QualityPolicy.coverage(from,s.at,intervals(c.id,from,s.at))<.95)
-                    jdbc.update("INSERT INTO snapshot_quality_revision VALUES (?,?,?,?) ON CONFLICT DO NOTHING",s.id,c.id,"COLLECTION_REVISED",ts(now));
+                if(quality.hasLoss(c.id(),from,s.at) || QualityPolicy.coverage(from,s.at,quality.intervals(c.id(),from,s.at))<.95)
+                    jdbc.update("INSERT INTO snapshot_quality_revision VALUES (?,?,?,?) ON CONFLICT DO NOTHING",s.id,c.id(),"COLLECTION_REVISED",ts(now));
             }
             var spikes=jdbc.query("""
                     SELECT spike_id,evaluated_at FROM spike_event s WHERE run_id=? AND channel_id=? AND quality_warning IS NULL AND evaluated_at>=?
@@ -183,10 +130,10 @@ public final class RankingStore {
                         AND s.evaluated_at<=x.heartbeat_at+interval '30 seconds'
                         AND s.evaluated_at>least(coalesce(x.ended_at,x.heartbeat_at),x.source_alive_at)
                         AND ((x.ended_at IS NOT NULL AND x.end_reason<>'CLOSED') OR (x.ended_at IS NULL AND (x.heartbeat_at<=? OR x.source_alive_at<=?)))))
-                    """, (rs,n)->new Candidate(rs.getObject(1,UUID.class),instant(rs,2),360),run,c.id,ts(now.minusSeconds(7*86400)),ts(now.minusSeconds(15)),ts(now.minusSeconds(30)));
+                    """, (rs,n)->new Candidate(rs.getObject(1,UUID.class),instant(rs,2),360),run,c.id(),ts(now.minusSeconds(7*86400)),ts(now.minusSeconds(15)),ts(now.minusSeconds(30)));
             for(var s:spikes) {
                 Instant from=s.at.minusSeconds(360);
-                if(hasLoss(c.id,from,s.at)||QualityPolicy.coverage(from,s.at,intervals(c.id,from,s.at))<.95)
+                if(quality.hasLoss(c.id(),from,s.at)||QualityPolicy.coverage(from,s.at,quality.intervals(c.id(),from,s.at))<.95)
                     jdbc.update("UPDATE spike_event SET quality_warning='COLLECTION_REVISED' WHERE spike_id=?",s.id);
             }
         }
@@ -245,8 +192,8 @@ public final class RankingStore {
         return tx.execute(transaction->{
             var points=new ArrayList<ActivityPoint>();
             for(Instant end=from.plusSeconds(60);!end.isAfter(to);end=end.plusSeconds(60)) {
-                Instant start=end.minusSeconds(60); var sessions=intervals(channel,start,end);
-                double coverage=QualityPolicy.coverage(start,end,sessions); boolean loss=hasLoss(channel,start,end);
+                Instant start=end.minusSeconds(60); var sessions=quality.intervals(channel,start,end);
+                double coverage=QualityPolicy.coverage(start,end,sessions); boolean loss=quality.hasLoss(channel,start,end);
                 boolean complete=coverage>=.95 && !loss;
                 long count=count(ranking,channel,start,end);
                 // 최근 완료 구간은 현재 분석 freshness도 필요하다. 과거 구간은 당시 snapshot 품질을 확인한다.
@@ -262,8 +209,6 @@ public final class RankingStore {
             return new ActivityResponse(channel,clock.instant().toString(),from.toString(),to.toString(),points);
         });
     }
-    private static boolean fresh(Instant value,long seconds,Instant now) { return value!=null&&!value.isAfter(now)&&now.isBefore(value.plusSeconds(seconds)); }
-    private static Instant min(Instant a,Instant b) { return a.isBefore(b)?a:b; }
     private static Instant instant(ResultSet rs,int column) throws SQLException { var value=rs.getTimestamp(column);return value==null?null:value.toInstant(); }
     private static Instant instant(ResultSet rs,String column) throws SQLException { var value=rs.getTimestamp(column);return value==null?null:value.toInstant(); }
 }

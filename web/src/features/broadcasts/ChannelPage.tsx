@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { channelIdSchema, fetchChannel } from '../../shared/api/client';
+import { channelIdSchema } from '../../shared/api/fields';
+import { fetchChannel } from '../../shared/api/metadata';
 import { fetchActivity, qualityLabel } from '../../shared/api/quality';
 import { usePolling } from '../../shared/api/usePolling';
 import { channelName, currentMetadata, formatCount, formatTime, metadataLabel } from './model';

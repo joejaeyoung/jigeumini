@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { bucketsSchema, fetchBuckets, fetchSnapshot } from './client';
+import { bucketsSchema, fetchBuckets, fetchSnapshot } from './buckets';
 const response = { asOf: '2026-10-25T00:01:00Z', windowSeconds: 300, bucketSeconds: 10, includesOpenBucket: true, coverageMeasured: false, buckets: [] };
 afterEach(() => vi.unstubAllGlobals());
 it('잘못된 응답을 정상 빈 결과로 취급하지 않는다', () => {

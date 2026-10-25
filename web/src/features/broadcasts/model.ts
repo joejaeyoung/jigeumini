@@ -1,5 +1,6 @@
 import { rankingStale, type Rankings, type RankingEntry } from '../../shared/api/quality';
-import type { Bucket, BroadcastMetadata } from '../../shared/api/client';
+import type { Bucket } from '../../shared/api/buckets';
+import type { BroadcastMetadata } from '../../shared/api/metadata';
 export type ChannelSummary = { id: string; chatCount: number | null; lastBucket: string | null; metadata?: BroadcastMetadata; quality?: RankingEntry; stale?: boolean };
 export function summarize(buckets: Bucket[]): ChannelSummary[] {
   const result = new Map<string, ChannelSummary>();

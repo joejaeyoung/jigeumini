@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { channelIdSchema } from '../../shared/api/client';
+import { channelIdSchema } from '../../shared/api/fields';
 export const storageKey = 'jigeumini.saved-channels.v1';
 export function parseSaved(raw: string | null): string[] {
   try {

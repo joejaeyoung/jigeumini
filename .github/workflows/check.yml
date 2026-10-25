@@ -2,7 +2,7 @@ name: 지금이니 검증
 on:
   pull_request:
   push:
-    branches: [main, develop, 'release/**', 'technicaltest/**', 'feat/**', 'fix/**']
+    branches: [main, develop, 'release/**', 'technicaltest/**', 'feat/**', 'fix/**', 'refactor/**']
 permissions:
   contents: read
 jobs:

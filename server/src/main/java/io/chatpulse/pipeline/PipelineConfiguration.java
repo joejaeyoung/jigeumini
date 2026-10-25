@@ -1,8 +1,6 @@
 package io.chatpulse.pipeline;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -37,19 +35,7 @@ public class PipelineConfiguration {
     }
     @Bean(destroyMethod = "close")
     HikariDataSource dataSource(PipelineProperties p) {
-        var config = new HikariConfig();
-        config.setJdbcUrl(p.jdbcUrl());
-        config.setUsername(p.dbUser());
-        config.setPassword(p.dbPassword());
-        config.setMaximumPoolSize(4);
-        config.setConnectionTimeout(3000);
-        config.setValidationTimeout(2000);
-        config.addDataSourceProperty("connectTimeout", "3");
-        config.addDataSourceProperty("socketTimeout", "10");
-        var ds = new HikariDataSource(config);
-        try { Flyway.configure().dataSource(ds).load().migrate(); }
-        catch (RuntimeException e) { ds.close(); throw e; }
-        return ds;
+        return PostgresSupport.openMigrated(p.jdbcUrl(), p.dbUser(), p.dbPassword());
     }
     @Bean
     @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")

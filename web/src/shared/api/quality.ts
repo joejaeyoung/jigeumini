@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { ApiError, channelIdSchema, read } from './client';
-const time = z.iso.datetime({ offset: true });
-const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
+import { channelIdSchema, count, timestamp as time } from './fields';
+import { ApiError, read } from './transport';
 export const qualityStatus = z.enum(['HEALTHY', 'DISABLED', 'OFFLINE', 'INCOMPLETE', 'WARMING_UP', 'LAGGING', 'UNKNOWN']);
 export const rankingEntrySchema = z.object({
   channelId: channelIdSchema, rank: z.number().int().positive().nullable(), count: count.nullable(), referenceCount: count,

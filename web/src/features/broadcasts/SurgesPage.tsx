@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fetchChannels } from '../../shared/api/client';
+import { fetchChannels } from '../../shared/api/metadata';
 import { fetchSpikes } from '../../shared/api/quality';
 import { usePolling } from '../../shared/api/usePolling';
 import { currentMetadata, formatTime } from './model';

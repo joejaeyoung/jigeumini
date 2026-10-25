@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { fetchChannel, fetchChannels, metadataSchema, type BroadcastMetadata } from './client';
+import { fetchChannel, fetchChannels, metadataSchema, type BroadcastMetadata } from './metadata';
 import { currentMetadata, matchesSearch, withMetadata } from '../../features/broadcasts/model';
 const id = 'a'.repeat(32);
 const time = Date.parse('2026-10-25T00:00:00Z');

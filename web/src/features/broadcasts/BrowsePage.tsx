@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router';
-import { fetchChannels } from '../../shared/api/client';
+import { fetchChannels } from '../../shared/api/metadata';
 import { fetchRankings, rankingStale } from '../../shared/api/quality';
 import { usePolling } from '../../shared/api/usePolling';
 import { rankedChannels, withSavedChannels, withMetadata, matchesSearch, formatTime } from './model';

@@ -1,5 +1,5 @@
-import { expect, it } from 'vitest';
-import { rankingsSchema, rankingStale, spikeSchema, type Rankings } from './quality';
+import { afterEach, expect, it, vi } from 'vitest';
+import { fetchActivity, rankingsSchema, rankingStale, spikeSchema, type Rankings } from './quality';
 import { rankedChannels } from '../../features/broadcasts/model';
 const at = '2026-10-25T12:00:00Z';
 const entry = { channelId: 'a'.repeat(32), rank: 1, count: 0, referenceCount: 0, coverage: 1, status: 'HEALTHY', reasons: [], previousRank: null, previousReason: 'NO_PREVIOUS_SNAPSHOT' };
@@ -24,4 +24,18 @@ it('급상승 임계값·비율이 맞지 않거나 품질 경고가 있는 유�
   expect(spikeSchema.safeParse({ ...spike, ratio: 3 }).success).toBe(false);
   expect(spikeSchema.safeParse({ ...spike, qualityWarning: 'COLLECTION_REVISED' }).success).toBe(false);
   expect(spikeSchema.safeParse({ ...spike, valid: false, qualityWarning: 'COLLECTION_REVISED' }).success).toBe(true);
+});
+
+afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
+it('상세 조회는 브라우저 시계 대신 서버 범위를 검증하고 누락 point를 거부한다', async () => {
+  vi.useFakeTimers(); vi.setSystemTime(new Date('2040-01-01T00:00:00Z'));
+  const end = Date.parse(at), start = end - 3600000;
+  const payload = { channelId: entry.channelId, asOf: at, from: new Date(start).toISOString(), to: at,
+    points: Array.from({ length: 60 }, (_, i) => ({ from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(), count: 0, referenceCount: 0, coverage: 1, status: 'HEALTHY', reasons: [] })) };
+  const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(payload), { status: 200 }));
+  vi.stubGlobal('fetch', fetcher);
+  await expect(fetchActivity(entry.channelId, 3600, new AbortController().signal)).resolves.toMatchObject({ to: at });
+  expect(fetcher.mock.calls[0][0]).toBe(`/api/v1/channels/${entry.channelId}/activity?seconds=3600`);
+  fetcher.mockResolvedValue(new Response(JSON.stringify({ ...payload, points: payload.points.slice(1) }), { status: 200 }));
+  await expect(fetchActivity(entry.channelId, 3600, new AbortController().signal)).rejects.toMatchObject({ reason: 'contract' });
 });

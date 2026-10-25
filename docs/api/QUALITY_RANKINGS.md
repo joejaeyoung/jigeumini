@@ -63,7 +63,7 @@ trend 전용 bucket에서 C=`[T−60,T)` 합계, B=`[T−360,T−60)` 합계/5�
 |---|---|
 | `GET /api/v1/rankings?window=60&limit=20` | window=60 또는 300. asOf/evaluatedAt/snapshotId/windowSeconds/algorithmVersion/status, 정상 entries와 excludedChannels |
 | `GET /api/v1/spikes?cursor=...&limit=20` | asOf/status/events/nextCursor. cursor는 마지막 evaluatedAt과 spikeId의 고정 위치. 최신순, 다음 페이지는 엄격히 이전 위치부터 |
-| `GET /api/v1/channels/{id}/activity?from=...&to=...` | UTC 분 경계, 최근 1시간 이내. 기본 최근 30분. 각 point의 from/to/count/referenceCount/coverage/status/reasons |
+| `GET /api/v1/channels/{id}/activity?seconds=1800` | seconds=1800 또는 3600. 서버 시계로 완료된 분 범위를 정한다. 생략 시 30분. 명시적 from/to는 최근 1시간·UTC 분 경계만 허용하며 seconds와 함께 쓰지 않는다. 각 point의 from/to/count/referenceCount/coverage/status/reasons |
 | `GET /api/v1/collection-status` | 1분 snapshot의 전체 상태와 채널 상태별 개수. 공개 ID 외 내부 진단/원문은 노출하지 않음 |
 
 순위 entry에는 channelId/rank/count/referenceCount/coverage/status/reasons/previousRank/previousReason을 둔다. snapshot이 없으면 WARMING_UP과 빈 결과다. 평가 시각이 20초 이상 오래되면 STALE이다. 웹도 이 경계에서 최신 순위·건수를 보류한다.

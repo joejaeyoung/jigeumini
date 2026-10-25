@@ -14,7 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
 public class RankingController {
     private final RankingStore store;
-    public RankingController(RankingStore store) { this.store=store; }
+    private final java.time.Clock clock;
+    @org.springframework.beans.factory.annotation.Autowired
+    public RankingController(RankingStore store) { this(store, java.time.Clock.systemUTC()); }
+    RankingController(RankingStore store, java.time.Clock clock) { this.store=store; this.clock=clock; }
     @GetMapping("/api/v1/rankings")
     public ResponseEntity<RankingStore.RankingResponse> rankings(@RequestParam(defaultValue="60") int window,@RequestParam(defaultValue="20") int limit) {
         if(window!=60&&window!=300)throw invalid();checkLimit(limit);
@@ -30,10 +33,11 @@ public class RankingController {
         return response(store.spikes(at,id,limit));
     }
     @GetMapping("/api/v1/channels/{id}/activity")
-    public ResponseEntity<RankingStore.ActivityResponse> activity(@PathVariable String id,@RequestParam(required=false) String from,@RequestParam(required=false) String to) {
+    public ResponseEntity<RankingStore.ActivityResponse> activity(@PathVariable String id,@RequestParam(required=false) String from,@RequestParam(required=false) String to, @RequestParam(required=false) Integer seconds) {
         if(!id.matches("[a-f0-9]{32}"))throw invalid();
-        Instant now=Instant.ofEpochSecond(Math.floorDiv(Instant.now().getEpochSecond(),60)*60),start,end;
-        try {end=to==null?now:Instant.parse(to);start=from==null?end.minusSeconds(1800):Instant.parse(from);}
+        Instant now=Instant.ofEpochSecond(Math.floorDiv(clock.instant().getEpochSecond(),60)*60),start,end;
+        if(seconds != null && ((seconds != 1800 && seconds != 3600) || from != null || to != null)) throw invalid();
+        try {end=to==null?now:Instant.parse(to);start=from==null?end.minusSeconds(seconds == null ? 1800 : seconds):Instant.parse(from);}
         catch(RuntimeException ignored) {throw invalid();}
         if(start.getNano()!=0||end.getNano()!=0||start.getEpochSecond()%60!=0||end.getEpochSecond()%60!=0||!end.isAfter(start)||end.isAfter(now)||start.isBefore(now.minusSeconds(3600)))throw invalid();
         return response(store.activity(id,start,end));

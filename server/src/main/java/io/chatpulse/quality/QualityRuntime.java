@@ -22,7 +22,13 @@ public final class QualityRuntime implements AutoCloseable {
     }
     public void start() {
         trendConsumer.start(); rankingObserver.start(); trendObserver.start();
-        evaluator.scheduleWithFixedDelay(() -> { try { ranking.evaluate(); } catch (RuntimeException ignored) { /* 저장 실패 시 기존 snapshot의 age가 STALE로 내려간다. */ } },1,10,TimeUnit.SECONDS);
+        scheduleEvaluation(evaluator, java.time.Clock.systemUTC(), () -> { try { ranking.evaluate(); } catch (RuntimeException ignored) { /* 저장 실패 시 기존 snapshot의 age가 STALE로 내려간다. */ } });
+    }
+    static void scheduleEvaluation(ScheduledExecutorService scheduler, java.time.Clock clock, Runnable task) {
+        long now = clock.millis();
+        long next = (Math.floorDiv(now - 1000, 10000) + 1) * 10000 + 1000;
+        // 완료 경계 1초 뒤, 실행 소요 시간과 무관한 고정 주기. 10초 초과 지연은 STALE로 남긴다.
+        scheduler.scheduleAtFixedRate(task, next - now, 10000, TimeUnit.MILLISECONDS);
     }
     @Override public void close() {
         evaluator.shutdownNow(); rankingObserver.close(); trendObserver.close(); trendConsumer.close();

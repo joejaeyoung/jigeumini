@@ -35,4 +35,17 @@ class RankingControllerTest {
         mvc.perform(get("/api/v1/spikes").param("cursor",at+"|"+id).param("limit","2")).andExpect(status().isOk()).andExpect(jsonPath("$.events").isEmpty());
         verify(store).spikes(at,id,2);
     }
+    @Test void relativeActivityUsesServerClockAndRejectsMixedRanges() throws Exception {
+        var store=mock(RankingStore.class);
+        var at=Instant.parse("2026-10-25T12:00:59.999Z");
+        var clock=java.time.Clock.fixed(at,java.time.ZoneOffset.UTC);
+        var mvc=MockMvcBuilders.standaloneSetup(new RankingController(store,clock)).build();
+        String id="a".repeat(32), path="/api/v1/channels/"+id+"/activity";
+        var end=Instant.parse("2026-10-25T12:00:00Z");
+        when(store.activity(id,end.minusSeconds(3600),end)).thenReturn(new RankingStore.ActivityResponse(id,at.toString(),end.minusSeconds(3600).toString(),end.toString(),List.of()));
+        mvc.perform(get(path).param("seconds","3600")).andExpect(status().isOk()).andExpect(jsonPath("$.to").value(end.toString()));
+        verify(store).activity(id,end.minusSeconds(3600),end);
+        mvc.perform(get(path).param("seconds","3600").param("to",end.toString())).andExpect(status().isBadRequest());
+        mvc.perform(get(path).param("seconds","120")).andExpect(status().isBadRequest());
+    }
 }

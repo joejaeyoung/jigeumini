@@ -54,6 +54,9 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 
 ## 수집 품질·순위·급상승 구현
 
+리뷰 보완(2026-10-25): 선행 PR #4·#12의 집계 미확인 표시를 통합했다. 평가 시작을 10초 경계+1초에 맞추고 고정 주기로 실행해 평가 비용에 따른 누적 drift를 제거했다. 합성 300ms 실행 비용으로 120회 tick 연속성을 검증했다. 상세 조회는 서버 기준 상대 기간으로 바꿔 브라우저 시계와 분 경계 이동에 의한 400 오류를 제거했고 범위·point 연속성을 검사한다. 2.96배는 2.9배 청록으로 내려 표시한다. `./scripts/check` 서버 단위 52개·하네스 16개·JAR, 웹 단위 17개·빌드 및 e2e 22개 통과. `./scripts/integration` 실제 Kafka·PostgreSQL 16개도 통과했다. 실제 10초 초과 평가 지연은 STALE·공백으로 유지하며 과거 tick을 추측해 복원하지 않는다.
+
+
 2026-10-25 · [이슈 #3](https://github.com/joejaeyoung/jigeumini/issues/3) · 브랜치 `feat/quality-rankings`. [메타데이터 PR #12](https://github.com/joejaeyoung/jigeumini/pull/12)의 브랜치에서 분기해 변경을 분리했다. #2·#3만 구현하며 #5~#11은 이번 범위에 포함하지 않는다. 보드는 In Progress, 검토·병합은 남겨둔다.
 
 - 기술 매핑: F03 → T02·T08·T11. 동일 eventId 중복을 ranking/trend 각각 1건으로 반영하고, ranking 중지 중 trend 처리·빈 partition freshness·미확인 버퍼 품질 제외를 검증했다. 신규 trend의 충돌/rollback 전용 장애 시험, consumer 수별 확장·실제 메모리·채널 공정성은 남아 있어 해당 목표 전체 완료로 판정하지 않는다.
@@ -70,7 +73,9 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 
 ## 방송 메타데이터 구현
 
-2026-10-25 · [이슈 #2](https://github.com/joejaeyoung/jigeumini/issues/2) · 브랜치 `feat/broadcast-metadata`. 선행 모노레포 [PR #4](https://github.com/joejaeyoung/jigeumini/pull/4)가 미병합이므로 `feat/monorepo-web`에서 분기했다. 보드는 In Progress이며 검토·병합은 남겨둔다.
+아래 구현·검증 항목은 메타데이터 최초 구현 시점의 기록이다. 최종 통합 검증은 품질·순위 절의 리뷰 보완 기록을 따른다.
+
+2026-10-25 · [이슈 #2](https://github.com/joejaeyoung/jigeumini/issues/2) · 브랜치 `feat/broadcast-metadata`. 최초 구현은 `feat/monorepo-web`에서 분기했으며 선행 [PR #4](https://github.com/joejaeyoung/jigeumini/pull/4)는 develop에 병합됐다. Claude 리뷰 승인·CI 통과 후 PR #12를 develop에 병합했고 이슈 #2·보드는 완료 처리했다.
 
 - 서버: 익명 공개 live-detail 조회, 명시적인 종료 확인, 타입이 있는 `/api/channels` 목록·개별 조회. 수집 이력 최근 20개와 요청 ID 목록을 구분한다. 메타데이터는 Kafka·DB에 저장하지 않는다.
 - 캐시: 60초 TTL·실패 재시도 15초·이전 공개 텍스트 최대 5분, 256개 제한, 동시 갱신 4개·대기 32개, 동일 채널 요청 합치기. 성인·접근 제한·404·잘못된 응답에서 이전 공개 정보를 지운다. 만료 후 LIVE·이미지를 유지하지 않는다.
@@ -83,7 +88,9 @@ push 기준 확보 실패는 경고로 명시하고 PR base 확보 실패는 차
 
 ## 실제 웹·모노레포 1차 구현
 
-2026-10-25 · [이슈 #1](https://github.com/joejaeyoung/jigeumini/issues/1) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1)에서 In Progress로 관리한다. PR 검토·병합은 남겨둔다.
+아래 구현·검증 항목은 M1 웹 최초 구현 당시의 기록이다. 당시 미구현 메타데이터·품질 기능은 위 절에서 추가됐으며 수치도 해당 실행 시점을 뜻한다.
+
+2026-10-25 · [이슈 #1](https://github.com/joejaeyoung/jigeumini/issues/1) · Claude 리뷰 승인·CI 통과 후 PR #4를 develop에 병합했고 이슈 #1·[보드](https://github.com/users/joejaeyoung/projects/1)는 완료 처리했다.
 
 - 저장소: 원격 주소를 변경된 이름 `joejaeyoung/jigeumini`로 맞췄다. 기존 기준 커밋 `44b6321`에서 `main`·`develop`을 만들고 기본 브랜치를 `main`으로 설정했다. `feat/monorepo-web`에서 구현하며 기존 `feat/chat-pipeline`은 보존한다.
 - 모노레포: 서버 소스·테스트·리소스와 빌드를 `server/` Gradle 서브프로젝트로 이동했다. `web/`은 npm workspace의 React·TypeScript·Vite 제품 웹이다. 루트 `scripts/` 실행 계약을 유지하고 JAR·테스트 결과 경로와 CI를 갱신했다.

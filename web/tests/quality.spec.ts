@@ -32,11 +32,12 @@ test('2배와 3배 리본·페이지 이동·품질 정정·오래된 분석을 
   const event = (id: number, channelId: string, count: number) => ({ spikeId: uuid(id), channelId, evaluatedAt: iso(-10000 * id), count, baseline: 50, ratio: count / 50, algorithmVersion: 'chat-spike-v1', valid: true, qualityWarning: null });
   await page.route('**/api/v1/spikes?**', route => {
     const next = Boolean(new URL(route.request().url()).searchParams.get('cursor'));
-    return route.fulfill({ json: { asOf: iso(), status: 'READY', events: next ? [{ ...event(3, a, 100), valid: false, qualityWarning: 'COLLECTION_REVISED' }] : [event(1, a, 100), event(2, b, 150)], nextCursor: next ? null : `${iso(-20000)}|${uuid(2)}` } });
+    return route.fulfill({ json: { asOf: iso(), status: 'READY', events: next ? [{ ...event(3, a, 100), valid: false, qualityWarning: 'COLLECTION_REVISED' }] : [event(1, a, 148), event(2, b, 150)], nextCursor: next ? null : `${iso(-20000)}|${uuid(2)}` } });
   });
   await page.goto('/surges');
   await expect(page.locator('.reaction-ribbon[data-level=rising]')).toHaveCount(1);
   await expect(page.locator('.reaction-ribbon[data-level=high]')).toHaveCount(1);
+  await expect(page.locator('.reaction-ribbon[data-level=rising]')).toContainText('2.9');
   await page.getByRole('button', { name: '더 이전 반응' }).click();
   await expect(page.getByText('수집 공백이 확인되어 판정을 보류한 기록이에요.')).toBeVisible();
   await expect(page.locator('.reaction-ribbon')).toHaveCount(0);
@@ -49,14 +50,17 @@ test('2배와 3배 리본·페이지 이동·품질 정정·오래된 분석을 
 test('상세 추이는 정상 0건과 공백을 따로 표시한다', async ({ page }) => {
   await setup(page);
   await page.route('**/api/v1/channels/*/activity?**', route => {
-    const url = new URL(route.request().url()), from = url.searchParams.get('from')!, to = url.searchParams.get('to')!;
-    return route.fulfill({ json: { channelId: a, asOf: iso(), from, to, points: [
-      { from, to: new Date(Date.parse(from) + 60000).toISOString(), count: 0, referenceCount: 0, coverage: 1, status: 'HEALTHY', reasons: [] },
-      { from: new Date(Date.parse(from) + 60000).toISOString(), to: new Date(Date.parse(from) + 120000).toISOString(), count: null, referenceCount: 5, coverage: .5, status: 'INCOMPLETE', reasons: ['LOW_COVERAGE'] },
-    ] } });
+    const seconds = Number(new URL(route.request().url()).searchParams.get('seconds'));
+    const start = now - seconds * 1000, from = new Date(start).toISOString(), to = iso();
+    return route.fulfill({ json: { channelId: a, asOf: iso(), from, to, points: Array.from({ length: seconds / 60 }, (_, i) => ({
+      from: new Date(start + i * 60000).toISOString(), to: new Date(start + (i + 1) * 60000).toISOString(),
+      count: i === 0 ? 0 : null, referenceCount: i === 0 ? 0 : 5, coverage: i === 0 ? 1 : .5, status: i === 0 ? 'HEALTHY' : 'INCOMPLETE', reasons: i === 0 ? [] : ['LOW_COVERAGE'],
+    })) } });
   });
   await page.goto(`/channels/${a}`);
   await expect(page.getByRole('table')).toBeVisible();
-  await expect(page.locator('tbody strong')).toHaveText(['—', '0']);
-  await expect(page.getByText('수집 불완전 · 참고 5건')).toBeVisible();
+  await expect(page.locator('tbody strong')).toHaveCount(30);
+  await expect(page.locator('tbody strong').last()).toHaveText('0');
+  await expect(page.locator('tbody strong').first()).toHaveText('—');
+  await expect(page.getByText('수집 불완전 · 참고 5건').first()).toBeVisible();
 });

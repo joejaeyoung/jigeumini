@@ -43,9 +43,10 @@ const activitySchema = z.object({ channelId: channelIdSchema, asOf: time, from: 
 }).refine(point => point.status === 'HEALTHY' ? point.count !== null && point.coverage >= .95 : point.count === null)).max(60) });
 export async function fetchActivity(id: string, seconds: number, signal: AbortSignal) {
   if (seconds !== 1800 && seconds !== 3600) throw new ApiError('contract');
-  const to = new Date(Math.floor(Date.now() / 60000) * 60000), from = new Date(to.getTime() - seconds * 1000);
-  const data = await read(`/api/v1/channels/${channelIdSchema.parse(id)}/activity?${new URLSearchParams({ from: from.toISOString(), to: to.toISOString() })}`, activitySchema, signal);
-  if (data.channelId !== id || Date.parse(data.from) !== from.getTime() || Date.parse(data.to) !== to.getTime()) throw new ApiError('contract');
+  const data = await read(`/api/v1/channels/${channelIdSchema.parse(id)}/activity?seconds=${seconds}`, activitySchema, signal);
+  const from = Date.parse(data.from), to = Date.parse(data.to);
+  if (data.channelId !== id || from % 60000 !== 0 || to % 60000 !== 0 || to - from !== seconds * 1000
+    || data.points.length !== seconds / 60 || data.points.some((point, i) => Date.parse(point.from) !== from + i * 60000 || Date.parse(point.to) !== from + (i + 1) * 60000)) throw new ApiError('contract');
   return data;
 }
 export function rankingStale(data: Rankings, now = Date.now()) { return data.status === 'STALE' || Boolean(data.evaluatedAt && now >= Date.parse(data.evaluatedAt) + 20000); }

@@ -27,7 +27,7 @@
 | 상황 | 동작·고정 코드 |
 |---|---|
 | 한 채널의 한도 초과 | frame 전부 거절, 그 채널을 `PUBLISH_CHANNEL_LIMIT` terminal 실패로 중단. 이미 수락한 입력은 drain하고 다른 채널은 계속 진행 |
-| 전역 한도 초과 | frame 전부 거절, `PUBLISH_BUFFER_REJECTED`로 전체 수집 중단 |
+| 전역 한도 초과 | frame 전부 거절, `PUBLISH_BUFFER_REJECTED`로 전체 수집 중단. broker가 정상이면 기존 수락 큐는 drain |
 | 잘못된 이벤트 | frame 전부 거절, `PUBLISH_INVALID_EVENT`로 전체 중단. 원문/예외 세부정보 출력 없음 |
 | broker callback·동기 send 실패 | `KAFKA_DELIVERY_FAILED`, 이후 발행·수락 중단. 실패 입력과 미발행 큐는 미확인으로 남김 |
 | 진단 채널 수1000 초과 | `PUBLISH_CHANNELS_LIMIT` 전체 중단. 진단 map도 유한, 추가 거절은 untrackedRejected에 합산 |
@@ -37,7 +37,7 @@
 
 ## 계수와 조회
 
-`finish()`는 다음 관계를 보존한 불변 결과를 반환한다. 종료 결과가 고정된 뒤의 호출·늦은 ACK는 해당 관측 결과를 바꾸지 않는다. 그 뒤 broker에 실제 반영될 수 있으므로 미확인은 손실 확정 건수도 아니다.
+`finish()`는 다음 관계를 보존한 불변 결과를 반환한다. 수락 단계 오류는 이미 수락한 큐의 drain을 막지 않고, 실제 전달 실패만 추가 send를 막는다. 종료 결과가 고정된 뒤의 호출·늦은 ACK는 해당 관측 결과를 바꾸지 않는다. 그 뒤 broker에 실제 반영될 수 있으므로 미확인은 손실 확정 건수도 아니다.
 
 - `attempted = accepted + rejected`
 - `accepted = acknowledged + unconfirmed`
@@ -55,3 +55,20 @@
 - 조회2026-10-26: [Kafka 4.1 Producer send](https://kafka.apache.org/41/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html). 비동기 결과 callback과 metadata/buffer 대기, max.block.ms를 구분한다.
 - 조회2026-10-26: [Kafka producer 설정](https://kafka.apache.org/41/configuration/producer-configs/). 앱 발행 창과 max.in.flight.requests.per.connection, ACK·멱등 설정은 별개다.
 - RF1 로컬 비교는 Kafka HA 근거가 아니다. 복제 장애는 #29, ACK 수준·커밋 방식 대조는 #31이다. 실제 선정 채널 전체의 용량·외부 소스 완전성은 이 변경으로 입증하지 않는다.
+
+
+## 성능·장애 대조 재현
+
+`LegacySerialPublisher`는 cf4049e의 기존 직렬 구현을 테스트 소스에만 보존한다. 제품 변경 후에도 과거 기준선이 같은 이름의 새 구현으로 바뀌지 않는다. 각 결과의 publisherImplementation/codeCommit/runtimeClassesSha256을 확인한다.
+
+```bash
+./scripts/experiment serial-control work/publisher-serial-control.json
+./scripts/experiment product-control work/publisher-product-control.json
+./scripts/experiment baseline work/publisher-serial-baseline.json
+./scripts/experiment product-baseline work/publisher-product-baseline.json
+./scripts/experiment product-burst work/publisher-product-burst.json
+./scripts/experiment product-hot work/publisher-product-hot.json
+./scripts/experiment broker-fault work/publisher-broker-fault.json
+```
+
+통제 입력100/s·15초는 양쪽 모두 완료하는 범위에서 지연/요청/배치를 비교한다.500/s·30초의 미달 여부와2,000/s 순간 입력,80% hot 채널·중복, 실제 별도 broker PAUSE/STOP을 구분한다. broker-fault는 직렬 기준선/실험 후보/제품 비동기6경우며 공유 broker를 멈추지 않는다. 실제 결과와 검증 범위는 STATUS의 근거를 따른다.

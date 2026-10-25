@@ -46,7 +46,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
     private final Thread worker;
     private long sequence, accepted, acknowledged, rejected, failedCallbacks, untrackedRejected;
     private int peakPending, peakInFlight;
-    private boolean closing, failed, finished;
+    private boolean closing, failed, dispatchFailed, finished;
     private String failureCode = "NONE";
     private Map<String, Object> finalReport;
 
@@ -68,6 +68,8 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
             if (finished) throw new SourceFailure("PUBLISH_CLOSED", true);
             if (events.isEmpty()) return;
             if (closing || failed) reject(events, closing ? "PUBLISH_CLOSED" : failureCode, false);
+            if (events.stream().anyMatch(e -> e != null && channels.containsKey(e.channelId()) && channels.get(e.channelId()).stopped))
+                reject(events, "PUBLISH_CHANNEL_LIMIT", false);
             if (events.size() > limits.capacity() - unacked.size()) reject(events, "PUBLISH_BUFFER_REJECTED", true);
             List<Pending> frame;
             try { frame = events.stream().map(e -> new Pending(++sequence, e, codec.encode(e))).toList(); }
@@ -115,8 +117,8 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 Pending p;
                 synchronized (lock) {
                     while (true) {
-                        if (finished || ((closing || failed) && sending.isEmpty() && (failed || ready.isEmpty()))) return;
-                        if (!failed && !ready.isEmpty() && sending.size() < limits.maxInFlight()) break;
+                        if (finished || ((closing || failed) && sending.isEmpty() && (dispatchFailed || ready.isEmpty()))) return;
+                        if (!dispatchFailed && !ready.isEmpty() && sending.size() < limits.maxInFlight()) break;
                         lock.wait();
                     }
                     String id = ready.removeFirst(); Channel c = channels.get(id);
@@ -142,7 +144,7 @@ public final class BufferedKafkaPublisher implements EventSink, AutoCloseable {
                 unacked.remove(p.sequence); acknowledged++;
                 Channel c = channels.get(p.event.channelId()); c.acknowledged++; c.pending--;
             } else {
-                failedCallbacks++; fail("KAFKA_DELIVERY_FAILED");
+                failedCallbacks++; dispatchFailed = true; fail("KAFKA_DELIVERY_FAILED");
             }
             lock.notifyAll();
         }

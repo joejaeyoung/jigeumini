@@ -55,6 +55,15 @@ class BufferedKafkaPublisherTest {
             assertEquals("PUBLISH_BUFFER_REJECTED", result.get("failureCode"));
         }
     }
+    @Test void globalOverflowStillDrainsPreviouslyAcceptedQueueWhileBrokerIsHealthy() throws Exception {
+        var b = new Broker();
+        try (var p = publisher(b, 3, 3, 1)) {
+            p.accept(List.of(event(HOT), event(HOT), event(COLD))); var sent = b.next();
+            assertThrows(SourceFailure.class, () -> p.accept(List.of(event(COLD))));
+            sent.future.complete(null); b.next().future.complete(null); b.next().future.complete(null);
+            balances(p.finish(), 3, 3, 1); assertTrue(p.deliveryFailed());
+        }
+    }
     @Test void failedCallbackStopsNewDispatchBeforeCapacityIsReached() throws Exception {
         var b = new Broker();
         try (var p = publisher(b, 10, 10, 1)) {

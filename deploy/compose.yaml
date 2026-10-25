@@ -79,6 +79,7 @@ services:
       retries: 30
   migrate:
     <<: *runtime
+    profiles: [maintenance]
     environment:
       <<: *runtime-env
       PIPELINE_DB_USER: app_owner
@@ -103,10 +104,10 @@ services:
       - --logging.level.io.chatpulse=OFF
     depends_on:
       kafka: {condition: service_healthy}
-      migrate: {condition: service_completed_successfully}
+      postgres: {condition: service_healthy}
     healthcheck:
       test: [CMD,java,-Xmx32m,-cp,'/app/classes:/app/lib/*',io.chatpulse.poc.PocApplication,ops,probe]
-      interval: 5s
+      interval: 15s
       timeout: 8s
       retries: 24
       start_period: 15s

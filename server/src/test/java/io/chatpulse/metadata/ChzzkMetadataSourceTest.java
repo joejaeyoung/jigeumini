@@ -71,6 +71,18 @@ class ChzzkMetadataSourceTest {
         assertThat(result.title()).isNull();
         assertThat(result.thumbnailUrl()).isNull();
     }
+    @Test void observationFallbackReservesEveryActualHttpRequestAndRejectsExhaustedBudget() {
+        body="{\"code\":200,\"content\":null}";
+        channelBody="{\"code\":200,\"content\":{\"channelId\":\""+ID+"\",\"openLive\":false}}";
+        var reservations=new java.util.concurrent.atomic.AtomicInteger();
+        var counted=new ChzzkMetadataSource("http://127.0.0.1:"+server.getAddress().getPort(),id->{assertThat(id).isEqualTo(ID);reservations.incrementAndGet();});
+        assertThat(counted.observe(ID).quality()).isEqualTo(PublicBroadcastObservation.Quality.OFFLINE);
+        assertThat(reservations.get()).isEqualTo(2);assertThat(paths).hasSize(2);
+        paths.clear();reservations.set(0);
+        var limited=new ChzzkMetadataSource("http://127.0.0.1:"+server.getAddress().getPort(),id->{if(reservations.incrementAndGet()>1)throw new IllegalStateException("SOURCE_BUDGET_EXHAUSTED");});
+        assertThat(limited.observe(ID).quality()).isEqualTo(PublicBroadcastObservation.Quality.UPSTREAM_ERROR);
+        assertThat(paths).hasSize(1);
+    }
     @Test void nullLiveRequiresExplicitOfflineFromChannel() {
         body = "{\"code\":200,\"content\":null}";
         channelBody = "{\"code\":200,\"content\":{\"channelId\":\"" + ID + "\",\"channelName\":\"합성 채널\",\"openLive\":false}}";

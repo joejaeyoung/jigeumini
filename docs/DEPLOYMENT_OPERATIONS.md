@@ -78,8 +78,14 @@ API/수집/DB writer를 모두 멈춘 뒤 새 DB에 dump를 복원한다. 원천
 
 관측 복구 시간은 **17.105초**였다. 시작은 기존 API 정지 후 새DB 생성 직전, 끝은 restore·불일치 시작 거부·새group 준비·API readiness·집계 대조까지다. 장애 감지/사람 판단/외부 provisioning 시간은 제외한다. 백업 대비 누락10건이 보존 Kafka로0건이 된 **fixture의 결과**이며 실제 원천 RPO=0이나 운영 RTO 보장을 뜻하지 않는다. 삭제된 로그·수집 공백·미확인 메모리 입력은 복원하지 못한다.
 
-첫 실행은 이미지 교체/복귀·DB 장애시503/프로세스200·schema checksum 실패/복귀·브라우저7경로와375px 폭·최종 종료까지16단계가 통과했다. API 정상 종료 표본은1.144/1.326초, 종료코드143·OOM없음이다. [원본](poc/evidence/deployment-2026-10-26/first.json)에 시각·Git/image/JAR 식별·phase별 결과·cleanup을 보관한다. 백업 파일과 비밀은 gitignored work에만 두며 공유 근거에는 hash/수치만 포함한다.
+첫 실행은 이미지 교체/복귀·DB 장애시503/프로세스200·schema checksum 실패/복귀·브라우저7개 URL의 SPA shell과375px 폭·최종 종료까지16단계가 통과했다. API 정상 종료 표본은1.144/1.326초, 종료코드143·OOM없음이다. [원본](poc/evidence/deployment-2026-10-26/first.json)에 시각·Git/image/JAR 식별·phase별 결과·cleanup을 보관한다. 백업 파일과 비밀은 gitignored work에만 두며 공유 근거에는 hash/수치만 포함한다.
 
 ## 리팩토링 점검
 
 비밀/CLI 설정은 RuntimeEnvironment, schema 연결은 PostgresSupport, 복원 위치 판정은 RecoveryPlan, 주기 health와 HTTP 표현은 DeploymentHealth/Controller에 둔다. consumer별 progress table 차이는 RecoveryPlan 내부 Target으로 숨기며 새 group 준비와 readonly plan을 구분한다. 하네스의 Docker 소유권·호출 기한·정리는 한 Rehearsal에서 관리한다. 범용 배포 프레임워크나 새 외부 의존성을 도입하지 않았다. fleet 관측은 기존 ObservationCollector를 재사용하며 임대 응답 전후·발행 직전 검사와 공유 HTTP 예산만 연결한다. 실패·보완과 회귀 결과는 WORK_LOG에 남긴다.
+
+### 최초 리뷰에서 드러난 검증 한계와 보완
+
+첫16단계와 두 번째17단계 원본은 그대로 보존한다. 당시 `/reports`는 등록되지 않은 URL이므로 fallback200을 실제 리포트 기능 검증으로 계산하지 않는다. startup 비정상 종료만 확인해 checksum/복구 가드 원인을 직접 단언하지 않았고, 일부 진단 계수와 기존 group 불변 필드도 상수였다. 실제 hash 대조·DB 집계 결과까지 무효가 되는 것은 아니지만 그 추가 주장은 보류한다.
+
+후속 하네스는 `SCHEMA_NOT_READY`/`RECOVERY_ALIGNMENT_REQUIRED` 허용 코드, DDL SQLSTATE42501·OOM 여부, 실제 기존 group offset 전후·DB 이름·계산한 누락 수를 단언한다. 브라우저는 실제 API2xx/요청 실패·각 화면 heading·채널별 리포트 목록/상세20건·503 오류/재시도·SPA/asset/revision nosniff를 확인하도록 보강한다. 결과는 후속 실행 원본으로 판정한다. strict VALIDATE와 동일 migration 집합의 이미지 rollback 한계는 배포 README를 따른다.

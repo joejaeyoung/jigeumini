@@ -42,16 +42,17 @@ class Rehearsal:
         info=json.loads(self.command(['docker','inspect',cid]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('CONTAINER_OWNER_MISMATCH')
         return cid,info
-    def ops(self,*args,check=True):
-        output=self.compose('run','--rm','--no-deps','-e','DEPLOYMENT_MAINTENANCE=true','migrate','ops',*args,check=check)
+    def ops(self,*args,check=True,group=None):
+        extra=[] if group is None else ['-e','PIPELINE_GROUP='+group]
+        output=self.compose('run','--rm','--no-deps','-e','DEPLOYMENT_MAINTENANCE=true',*extra,'migrate','ops',*args,check=check)
         if not check and output.returncode:return {'failed':True,'code':output.returncode}
         return json.loads(output.stdout.strip().splitlines()[-1])
     def probe(self,*args):
         command=['run','--rm','--no-deps','--entrypoint','java','-v',str(ROOT/'server/build/classes/java/test')+':/probe:ro','api',
                  '-Xmx128m','-cp','/app/classes:/app/lib/*:/probe','io.chatpulse.operations.DeploymentProbe',*args]
         return json.loads(self.compose(*command).stdout.strip().splitlines()[-1])
-    def sql(self,statement,database=None,user='app_owner',check=True):
-        cid,_=self.owned('postgres');return self.command(['docker','exec',cid,'psql','-X','-v','ON_ERROR_STOP=1','-U',user,'-d',database or self.environment['DATABASE_NAME'],'-At','-c',statement],check=check)
+    def sql(self,statement,database=None,user='app_owner',check=True,sqlstate=False):
+        cid,_=self.owned('postgres');return self.command(['docker','exec',cid,'psql','-X','-v','ON_ERROR_STOP=1',*(['-v','VERBOSITY=sqlstate'] if sqlstate else []),'-U',user,'-d',database or self.environment['DATABASE_NAME'],'-At','-c',statement],check=check)
     def http(self,path):
         try:
             with urllib.request.urlopen(self.base+path,timeout=5) as response:return response.status,response.read()
@@ -99,9 +100,12 @@ class Rehearsal:
         return {'dockerMemoryBytes':info['MemTotal'],'hostFreeDiskBytes':shutil.disk_usage(ROOT).free,'applicationImageUsers':['10001:10001','101:101'],'maximumComposeMemoryBytes':(640+640+768+384+64)*1024**2}
     def initialize(self):
         self.started=True;self.compose('up','-d','--wait','--wait-timeout','120','postgres','kafka',timeout=150)
-        self.ops('migrate');self.ops('bind-sources');self.ops('initialize-groups')
-        denied=self.sql('CREATE TABLE runtime_must_not_create(id int)',user='app_runtime',check=False);assert denied.returncode!=0
-        return {'runtimeDdlRejected':True,'groupsInitialized':6,'sourcesBound':4}
+        self.ops('migrate');self.ops('bind-sources');initialized=self.ops('initialize-groups')
+        source_count=int(self.sql("SELECT count(*) FROM deployment_source_identity WHERE run_id='deploy-v1'").stdout.strip())
+        denied=self.sql('CREATE TABLE runtime_must_not_create(id int)',user='app_runtime',check=False,sqlstate=True)
+        assert denied.returncode!=0 and re.search(r'ERROR:\s+42501',denied.stderr)
+        assert initialized['groups']==6 and source_count==4
+        return {'runtimeDdlRejected':True,'runtimeDdlSqlState':'42501','groupsInitialized':initialized['groups'],'sourcesBound':source_count}
     def collector_preflight(self):
         status=self.compose('run','--rm','--no-deps','api','fleet','status')
         state=json.loads(status.stdout.strip().splitlines()[-1]);assert state['assigned']==0
@@ -131,31 +135,50 @@ class Rehearsal:
         (self.directory/'database.dump').write_bytes(dump)
         self.result['backupSnapshot']=before;self.result['dumpSha256']=hashlib.sha256(dump).hexdigest()
         return {'bytes':len(dump),'sha256':self.result['dumpSha256'],'chat':10,'pendingOutbox':1}
+    def rejected_start(self,expected):
+        self.until(lambda:self.owned('api')[1]['State']['Status']=='exited',60)
+        _,info=self.owned('api');assert info['State']['ExitCode']!=0 and not info['State']['OOMKilled']
+        logs=self.compose('logs','--no-color','--no-log-prefix','api').stdout
+        diagnostics=[]
+        for line in logs.splitlines():
+            try:
+                value=json.loads(line)
+                if isinstance(value,dict) and value.get('error')=='APPLICATION_START_FAILED':diagnostics.extend(value.get('codes',[]))
+            except json.JSONDecodeError:pass
+        assert expected in diagnostics
+        return {'exitCode':info['State']['ExitCode'],'oomKilled':info['State']['OOMKilled'],'diagnosticCode':expected}
     def schema_failure(self):
         self.stop_api();checksum=int(self.sql("SELECT checksum FROM flyway_schema_history WHERE version='1'").stdout.strip())
         self.sql("UPDATE flyway_schema_history SET checksum=0 WHERE version='1'")
         self.image(self.candidate);self.compose('up','-d','--no-deps','--force-recreate','api')
-        self.until(lambda:self.owned('api')[1]['State']['Status']=='exited',60)
-        assert self.owned('api')[1]['State']['ExitCode']!=0
+        rejected=self.rejected_start('SCHEMA_NOT_READY')
         assert self.sql("SELECT checksum FROM flyway_schema_history WHERE version='1'").stdout.strip()=='0'
         self.sql("UPDATE flyway_schema_history SET checksum="+str(checksum)+" WHERE version='1'")
         self.up_apps(self.baseline);assert self.snapshot(20,2)==self.expected
-        return {'checksumMismatchStartRejected':True,'automaticRepair':False,'previousImageRecovered':True}
+        return {'checksumMismatchStartRejected':rejected,'automaticRepair':False,'previousImageRecovered':True,'scope':'SAME_MIGRATION_SET_CHECKSUM_CORRUPTION'}
     def restore(self):
-        self.stop_api();started=time.monotonic();started_at=self.now()
+        self.stop_api();started=time.monotonic();started_at=self.now();original_database=self.sql('SELECT current_database()').stdout.strip();original_group=self.environment['CONSUMER_GROUP']
         self.sql('CREATE DATABASE restored OWNER app_owner',database='chatpulse');cid,_=self.owned('postgres')
         self.command(['docker','exec','-i',cid,'pg_restore','-U','app_owner','-d','restored','--exit-on-error','--no-owner'],input=(self.directory/'database.dump').read_bytes(),binary=True)
         self.environment['DATABASE_NAME']='restored';self.write_env()
         restored=self.probe('snapshot');assert restored==self.result['backupSnapshot']
+        restored_database=self.sql('SELECT current_database()').stdout.strip();assert restored_database!=original_database
         plan=self.ops('recovery-plan');assert not plan['safeForStartup'] and plan['recoverableFromRetainedLog'];self.result['restoredPlanBefore']=plan
         self.image(self.candidate);self.compose('up','-d','--no-deps','--force-recreate','api')
-        self.until(lambda:self.owned('api')[1]['State']['Status']=='exited',60);assert self.owned('api')[1]['State']['ExitCode']!=0
+        rejected=self.rejected_start('RECOVERY_ALIGNMENT_REQUIRED')
         prepared=self.ops('recover-groups','deploy-recovered');self.environment['CONSUMER_GROUP']='deploy-recovered';self.write_env()
         self.up_apps(self.candidate);actual=self.snapshot(20,2)
         differences=[key for key in self.expected if self.expected[key]!=actual[key]]
         self.result['restoredSnapshot']=actual;self.result['restoredPlanAfter']=self.ops('recovery-plan');assert not differences
         assert self.result['restoredPlanAfter']['safeForStartup']
-        return {'startedAt':started_at,'secondsToVerifiedCatchup':time.monotonic()-started,'backupChatGap':10,'chatGapAfterRecovery':0,'businessSnapshotDifferences':differences,'newGroups':prepared['groups'],'oldGroupsModified':False,'restoredIntoNewDatabase':True}
+        old_after=self.ops('recovery-plan',group=original_group)
+        def committed(plan):return {(r['group'],r['topic'],r['partition']):r['committed'] for r in plan['partitions']}
+        old_changed=committed(plan)!=committed(old_after);assert not old_changed
+        self.result['originalGroupsAfterRecovery']=old_after
+        return {'startedAt':started_at,'secondsToVerifiedCatchup':time.monotonic()-started,'backupChatGap':self.expected['rankingCount']-restored['rankingCount'],
+                'chatGapAfterRecovery':self.expected['rankingCount']-actual['rankingCount'],'businessSnapshotDifferences':differences,'newGroups':prepared['groups'],
+                'oldGroupsModified':old_changed,'restoredIntoNewDatabase':restored_database!=original_database,'originalDatabase':original_database,
+                'restoredDatabase':restored_database,'alignmentStartRejected':rejected}
     def run(self):
         try:
             self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit);self.phase('COLLECTOR_CLI_PREFLIGHT',self.collector_preflight)
@@ -193,7 +216,10 @@ class Rehearsal:
                 self.command(['docker','volume','rm',volume])
             remaining=self.command(['docker','ps','-aq','--filter','label=io.jigeumini.deployment.owner='+self.owner]).stdout.strip()
             remaining_volumes=self.command(['docker','volume','ls','-q','--filter','label=io.jigeumini.deployment.owner='+self.owner]).stdout.strip()
-            assert not remaining and not remaining_volumes;self.result['cleanupComplete']=True
+            assert not remaining and not remaining_volumes
+            for name in ['secrets/owner.txt','secrets/runtime.txt','database.dump']:(self.directory/name).unlink(missing_ok=True)
+            self.result['sensitiveArtifactsRemoved']=not any((self.directory/name).exists() for name in ['secrets/owner.txt','secrets/runtime.txt','database.dump'])
+            self.result['cleanupComplete']=True
         except Exception:self.result['cleanupComplete']=False;self.result['correct']=False
 if __name__=='__main__':
     try:raise SystemExit(Rehearsal(*sys.argv[1:]).run())

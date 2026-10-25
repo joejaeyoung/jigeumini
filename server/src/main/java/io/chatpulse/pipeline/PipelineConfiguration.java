@@ -41,9 +41,10 @@ public class PipelineConfiguration {
             @Value("${pipeline.schema-mode:MIGRATE}") String schemaMode,
             @Value("${pipeline.db-password-file:}") String secretFile,
             @Value("${deployment.recovery-guard:false}") boolean recoveryGuard,
+            @Value("${deployment.enabled:false}") boolean deploymentEnabled,
             @Value("${observations.topic:broadcast.observed.v1}") String observationTopic,
             @Value("${notifications.topic:}") String notificationTopic) {
-        String password=RuntimeEnvironment.secret(p.dbPassword(),secretFile);
+        String password=RuntimeEnvironment.secret(p.dbPassword(),secretFile,deploymentEnabled||schemaMode.equals("VALIDATE"));
         if(!java.util.Set.of("MIGRATE","VALIDATE").contains(schemaMode))throw new IllegalArgumentException("SCHEMA_MODE");
         var ds=schemaMode.equals("VALIDATE")?PostgresSupport.openValidated(p.jdbcUrl(),p.dbUser(),password):PostgresSupport.openMigrated(p.jdbcUrl(),p.dbUser(),password);
         try {

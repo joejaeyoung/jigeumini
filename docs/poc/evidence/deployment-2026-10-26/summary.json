@@ -17,6 +17,15 @@
       "correct": true,
       "cleanupComplete": true,
       "phases": 16
+    },
+    {
+      "file": "second.json",
+      "sha256": "d340726752bb14b0a5234be95687009ef551f435d2e6e4607f3d426367b0cdb8",
+      "baseline": "4f85f1ded5bd51f85be9a4fb842ae85144cde458",
+      "candidate": "36f3503b27e4839cea51460fd51e0659105d7f78",
+      "correct": true,
+      "cleanupComplete": true,
+      "phases": 17
     }
   ],
   "observedRecovery": {
@@ -43,5 +52,10 @@
     "ownedSchemasCleaned": 4,
     "ownedTopicsCleaned": 16,
     "cleanupEvidence": "local work/deployment-initial-cleanup.json"
-  }
+  },
+  "reviewLimitations": [
+    "First two runs only checked nonzero exit, not the stable startup failure code",
+    "First two browser runs checked SPA shell/layout, not API success/data rendering",
+    "Some diagnostic counts/old-group invariance fields were literals; final followup measures them"
+  ]
 }

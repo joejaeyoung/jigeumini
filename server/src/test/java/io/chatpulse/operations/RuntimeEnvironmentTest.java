@@ -8,6 +8,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RuntimeEnvironmentTest {
     @TempDir Path directory;
+    @Test void deploymentNeverFallsBackToDevelopmentPassword() {
+        var failure=assertThrows(IllegalArgumentException.class,()->RuntimeEnvironment.from(Map.of("DEPLOYMENT_ENABLED","true")));
+        assertEquals("SECRET_FILE_REQUIRED",failure.getMessage());
+        assertThrows(IllegalArgumentException.class,()->RuntimeEnvironment.password(Map.of("PIPELINE_SCHEMA_MODE","VALIDATE")));
+    }
+    @Test void diagnosticsDiscardUnknownMessagesAndKeepOnlyStableCodes() {
+        var failure=new IllegalStateException("SYNTHETIC_SECRET",new IllegalStateException("SCHEMA_NOT_READY"));
+        assertEquals(java.util.List.of("SCHEMA_NOT_READY"),FailureDiagnostics.codes(failure));
+    }
     @Test void secretFileWinsWithoutAppearingInDiagnosticsAndInvalidFileFailsClosed() throws Exception {
         Path file=directory.resolve("password");Files.writeString(file,"SYNTHETIC_SECRET_VALUE\n");
         var settings=RuntimeEnvironment.from(Map.of("PIPELINE_DB_PASSWORD_FILE",file.toString(),"PIPELINE_KAFKA_DURABILITY","HA"));

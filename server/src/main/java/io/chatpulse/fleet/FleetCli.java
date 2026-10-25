@@ -34,7 +34,7 @@ public final class FleetCli {
             if(plan.sourceMode()==SelectionPolicy.SourceMode.UNOFFICIAL_POC&&!"true".equals(env.get("FLEET_LIVE_ENABLED")))throw new IllegalArgumentException("FLEET_LIVE_DISABLED");
         } else if(!(Set.of("migrate","status").contains(args[0])&&args.length==1)&&!(args[0].equals("worker")&&args.length==4))throw new IllegalArgumentException("FLEET_ARGUMENTS");
         if(args[0].equals("worker")&&!"true".equals(env.get("FLEET_LIVE_ENABLED")))throw new IllegalArgumentException("FLEET_LIVE_DISABLED");
-        String url=env.getOrDefault("PIPELINE_JDBC_URL","jdbc:postgresql://localhost:15432/chatpulse"),user=env.getOrDefault("PIPELINE_DB_USER","chatpulse"),password=io.chatpulse.operations.RuntimeEnvironment.secret(env.getOrDefault("PIPELINE_DB_PASSWORD","local-chatpulse"),env.getOrDefault("PIPELINE_DB_PASSWORD_FILE",""));
+        String url=env.getOrDefault("PIPELINE_JDBC_URL","jdbc:postgresql://localhost:15432/chatpulse"),user=env.getOrDefault("PIPELINE_DB_USER","chatpulse"),password=io.chatpulse.operations.RuntimeEnvironment.password(env);
         if(args[0].equals("migrate")){try(var ds=PostgresSupport.openMigrated(url,user,password)){System.out.println("{\"migrated\":true}");return 0;}}
         try(var ds=args[0].equals("worker")&&"VALIDATE".equals(env.get("PIPELINE_SCHEMA_MODE"))?PostgresSupport.openValidated(url,user,password):PostgresSupport.open(url,user,password,args[0].equals("status"))) {
             var store=new CollectorLeases(ds);
@@ -53,14 +53,14 @@ public final class FleetCli {
                 try(var worker=new CollectorWorker(store,SelectionPolicy.SourceMode.UNOFFICIAL_POC,limits,new ChzzkHttpSource(),kafka,topic,(publisher,budget)->{
                     var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
                     var observer=new CollectionTelemetry(new JdbcTemplate(ds),tx,publisher);telemetry.set(observer);observer.start();
-                    if("false".equals(env.get("OBSERVATIONS_ENABLED")))return observer;
+                    if(!"true".equals(env.get("OBSERVATIONS_ENABLED")))return observer;
                     String observedTopic=env.getOrDefault("OBSERVATIONS_TOPIC","broadcast.observed.v1");
                     if(observedTopic.equals(topic)||observedTopic.equals(topic+".dlq")||observedTopic.equals(topic+".spikes"))throw new IllegalArgumentException("OBSERVATION_TOPIC");
                     KafkaSupport.ensureTopic(bootstrap,observedTopic,policy);
                     var observedPublisher=new io.chatpulse.observations.ObservationPublisher(bootstrap,observedTopic);observationPublisher.set(observedPublisher);
                     var observed=new LeasedObservations(budget,env.getOrDefault("PIPELINE_RUN_ID","live-v1"),
                             Integer.parseInt(env.getOrDefault("OBSERVATIONS_INTERVAL_SECONDS","60")),Integer.parseInt(env.getOrDefault("OBSERVATIONS_TTL_SECONDS","120")),
-                            new io.chatpulse.metadata.ChzzkMetadataSource()::observe,observedPublisher);observations.set(observed);
+                            new io.chatpulse.metadata.ChzzkMetadataSource(budget::reserveFor)::observe,observedPublisher);observations.set(observed);
                     return io.chatpulse.poc.CollectionObserver.combine(List.of(observer,observed));
                 })) {
                     var report=worker.run(result->{try{closeRuntime.run();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});

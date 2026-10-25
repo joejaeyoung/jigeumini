@@ -45,8 +45,7 @@ public final class OperationsCli {
             }
             System.out.println(JsonMapper.builder().build().writeValueAsString(result));return 0;
         } catch(Exception failure) {
-            var codes=new ArrayList<String>();Throwable cause=failure;
-            for(int n=0;cause!=null&&n<6;n++,cause=cause.getCause())if(cause.getMessage()!=null&&cause.getMessage().matches("[A-Z][A-Z_]{3,80}"))codes.add(cause.getMessage());
+            var codes=FailureDiagnostics.codes(failure);
             try{System.out.println(JsonMapper.builder().build().writeValueAsString(Map.of("error","OPERATIONS_FAILED","codes",codes)));}catch(Exception ignored){System.out.println("{\"error\":\"OPERATIONS_FAILED\"}");}return 2;
         }
     }

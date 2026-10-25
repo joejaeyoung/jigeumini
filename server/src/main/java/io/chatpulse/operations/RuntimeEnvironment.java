@@ -11,7 +11,7 @@ public record RuntimeEnvironment(String jdbcUrl,String user,String password,Stri
     public static RuntimeEnvironment from(Map<String,String> env) {
         String topic=env.getOrDefault("PIPELINE_TOPIC","chat.received.v1");
         return new RuntimeEnvironment(env.getOrDefault("PIPELINE_JDBC_URL","jdbc:postgresql://localhost:15432/chatpulse"),
-                env.getOrDefault("PIPELINE_DB_USER","chatpulse"),secret(env.getOrDefault("PIPELINE_DB_PASSWORD","local-chatpulse"),env.getOrDefault("PIPELINE_DB_PASSWORD_FILE","")),
+                env.getOrDefault("PIPELINE_DB_USER","chatpulse"),password(env),
                 env.getOrDefault("PIPELINE_BOOTSTRAP_SERVERS","localhost:19092"),topic,env.getOrDefault("OBSERVATIONS_TOPIC","broadcast.observed.v1"),
                 env.getOrDefault("NOTIFICATIONS_TOPIC",topic+".spikes"),env.getOrDefault("PIPELINE_GROUP","chat-ranking-live-v1"),
                 env.getOrDefault("PIPELINE_PROJECTION","ranking"),env.getOrDefault("PIPELINE_RUN_ID","live-v1"),policy(env));
@@ -19,6 +19,14 @@ public record RuntimeEnvironment(String jdbcUrl,String user,String password,Stri
     public static KafkaTopicPolicy policy(Map<String,String> env) {
         return new KafkaTopicPolicy(KafkaTopicPolicy.Durability.valueOf(env.getOrDefault("PIPELINE_KAFKA_DURABILITY","LOCAL")),
                 Long.parseLong(env.getOrDefault("PIPELINE_KAFKA_RETENTION_MS","86400000")),Long.parseLong(env.getOrDefault("PIPELINE_KAFKA_RETENTION_BYTES","268435456")),Integer.parseInt(env.getOrDefault("PIPELINE_KAFKA_SEGMENT_BYTES","33554432")));
+    }
+    public static String password(Map<String,String> env) {
+        return secret(env.getOrDefault("PIPELINE_DB_PASSWORD","local-chatpulse"),env.getOrDefault("PIPELINE_DB_PASSWORD_FILE",""),
+                "true".equals(env.get("DEPLOYMENT_ENABLED"))||"VALIDATE".equals(env.get("PIPELINE_SCHEMA_MODE")));
+    }
+    public static String secret(String fallback,String file,boolean required) {
+        if(required&&file.isEmpty())throw new IllegalArgumentException("SECRET_FILE_REQUIRED");
+        return secret(fallback,file);
     }
     public static String secret(String fallback,String file) {
         if(file.isEmpty())return fallback;

@@ -17,7 +17,7 @@ class LeasedObservationsTest {
         var budget=new BudgetedChatSource(mock(ChatSource.class),authority,20,Duration.ofMillis(100));
         var entered=new CountDownLatch(1);var release=new CountDownLatch(1);var published=new AtomicInteger();
         try(var observations=new LeasedObservations(budget,"test",60,120,id->{
-            entered.countDown();try{assertTrue(release.await(3,TimeUnit.SECONDS));}catch(InterruptedException e){throw new IllegalStateException();}
+            budget.reserveFor(id);entered.countDown();try{assertTrue(release.await(3,TimeUnit.SECONDS));}catch(InterruptedException e){throw new IllegalStateException();}
             return new PublicBroadcastObservation(BroadcastMetadata.LiveStatus.LIVE,10L,"123",null,null,PublicBroadcastObservation.Quality.OBSERVED);
         },event->published.incrementAndGet())) {
             try(var executor=Executors.newSingleThreadExecutor()) {

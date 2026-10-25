@@ -27,6 +27,8 @@ public class PocApplication {
                 new java.util.concurrent.CountDownLatch(1).await();
             }
             code = context.getBean(PocRunner.class).run();
+        } catch(RuntimeException failure) {
+            io.chatpulse.operations.FailureDiagnostics.startupFailed(failure);code=2;
         }
         System.exit(code);
     }

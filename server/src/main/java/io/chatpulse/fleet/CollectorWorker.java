@@ -28,7 +28,7 @@ public final class CollectorWorker implements AutoCloseable {
     private final Map<String,Active> active=new LinkedHashMap<>();private final Object lock=new Object();
     private final ExecutorService connections=Executors.newVirtualThreadPerTaskExecutor();
     private final ScheduledExecutorService heartbeat=Executors.newSingleThreadScheduledExecutor();
-    private boolean closing,closed;private volatile String failureCode="NONE";private Map<String,Object> finalReport;private Instant startedAt;
+    private boolean closing,closed,persisted;private volatile String failureCode="NONE";private Map<String,Object> finalReport;private Instant startedAt;
     public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
                            CollectionObserver observer) {
         this(leases,mode,limits,source,kafka,topic,ignored->observer);
@@ -45,18 +45,27 @@ public final class CollectorWorker implements AutoCloseable {
     public Map<String,Object> run() {return run(ignored->{ });}
     public Map<String,Object> run(java.util.function.Consumer<Map<String,Object>> persist) {
         startedAt=Instant.now();
-        var hook=new Thread(()->{close();persist.accept(finalReport);},"collector-graceful-stop");Runtime.getRuntime().addShutdownHook(hook);
+        var hook=new Thread(()->{close();persistResult(persist);},"collector-graceful-stop");Runtime.getRuntime().addShutdownHook(hook);
         long deadline=System.nanoTime()+limits.duration().toNanos();
         try {
             tick();heartbeat.scheduleWithFixedDelay(this::safeTick,1,1,TimeUnit.SECONDS);
             while(!stop.get()&&System.nanoTime()<deadline) {
                 authority.checkAll();publisher.checkHealthy();Thread.sleep(100);
-                synchronized(lock){if(!stop.get()&&active.values().stream().anyMatch(a->a.task().isDone())){failureCode="CHANNEL_ENDED";stop.set(true);}}
+                synchronized(lock){if(!stop.get()&&System.nanoTime()<deadline&&active.values().stream().anyMatch(a->a.task().isDone())){failureCode="CHANNEL_ENDED";stop.set(true);}}
             }
         } catch(InterruptedException interrupted){Thread.currentThread().interrupt();fail("WORKER_INTERRUPTED");}
         catch(Exception failure){fail("COLLECTION_LEASE_OR_DELIVERY_LOST");}
-        finally {close();try{Runtime.getRuntime().removeShutdownHook(hook);}catch(IllegalStateException ignored){}}
-        persist.accept(finalReport);return finalReport;
+        finally {
+            close();
+            try {persistResult(persist);}
+            finally {try{Runtime.getRuntime().removeShutdownHook(hook);}catch(IllegalStateException ignored){}}
+        }
+        return finalReport;
+    }
+    // SIGTERM hook은 main thread의 파일 쓰기 완료까지 기다린다. CAS만으로 중복을 막으면
+    // main이 쓰기 권한만 얻고 hook이 먼저 반환하여 JVM이 파일 저장 전에 종료될 수 있다.
+    private synchronized void persistResult(java.util.function.Consumer<Map<String,Object>> persist) {
+        if(!persisted){persist.accept(finalReport);persisted=true;}
     }
     private void safeTick(){try{tick();}catch(Exception failure){fail("COLLECTION_LEASE_LOST");}}
     private void tick() {

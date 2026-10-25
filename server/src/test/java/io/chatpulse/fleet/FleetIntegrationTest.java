@@ -3,6 +3,7 @@ package io.chatpulse.fleet;
 import io.chatpulse.db.PostgresSupport;
 import io.chatpulse.discovery.SelectionPolicy.SourceMode;
 import io.chatpulse.pipeline.*;
+import io.chatpulse.poc.ChatEvent;
 import io.chatpulse.replay.ReplaySource;
 import java.net.*;
 import java.nio.file.*;
@@ -25,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 @Tag("integration") @Timeout(120)
 class FleetIntegrationTest {
     private static final String CHANNEL="a".repeat(32),SECOND="b".repeat(32);private static final JsonMapper JSON=JsonMapper.builder().build();
+    private Long stalePostResumeAccepted;
     private String schema,topic,group,scenario;private com.zaxxer.hikari.HikariDataSource root,ds;private JdbcTemplate jdbc;private CollectorLeases leases;
     private final List<Process> children=new ArrayList<>();private final List<Path> reports=new ArrayList<>();private SyntheticServer source;
     @BeforeEach void setup(TestInfo info) throws Exception {
@@ -74,10 +76,14 @@ class FleetIntegrationTest {
     }
     @Test void stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver() throws Exception {
         plan(List.of(CHANNEL));var first=start(15432,1);awaitConnected(1);
+        await().atMost(Duration.ofSeconds(10)).until(()->!readBrokerEvents().isEmpty());
+        var oldSessions=readBrokerEvents().stream().map(ChatEvent::collectionSessionId).collect(java.util.stream.Collectors.toSet());
         UUID original=jdbc.queryForObject("SELECT owner FROM collector_lease WHERE channel_id=?",UUID.class,CHANNEL);signal(first,"STOP");
         var second=start(15432,1);
         await().atMost(Duration.ofSeconds(25)).untilAsserted(()->{assertNotEquals(original,jdbc.queryForObject("SELECT owner FROM collector_lease WHERE channel_id=?",UUID.class,CHANNEL));assertEquals(2L,jdbc.queryForObject("SELECT epoch FROM collector_lease WHERE channel_id=?",Long.class,CHANNEL));});
-        signal(first,"CONT");assertTrue(first.waitFor(35,TimeUnit.SECONDS));awaitConnected(1);stop(second);
+        Instant resumedAt=Instant.now();signal(first,"CONT");assertTrue(first.waitFor(35,TimeUnit.SECONDS));awaitConnected(1);stop(second);
+        stalePostResumeAccepted=readBrokerEvents().stream().filter(e->oldSessions.contains(e.collectionSessionId())&&!e.receivedAt().isBefore(resumedAt)).count();
+        assertEquals(0L,stalePostResumeAccepted);
         JsonNode stale=JSON.readTree(Files.readString(reports.getFirst()));assertFalse(stale.path("complete").asBoolean());assertNotEquals("NONE",stale.path("failureCode").asText());
         assertReconciled();
     }
@@ -89,9 +95,19 @@ class FleetIntegrationTest {
             var second=start(15432,1);await().atMost(Duration.ofSeconds(20)).untilAsserted(()->assertEquals(2L,jdbc.queryForObject("SELECT epoch FROM collector_lease WHERE channel_id=?",Long.class,CHANNEL)));awaitConnected(1);stop(second);assertReconciled();
         }
     }
-    private Process start(int dbPort,int capacity) throws Exception {
+    @Test void sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile() throws Exception {
+        plan(List.of(CHANNEL));var child=start(15432,1,true);Path report=reports.getFirst();
+        await().atMost(Duration.ofSeconds(25)).until(()->Files.exists(Path.of(report+".persisting")));
+        assertTrue(child.isAlive());signal(child,"TERM");assertTrue(child.waitFor(20,TimeUnit.SECONDS));
+        var diagnostic=JSON.readTree(Files.readString(report));assertTrue(diagnostic.path("complete").asBoolean());
+        assertTrue(diagnostic.path("released").asBoolean());assertReconciled();
+    }
+    private Process start(int dbPort,int capacity) throws Exception {return start(dbPort,capacity,false);}
+    private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {
         Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();reports.add(report);
-        var child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
+        var command=new ArrayList<>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()));
+        if(delayedReport)command.add("DELAY_REPORT");
+        var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
     }
     private void stop(Process process) throws Exception {process.destroy();assertTrue(process.waitFor(35,TimeUnit.SECONDS));}
     private static void signal(Process process,String name) throws Exception {if(process.isAlive())assertEquals(0,new ProcessBuilder("kill","-"+name,Long.toString(process.pid())).start().waitFor());}
@@ -99,18 +115,23 @@ class FleetIntegrationTest {
     private void assertReconciled() throws Exception {
         long accepted=0,acked=0;
         for(Path path:reports){var d=JSON.readTree(Files.readString(path));var p=d.path("delivery");assertEquals(p.path("accepted").asLong(),p.path("acknowledged").asLong()+p.path("unconfirmed").asLong());accepted+=p.path("accepted").asLong();acked+=p.path("acknowledged").asLong();}
-        assertTrue(acked>0);var brokerIds=new HashSet<UUID>();long physical=0;
-        try(var source=new ReplaySource("localhost:19092",topic,UUID.randomUUID())) {
-            var manifest=source.capture(null,null);source.assign(manifest);var next=new HashMap<Integer,Long>();manifest.partitions().forEach(p->next.put(p.partition(),p.start()));long end=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);
-            while(manifest.partitions().stream().anyMatch(p->next.get(p.partition())<p.end())) {assertTrue(System.nanoTime()<end);for(var r:source.poll()){physical++;brokerIds.add(new EventCodec().decode(r.value(),r.key()).eventId());next.put(r.partition(),r.offset()+1);}}
-        }
+        assertTrue(acked>0);var records=readBrokerEvents();var brokerIds=new HashSet<UUID>();records.forEach(e->brokerIds.add(e.eventId()));long physical=records.size();
         assertTrue(physical>=acked&&physical<=accepted);assertEquals(physical,brokerIds.size());
         var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);var store=new ProjectionStore(jdbc,tx,new EventCodec(),"fleet-test",schema);
         try(var consumer=new ProjectionConsumer(KafkaSupport.consumerFactory("localhost:19092",group,"earliest"),topic,store)){consumer.start();await().atMost(Duration.ofSeconds(20)).untilAsserted(()->assertEquals((long)brokerIds.size(),store.totals().get("bucketTotal")));}
         assertEquals(brokerIds,new HashSet<>(jdbc.query("SELECT event_id FROM processed_event WHERE projection='fleet-test'",(rs,n)->rs.getObject(1,UUID.class))));
         for(Path path:reports)assertFalse(Files.readString(path).contains("PRIVATE_CANARY"));
         var evidence=new LinkedHashMap<String,Object>();evidence.put("scenario",scenario);evidence.put("recordedAt",Instant.now().toString());evidence.put("accepted",accepted);evidence.put("acknowledged",acked);evidence.put("unconfirmed",accepted-acked);evidence.put("brokerPhysical",physical);evidence.put("brokerUnique",brokerIds.size());evidence.put("databaseUnique",brokerIds.size());evidence.put("brokerDatabaseDifference",0);evidence.put("children",reports.stream().map(path->{try{return JSON.readValue(Files.readString(path),Map.class);}catch(Exception failure){throw new RuntimeException(failure);}}).toList());
+        if(stalePostResumeAccepted!=null)evidence.put("stalePostResumeAccepted",stalePostResumeAccepted);
         Files.writeString(Path.of("build","fleet-evidence-"+scenario+".json"),JSON.writerWithDefaultPrettyPrinter().writeValueAsString(evidence)+"\n");
+    }
+    private List<ChatEvent> readBrokerEvents() throws Exception {
+        var events=new ArrayList<ChatEvent>();
+        try(var source=new ReplaySource("localhost:19092",topic,UUID.randomUUID())) {
+            var manifest=source.capture(null,null);source.assign(manifest);var next=new HashMap<Integer,Long>();manifest.partitions().forEach(p->next.put(p.partition(),p.start()));long end=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);
+            while(manifest.partitions().stream().anyMatch(p->next.get(p.partition())<p.end())) {assertTrue(System.nanoTime()<end);for(var r:source.poll()){events.add(new EventCodec().decode(r.value(),r.key()));next.put(r.partition(),r.offset()+1);}}
+        }
+        return List.copyOf(events);
     }
     private static final class SyntheticServer extends WebSocketServer implements AutoCloseable {
         final CountDownLatch ready=new CountDownLatch(1);final ScheduledExecutorService sender=Executors.newSingleThreadScheduledExecutor();

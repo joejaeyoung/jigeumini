@@ -33,7 +33,7 @@ public final class NotificationConsumer implements AutoCloseable {
         handler.setClassifications(Map.of(Exception.class,true),true);container.setCommonErrorHandler(handler);
     }
     public void start(){container.start();}
-    public Map<String,Object> status(){var assigned=container.getAssignedPartitions();return Map.of("running",container.isRunning(),"state",state,
+    public Map<String,Object> status(){var assigned=container.getAssignedPartitions();return Map.of("running",container.isRunning(),"state",state.equals("STARTING")&&assigned!=null&&!assigned.isEmpty()?"WAITING_FOR_EVENTS":state,
             "successfulBatches",batches.get(),"failedAttempts",failures.get(),"assignedPartitions",assigned==null?0:assigned.size());}
     @Override public void close(){container.stop();}
 }

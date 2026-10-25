@@ -28,7 +28,13 @@ public record SpikeDetected(int schemaVersion, UUID spikeId, String runId, Strin
     public static SpikeDetected decode(String key, byte[] bytes) {
         try {
             if (bytes == null || bytes.length > 4096) throw new IllegalArgumentException();
-            var event = JSON.readValue(bytes, SpikeDetected.class);
+            var node = JSON.readTree(bytes);
+            if (node == null || !node.isObject() || !node.path("schemaVersion").isIntegralNumber()
+                    || !node.path("count").isIntegralNumber() || !node.path("count").canConvertToLong()
+                    || !node.path("baseline").isNumber() || !node.path("ratio").isNumber()) throw new IllegalArgumentException();
+            for (String field : List.of("spikeId","runId","channelId","evaluatedAt","algorithmVersion","quality"))
+                if (!node.path(field).isString()) throw new IllegalArgumentException();
+            var event = JSON.treeToValue(node, SpikeDetected.class);
             if (!event.channelId.equals(key)) throw new IllegalArgumentException();
             return event;
         } catch (RuntimeException ignored) { throw new IllegalArgumentException("SPIKE_CONTRACT_INVALID"); }

@@ -23,11 +23,11 @@
 | 웹 | 정상8경로 heading/새로고침·리포트 상세20건, 정상 API응답26개 전부200, 503 오류 표시·재시도 회복, static/SPA/revision nosniff, 375px overflow없음·pageerror0 |
 | 새DB 복원 | 백업10건/pending outbox1개, 최신 원래DB20건/알림2개. 복원DB+기존group 시작은 RECOVERY_ALIGNMENT_REQUIRED·exit2·OOM없음 |
 | DB/Kafka 위치 복구 | 새group6개를 DB next에 준비. 최종20건·피드2개·미발행0·선택한 ledger/집계 hash차이0. 기존group offsets 전후일치·chatpulse와restored DB이름 차이 확인 |
-| 종료/정리 | 최종SIGTERM1.281초·exit143·OOM없음, 소유컨테이너/볼륨 제거. 생성 secret/dump 삭제. 진행중 HTTP요청완료 시험은 아님 |
+| 종료/정리 | 최종SIGTERM1.310초·exit143·OOM없음, 소유컨테이너/볼륨 제거. 생성 secret/dump 삭제. 진행중 HTTP요청완료 시험은 아님 |
 
 17단계 모두 통과했다. 마지막 `./scripts/check`는 Java140·하네스16·JAR가 통과했다. 전체 실제 Kafka/DB 회귀와 최종 CI 결과는 STATUS/정제요약에 이어 기록한다.
 
-복원 후 검증 완료까지 **24.188초**였다. 기존 API 정지 후 새DB 생성 직전부터 dump복원·거부진단·새group준비·readiness·집계 및 기존offset 대조까지 포함한다. 장애감지/운영자 판단/클라우드 provisioning은 제외한다. 보존 Kafka가 있는 합성20건의 누락10→0이며 실제 원천 RPO0 또는 운영 RTO 보장이 아니다.
+최신5차의 복원 후 검증 완료까지 **24.188초**였다. 서로 다른 코드/검사 강도의5회 범위는17.105~24.188초이며 분포나 운영RTO 추정으로 사용하지 않는다. 기존 API 정지 후 새DB 생성 직전부터 dump복원·거부진단·새group준비·readiness·집계 및 기존offset 대조까지 포함한다. 장애감지/운영자 판단/클라우드 provisioning은 제외한다. 보존 Kafka가 있는 합성20건의 누락10→0이며 실제 원천 RPO0 또는 운영 RTO 보장이 아니다.
 
 snapshot은 ledger eventId/원천offset, 채팅·category·report bucket, observation eventId, notification/spike ID, outbox발행상태를 정규화해 hash 대조한다. 모든 payload 열·updatedAt·snapshot/evaluation 과거 이력을 완전 비교한 것은 아니다. synthetic spike/outbox를 SQL로 주입했으므로 급상승 탐지 전체 경로 검증으로 확대하지 않는다.
 
@@ -39,7 +39,7 @@ snapshot은 ledger eventId/원천offset, 채팅·category·report bucket, observ
 
 ## 리팩토링과 미검증 범위
 
-FailureDiagnostics로 startup/CLI 허용코드만 공유하고 실제 메시지·비밀을 출력하지 않는다. 복원 계획은 RecoveryPlan, schema/connection은 PostgresSupport, 비밀/정책은 RuntimeEnvironment가 담당한다. 관측 HTTP예산은 실제 전송 직전 hook에서 매 요청에 적용하며 offline fallback2회도 단위 HTTP fixture로 대조한다. 기존 ObservationCollector와fleet 임대수명을 재사용했다.
+FailureDiagnostics로 startup/CLI 허용코드와 예외 타입명을 공유하고 실제 메시지·비밀을 출력하지 않는다. 복원 계획은 RecoveryPlan, schema/connection은 PostgresSupport, 비밀/정책은 RuntimeEnvironment가 담당한다. 관측 HTTP예산은 실제 전송 직전 hook에서 매 요청에 적용하며 offline fallback2회도 단위 HTTP fixture로 대조한다. 기존 ObservationCollector와fleet 임대수명을 재사용했다.
 
 T16은 부분검증이다. 동일V12 이미지 복귀와strict미래migration거부만 시험했고 실제새migration을포함한릴리스의복원/재생까지연결한시험은아직없다. 해당작업을시작할때이전schema백업/보존입력/실행이미지로추가리허설한다. 외부TLS·다중AZ·DBstandby/PITR·중앙경보·비밀회전·실제동의/전체방송수집은이로컬실행범위밖이다.
 

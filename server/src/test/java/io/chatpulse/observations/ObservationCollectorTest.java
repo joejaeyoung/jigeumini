@@ -63,7 +63,7 @@ class ObservationCollectorTest {
         try(var collector=new ObservationCollector(List.of(CHANNEL),"test-v1",60,120,id->{
             if(attempts.incrementAndGet()==1)throw new io.chatpulse.metadata.PublicObservationSource.Skipped();return LIMITED;
         },sent::add,clock,executor)) {
-            collector.start(CHANNEL);collector.pollDue();executor.run();assertTrue(sent.isEmpty());
+            collector.start(CHANNEL);collector.pollDue();executor.run();assertTrue(sent.isEmpty());assertEquals(1,collector.skippedRequests());
             clock.advance(59);collector.pollDue();assertTrue(executor.queue.isEmpty());
             clock.advance(1);collector.pollDue();executor.run();assertEquals(1,sent.size());assertEquals(Quality.RATE_LIMITED,sent.getFirst().quality());
         }

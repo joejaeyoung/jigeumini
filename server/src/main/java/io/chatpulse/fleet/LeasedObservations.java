@@ -10,7 +10,7 @@ import java.util.function.*;
 public final class LeasedObservations implements CollectionObserver,AutoCloseable {
     private final BudgetedChatSource budget;private final String run;private final int interval,ttl;
     private final Function<String,PublicBroadcastObservation> source;private final Consumer<BroadcastObserved> publisher;
-    private final Map<String,ObservationCollector> active=new HashMap<>();private boolean closed;
+    private final Map<String,ObservationCollector> active=new HashMap<>();private boolean closed;private long retiredSkipped;
     public LeasedObservations(BudgetedChatSource budget,String run,int interval,int ttl,
             Function<String,PublicBroadcastObservation> source,Consumer<BroadcastObserved> publisher) {
         this.budget=budget;this.run=run;this.interval=interval;this.ttl=ttl;this.source=source;this.publisher=publisher;
@@ -26,6 +26,7 @@ public final class LeasedObservations implements CollectionObserver,AutoCloseabl
         var permit=budget.authorize(channel);var data=source.apply(channel);permit.check();return data;
     }
     void publish(BroadcastObserved event){budget.authorize(event.channelId()).check();publisher.accept(event);}
-    @Override public void stopped(String channel) {ObservationCollector collector;synchronized(this){collector=active.remove(channel);}if(collector!=null){collector.stopped(channel);collector.close();}}
+    @Override public void stopped(String channel) {ObservationCollector collector;synchronized(this){collector=active.remove(channel);}if(collector!=null){collector.stopped(channel);collector.close();synchronized(this){retiredSkipped+=collector.skippedRequests();}}}
+    public synchronized Map<String,Object> snapshot(){return Map.of("skippedRequests",retiredSkipped+active.values().stream().mapToLong(ObservationCollector::skippedRequests).sum(),"activeChannels",active.size());}
     @Override public void close(){List<String> channels;synchronized(this){closed=true;channels=List.copyOf(active.keySet());}channels.forEach(this::stopped);}
 }

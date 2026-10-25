@@ -125,7 +125,7 @@ public final class ChzzkMetadataSource implements MetadataSource, PublicObservat
         return text.isEmpty() || text.length() > max ? null : text;
     }
     private JsonNode get(String channel,String path) {
-        try{beforeRequest.accept(channel);}catch(RuntimeException skipped){throw new PublicObservationSource.Skipped();}
+        try{beforeRequest.accept(channel);}catch(io.chatpulse.poc.SourceFailure skipped){throw new PublicObservationSource.Skipped();}
         return client.get().uri(base + path).exchange((request, response) -> {
             int status = response.getStatusCode().value();
             if (status != 200) throw new Failure(reason(status));

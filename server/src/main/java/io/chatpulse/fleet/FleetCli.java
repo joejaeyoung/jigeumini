@@ -63,7 +63,7 @@ public final class FleetCli {
                             new io.chatpulse.metadata.ChzzkMetadataSource(budget::reserveFor)::observe,observedPublisher);observations.set(observed);
                     return io.chatpulse.poc.CollectionObserver.combine(List.of(observer,observed));
                 })) {
-                    var report=worker.run(result->{try{closeRuntime.run();Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
+                    var report=worker.run(result->{try{closeRuntime.run();var diagnostic=new LinkedHashMap<>(result);if(observations.get()!=null)diagnostic.put("observations",observations.get().snapshot());Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(diagnostic)+"\n");}catch(Exception failure){throw new IllegalStateException("FLEET_OUTPUT_FAILED");}});
                     System.out.println(JSON.writeValueAsString(Map.of("complete",report.get("complete"),"workerId",report.get("workerId"))));return Boolean.TRUE.equals(report.get("complete"))?0:2;
                 }
             } finally {closeRuntime.run();}

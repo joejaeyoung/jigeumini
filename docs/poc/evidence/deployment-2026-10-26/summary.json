@@ -127,7 +127,7 @@
     "failures": 0,
     "harness": 16,
     "jarBuilt": true,
-    "sortedXmlSha256": "f752233649fbec2c225c8d10adbc4b31e4a5119d0dc001bea815a67a44f948c1",
+    "sortedXmlSha256": "9405df0e16ec5ffb45eff9c0131b8d49711e27b83ff69e83c41211ce207ec43f",
     "codeCommit": "a0283bc3803e2a80a75fc1d770bcd55323564636"
   },
   "localFullRegression": {
@@ -138,5 +138,33 @@
     "versionPinned": false,
     "excludedFromFinalEvidence": true,
     "reason": "followup build updated classes/JAR during final 14 seconds; use isolated final CI for code provenance"
+  },
+  "recoverySamples": {
+    "samples": [
+      {
+        "file": "first.json",
+        "seconds": 17.105119707994163
+      },
+      {
+        "file": "second.json",
+        "seconds": 17.276239333994454
+      },
+      {
+        "file": "third.json",
+        "seconds": 18.536133666988462
+      },
+      {
+        "file": "fourth.json",
+        "seconds": 18.387081207998563
+      },
+      {
+        "file": "fifth.json",
+        "seconds": 24.187962916999822
+      }
+    ],
+    "count": 5,
+    "minSeconds": 17.105119707994163,
+    "maxSeconds": 24.187962916999822,
+    "scope": "Different code revisions; first two runs had weaker assertions; not production RTO or latency distribution"
   }
 }

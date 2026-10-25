@@ -9,7 +9,7 @@
 - 비밀은 `/run/secrets/` 파일로 읽는다. 이미지·Git·환경변수 값에 넣지 않는다. Compose 파일 mount는 클라우드 secret manager의 보장을 대신하지 않는다.
 - migration 서비스는 owner 계정으로 명시 실행한다. 로컬 owner는 PostgreSQL 초기 superuser이며 runtime은 DML과 조회만 가능한 별도 계정이며 Flyway checksum·미적용·미래 migration을 검사해 실패하면 종료한다. 소스 topicId/clusterId/partition과 복원 DB 진행 위치·Kafka group offset도 consumer 기동 전에 검사한다.
 - API와 분석기는 현재 한 JVM이다. 조회만 별도 증설할 역할 분리는 아직 제공하지 않는다. 수집은 별도 `fleet` CLI를 사용하며 legacy collector와 함께 켜지 않는다. fleet의 시청자 관측은 `OBSERVATIONS_ENABLED=true`로 명시 활성화한다. live-detail 뒤 offline 확인을 위해 두 번째 HTTP가 필요한 경우까지 매 요청에서 임대·공유 예산을 검사하며 HA 정책을 전달한다.
-- `/livez`는 프로세스, `/readyz`는 최근 DB·topic ISR/leader·consumer 상태 표본이다. stale 표본은 실패하며 원천 접속 성공/채팅 품질 정상과는 별개다. shutdown 중 readiness를 내리고 Spring/consumer 종료를 기다리도록 구성한다. Compose는60초 유예를 주고 healthcheck는15초 간격이다. 리허설의 종료 시간/코드만으로 진행 중 HTTP 요청 완료까지 검증했다고 보지 않는다. 기동 실패는 원문 없이 허용된 고정 원인 코드만 stdout에 남긴다.
+- `/livez`는 프로세스, `/readyz`는 최근 DB·topic ISR/leader·consumer 상태 표본이다. stale 표본은 실패하며 원천 접속 성공/채팅 품질 정상과는 별개다. shutdown 중 readiness를 내리고 Spring/consumer 종료를 기다리도록 구성한다. Compose는60초 유예를 주고 healthcheck는15초 간격이다. 리허설의 종료 시간/코드만으로 진행 중 HTTP 요청 완료까지 검증했다고 보지 않는다. 기동 실패는 원문 없이 허용된 고정 원인 코드와 예외 타입명만 stdout에 남긴다.
 
 ## 이미지 만들기
 
@@ -54,3 +54,5 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 관측 요청 예산은 `채널수 × (ceil(실행초/관측간격초)+경계여유1회) × 최대2HTTP + 채팅방/토큰/재접속 요청`으로 계산한다. 현재최대3채널·30분·60초 간격의관측은경계여유를포함해186회이며 최초채팅준비6회를합쳐192회, 총500회에서308회가재접속 등에남는다(간격/연결패턴에따른계획값). 실제총량은BudgetedChatSource카운터가제한한다. 로컬예산/임대거절로HTTP를생략하면원천오류관측을만들지않고다음간격까지기다린다. 관측은명시opt-in이다.
 
 init SQL은로컬세션의statement/error statement로깅을끄지만CREATE ROLE의실제SQL에는비밀이포함된다. 실제관리형DB의감사로그정책과비밀회전은별도설정이필요하다. healthcheck15초간격은이번로컬합성기동범위이며고부하시probeRSS/CPU/플래핑은미검증이다. UI의503은브라우저요청모의,실제프록시503은DB중단HTTP검증으로구분한다.
+
+관측 로컬 생략은 `SourceFailure`(예산/임대)만 처리하며 worker 최종 결과의 `observations.skippedRequests`에 누적한다. 예상하지 못한 hook 오류는 기존 오류 관측 경로로 드러난다. `CollectorWorker.Limits.defaults`는 총500회를 지정하고 생성자가30분 초과 실행을 거부하므로 예산 식의 실행시간 상한을 강제한다. 관측 활성 FleetCli의 실제 원천 연결·종료 조립은 이번 리허설에서 실행하지 않았으며 활성화 전 해당 환경에서 확인한다.

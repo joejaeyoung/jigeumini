@@ -29,3 +29,5 @@ Claude 초기 리뷰55726f0은 부분 보존 정리와 재계산의 충돌, earl
 09b5a03의 push/PR CI40205131666·40205136741은 시각 기대값의 나노초와 관측의 마이크로초 내림 차이로 동일 시험에서 실패했다. 원격 XML은070074210ns 대070074000ns를 기록했다. 해당 기대 시각을 계약 정밀도로 고정했다. heartbeat 시험은 두 실행 모두 통과했다.
 
 보완 구현976f88e에서 `./scripts/check` Java85·하네스16·JAR와 `./scripts/integration` 실제Kafka/DB70(리포트9)이 통과했다. 위1만행 경계 회귀·3일 입력 재개·공유fixture DB동일성 검사를 포함한다. 웹 코드/fixture는55726f0 이후 바꾸지 않아29/31 근거를 유지한다. 정제 JSON의reviewCorrections에 코드/JAR/XML hash를 추가했다.
+
+976f88e는 Claude APPROVE를 받았다. 비차단 항목도 보완해 만료 관측을 배정/coverage에서 제외하고, 같은 원천ID 재등장 시 부분 삭제된 집계를 되살리지 않고 정리 뒤 재시도하게 했다. anchor 삭제를 명시해 부분 정리 회귀를 결정적으로 만들었다. 새 실제DB시험은 부분 bucket 삭제→입력 rollback→cleanup→동일입력재시도1건을 확인한다. 이 추가 보완의 최종검증은 별도로 기록한다.

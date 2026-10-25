@@ -102,12 +102,16 @@ public final class ReportStore implements DualTopicProjection {
             previous.put(rs.getObject(1,UUID.class),rs.getObject(3,UUID.class));return BroadcastObserved.decode(channel,rs.getString(2).getBytes(java.nio.charset.StandardCharsets.UTF_8));
         },run,channel,ts(oldest));
         var derived=ReportSessions.derive(samples,anchors,now);var changedObservations=new ArrayList<UUID>();
-        for(var session:derived.sessions())jdbc.update("""
+        for(var session:derived.sessions()) {
+            // 부분 정리 중 동일 원천 ID가 다시 오면 정리 완료 뒤 같은 배치를 재시도한다.
+            if(Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM report_session WHERE run_id=? AND report_id=? AND ended_at<?)",Boolean.class,run,session.id(),ts(oldest))))throw new IllegalStateException("REPORT_EXPIRED_ID_REUSE");
+            jdbc.update("""
                 INSERT INTO report_session(run_id,report_id,channel_id,anchor_observation_id,observed_from,observed_to,ended_at,payload,updated_at)
                 VALUES (?,?,?,?,?,?,?,?::jsonb,?) ON CONFLICT(run_id,report_id) DO UPDATE SET anchor_observation_id=excluded.anchor_observation_id,
                   observed_from=excluded.observed_from,observed_to=excluded.observed_to,ended_at=excluded.ended_at,payload=excluded.payload,
                   revision=report_session.revision+1,updated_at=excluded.updated_at WHERE report_session.payload<>excluded.payload
                 """,run,session.id(),channel,session.anchorObservationId(),ts(session.observedFrom()),ts(session.observedTo()),session.endedAt()==null?null:ts(session.endedAt()),JSON.writeValueAsString(session),ts(now));
+        }
         for(var sample:samples) {
             var report=derived.observationReports().get(sample.eventId());
             if(!Objects.equals(report,previous.get(sample.eventId()))) {
@@ -115,7 +119,7 @@ public final class ReportStore implements DualTopicProjection {
             }
         }
         derived.aliases().forEach((alias,canonical)->jdbc.update("INSERT INTO report_alias VALUES (?,?,?) ON CONFLICT(run_id,alias_id) DO UPDATE SET canonical_id=excluded.canonical_id",run,alias,canonical));
-        var affected=new ArrayList<Object>(List.of(run,channel,ts(from.isBefore(oldest)?oldest:from),ts(to)));
+        var affected=new ArrayList<Object>(List.of(ts(oldest),run,channel,ts(from.isBefore(oldest)?oldest:from),ts(to)));
         String identityChanges="";
         if(!changedObservations.isEmpty()) { identityChanges=" OR e.observation_id=ANY(CAST(? AS uuid[]))";affected.add("{"+String.join(",",changedObservations.stream().map(UUID::toString).toList())+"}"); }
         affected.add(run);
@@ -125,7 +129,8 @@ public final class ReportStore implements DualTopicProjection {
                     CASE WHEN m.live AND e.event_time<m.observed_at+make_interval(secs=>m.ttl_seconds) THEN m.report_id END new_report,
                     CASE WHEN m.live AND e.event_time<m.observed_at+make_interval(secs=>m.ttl_seconds) THEN m.event_id END new_observation
                   FROM report_event e LEFT JOIN LATERAL (SELECT * FROM report_observation m WHERE m.run_id=e.run_id AND m.channel_id=e.channel_id
-                    AND m.observed_at<=e.event_time ORDER BY m.observed_at DESC,m.event_id DESC LIMIT 1) m ON true
+                    AND m.observed_at<=e.event_time AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=m.run_id AND s.report_id=m.report_id AND s.ended_at<?)
+                    ORDER BY m.observed_at DESC,m.event_id DESC LIMIT 1) m ON true
                   WHERE e.run_id=? AND e.channel_id=? AND ((e.event_time>=? AND e.event_time<?)
                 """+identityChanges+"""
                   )
@@ -182,9 +187,9 @@ public final class ReportStore implements DualTopicProjection {
             var rows=jdbc.query("SELECT * FROM report_session WHERE run_id=? AND report_id=? AND (greatest(observed_to,ended_at)>=? OR ended_at IS NULL)",this::stored,run,canonical,ts(clock.instant().minusSeconds(7*86400)));if(rows.isEmpty())return null;
             var stored=rows.getFirst();var minutes=jdbc.query("SELECT date_trunc('minute',bucket_start) at,sum(message_count)::bigint count FROM report_bucket WHERE run_id=? AND report_id=? GROUP BY at ORDER BY at",(rs,n)->new Minute(rs.getTimestamp(1).toInstant(),rs.getLong(2)),run,canonical);
             var intervals=jdbc.query("""
-                    WITH ordered AS (SELECT *,lead(observed_at) OVER(ORDER BY observed_at,event_id) next_at FROM report_observation WHERE run_id=? AND channel_id=?)
+                    WITH ordered AS (SELECT *,lead(observed_at) OVER(ORDER BY observed_at,event_id) next_at FROM report_observation o WHERE run_id=? AND channel_id=? AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=o.run_id AND s.report_id=o.report_id AND s.ended_at<?))
                     SELECT observed_at,least(observed_at+make_interval(secs=>ttl_seconds),next_at) FROM ordered WHERE report_id=? AND live
-                    """,(rs,n)->new QualityPolicy.Interval(rs.getTimestamp(1).toInstant(),rs.getTimestamp(2).toInstant()),run,stored.session().channelId(),canonical);
+                    """,(rs,n)->new QualityPolicy.Interval(rs.getTimestamp(1).toInstant(),rs.getTimestamp(2).toInstant()),run,stored.session().channelId(),ts(clock.instant().minusSeconds(7*86400)),canonical);
             long late=jdbc.queryForObject("SELECT count(*) FROM report_event WHERE run_id=? AND report_id=? AND late",Long.class,run,canonical);
             return new Detail(stored,minutes,intervals,unassigned(stored.session().channelId()),late,fresh());
         });

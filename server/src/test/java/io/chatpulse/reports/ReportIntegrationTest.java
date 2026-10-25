@@ -112,11 +112,23 @@ class ReportIntegrationTest {
         store=store(Clock.fixed(now,ZoneOffset.UTC));store.cleanup();
         assertEquals(5L,jdbc.queryForObject("SELECT count(*) FROM report_event WHERE report_id=?",Long.class,old));
         assertEquals(6L,jdbc.queryForObject("SELECT count(*) FROM report_observation WHERE report_id=?",Long.class,old));
+        jdbc.update("DELETE FROM report_observation WHERE event_id=?",first.eventId());
         assertNull(store.detail(old));
         store.apply(List.of(record(live(now.minusSeconds(30),null),2),record(event(now.minusSeconds(20),now.minusSeconds(19)),1)));
         UUID current=source(null);assertNotEquals(old,current);assertEquals(1,total(current));assertEquals(now.minusSeconds(30),store.detail(current).stored().session().observedFrom());
         assertEquals(at.plusSeconds(20),jdbc.queryForObject("SELECT ended_at FROM report_session WHERE report_id=?",java.sql.Timestamp.class,old).toInstant());
         store.cleanup();assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_session",Long.class));assertEquals(1,total(current));
+    }
+    @Test void reusedExpiredSourceWaitsForCleanupAndNeverRevivesPartiallyDeletedCounts() {
+        Instant at=Instant.parse("2026-10-10T12:00:00Z"),now=at.plusSeconds(8*86400);store=store(Clock.fixed(at.plusSeconds(60),ZoneOffset.UTC));
+        store.apply(List.of(record(live(at,"123"),0),record(event(at.plusSeconds(1),at.plusSeconds(2)),0),record(sample(at.plusSeconds(20),null,BroadcastMetadata.LiveStatus.OFFLINE,null),1)));
+        UUID old=source("123");store=store(Clock.fixed(now,ZoneOffset.UTC));
+        // 정리 도중 bucket만 먼저 지워진 상태를 명시적으로 재현한다.
+        jdbc.update("DELETE FROM report_bucket WHERE report_id=?",old);
+        var incoming=List.of(record(live(now.minusSeconds(30),"123"),2),record(event(now.minusSeconds(20),now.minusSeconds(19)),1));
+        assertEquals("REPORT_EXPIRED_ID_REUSE",assertThrows(IllegalStateException.class,()->store.apply(incoming)).getMessage());
+        assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_event",Long.class));
+        store.cleanup();store.apply(incoming);assertEquals(old,source("123"));assertEquals(1,total(old));assertEquals(now.minusSeconds(30),store.detail(old).stored().session().observedFrom());
     }
     @Test void retainedReportInputsOlderThanLiveWindowResumeAndExpiredInputsOnlyAdvanceProgress() {
         Instant now=Instant.parse("2026-10-25T12:00:00Z"),at=now.minusSeconds(3*86400);store=store(Clock.fixed(now,ZoneOffset.UTC));

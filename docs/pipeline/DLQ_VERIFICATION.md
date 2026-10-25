@@ -24,7 +24,7 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 
 ## 실제 실행 결과
 
-[정제 근거](../poc/evidence/dlq-2026-10-25.json)에 구현 commit `4fd93c5`, 실행 JAR SHA-256, suite별 시각·건수와 장애 대조값을 기록했다.
+[정제 근거](../poc/evidence/dlq-2026-10-25.json)에 구현 commit `cb4117a`, 실행 JAR SHA-256, suite별 시각·건수와 장애 대조값을 기록했다.
 
 | 명령 | 결과 |
 |---|---|
@@ -34,6 +34,8 @@ Java 21, Kafka 4.1.2 단일 broker/RF=1, PostgreSQL 16.14, Node.js 24와 Chromiu
 | `./scripts/web test:e2e` | Chromium 23개 통과, 운영 진단 사례 1개 포함 |
 
 서버 테스트 결과 파일에서 합성 원본 canary 표식이 남은 파일은 0개였다. 이는 해당 합성 경로의 출력 검사이며 모든 운영 입력의 전수 개인정보 감사는 아니다.
+
+미확인 오류의 품질 영향 범위는 수신 시각 +5초와 eventTime의 추가 +5초 허용치를 함께 고려해 마지막 가능 bucket 끝까지 포함한다. 고정 시각 fixture로 이 경계를 확인했다.
 
 ## 시험 설계에서 확인한 점
 

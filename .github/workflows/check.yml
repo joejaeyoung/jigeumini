@@ -1,14 +1,27 @@
-name: Chat Pulse 검증
+name: 지금이니 검증
 on:
   pull_request:
   push:
-    branches: [main, 'technicaltest/**', 'feat/**', 'fix/**']
+    branches: [main, develop, 'release/**', 'technicaltest/**', 'feat/**', 'fix/**']
 permissions:
   contents: read
 jobs:
-  check:
+  branch-policy:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    steps:
+      - name: Git Flow 대상 확인
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          if [[ "$BASE_BRANCH" == main && "$HEAD_BRANCH" != release/* && "$HEAD_BRANCH" != fix/hotfix-* ]]; then
+            echo 'main에는 release/* 또는 fix/hotfix-* PR만 허용합니다. 기능 PR은 develop을 대상으로 만드세요.'
+            exit 1
+          fi
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -23,9 +36,25 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
+          name: server-test-results
           path: |
-            build/reports/tests/test
-            build/test-results/test
-            build/reports/tests/integrationTest
-            build/test-results/integrationTest
+            server/build/reports/tests
+            server/build/test-results
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: ./scripts/web install
+      - run: ./scripts/web check
+      - run: ./scripts/web browser-install
+      - run: ./scripts/web test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: web-test-results
+          path: web/test-results

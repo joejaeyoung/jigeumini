@@ -8,11 +8,11 @@ if [[ "$role" != analyzer && "$role" != collector ]]; then
   exit 1
 fi
 shift
-./gradlew --console=plain bootJar
-# 실행 중 build/libs JAR가 다시 빌드되어도 프로세스의 classpath는 바뀌지 않는다.
+./gradlew --console=plain :server:bootJar
+# 실행 중 server/build/libs JAR가 다시 빌드되어도 프로세스의 classpath는 바뀌지 않는다.
 mkdir -p work/runtime
 runtime_jar="$(mktemp "$PWD/work/runtime/launch.XXXXXX")"
-cp build/libs/chat-pulse-poc.jar "$runtime_jar"
+cp server/build/libs/chat-pulse-poc.jar "$runtime_jar"
 chmod 400 "$runtime_jar"
 mkdir -p work
 if [[ "$role" == analyzer ]]; then

@@ -1,4 +1,4 @@
-# Chat Pulse — High-Level Design
+# 지금이니 — High-Level Design
 
 2026-10-25 · v0.2 · 구현 전 설계
 

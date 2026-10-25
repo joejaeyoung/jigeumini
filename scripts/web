@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+command="${1:-dev}"
+case "$command" in
+  install) npm ci ;;
+  browser-install) npm exec --workspace @jigeumini/web -- playwright install --with-deps chromium ;;
+  dev|preview|build|check|test:e2e) npm run "$command" --workspace @jigeumini/web ;;
+  *) echo '사용법: ./scripts/web [install|browser-install|dev|preview|build|check|test:e2e]'; exit 1 ;;
+esac

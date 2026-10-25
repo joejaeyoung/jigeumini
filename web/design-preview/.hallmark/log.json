@@ -1,6 +1,24 @@
 [
   {
     "date": "2026-10-25",
+    "macrostructure": "Website Header + Discovery",
+    "theme": "warm light mint",
+    "nav": "상단 메뉴 + 공통 검색",
+    "footer": "서비스 안내",
+    "enrichment": "기존 AI 제작 가상 방송 썸네일",
+    "brief": "앱형 하단 메뉴와 사이드바를 상단 메뉴로 통일, 화면 확장 구조 유지"
+  },
+  {
+    "date": "2026-10-25",
+    "macrostructure": "Platform Shell + Discovery",
+    "theme": "warm light mint",
+    "nav": "고정 사이드바 + 공통 검색 + 모바일 하단 메뉴",
+    "footer": "서비스 안내",
+    "enrichment": "기존 AI 제작 가상 방송 썸네일",
+    "brief": "독립 화면과 주소를 가진 플랫폼 구성, 화면 등록과 공통 셸 분리"
+  },
+  {
+    "date": "2026-10-25",
     "macrostructure": "Split Studio + Catalogue",
     "theme": "warm light mint",
     "nav": "N13",

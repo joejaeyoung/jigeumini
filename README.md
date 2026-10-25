@@ -1,7 +1,32 @@
-# Chat Pulse — 채팅 수집·Kafka·PostgreSQL 집계
+# 지금이니 — 서버·웹 모노레포
 
 치지직 공개 채팅을 익명 READ WebSocket으로 수신해 **Spring에서 데이터 소스를 확보할 수 있는지** 검증한다.
 Java 21 + Spring Boot 4.0.9 + Gradle 9.4.1로 구현했다. Kafka 4.1.2 → PostgreSQL 16.14의 10초 집계와 조회 화면까지 연결한다.
+
+## 실제 웹 개발
+
+Node.js 24(`.nvmrc`), Java 21, Python 3, Docker Compose를 사용한다. 최초 웹 의존성을 설치한다:
+
+```bash
+./scripts/web install
+./scripts/web dev
+```
+
+제품 웹은 http://127.0.0.1:18082/ . `/api` 요청을 기본 `127.0.0.1:18080`의 Spring 조회 서버로 전달한다. 조회 서버와 Kafka·DB는 아래 파이프라인 명령으로 실행한다. 다른 조회 서버는 `API_PROXY_TARGET=http://127.0.0.1:포트 ./scripts/web dev`로 지정한다.
+
+```bash
+./scripts/check                 # 서버 테스트·JAR·문서 링크
+./scripts/integration           # 실제 Kafka·PostgreSQL 통합 검증
+./scripts/web check             # 웹 타입·단위 테스트·제품 빌드
+./scripts/web browser-install   # 최초 Chromium 설치
+./scripts/web test:e2e          # 합성 API 응답 기반 브라우저 검증
+./scripts/web build
+./scripts/web preview           # 빌드 확인: http://127.0.0.1:18083/
+```
+
+웹은 실제 집계 조회·1분/5분 선택·채널 ID 검색·관심 방송·상세 기록을 제공한다. 아직 서버에 없는 방송 메타데이터와 급상승 배수는 표시하지 않는다. 최근 수집 기록이 없으면 빈 화면이 정상이며 가상 방송으로 대체하지 않는다. 디자인 시안은 별도 포트로 보존한다.
+
+[개발 구조·Git Flow](docs/DEVELOPMENT.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
 
 ## 웹 UI 디자인 시안
 
@@ -10,10 +35,11 @@ Java 21 + Spring Boot 4.0.9 + Gradle 9.4.1로 구현했다. Kafka 4.1.2 → Post
 ```
 
 브라우저에서 http://127.0.0.1:18081/ 에 접속한다. Python 3만 필요하며 `Ctrl+C`로 종료한다.
-`web/design-preview/`의 방송 탐색 서비스 시안이다. 모든 채널·수치는 합성 예시이며 썸네일은 AI로 제작했다. 서버 API와 연결하지 않는다.
-방송 검색, 카테고리 필터, 관심 방송 저장, 1분/5분 정렬, 급증 방송 선택, 상세 모달의 추이와 집계 안내를 확인할 수 있다.
+`web/design-preview/`의 플랫폼형 방송 탐색 서비스 시안이다. 모든 채널·수치는 합성 예시이며 썸네일은 AI로 제작했다. 서버 API와 연결하지 않는다.
+홈·방송 탐색·반응 급상승·관심 방송을 공통 메뉴로 이동한다. 상단 검색, 카테고리 필터, 관심 방송 저장, 1분/5분 정렬, 상세 모달의 추이와 집계 안내를 확인할 수 있다.
+화면별 주소는 `#/home`, `#/explore`, `#/surges`, `#/saved`이며 데스크톱과 모바일 모두 상단 메뉴로 이동한다.
 관심 방송은 해당 브라우저의 로컬 저장소에만 저장한다. 가상 방송이므로 방송 보기 버튼은 실제 방송 대신 예시 안내를 표시한다.
-모노레포의 웹 영역은 `web/`로 둔다. 현재 서버는 루트의 Gradle·`src/`에 있으며 `server/` 이동은 별도 작업이다.
+모노레포의 웹 영역은 `web/`로 둔다. 서버는 `server/`, 제품 웹은 `web/src/`, 확정 시안은 `web/design-preview/`에 둔다.
 
 ## Kafka·PostgreSQL로 실행
 
@@ -48,7 +74,7 @@ Java 21 + Spring Boot 4.0.9 + Gradle 9.4.1로 구현했다. Kafka 4.1.2 → Post
 직접 JAR를 실행한다면 실행 중 재빌드하지 않는다. 지속 실행에는 위 스크립트의 별도 JAR 복사본을 사용한다:
 
 ```bash
-java -jar build/libs/chat-pulse-poc.jar \
+java -jar server/build/libs/chat-pulse-poc.jar \
   --poc.channels=<채널ID> \
   --poc.duration=60s \
   --poc.reconnect-after=30s \
@@ -78,8 +104,10 @@ java -jar build/libs/chat-pulse-poc.jar \
 
 | 위치 | 내용 |
 |---|---|
-| `src/main/java/io/chatpulse/poc` | HTTP 어댑터, 프로토콜, 연결 감독, 통계·실행기 |
-| `src/test` | 합성 frame, 로컬 HTTP·실제 WebSocket 테스트 |
+| `server/src/main/java/io/chatpulse/poc` | HTTP 어댑터, 프로토콜, 연결 감독, 통계·실행기 |
+| `server/src/test` | 합성 frame, 로컬 HTTP·실제 WebSocket 테스트 |
+| `web/src/` | React·TypeScript 제품 웹, 서버 API 조회 |
+| `server/src/main/java/io/chatpulse/pipeline` | Kafka 발행·집계·조회 API |
 | `scripts/` | 환경 확인, 빌드·검증, 공개 채널 찾기, live 실행 |
 | [설계 문서](docs/design/README.md) | PRD·아키텍처·HLD |
 | [프로토콜과 구현 결정](docs/poc/PROTOCOL.md) | 입력 분류, timeout·재시도, 소스 근거 |

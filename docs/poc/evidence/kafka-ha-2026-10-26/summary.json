@@ -89,5 +89,15 @@
     "failures": 0,
     "errors": 0,
     "xmlSha256": "a658dc2f829f68c25489fcaca14208f17c102179e3b36b75bde688995cfdb11c"
+  },
+  "fullAnalyzerFollowup": {
+    "file": "fifth.json",
+    "sha256": "ace6c21117de34d99f49977d5a748aca60f4e0ba31cd9ccf64415b3066ddab03",
+    "codeCommit": "a68011e112276d3c6531bbdfb24a6299d9b6fe19",
+    "correct": true,
+    "cleanupComplete": true,
+    "phaseCount": 11,
+    "fix": "QualityRuntime trend DLQ now receives HA KafkaTopicPolicy",
+    "result": "Full Spring analyzer initialized four HA topics; synthetic10 acknowledged and ranking10/trend10"
   }
 }

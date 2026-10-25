@@ -21,6 +21,10 @@
   --color-transparent: transparent;
   --color-image-label: oklch(20% .018 155 / .9);
   --color-discovery-band: oklch(96% .022 145);
+  --color-surge-rising: oklch(43% .075 185);
+  --color-surge-rising-soft: oklch(95% .025 185);
+  --color-surge-high: oklch(51% .17 30);
+  --color-surge-high-soft: oklch(96% .025 30);
   --color-heart: oklch(88% .14 125);
   --color-shadow: oklch(20% .02 155 / .08);
   --font-display: 'Manrope', 'Apple SD Gothic Neo', sans-serif;

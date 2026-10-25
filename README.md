@@ -30,7 +30,7 @@ Node.js 24(`.nvmrc`), Java 21, Python 3, Docker Compose를 사용한다. 최초 
 
 방송 정보 조회를 끄려면 분석기를 `./scripts/pipeline analyzer --metadata.enabled=false`로 실행한다. 새 코드를 반영할 때는 실행 중인 분석기를 Ctrl+C로 종료한 뒤 `./scripts/pipeline analyzer`로 재시작한다. [방송 정보 API·캐시·원천 이용 범위](docs/api/BROADCAST_METADATA.md)를 참고한다.
 
-[개발 구조·Git Flow](docs/DEVELOPMENT.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
+[개발 구조·Git Flow](docs/DEVELOPMENT.md) · [구조 개선 결정](docs/REFACTORING.md) · [GitHub Projects](https://github.com/users/joejaeyoung/projects/1) · [진행 상태](docs/STATUS.md)
 
 ## 기술 목표와 추적 검사
 

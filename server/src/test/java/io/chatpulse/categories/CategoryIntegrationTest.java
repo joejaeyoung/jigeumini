@@ -151,6 +151,37 @@ class CategoryIntegrationTest {
                 source.liveStatus(),source.quality(),source.sourceBroadcastId(),source.broadcastIdentity(),source.categoryId(),source.categoryName());
         store.apply(List.of(record(shorter,1)));assertEquals(0,count("game"));assertEquals(0,count("short"));assertEquals(1,count(null));
     }
+    @Test void executableAnalyzerWiresBothInputsAndReturnsNonemptyCategoryJson() throws Exception {
+        int port;try(var socket=new java.net.ServerSocket(0)){port=socket.getLocalPort();}
+        var process=new ProcessBuilder(java.nio.file.Path.of(System.getProperty("java.home"),"bin","java").toString(),"-jar",
+                java.nio.file.Path.of("build/libs/chat-pulse-poc.jar").toAbsolutePath().toString(),"--spring.profiles.active=pipeline",
+                "--pipeline.role=analyzer","--spring.main.web-application-type=servlet","--server.address=127.0.0.1","--server.port="+port,
+                "--pipeline.bootstrap-servers="+BOOTSTRAP,"--pipeline.topic="+chat,"--pipeline.group="+group,"--observations.topic="+observations,
+                "--pipeline.run-id=test-v1","--pipeline.offset-reset=earliest","--quality.trend-offset-reset=earliest","--metadata.enabled=false",
+                "--pipeline.jdbc-url=jdbc:postgresql://localhost:15432/chatpulse?currentSchema="+schema,"--logging.level.root=OFF")
+                .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+        var factory=KafkaSupport.producerFactory(BOOTSTRAP);
+        try(var http=java.net.http.HttpClient.newHttpClient();var publisher=new ObservationPublisher(BOOTSTRAP,observations)) {
+            Instant at=Instant.now().minusSeconds(130);publisher.accept(sample(A,at,"game"));
+            new KafkaTemplate<>(factory).send(chat,A,codec.encode(event(A,at.plusSeconds(1)))).get(10,TimeUnit.SECONDS);
+            var root=java.net.URI.create("http://127.0.0.1:"+port);var json=tools.jackson.databind.json.JsonMapper.builder().build();
+            await().atMost(Duration.ofSeconds(40)).ignoreExceptions().untilAsserted(()->{
+                assertTrue(process.isAlive());
+                var response=http.send(java.net.http.HttpRequest.newBuilder(root.resolve("/api/v1/categories")).timeout(Duration.ofSeconds(5)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+                assertEquals(200,response.statusCode());assertEquals("no-store",response.headers().firstValue("Cache-Control").orElse(""));
+                var body=json.readTree(response.body());assertEquals("COLLECTED_CHANNELS_ONLY",body.path("scope").asText());
+                var category=java.util.stream.StreamSupport.stream(body.path("categories").spliterator(),false).filter(c->c.path("categoryKey").asText().equals(CategoryStore.key("game"))).findFirst().orElseThrow();
+                assertEquals(1,category.path("referenceCount").asLong());assertTrue(category.path("count").isNull());assertTrue(category.path("share").isNull());
+            });
+            var timeline=http.send(java.net.http.HttpRequest.newBuilder(root.resolve("/api/v1/categories/"+CategoryStore.key("game")+"/timeline")).timeout(Duration.ofSeconds(5)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assertEquals(200,timeline.statusCode());var body=json.readTree(timeline.body());assertEquals(60,body.path("points").size());
+            assertEquals(1,java.util.stream.StreamSupport.stream(body.path("points").spliterator(),false).mapToLong(p->p.path("referenceCount").asLong()).sum());
+            var status=http.send(java.net.http.HttpRequest.newBuilder(root.resolve("/api/operations/categories")).timeout(Duration.ofSeconds(5)).build(),java.net.http.HttpResponse.BodyHandlers.ofString());
+            assertEquals(200,status.statusCode());assertEquals(6,json.readTree(status.body()).path("assignedPartitions").asInt());
+        } finally { process.destroy();if(!process.waitFor(20,TimeUnit.SECONDS))process.destroyForcibly().waitFor();factory.destroy();
+            try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))){admin.deleteTopics(List.of(chat+".dlq",chat+".spikes")).all().get(10,TimeUnit.SECONDS);}
+        }
+    }
     private void awaitCommitted(long expected) {
         await().atMost(Duration.ofSeconds(40)).untilAsserted(()->{
             try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))) {

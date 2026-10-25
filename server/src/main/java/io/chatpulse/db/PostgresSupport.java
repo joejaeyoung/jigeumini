@@ -1,4 +1,4 @@
-package io.chatpulse.pipeline;
+package io.chatpulse.db;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -23,8 +23,12 @@ public final class PostgresSupport {
         try {
             Flyway.configure().dataSource(dataSource).load().migrate();
             return dataSource;
-        } catch (RuntimeException exception) {
-            dataSource.close();
+        } catch (RuntimeException | Error exception) {
+            try {
+                dataSource.close();
+            } catch (RuntimeException | Error closeFailure) {
+                exception.addSuppressed(closeFailure);
+            }
             throw exception;
         }
     }

@@ -1,7 +1,7 @@
 package io.chatpulse.replay;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.chatpulse.pipeline.PostgresSupport;
+import io.chatpulse.db.PostgresSupport;
 import java.nio.file.*;
 import java.time.Instant;
 import java.util.*;

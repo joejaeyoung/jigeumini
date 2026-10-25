@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.chatpulse.pipeline.*;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,9 +23,9 @@ class NotificationConfiguration {
     }
     @Bean NotificationStore notificationStore(HikariDataSource ds,PipelineProperties p){return new NotificationStore(new JdbcTemplate(ds),tx(ds),p.runId(),Clock.systemUTC());}
     @Bean(initMethod="start",destroyMethod="close")
-    SpikeOutbox spikeOutbox(HikariDataSource ds,PipelineProperties p,String notificationTopic){return new SpikeOutbox(new JdbcTemplate(ds),tx(ds),p.bootstrapServers(),notificationTopic,p.runId());}
+    SpikeOutbox spikeOutbox(HikariDataSource ds,PipelineProperties p,@Qualifier("notificationTopic") String notificationTopic){return new SpikeOutbox(new JdbcTemplate(ds),tx(ds),p.bootstrapServers(),notificationTopic,p.runId());}
     @Bean(initMethod="start",destroyMethod="close")
-    NotificationConsumer notificationConsumer(PipelineProperties p,String notificationTopic,NotificationStore store,
+    NotificationConsumer notificationConsumer(PipelineProperties p,@Qualifier("notificationTopic") String notificationTopic,NotificationStore store,
             @Value("${notifications.offset-reset:${pipeline.offset-reset:none}}") String reset){
         return new NotificationConsumer(p.bootstrapServers(),notificationTopic,p.group()+"-notifications",reset,store);
     }

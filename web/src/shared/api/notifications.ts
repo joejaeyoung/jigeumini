@@ -2,8 +2,14 @@ import { z } from 'zod';
 import { channelIdSchema, timestamp } from './fields';
 import { spikeSchema } from './quality';
 import { ApiError, read } from './transport';
+function instantNanos(value: string) {
+  // Date는 밀리초 아래를 버리므로 DB의 마이크로초를 별도로 더한다.
+  const fraction = value.match(/\.(\d+)/)?.[1] ?? '';
+  return BigInt(Date.parse(value)) * 1000000n + BigInt(fraction.padEnd(9, '0').slice(3, 9));
+}
 export const notificationSchema = z.object({ ...spikeSchema.shape, receivedAt: timestamp, delayed: z.boolean() }).superRefine((event, ctx) => {
-  if (!spikeSchema.safeParse(event).success || event.delayed !== (Date.parse(event.receivedAt) > Date.parse(event.evaluatedAt) + 600000))
+  if (!timestamp.safeParse(event.receivedAt).success) return;
+  if (!spikeSchema.safeParse(event).success || event.delayed !== (instantNanos(event.receivedAt) > instantNanos(event.evaluatedAt) + 600000000000n))
     ctx.addIssue({ code: 'custom', message: '알림 판정 계약 불일치' });
 });
 export const notificationsSchema = z.object({ asOf: timestamp, events: z.array(notificationSchema).max(100), nextCursor: z.string().nullable() }).superRefine((page, ctx) => {

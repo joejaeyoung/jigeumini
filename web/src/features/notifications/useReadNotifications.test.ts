@@ -7,6 +7,17 @@ it('알림 중복과 지연 여부의 모순을 거부한다', () => {
   expect(notificationsSchema.safeParse({ asOf: event.receivedAt, events: [event, event], nextCursor: null }).success).toBe(false);
   expect(notificationsSchema.safeParse({ asOf: event.receivedAt, events: [{ ...event, delayed: true }], nextCursor: null }).success).toBe(false);
 });
+it('10분 지연 경계의 마이크로초와 시간대 차이를 보존한다', () => {
+  const parse = (receivedAt: string, delayed: boolean) => notificationsSchema.safeParse({
+    asOf: receivedAt, events: [{ ...event, receivedAt, delayed }], nextCursor: null,
+  }).success;
+  expect(parse('2026-10-25T12:09:00Z', false)).toBe(true);
+  expect(parse('2026-10-25T12:09:00.000001Z', true)).toBe(true);
+  expect(parse('2026-10-25T21:09:00.000001+09:00', true)).toBe(true);
+  expect(parse('2026-10-25T12:08:59.999999Z', false)).toBe(true);
+  expect(parse('2026-10-25T12:09:00.000001Z', false)).toBe(false);
+  expect(parse('invalid', false)).toBe(false);
+});
 it('최근 유효한 기록만 강조하고 미래·만료·정정·지연 알림은 보류한다', () => {
   expect(canHighlight(event, now)).toBe(true);
   expect(canHighlight(event, now + 600001)).toBe(false);

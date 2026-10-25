@@ -22,4 +22,14 @@ class SpikeDetectedTest {
         assertThatThrownBy(()->new SpikeDetected(1,UUID.randomUUID(),"test-v1","a".repeat(32),Instant.now(),"chat-spike-v1",99,BigDecimal.TEN,BigDecimal.TEN,"HEALTHY_AT_DETECTION"))
                 .hasMessage("SPIKE_CONTRACT_INVALID");
     }
+    @Test void roundedTrendEvidenceRemainsDeliverable() {
+        var at=Instant.parse("2026-10-25T12:00:00Z");
+        var previous=new io.chatpulse.quality.TrendPolicy.State(at.minusSeconds(10),1,null);
+        var result=io.chatpulse.quality.TrendPolicy.evaluate(previous,at,101,150,true);
+        assertThat(result.alert()).isTrue();
+        var event=new SpikeDetected(1,UUID.randomUUID(),"test-v1","a".repeat(32),at,
+                io.chatpulse.quality.TrendPolicy.VERSION,101,result.baseline(),result.ratio(),"HEALTHY_AT_DETECTION");
+        assertThat(event.ratio()).isEqualByComparingTo("3.36666667");
+        assertThat(SpikeDetected.decode(event.channelId(),event.encode())).isEqualTo(event);
+    }
 }

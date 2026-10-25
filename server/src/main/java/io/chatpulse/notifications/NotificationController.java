@@ -30,7 +30,7 @@ public class NotificationController {
     }
     @GetMapping("/api/operations/notifications")
     public ResponseEntity<Map<String,Object>> status(){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("outbox",outbox.status(),"consumer",consumer.status()));}
-    @ExceptionHandler({DataAccessException.class,org.springframework.transaction.TransactionException.class})
+    @ExceptionHandler({DataAccessException.class,org.springframework.transaction.TransactionException.class,IllegalArgumentException.class})
     public ResponseEntity<Map<String,String>> unavailable(){return ResponseEntity.status(503).cacheControl(CacheControl.noStore()).body(Map.of("reason","QUERY_UNAVAILABLE"));}
     private ResponseStatusException invalid(){return new ResponseStatusException(HttpStatus.BAD_REQUEST,"관심 채널과 조회 범위를 확인해주세요");}
 }

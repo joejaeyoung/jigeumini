@@ -27,5 +27,7 @@ class NotificationControllerTest {
                 .andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.events").isEmpty());
         when(store.page(anyList(),any(),any(),anyInt())).thenThrow(new DataAccessResourceFailureException("SYNTHETIC_PRIVATE_SQL"));
         mvc.perform(get("/api/v1/notifications")).andExpect(status().isServiceUnavailable()).andExpect(content().json("{\"reason\":\"QUERY_UNAVAILABLE\"}"));
+        doThrow(new IllegalArgumentException("SPIKE_CONTRACT_INVALID")).when(store).page(anyList(),any(),any(),anyInt());
+        mvc.perform(get("/api/v1/notifications")).andExpect(status().isServiceUnavailable()).andExpect(content().json("{\"reason\":\"QUERY_UNAVAILABLE\"}"));
     }
 }

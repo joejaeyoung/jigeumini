@@ -236,3 +236,11 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 
 수집기 #27의 기본 발행 한도는 전체1,000·채널500·비동기 창64다. 채널별 초과/거절·ACK 미확인·종료 정책은 [발행 계약](docs/pipeline/PUBLISHER.md)을 따른다.
+
+## Kafka HA 로컬 장애 리허설
+
+```bash
+./scripts/kafka-ha work/ha-result.json
+```
+
+[HA 계약](docs/pipeline/KAFKA_HA.md)을 따른다. 합성 입력과 UUID별6노드 Compose project·소유 데이터 볼륨을 만들고 종료 뒤 정리한다. Docker 가용메모리6GiB 이상, 기존 사용량+실험 상한2.625GiB가90% 이내, 여유디스크2GiB가 필요하다. 기존 chat-pulse/다른 프로젝트를 정지하지 않는다. 외부 배포·실제 AZ 장애 검증은 아니다.

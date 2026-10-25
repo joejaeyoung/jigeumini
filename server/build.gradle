@@ -84,3 +84,12 @@ tasks.register('loadExperiment', JavaExec) {
     args providers.gradleProperty('experimentProfile').getOrElse('smoke'), providers.gradleProperty('experimentOutput').getOrElse('work/experiment-smoke.json')
     if (providers.gradleProperty('experimentBase').isPresent()) args providers.gradleProperty('experimentBase').get()
 }
+
+tasks.register('haExperiment', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.pipeline.KafkaHaExperiment'
+    workingDir = rootProject.projectDir
+    maxHeapSize = '256m'
+    if (project.hasProperty('haOutput')) args(project.property('haOutput'))
+}

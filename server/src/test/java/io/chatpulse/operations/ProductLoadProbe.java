@@ -118,6 +118,8 @@ public final class ProductLoadProbe {
                 }
                 result.put("drainSeconds",(System.nanoTime()-drainStart)/1e9);check(caughtUp,"DRAIN_TIMEOUT");
                 phase="VERIFY";apiTraffic.close();visibility.close();stopSampler(scheduler);
+                // 입력과 drain이 끝난 뒤 연결 버퍼를 해제해 최종 기대/실제 대조의 메모리와 겹치지 않게 한다.
+                if(sockets!=null)sockets.close();
                 result.put("apiTraffic",apiTraffic.snapshot());result.put("commitVisibility",visibility.snapshot());
                 if(samplerFailure.get()!=null){result.put("samplerFailure",samplerFailure.get());throw new IllegalStateException("SAMPLER_FAILED");}
                 result.put("finalSample",measurements.sample(phase,elapsed()));

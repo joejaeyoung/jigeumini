@@ -476,3 +476,21 @@ F03/F04/F05/F06/F07/F08/F10/F13/F14/F15/F16 → T02/T04/T07/T08/T10/T11/T12/T14/
 리팩토링 점검은 이슈별 검증 문서에 남겼다. #60은 DB 분류와 worker 수명 책임을 분리하고 시험 장벽을 test DataSource에 한정했다. #45는 소유 cluster/읽기 전용 disk probe/판정 경계, #46은 공통 소유 자원·snapshot·새 group 정렬을 재사용했다. 최종 비차단 문서 검토에서 PITR 경로 감사를 quality/categories/reports/notifications/observations/replay와 wrapper까지 확장하고, 실제 main source 변경5개 및 시험 JavaExec 차이를 명시했다. release의 lock 호출·비밀 파일0444/디렉터리0700·유휴2초의 정상 일시중단 영향·미배정 실패 코드 해석도 확인했다. 제품 코드와 시험은 마지막 승인 HEAD 이후 변경하지 않았다.
 
 #47 공식 앱/동의/안전한 주입 경로, #48 계정/리전/AZ/예산, #49 배포 대상/도메인/운영 목표는 준비되지 않아 실제 운영 검증 이슈를 열어 둔다. 로컬 선행 #42/#43/#45/#46은 완료됐다. PoC/API/web와 개발 Kafka/PostgreSQL은 종료 상태이며 다른 worktree·다른 서비스는 변경하지 않았다.
+
+## 2026-10-26 공개 방송 목록 대안 조사
+
+F12/F13 → T13/T14/T08/T11. 사용자 요청에 따라 공식 API 등록 외의 발견 경로를 조사했다. 소유 저장소의 clean 상태를 확인하고 fetch한 origin/develop `128f3e6`에서 `technicaltest/public-catalog-research`를 만들었다. 별도 develop worktree는 변경하지 않았다.
+
+현재 공개 웹 JavaScript와 고정 커밋의 클라이언트를 대조해 `/service/v1/lives` cursor, 카테고리별 목록, 채널별 상태 polling과 팔로워 합계 경로를 확인했다. 기존 `scripts/discover`도 공개 목록의 첫 10개만 읽고 있었다. [조사 문서](research/CHZZK_PUBLIC_CATALOG.md)에 근거 URL·소스 hash·추천 구조를 남겼다.
+
+15:49:46~15:50:06 KST에 앱 키·쿠키 없이 목록 50개씩 20페이지와 채널 상세 1회를 호출했다. 목록 1,000행·고유 방송 995개·페이지 간 중복 5행, 상세의 `followerCount` 정수를 확인했다. 20페이지 예산에서 중단했고 다음 cursor가 남아 전체 순회가 아니다. 중복 원인은 확정하지 않았다. 원천 응답·식별자·이름은 메모리에서만 처리하고 [수치·필드·hash](poc/evidence/public-catalog-research-2026-10-26.json)만 공유한다. 초기 Python 로컬 CA 오류는 서비스 거절과 구분했고 curl 기본 TLS 검증으로 성공했다.
+
+공식 앱이 모든 원천 조사의 선행이라는 해석을 바로잡고 #47의 범위를 공식 인증 경로로 한정했다. 제품 코드·수집 한도·인프라는 변경하지 않았다. 리팩토링 검토 결과 기존 `BroadcastCatalog`와 선정·임대 경계를 재사용하는 어댑터가 적합하며, 조사만을 위해 공통 계층을 추가하지 않았다. 문서 70개 링크·기술 목표 16개/기능 16개 매핑·diff 공백 검사와 정제 근거의 계수·종료 조건·공유 필드 검사가 통과했다. 공유 필드 검사에서 cursor 형식 설명의 `liveId: int`를 실제 ID 값으로 오인한 첫 검사식을 경로·형식으로 구분해 재검사했다. Java·Kafka/DB·웹 회귀는 문서만 변경한 이번 조사에서 실행하지 않았다.
+
+## 2026-10-26 로컬 미리보기·공개 수집 재기동
+
+F01/F03 → T02/T08/T13. 사용자가 실행 확인을 요청하여 기존 개발 volume을 보존한 채 Kafka/PostgreSQL·분석기·Node24.20.0 웹을 띄웠다. 현재 코드의 JAR 빌드는 UP-TO-DATE 성공이며 분석기와 수집기 실행 복사본의 SHA-256이 같다. 기존 Kafka group은 ranking/trend/notification 3개였으므로 관측/category/report 3개의 최초 시작만 earliest로 지정했다. 원천 목록의 첫 20개 응답에서 adult=false인 3채널을 메모리로 골라 `SPRING_PROFILES_ACTIVE=pipeline PIPELINE_ROLE=collector ./scripts/poc <3 IDs> 30m 0s`로 시작했다.
+
+18:28:53 KST에 완료 1분 순위 3채널 HEALTHY, DB 처리 이력/집계 각각 7,100→9,304, 소비 실패 0을 확인했다. 브라우저 7경로와 320px 알림 화면의 JS/API 오류·alert·가로 넘침은 0이다. 실제 방송명·제목·이미지는 저장할 스크린샷에서 가리고 원천 목록은 저장하지 않았다. [정제 근거](poc/evidence/runtime-preview-2026-10-26.json)는 중간 관측으로 표시하며 진행 중 수집을 완료 PASS로 기록하지 않는다. 웹·서버·인프라를 사용자 확인용으로 유지하고 수집기만 기존 30분 상한에서 자동 종료한다.
+
+도중 최대 채널 수 질문에는 기존 #43의 합성 20채널/50건/s 30분·200건/s 60초와 실연결 3채널을 구분해 답했다. 이 시험은 collector를 실행하지 않았으므로 실제 채널 최대 수용량으로 환산하지 않는다. 이번 기동에서 새 부하 실험이나 제품 코드 변경은 하지 않았다.

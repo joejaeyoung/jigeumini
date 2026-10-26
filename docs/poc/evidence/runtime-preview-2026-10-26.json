@@ -1,0 +1,259 @@
+{
+  "scope": "로컬 제품 미리보기 기동·공개 3채널 실수신 중간 관측. 최대 부하 시험이나 30분 완료 판정이 아님.",
+  "features": [
+    "F01",
+    "F03"
+  ],
+  "technicalGoals": [
+    "T02",
+    "T08",
+    "T13"
+  ],
+  "baseCommit": "128f3e6065da681c9c38f0b54ae6f9112429b498",
+  "runtimeJarSha256": {
+    "analyzer": "0baebd79d1b82995b7e3a6fc1bc63605698e637e02223619f3fa4de8691469ff",
+    "collector": "0baebd79d1b82995b7e3a6fc1bc63605698e637e02223619f3fa4de8691469ff"
+  },
+  "commands": [
+    "./scripts/infra up",
+    "./scripts/pipeline analyzer --observations.offset-reset=earliest --categories.offset-reset=earliest --reports.offset-reset=earliest",
+    "Node 24.20.0 PATH에서 ./scripts/web dev",
+    "SPRING_PROFILES_ACTIVE=pipeline PIPELINE_ROLE=collector ./scripts/poc <3 public channel IDs> 30m 0s",
+    "Node 24.20.0으로 work/runtime-preview-2026-10-26/browser-smoke.mjs 실행"
+  ],
+  "source": {
+    "catalogPath": "/service/v1/lives?size=20",
+    "authentication": "앱 키·쿠키 없음",
+    "selection": "첫 페이지의 adult=false인 서로 다른 공개 채널 3개",
+    "requestedDurationSeconds": 1800,
+    "forcedReconnectAfterSeconds": 0,
+    "collectorStartedAt": "2026-10-26T09:26:55.735130+00:00"
+  },
+  "before": {
+    "asOf": "2026-10-26T09:26:18.958993Z",
+    "totals": {
+      "runId": "live-v1",
+      "projection": "ranking",
+      "processedEvents": 7100,
+      "bucketTotal": 7100
+    }
+  },
+  "liveSnapshot": {
+    "observedAt": "2026-10-26T09:28:14.794477+00:00",
+    "connectedChannelCount": 3,
+    "latestProgress": [
+      {
+        "chatCount": 451,
+        "connections": 1,
+        "state": "CONNECTED"
+      },
+      {
+        "chatCount": 806,
+        "connections": 1,
+        "state": "CONNECTED"
+      },
+      {
+        "chatCount": 46,
+        "connections": 1,
+        "state": "CONNECTED"
+      }
+    ],
+    "progressChatCount": 1303,
+    "status": {
+      "httpStatus": 200,
+      "asOf": "2026-10-26T09:28:14.806996Z",
+      "totals": {
+        "runId": "live-v1",
+        "projection": "ranking",
+        "processedEvents": 8590,
+        "bucketTotal": 8590
+      },
+      "consumer": {
+        "running": true,
+        "failedAttempts": 0,
+        "successfulBatches": 220,
+        "lastErrorCode": "NONE",
+        "assignedPartitions": 3,
+        "state": "RUNNING"
+      }
+    },
+    "collection": {
+      "httpStatus": 200,
+      "asOf": "2026-10-26T09:28:14.819175Z",
+      "channelsByStatus": {
+        "INCOMPLETE": 2,
+        "WARMING_UP": 3
+      },
+      "status": "WARMING_UP"
+    },
+    "rankings": {
+      "httpStatus": 200,
+      "status": "WARMING_UP",
+      "evaluatedAt": "2026-10-26T09:28:00Z",
+      "entryCount": 0,
+      "healthyCount": 0,
+      "excludedCount": 5,
+      "entries": []
+    },
+    "sinceBefore": {
+      "processedEvents": 1490,
+      "bucketTotal": 1490
+    },
+    "collectorFinished": false
+  },
+  "readySnapshot": {
+    "observedAt": "2026-10-26T09:28:53.073248+00:00",
+    "status": {
+      "httpStatus": 200,
+      "totals": {
+        "runId": "live-v1",
+        "projection": "ranking",
+        "processedEvents": 9304,
+        "bucketTotal": 9304
+      },
+      "consumer": {
+        "running": true,
+        "failedAttempts": 0,
+        "successfulBatches": 346,
+        "lastErrorCode": "NONE",
+        "assignedPartitions": 3,
+        "state": "RUNNING"
+      }
+    },
+    "rankings": {
+      "httpStatus": 200,
+      "status": "READY",
+      "evaluatedAt": "2026-10-26T09:28:40Z",
+      "entries": [
+        {
+          "rank": 1,
+          "count": 814,
+          "coverage": 1.0,
+          "status": "HEALTHY"
+        },
+        {
+          "rank": 2,
+          "count": 495,
+          "coverage": 1.0,
+          "status": "HEALTHY"
+        },
+        {
+          "rank": 3,
+          "count": 53,
+          "coverage": 1.0,
+          "status": "HEALTHY"
+        }
+      ],
+      "excludedCount": 2
+    },
+    "collection": {
+      "httpStatus": 200,
+      "asOf": "2026-10-26T09:28:53.107254Z",
+      "channelsByStatus": {
+        "HEALTHY": 3,
+        "INCOMPLETE": 2
+      },
+      "status": "READY"
+    },
+    "sinceBefore": {
+      "processedEvents": 2204,
+      "bucketTotal": 2204
+    }
+  },
+  "browser": {
+    "executedAt": "2026-10-26T09:27:40.227Z",
+    "baseUrl": "http://127.0.0.1:18082",
+    "routes": [
+      {
+        "route": "/",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 6,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/explore",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 6,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/surges",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/categories",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/saved",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/notifications",
+        "httpStatus": 200,
+        "heading": true,
+        "cards": 0,
+        "alerts": 0,
+        "loading": 0,
+        "overflow": false
+      },
+      {
+        "route": "/channels/{id}",
+        "httpStatus": 200,
+        "heading": true,
+        "alerts": 0,
+        "overflow": false
+      }
+    ],
+    "pageErrors": 0,
+    "apiErrors": [],
+    "consoleErrors": 0,
+    "mobile": {
+      "width": 320,
+      "route": "/notifications",
+      "alerts": 0,
+      "overflow": false
+    }
+  },
+  "otherServices": {
+    "unchangedRunningContainerCount": 6,
+    "idAndNameCompared": true
+  },
+  "leftRunning": [
+    "collector (최대 30분 후 자동 종료)",
+    "analyzer:18080",
+    "web:18082",
+    "개발 Kafka:19092",
+    "개발 PostgreSQL:15432"
+  ],
+  "limits": [
+    "수집 진행 중이므로 최종 PoC verdict·전체 실행 accepted/ACK/DB 대조는 아직 없음",
+    "progress 로그와 DB 조회는 서로 다른 시각의 표본이므로 두 수치를 동시에 측정한 것으로 비교하지 않음",
+    "DB의 processedEvents와 bucketTotal 증가 2204가 같으며 원천 채팅 전체 수신율은 측정하지 않음",
+    "3개의 HEALTHY는 해당 완료 1분 창의 수집 품질 판정. 과거 비활성 채널 2개는 INCOMPLETE로 남음",
+    "홈 기본 완료 5분 집계는 별도 관측 시간이 필요. 이번 READY 근거는 window=60",
+    "실제 급상승·알림 발생·30분 완료·강제 재접속·최대 동시 채널/처리 용량 시험은 이번 실행에서 검증하지 않음",
+    "공개 카탈로그의 제품 어댑터는 미구현이며 현재 PoC 3채널 제한 유지"
+  ]
+}

@@ -12,7 +12,7 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.offsets=pathlib.Path(self.directory.name)/'offsets.jsonl'
         self.plan={'name':'capacity','channels':20,'stages':[{'name':'steady','seconds':60,'eventsPerSecond':100,'hot':False}],
                    'faultAtSeconds':-1,'faultSeconds':0,'sourceMode':'DIRECT','apiRequestsPerSecond':10,'apiMaxInFlight':32,'resourceProfile':'BASELINE'}
-        self.load={'correct':True,'maximumPacingDelayMillis':3,'commitVisibility':{'phases':{'steady':{'sampled':300,'latency':{'p95UpperMillis':300},'inputPartitions':[0,1,2],'sampledByPartition':{'0':100,'1':100,'2':100},'latencyByPartition':{'0':{'p95UpperMillis':300},'1':{'p95UpperMillis':300},'2':{'p95UpperMillis':300}}}}},
+        self.load={'correct':True,'maximumPacingDelayMillis':3,'commitVisibility':{'phases':{'steady':{'sampled':300,'latency':{'samples':300,'p95UpperMillis':300},'inputPartitions':[0,1,2],'sampledByPartition':{'0':100,'1':100,'2':100},'latencyByPartition':{'0':{'p95UpperMillis':300},'1':{'p95UpperMillis':300},'2':{'p95UpperMillis':300}}}}},
                    'apiTraffic':{'phases':{'steady':{'offered':600,'issued':600,'successful':600,'failed':0,'notIssuedConcurrentLimit':0,
                                                    'scheduleDelay':{'p95UpperMillis':5},'latency':{'p95UpperMillis':50}}}}}
         self.rows=[{'elapsedSeconds':s,'partitions':[{'group':f'g{p//4}','topic':'t','partition':p%4,'lag':3,'end':10000+s*25,'committed':9997+s*25} for p in range(24)]} for s in range(60)]
@@ -33,6 +33,26 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.assertEqual('GENERATOR_LIMITED',self.analyze()['classification'])
         self.load['maximumPacingDelayMillis']=3;self.rows=self.rows[:20]
         self.assertEqual('MEASUREMENT_INCOMPLETE',self.analyze()['classification'])
+    def test_visibility_quantiles_never_hide_unobserved_samples(self):
+        visibility=self.load['commitVisibility']['phases']['steady']
+        complete=self.analyze()['stages'][0]['visibility']
+        self.assertEqual(300,complete['allSelectedP95UpperMillis'])
+        for missing in (1,16,300):
+            with self.subTest(missing=missing):
+                visibility['latency']['samples']=300-missing;visibility['notVisibleWithin10Seconds']=missing
+                original=copy.deepcopy(visibility);result=self.analyze();view=result['stages'][0]['visibility']
+                self.assertEqual('EXCEEDS_SLO',result['classification'])
+                self.assertEqual(missing,view['sampleCoverage']['unobserved'])
+                self.assertAlmostEqual(missing/300,view['sampleCoverage']['unobservedRatio'])
+                self.assertIsNone(view['allSelectedP95UpperMillis'])
+                self.assertEqual(300,view['latency']['p95UpperMillis'])
+                self.assertEqual(original,visibility)
+        visibility.pop('notVisibleWithin10Seconds');visibility['latency']['samples']=299
+        self.assertEqual('EXCEEDS_SLO',self.analyze()['classification'])
+        for count in (None,True,-1,301):
+            with self.subTest(invalid_visible=count):
+                visibility['latency']['samples']=count
+                self.assertIn('steady:VISIBILITY_SAMPLE_ACCOUNTING',self.analyze()['measurementProblems'])
     def test_clock_step_in_either_direction_invalidates_an_otherwise_successful_run(self):
         original=copy.deepcopy(self.load['samples'])
         for step in (-2045,2044):

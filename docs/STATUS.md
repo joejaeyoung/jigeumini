@@ -10,7 +10,7 @@
 
 정확한 채널 수 경계는 #64에서 이관한450/600 정상 시계 반복·지속 및100채널500/s/API10 복합 후보를 재검증한다. 조사·실험·개선 결과는 이 절과 검증 문서에 계속 연결한다.
 
-[진단 조사](research/PROJECTION_PERFORMANCE.md)에 가설·공식 자료·계측 계약을 기록했다. probe의 양방향 시계 이동과 누락을 용량 통과에서 제외하고, 합성 원천도 단조 경과 대비 잔차를 기록한다. 전체 COUNT만 끄는 대조와 COUNT/du를 끄는 대조, SQL·JVM 숫자 진단을 추가했다. 기준선 3회는 정상 시계·고유 180,000건 대조를 마쳤으나 카테고리 적체로 SLO를 넘었다. COUNT 생략만으로 해결되지 않았다. [원본 4회 정제](poc/evidence/projection-performance-2026-10-27/baseline.json)·[시계 감사](poc/evidence/projection-performance-2026-10-27/clock-audit.json). 카테고리 진행 저장을 partition별로 묶고, 리포트 새 채팅의 직접 귀속과 관측에 따른 기존 기록 보정을 분리했다. 카테고리·리포트 실제 통합 20개 통과; 전체 회귀와 같은 부하 재측정은 진행 중이다.
+[진단 조사](research/PROJECTION_PERFORMANCE.md)에 가설·공식 자료·계측 계약을 기록했다. probe의 양방향 시계 이동과 누락을 용량 통과에서 제외하고, 합성 원천도 단조 경과 대비 잔차를 기록한다. 전체 COUNT만 끄는 대조와 COUNT/du를 끄는 대조, SQL·JVM 숫자 진단을 추가했다. 기준선 3회는 정상 시계·고유 180,000건 대조를 마쳤으나 카테고리 적체로 SLO를 넘었다. COUNT 생략만으로 해결되지 않았다. [원본 6회 정제](poc/evidence/projection-performance-2026-10-27/baseline.json)·[시계 감사](poc/evidence/projection-performance-2026-10-27/clock-audit.json). 카테고리 진행 저장을 partition별로 묶고, 리포트 새 채팅의 직접 귀속과 관측에 따른 기존 기록 보정을 분리했다. 카테고리·리포트 실제 통합 20개에 이어 전체 138개·단위 176개가 통과했다. COUNT/du를 모두 끈 대조에서도 적체가 남았고, 편향 2,000/s는 이번에 통과했다. 미관측 비율·조건부 p95와 전체 p95를 구분하는 보완 후 하네스 38개 통과. 수정 버전 부하 재측정은 진행 중이다.
 
 ## 수집 연결 메모리·종료 자원 #64
 

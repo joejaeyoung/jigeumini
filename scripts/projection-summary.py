@@ -47,9 +47,13 @@ def summarize(directory):
 
 def main(root,output):
     runs=[]
+    exclusions=root/'aborted-overlap.json'
+    interrupted=json.loads(exclusions.read_text()) if exclusions.exists() else None
+    excluded={run['name'] for run in interrupted['runs']} if interrupted else set()
     for directory in sorted(root.iterdir()):
         path=directory/'result.json'
         if not directory.is_dir() or not path.is_file():continue
+        if directory.name in excluded:continue
         if json.loads(path.read_text()).get('finishedAt'):runs.append(summarize(directory))
     helpers=['scripts/projection-summary.py','scripts/capacity-summary.py','scripts/product_load_capacity.py']
     output.parent.mkdir(parents=True,exist_ok=True)
@@ -57,6 +61,7 @@ def main(root,output):
         'scope':'LOCAL_RF1_FRESH_DB_SYNTHETIC_PROJECTION_COST; NOT_OPERATIONAL_MAXIMUM',
         'curatorFiles':{name:digest(ROOT/name) for name in helpers},
         'analysisProvenance':'CURRENT_ANALYZER_RECALCULATED; ORIGINAL_RECORDED_CLASSIFICATION_RETAINED',
+        'interruptedExperiments':interrupted,'interruptedExperimentsArtifact':digest(exclusions) if interrupted else None,
         'runs':runs,'limitations':['SQL server execution excludes JDBC/pool time; counts include probe and final oracle.',
             'JMX and SQL activity are instant samples, not durations or causal proof.',
             'Host resource timestamps are not atomic with VM probe samples.',

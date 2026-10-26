@@ -21,6 +21,17 @@ def clock_reference(load):
             'maximumAbsoluteResidualMillis':round(maximum,3) if maximum is not None else None,
             'valid':len(residuals)>=2 and missing==0 and maximum<=LIMITS['maximumClockResidualMillis']}
 
+def visibility_summary(visibility):
+    """관측 성공 표본의 quantile과 전체 선택 표본의 미관측을 구분한다. 원본은 바꾸지 않는다."""
+    selected=visibility.get('sampled');visible=visibility.get('latency',{}).get('samples')
+    valid=type(selected) is int and type(visible) is int and 0<=visible<=selected
+    missing=selected-visible if valid else None
+    return {**visibility,'latencyPopulation':'OBSERVED_VISIBLE_SAMPLES_ONLY_INCLUDING_PER_PARTITION',
+            'sampleCoverage':{'valid':valid,'selected':selected,'observedVisible':visible,'unobserved':missing,
+                              'unobservedRatio':missing/selected if valid and selected else None},
+            'allSelectedP95UpperMillis':visibility.get('latency',{}).get('p95UpperMillis') if valid and missing==0 else None,
+            'allSelectedP95Rule':'UNKNOWN_WHEN_ANY_SELECTED_SAMPLE_IS_UNOBSERVED'}
+
 def lag_summary(samples,stage,begin):
     end=begin+stage['seconds'];series={};times=[]
     for sample in samples:
@@ -87,7 +98,8 @@ def analyze_capacity(plan,load,offset_file,source=None):
         name=stage['name'];row={'name':name,'eventsPerSecond':stage['eventsPerSecond'],'hot':stage['hot'],'seconds':stage['seconds'],'warmup':name=='warmup'}
         stage_invalid=[];stage_failures=[]
         visibility=load.get('commitVisibility',{}).get('phases',{}).get(name,{})
-        row['visibility']=visibility;p95=visibility.get('latency',{}).get('p95UpperMillis')
+        row['visibility']=visibility_summary(visibility);p95=row['visibility']['allSelectedP95UpperMillis']
+        if not row['visibility']['sampleCoverage']['valid']:stage_invalid.append('VISIBILITY_SAMPLE_ACCOUNTING')
         if visibility.get('sampled',0)<stage['seconds']:stage_invalid.append('VISIBILITY_SAMPLES')
         if visibility.get('queryErrors',0) or visibility.get('notQueued',0):stage_invalid.append('VISIBILITY_OBSERVATION_ERRORS')
         if visibility.get('notVisibleWithin10Seconds',0) or p95 is None or p95>LIMITS['visibilityP95Millis']:stage_failures.append('VISIBILITY_SLO')

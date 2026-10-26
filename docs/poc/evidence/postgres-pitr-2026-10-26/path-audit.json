@@ -1,0 +1,39 @@
+{
+  "head": "4e16f50a172afcf975d36f88e5629df4f997c62e",
+  "experimentRevision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+  "unchangedPaths": [
+    "scripts/postgres-pitr",
+    "scripts/postgres-pitr.py",
+    "scripts/deploy-rehearsal",
+    "scripts/deploy-rehearsal.py",
+    "scripts/deploy-images",
+    "scripts/deploy-images.py",
+    "deploy",
+    "server/src/test/java/io/chatpulse/operations/DeploymentProbe.java",
+    "server/src/main/java/io/chatpulse/poc/PocApplication.java",
+    "server/src/main/java/io/chatpulse/operations",
+    "server/src/main/java/io/chatpulse/pipeline",
+    "server/src/main/java/io/chatpulse/db",
+    "server/src/main/resources",
+    "web",
+    "build.gradle",
+    "settings.gradle",
+    "server/src/main/java/io/chatpulse/quality",
+    "server/src/main/java/io/chatpulse/categories",
+    "server/src/main/java/io/chatpulse/reports",
+    "server/src/main/java/io/chatpulse/notifications",
+    "server/src/main/java/io/chatpulse/observations",
+    "server/src/main/java/io/chatpulse/replay",
+    "gradle"
+  ],
+  "fleetCodeIdenticalTo": "14816f892d2aca61ae3398675718c2ea1ad48338",
+  "scope": "나열한 PITR/analyzer/recovery 경로의 diff0이다. fleet와 poc 변경 파일은 명시하며 server/build.gradle에는 Kafka 디스크 시험 JavaExec만 추가됐다. JAR/이미지 byte 동일성이나 새 이미지의 PITR 재실행을 뜻하지 않는다.",
+  "changedMainSources": [
+    "server/src/main/java/io/chatpulse/fleet/CollectorLeases.java",
+    "server/src/main/java/io/chatpulse/fleet/CollectorWorker.java",
+    "server/src/main/java/io/chatpulse/poc/ChannelProbe.java",
+    "server/src/main/java/io/chatpulse/poc/ChatConnection.java",
+    "server/src/main/java/io/chatpulse/poc/ProbeStats.java"
+  ],
+  "serverBuildGradleDiff": "diff --git a/server/build.gradle b/server/build.gradle\nindex 1590471..0469b63 100644\n--- a/server/build.gradle\n+++ b/server/build.gradle\n@@ -102,3 +102,14 @@ tasks.register('ackExperiment', JavaExec) {\n     maxHeapSize = '256m'\n     if (project.hasProperty('ackOutput')) args(project.property('ackOutput'))\n }\n+\n+tasks.register('diskLossExperiment', JavaExec) {\n+    description = '소유 Kafka replica 디스크 교체·마지막 복사본 손실 검증'\n+    group = 'verification'\n+    dependsOn testClasses\n+    classpath = sourceSets.test.runtimeClasspath\n+    mainClass = 'io.chatpulse.pipeline.KafkaDiskLossExperiment'\n+    workingDir = rootProject.projectDir\n+    maxHeapSize = '256m'\n+    if (project.hasProperty('diskScenario') && project.hasProperty('diskOutput')) args(project.property('diskScenario'), project.property('diskOutput'))\n+}\n"
+}

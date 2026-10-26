@@ -59,3 +59,5 @@ CLI는 결과 경로를 배타 생성하므로 준비 실패 때 빈 파일이 �
 #60 / F13 → T02/T08/T11/T14. 임대 apply/tick/release는 transaction에만 유휴2초·잠금1초·SQL3초 제한을 적용한다. 클라이언트 transaction4초와 별개로, 다음 요청이 오지 않는 유휴 transaction은 PostgreSQL이 종료해 plan 잠금을 해제한다. 서버 전체나 연결 풀의 기본 설정을 변경하지 않는다.
 
 미배정 worker의 tick이 SQLSTATE55P03으로 실패하고 rollback이 끝났을 때만 기존1초 간격으로 최대5회 연속 재시도한다. 정상 tick 뒤 연속 횟수를 초기화하며6번째 충돌, 보유 임대, 종료 중, 연결 오류·SQL 취소·commit/rollback 실패는 종료한다. 결과의 `leaseContentionRetries`는 해당 프로세스가 허용한 누적 재시도 수다. 종료를 결정한6번째 충돌은 이 수에 포함하지 않는다. 실행 기간과 권한 기한은 그대로 적용한다. [원인 조사](../research/FLEET_DB_LOCK.md)를 참고한다.
+
+DB 문장 사이에서 JVM 진행이2초를 넘게 멈추면 네트워크가 정상이어도 서버가 해당 세션을 종료할 수 있고 worker는 실패 종료한다. 이 유휴 제한이 수집 중단 빈도에 미칠 운영 영향은 실제 호스트 검증 범위다. 영구 충돌 종료의 failureCode는 현재 COLLECTION_LEASE_LOST이며, 원인을 더 세분한 코드/최종 SQLSTATE는 결과에 보관하지 않는다. 미배정 여부와 leaseContentionRetries를 함께 읽는다.

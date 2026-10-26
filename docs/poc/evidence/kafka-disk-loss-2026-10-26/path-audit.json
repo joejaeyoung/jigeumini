@@ -1,0 +1,18 @@
+{
+  "head": "ac934e31e84d1cf8b623c1bc391c0901414f8ae0",
+  "experimentRevision": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+  "unchangedPaths": [
+    "scripts/kafka-disk-loss",
+    "server/src/test/java/io/chatpulse/pipeline/KafkaDiskLossExperiment.java",
+    "server/src/test/java/io/chatpulse/pipeline/KafkaDiskProbe.java",
+    "server/src/test/java/io/chatpulse/pipeline/LocalKafkaCluster.java",
+    "server/src/main/java/io/chatpulse/replay",
+    "server/src/main/java/io/chatpulse/pipeline",
+    "server/build.gradle",
+    "infra/kafka-ha.compose.yaml",
+    "server/src/main/java/io/chatpulse/db",
+    "server/src/main/resources"
+  ],
+  "fleetCodeIdenticalTo": "14816f892d2aca61ae3398675718c2ea1ad48338",
+  "scope": "실험3종·실행기·replay/pipeline뿐 아니라 Gradle·HA Compose·DB 공통 코드·migration/resources도 실제 실행 revision과 같다. 현재 JAR 전체와 과거 이미지의 byte 동일성 주장이 아니다."
+}

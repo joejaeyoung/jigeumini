@@ -1,0 +1,12 @@
+{
+  "run": 40263229427,
+  "head": "31e07732d1bd0dc2c5ca70d54cafa4c1c5b225af",
+  "failedCase": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver()",
+  "failure": "org.opentest4j.AssertionFailedError: expected: <2> but was: <1>",
+  "backendSampleCount": 80,
+  "idleTransactionSamples": 80,
+  "blockedSamples": 17,
+  "observationSha256": "052599cbb3b15b2001113bd2c19cbc27358290a1398cee4cbcc9255d263bf8b6",
+  "xmlSha256": "615fc4875e2078d2d11136ff01159226f7b0dd6c4f897b5b7586d46760618a98",
+  "scope": "실패 시험과 실제 DB 상태 표본을 확인했다. 당시 최종 SQLSTATE 미기록으로 최종 예외의 동일성은 확정하지 않는다."
+}

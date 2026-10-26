@@ -23,3 +23,12 @@ Spring7.0.10의 [SQLStateSQLExceptionTranslator](https://raw.githubusercontent.c
 rollback을 완료한 임대 tick의55P03만 도메인 잠금 충돌로 전달한다. 아직 임대를 갖지 않은 worker는 기존1초 scheduler 간격으로 최대5회 연속 재시도하고6번째 충돌에서 종료한다. 정상 tick 뒤 연속 횟수를 초기화한다. 기존 실행 기한도 적용하며 누적 재시도 수만 결과에 남긴다. 보유 임대가 있거나 종료 중이면 재시도하지 않는다. 연결 실패·SQL 취소·불확정 commit·rollback 실패도 기존 실패 종료 경계를 유지한다.
 
 실제 실행 revision·실패/성공·남은 범위는 검증 기록에 추가하고 현재 진행은 [STATUS](../STATUS.md)에서 관리한다.
+
+
+## Spring 기본 번역기와 확장 감사
+
+최종 비차단 리뷰에서 번역기 선택을 다시 확인했다. Spring7.0.10 [JdbcAccessor](https://raw.githubusercontent.com/spring-projects/spring-framework/v7.0.10/spring-jdbc/src/main/java/org/springframework/jdbc/support/JdbcAccessor.java)는 classpath root에 사용자 `sql-error-codes.xml`이 있으면 SQLErrorCodeSQLExceptionTranslator, 없으면 SQLExceptionSubclassTranslator를 기본으로 선택한다. [내장 XML의 PostgreSQL 항목](https://raw.githubusercontent.com/spring-projects/spring-framework/v7.0.10/spring-jdbc/src/main/resources/org/springframework/jdbc/support/sql-error-codes.xml)에는55P03의 cannotAcquireLockCodes 매핑이 있다. 따라서 모든 Spring 번역기가55P03을 매핑하지 않는다는 뜻이 아니다.
+
+4e16f50의 실제 JAR와 내장 의존 JAR에서 root override가0개임을 [검사](../poc/evidence/fleet-db-lock-2026-10-26/jdbc-translator-audit.json)했다. 이 코드가 번역기를 명시적으로 바꾸지 않으므로 기본 subclass/SQLState fallback 경로라는 해석이다. 분류는 Spring 예외 클래스와 무관하게 transaction 종료 뒤 SQLSTATE로 한다.
+
+#45의 이전 push40263229427 아티팩트도 추가 확인했다. 같은 시험의 epoch2 기대/실제1, 유휴 transaction80개·잠금 대기17개 표본을 [별도 근거](../poc/evidence/fleet-db-lock-2026-10-26/second-ci-failure.json)에 보존했다. 동일한 DB 상태·인계 실패 패턴이며 최종 SQLSTATE의 동일성은 미확정이다.

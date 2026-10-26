@@ -559,3 +559,29 @@ hot 물리 24,300건을 8,047/8,117/8,136으로 실제 분산했고 배정 불�
 초기 구현 상태(cda9a19와 같은 source)의 로컬 실제 Kafka/DB 136개가 통과했다. 소비자별 초기 할당 검사를 보완한 상태(96d2cf4와 같은 source)에서 단위 167·하네스 34·JAR 빌드와 실제 LoadExperiment 4개를 통과했다. 실행당 HEAD/작업 트리 검증 범위는 근거 파일에서 구분한다. 리팩토링은 ExperimentRouting에 배정/분포 검사를 모으고 기존 생성·집계·replay·정리 수명을 재사용하는 범위다. 제품 main/web/deploy source는 변경하지 않았다. 최종 HEAD의 Claude 승인·push/PR CI·develop 병합은 PR 댓글로 연결한다.
 
 2026-10-27 KST 최종 Spec 검토는 지적 0건이다. Standards의 비차단 지적 1건을 반영해 공통 보고서의 C4 유휴 할당 문구를 실제 consumer 할당 표본을 확인하는 일반 안내로 고쳤다. 이번 C1/C3 실행에 C4 검증을 포함한 것으로 읽히지 않게 했고 보고서를 정본 정제기로 다시 생성했다. 원본 수치와 summary hash는 동일하다.
+
+## 2026-10-27 · 수집 연결 메모리 재현 #64
+
+사용자의 남은 이슈 처리 요청을 이어 #67을 마무리했다. PR69 최종d7fc0ba의 Claude APPROVE와 push40345203463/PR40345333950 SUCCESS, 양쪽 XML 단위167·실제136·실패/오류/skip0 및 하네스34·웹29·Chromium31을 확인했다. develop의5048d88로 병합하고 #67/보드를 완료했다. 다른 worktree는 변경하지 않았다.
+
+origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으로 옮겼다. F01/F13/F14 → T02/T08/T11/T12/T14. 깨끗한5048d88의180채널 전체 제품 계획은 최고172연결·입력0·JAVA_HEAP_SPACE·exit3을 재현했다. 실행 소유 자원과 생성 비밀은 정리했고 기존8개 container는 보존했다. 준비한 독립 Xmx64MiB loopback은32연결 heap 실패,8연결3회 종료 뒤 IO group 등록0→8→16→24를 재현했다. 하네스/기대 이벤트 비용과 분리한 실패 경계다.
+
+`diagnose`의 피드백 루프에 따라 큰 문자 버퍼·container 수명·부대 비용의 가설을 분리했다. [공식 source 조사](research/COLLECTOR_TEXT_MEMORY.md)에 partial 수신과 전체 메시지 한도, destroy/공유 group 계약을 기록한다. 청크 버퍼와 완성 메시지 조립을 분리하되1MiB·READ/heartbeat·개인정보 비저장 계약을 유지하고, 종료 자원 문제를 별도로 회귀 검증한다.
+
+### #64 수정과 작은 재현 대조
+
+8,192문자 partial 수신과 UTF-8 전체1MiB 조립을 분리했다. Chunk/whole 단계를 구분해 완성 frame만 decode·계수하며 초과/잘못된 surrogate/연결 종료에서 상태를 버린다. 소유 Tomcat container destroy와 late handshake 정리를 추가했다. 실제 socket fixture에서1MiB 혼합 Unicode·UTF-8 중간 분할·초과·부분 JSON 종료/재접속·양방향 heartbeat를 확인했고 다른 owner를 유지한 늦은 연결 정리도 통과했다. 초안 Xmx64MiB 실험은32연결2회·8연결3회 모두 correct=true, 매 종료 IO 등록/스레드0이다. 이 초안 수치는 고정 commit 재측정 전이며 운영 용량으로 쓰지 않는다.
+
+### #64 고정 코드 전후 검증과 한계
+
+2026-10-27 KST · F01/F13/F14 → T02/T08/T11/T12/T14.876bb68의 독립32연결2회·8연결3회가 정상 종료했고 매 회차 IO 등록/IO 스레드0이었다. clean f9b7713 baseline과 같은 하네스 source를 사용했다.8연결의 관측 heap 차이는 연결당 약3.09MiB→0.116~0.120MiB이며 순수 배열/RSS 비용과 구분했다. FD99→101·JVM 공유 live thread 잔류를 숨기지 않았다.
+
+전체 제품8회(전180실패 포함)의 정제·계획·명령·hash·소유 자원 정리를 [검증](COLLECTOR_MEMORY_VERIFICATION.md)에 보관했다. 180계획·fixture bytecode/library hash가 전후 동일하다. 후180/300/450채널90초·450채널5분 통과,600최초 리포트 지연/readiness503,600반복은 기능 대조 통과이나 시계 기준 오류1,700건으로 용량 판정 제외다. 후자의 벽/단조 잔차가 약2.045초 바뀐 표본을 보존하고 원인 미확정을 명시했다. 기존100채널500/s·API10/s·1KiB·80%편향5분도 고유150,000/물리151,500·전부 대조·최종lag0으로 통과했다.450을 정확한 최대치로 확정하지 않는다.
+
+구현 Standards/Spec 각각 차단0·비차단0. clean876bb68의 단위176·하네스34·JAR와 실제Kafka/DB136개가 통과했고 소유 시험 자원만 정리했다. 최종 문서 HEAD의 Claude/CI·병합은 별도 PR 게이트다. 시계/리포트 병목은 #65, 보존은 #63, 전체 제품 샤딩은 #68에서 이어간다.
+
+### #64 최종 Claude 의견 보완
+
+최초 최종HEAD afc1548은 Claude APPROVE·차단0이었다. 비차단 중 Gradle tasks 속성 누락 실패를 실제 종료1로 재현해 인자 조건부 설정으로 수정한다. 600 최초 SLO 초과/반복 시계 무효를 STATUS·인프라 요약에서도 구분하고 실패 후 close 전 수신 비활성화를 PROTOCOL에 명시한다. baseline Gradle 종료값은 미캡처 null·기대값·출처를 나누고 로그에 있는 자식 exit3/2를 추출한다. 제품 GC 종류 미계측과 스레드956/1257~1259, 전역 조립 예산 부재를 한계로 남긴다. 정확한 최대치/정상 시계450·600 반복 검증은 #65의 명시적 완료 조건으로 이관했으며 Spec 재검토의 남은 지적은0건이다. 최종 보완 HEAD의 Claude/CI는 다시 확인한다.
+
+보완 뒤 `./gradlew --console=plain tasks` 종료0, 문서77개 링크·기술목표16/기능16 검사와 diff 공백 검사를 통과했다. Java main/test source는876bb68과 같으며 추가 변경은 Gradle 태스크 설정·정제 출처·문서다.

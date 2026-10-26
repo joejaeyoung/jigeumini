@@ -90,6 +90,9 @@ class ChatProtocolTest {
     void frameSizeIsBounded() {
         assertThatThrownBy(() -> decode("x".repeat(ChatProtocol.MAX_FRAME_BYTES + 1)))
                 .hasMessage("FRAME_TOO_LARGE");
+        assertThatThrownBy(() -> decode("한".repeat(ChatProtocol.MAX_FRAME_BYTES / 3 + 1)))
+                .hasMessage("FRAME_TOO_LARGE");
+        assertThat(decode("{\"cmd\":0}" + " ".repeat(ChatProtocol.MAX_FRAME_BYTES - 9)).command()).isZero();
     }
 
     @Test

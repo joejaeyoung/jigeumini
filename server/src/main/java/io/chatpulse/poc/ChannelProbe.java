@@ -4,10 +4,8 @@ import java.time.Duration;
 import java.time.Clock;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import jakarta.websocket.ContainerProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 public final class ChannelProbe {
     private static final Logger log = LoggerFactory.getLogger(ChannelProbe.class);
@@ -31,7 +29,7 @@ public final class ChannelProbe {
     ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval,CollectionObserver observer) {
         this(source,pingInterval,pongTimeout,roomPollInterval,EventSink.DISCARD,observer,Clock.systemUTC());
     }
-    private ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval,EventSink sink,CollectionObserver observer,Clock clock) {
+    ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval,EventSink sink,CollectionObserver observer,Clock clock) {
         this.source=source;this.pingInterval=pingInterval;this.pongTimeout=pongTimeout;this.roomPollInterval=roomPollInterval;
         this.sink=sink;this.observer=observer;this.clock=java.util.Objects.requireNonNull(clock);
     }
@@ -46,13 +44,7 @@ public final class ChannelProbe {
         long start = System.nanoTime();
         long deadline = start + duration.toNanos();
         boolean forced = false;
-        var container = ContainerProvider.getWebSocketContainer();
-        container.setDefaultMaxTextMessageBufferSize(ChatProtocol.MAX_FRAME_BYTES);
-        container.setDefaultMaxSessionIdleTimeout(60_000);
-        container.setAsyncSendTimeout(5_000);
-        var client = new StandardWebSocketClient(container);
-        client.setUserProperties(java.util.Map.of("org.apache.tomcat.websocket.BLOCKING_SEND_TIMEOUT", 5_000L));
-        try (var scheduler = Executors.newSingleThreadScheduledExecutor()) {
+        try (var client = new ChatSocketClient(); var scheduler = Executors.newSingleThreadScheduledExecutor()) {
             for (int attempt = 1; attempt <= 6 && !stop.get() && System.nanoTime() < deadline; attempt++) {
                 stats.attempt();
                 try {

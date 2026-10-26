@@ -85,6 +85,20 @@ tasks.register('loadExperiment', JavaExec) {
     if (providers.gradleProperty('experimentBase').isPresent()) args providers.gradleProperty('experimentBase').get()
 }
 
+tasks.register('collectorMemoryExperiment', JavaExec) {
+    description = '격리 JVM에서 실제 WebSocket 연결 메모리와 종료 자원 대조'
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.poc.CollectorMemoryExperiment'
+    maxHeapSize = '64m'
+    jvmArgs '-XX:+ExitOnOutOfMemoryError'
+    workingDir = rootProject.projectDir
+    if (providers.gradleProperty('collectorMemoryProfile').isPresent() && providers.gradleProperty('collectorMemoryOutput').isPresent()) {
+        args providers.gradleProperty('collectorMemoryProfile').get(), providers.gradleProperty('collectorMemoryOutput').get()
+    }
+}
+
 tasks.register('haExperiment', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath

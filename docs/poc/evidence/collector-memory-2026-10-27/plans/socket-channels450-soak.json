@@ -1,0 +1,24 @@
+{
+  "name": "socket-channels450-soak",
+  "channels": 450,
+  "stages": [
+    {
+      "name": "warmup",
+      "seconds": 30,
+      "eventsPerSecond": 100,
+      "hot": false
+    },
+    {
+      "name": "steady",
+      "seconds": 270,
+      "eventsPerSecond": 100,
+      "hot": false
+    }
+  ],
+  "faultAtSeconds": -1,
+  "faultSeconds": 0,
+  "sourceMode": "WEBSOCKET",
+  "apiRequestsPerSecond": 10,
+  "apiMaxInFlight": 32,
+  "resourceProfile": "BASELINE"
+}

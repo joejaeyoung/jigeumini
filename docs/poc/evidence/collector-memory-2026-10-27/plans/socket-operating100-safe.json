@@ -1,0 +1,25 @@
+{
+  "name": "socket-operating100-safe",
+  "channels": 100,
+  "stages": [
+    {
+      "name": "warmup",
+      "seconds": 30,
+      "eventsPerSecond": 500,
+      "hot": true
+    },
+    {
+      "name": "steady",
+      "seconds": 270,
+      "eventsPerSecond": 500,
+      "hot": true
+    }
+  ],
+  "faultAtSeconds": -1,
+  "faultSeconds": 0,
+  "sourceMode": "WEBSOCKET",
+  "apiRequestsPerSecond": 10,
+  "apiMaxInFlight": 32,
+  "resourceProfile": "BASELINE",
+  "payloadProfile": "KOREAN_1K"
+}

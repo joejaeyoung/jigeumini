@@ -108,3 +108,12 @@ Claude 초기 승인의 비차단 의견에서 강제형변환·null initializer
 F01/F10 → T02/T04/T06/T07/T08. 기존 suffix 배정의 hash 충돌을 발견해 실제 분산 검사와 배정 책임을 `ExperimentRouting`에 모았다. `ExperimentPublisher`는 배정된 record를 유한 발행하고, `LoadExperiment`는 생성·소비·replay·정리를 계속 소유한다. 기존 suffix 프로필만 decode 전 정규화하며 명시 분할은 제품의 channelId 업무 key를 유지한다. 시작 준비 검사는 소비자 수에 맞는 실제 할당을 기다린다.
 
 제품 전용 routing 추상화나 부분 bucket은 이번 단순 실험에 도입하지 않았다. [제품 계약 검토](pipeline/SHARDING_REVIEW.md)의 `ChatRouting` 소유권·품질 기대 집합·정책 이력과 consumer 수명은 #68의 후속 설계다. [6회 근거](poc/evidence/sharding-2026-10-26/report/summary.json)에서 동일 eventId 배정·실제 분포·중복 제거·DB/replay 일치를 확인했다. 제품 `server/src/main`·web·deploy 파일은 변경하지 않았다.
+
+
+## 2026-10-27 · 수집 메시지와 transport 수명 #64
+
+F01/F13/F14 → T02/T08/T11/T12/T14. `IncomingText`는 UTF-8 전체 한도·surrogate 경계·완료/실패 초기화를 소유한다. `ChatConnection`은 완성 메시지만 protocol/sink/관측에 전달한다. 공개 `ChatProtocol.decode(String, ...)`도 같은 byte 검사를 사용하고 내부 Complete 경로는 중복 순회를 피한다. 실제 UTF-8 codec은 transport가 담당하며 별도 JSON parser를 만들지 않는다.
+
+`ChatSocketClient`는 고정 Tomcat container의 설정·연결·종료를 소유하는 작은 내부 모듈이다. `ChannelProbe`는 재접속 정책과 scheduler 수명을 유지한다. 소켓 close와 container destroy의 차이를 이 모듈에 감추고 late handshake도 정리한다. 공유 singleton client·범용 transport interface는 도입하지 않는다. 정확히1MiB·wire fragment·재접속·다른 owner 보존과 실제 heap/자원 반복 시험으로 경계를 검증한다. [조사](research/COLLECTOR_TEXT_MEMORY.md).
+
+최종 리뷰에서 실험 태스크의 속성 평가는 실행 인자가 제공될 때만 하도록 보완해 일반 Gradle 탐색과 실험 실행의 설정 경계를 분리했다. 정제기의 실제/기대 종료값·출처도 구분하며 전체 메시지 한도를 전역 조립 예산으로 설명하지 않는다.

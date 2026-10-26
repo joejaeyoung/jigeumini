@@ -4,7 +4,7 @@
 
 `feat/retention-bounds`, [PR #72](https://github.com/joejaeyoung/jigeumini/pull/72). F01/F08/F10/F16 → T02/T04/T08/T16. live 입력 하한·72시간 ledger/8일 bucket, replay 결과 7일/metadata 30일·활성 자료 보호·유한 정리·공간/WAL 진단을 구현했다. [보존 계약](pipeline/RETENTION.md)·[공식 조사](research/DATA_RETENTION.md)·[검증 기록](pipeline/RETENTION_VERIFICATION.md).
 
-초기 전체 통합 150개 이후 리뷰 보완 경계 13개가 통과했다. 합성 DB의 각 집계 60,000행×3회·동시 입력 10,000건의 정합/정리와 Kafka 24시간/256MiB 설정의 실제 prefix 삭제를 확인했다. 전체 회귀·제품 후보 부하·최종 리뷰를 진행한다. 최종 CI는 GitHub 계정 결제/사용 한도로 runner 시작 전에 차단됐다(push 40395092953/PR 40395103827). 사용자에게 설정 확인을 요청했으며 CI 성공 전에 병합하지 않는다. 보호 자료의 무기한 활성·장기 DB·외부 경보는 검증하지 않았다.
+단위 179개·하네스 38개·실제 Kafka/DB 155개·웹 29개·Chromium 31개와 추가 보존 경계 13개·CLI 검증이 통과했다. 합성 DB의 각 집계 60,000행×3회·동시 입력 10,000건의 정합/정리와 Kafka 24시간/256MiB 설정의 실제 prefix 삭제를 확인했다. d4aa22c의 전체 제품 100채널·총 500건/s·API 10요청/s·1KiB·80% 편향 5분은 고유 150,000/물리 151,500·전체 대조·최종 24개 lag 0으로 통과했다. 순위/API p95는 236/62ms이며 fresh DB의 회귀 범위다. 최종 리뷰를 진행한다. 최종 CI는 GitHub 계정 결제/사용 한도로 runner 시작 전에 차단됐다(push 40395092953/PR 40395103827). 사용자에게 설정 확인을 요청했으며 CI 성공 전에 병합하지 않는다. 보호 자료의 무기한 활성·장기 DB·외부 경보는 검증하지 않았다.
 
 2026-10-27 · 카테고리·리포트 병목 진단 #65
 

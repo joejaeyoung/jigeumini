@@ -698,3 +698,11 @@ Kafka 대조에서16KiB segment의 InvalidConfigurationException을 실제broker
 전체 회귀는 단위 179개·하네스 38개·실제 Kafka/DB 155개, 실패/오류/skip 0이다. Claude의 고정 12c0c3e 정적 구현 리뷰는 APPROVE였다. 비차단 의견에서 오래된 알림/replay 문구를 수정했고, 오류 격리 이력·spike FK 분기를 기존 테스트에 추가해 보존 13개를 다시 확인했다. 실제 단일 consumer·trend namespace·기존 bucket 색인을 확인했다. 장기 DB의 반복 timeout과 다중 writer의 정리율은 별도 검증 범위로 남긴다. 고유 schema의 CLI 진단/terminal 정리·재실행도 통과하고 schema를 정리했다.
 
 PR72 첫 push/PR CI는 GitHub 계정 결제 또는 사용 한도 문제로 runner가 시작되지 않았다. 사용자에게 Billing & plans 확인을 요청했다. 테스트 실패로 세거나 CI 게이트를 생략하지 않으며, 최종 HEAD 승인/CI 전에는 병합하지 않는다.
+
+### #63 전체 제품 회귀
+
+d4aa22c의 깨끗한 이미지로 기존 100채널·500건/s·API10·1KiB·80% 편향·5분 계획을 실행했다. 고유150,000/물리151,500·관측1,000·outbox10의 전체 대조, 최종24개 lag0과 WITHIN_SLO를 확인했다. steady 순위/API p95 236/62ms, category/report 채팅 lag 기울기 −0.014/−0.030건/s다. 입력118초의 app_runtime 진단 한 번에서 정리9종 SUCCEEDED·실패0·live 하한 존재를 확인했다. 오래된 자료가 없는 fresh DB의 동작 확인이므로 실제 만료 삭제가 겹친 장기 처리율로 세지 않는다. 소유 자원을 정리하고 기존8개container를 보존했다.
+
+Standards의 d4aa22c delta 검토는 규칙 위반0·판단 지적0이다. Spec은 차단0·비차단P3 1건으로, 알림 문서의 남은 cleanup 상태 미지원 문구를 수정해 publisher 진단 한계와 보존 작업 진단을 구분했다.
+
+부하 종료 후 웹 check(단위29·타입·제품빌드)와 Chromium31이 통과했다. 기존 API18080/웹18082는 HTTP200을 유지한다. 최종 CI 계정 문제는 해결 확인 전이며 성공 게이트를 유지한다.

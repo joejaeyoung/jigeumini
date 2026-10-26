@@ -8,7 +8,7 @@ F07 · 이슈 #8 · T02/T03/T08/T10.
 
 publisher는 `(created_at, spike_id)` 오름차순으로 미전달 행 하나를 잠그고 Kafka ACK를 기다린 뒤 `published_at`을 기록한다. ACK 전 실패는 전달 미완료로 남고 1초 간격으로 재시도한다. 트랜잭션 한도 20초, SQL 5초, ACK 대기 10초다. ACK 직후 종료나 DB commit 실패는 같은 spike를 다시 보낼 수 있다. 발행은 at-least-once이고 전체 Exactly-once를 보장하지 않는다. `SKIP LOCKED`를 쓰므로 여러 publisher 사이의 전역 발행 순서는 보장하지 않는다. 피드는 `evaluatedAt, spikeId`로 정렬한다.
 
-단일 publisher에서 선두 행의 영구 계약 오류도 계속 재시도하며 이후 행을 막는다. 임의로 버리거나 완료로 표시하지 않는다. 운영자는 `outbox.state=RETRYING`, pending 증가·마지막 ACK 정체로 확인하고 원본 판정/코드를 수정한 뒤 다시 실행한다. 행별 오류 코드·연속 실패 횟수와 cleanup 전용 상태는 아직 없다. ACK 대기 중 DB 연결 하나와 행 잠금을 유지하므로 공유 풀/DB의 자원 비용이 있다.
+단일 publisher에서 선두 행의 영구 계약 오류도 계속 재시도하며 이후 행을 막는다. 임의로 버리거나 완료로 표시하지 않는다. 운영자는 `outbox.state=RETRYING`, pending 증가·마지막 ACK 정체로 확인하고 원본 판정/코드를 수정한 뒤 다시 실행한다. 행별 publisher 오류 코드·연속 실패 횟수는 아직 없다. 정리 작업의 상태·실패 횟수는 별도로 `retention_task`와 `ops retention-status`에 기록한다. ACK 대기 중 DB 연결 하나와 행 잠금을 유지하므로 공유 풀/DB의 자원 비용이 있다.
 
 기본 토픽은 `<pipeline.topic>.spikes`(기본 `chat.received.v1.spikes`), 이벤트 종류는 `spike.detected.v1`이다. `notifications.topic`으로 전용 토픽명을 지정할 수 있다. 채팅 토픽과 같을 수 없다. key=channelId, CreateTime=evaluatedAt, 3 partition, RF=1, ACK=all, idempotent producer이며 보존은 24시간/partition당 256MiB/segment 32MiB다. ACK는 복제 HA나 feed 저장 완료를 뜻하지 않는다.
 

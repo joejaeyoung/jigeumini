@@ -559,5 +559,24 @@
     "skipped": 0,
     "timestamp": "2026-10-26T20:33:51.227Z",
     "xmlSha256": "216861fdfdc8aaadbfcf15afcdb4f171bdfcab0ea2e68245f009d3f3bfa875ed"
+  },
+  "web": {
+    "command": "./scripts/web check",
+    "passed": 29,
+    "failures": 0,
+    "logSha256": "37f495ea1df37b7a923d83bb22c3a5ae46ecd68261d792f996390d42f20b027b",
+    "sourceChangedSinceD4aa22c": false
+  },
+  "chromium": {
+    "command": "./scripts/web test:e2e",
+    "passed": 31,
+    "failures": 0,
+    "logSha256": "3bfe6cea95789dfb13150feca52514958d69658ff363b5c9cc4202bb7bfcba51",
+    "sourceChangedSinceD4aa22c": false
+  },
+  "harness": {
+    "passed": 38,
+    "command": "./scripts/check",
+    "logSha256": "256400430f0135be6804a1bcf7ce4ed00924c97bbe1320cab8acbbcf134e8803"
   }
 }

@@ -40,7 +40,7 @@ public final class ProductLoadProbe {
         var config=RuntimeEnvironment.from(System.getenv());var fixture=new ProductLoadFixture();
         var factory=KafkaSupport.producerFactory(config.bootstrap());var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
         var publisher=new BufferedKafkaPublisher(kafka,config.topic(),new EventCodec(),new BufferedKafkaPublisher.Limits(1000,500,64));
-        var scheduler=Executors.newSingleThreadScheduledExecutor();
+        var scheduler=Executors.newScheduledThreadPool(2);
         try(var ds=PostgresSupport.open(config.jdbcUrl(),config.user(),config.password(),false)) {
             var jdbc=new JdbcTemplate(ds);var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
             try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0))) {
@@ -53,6 +53,13 @@ public final class ProductLoadProbe {
                         synchronized(this){samples.add(sample);checkpoint();}
                     } catch(Exception failure) {samplerFailure.compareAndSet(null,failure.getClass().getSimpleName());}
                 },0,5,TimeUnit.SECONDS);
+                scheduler.scheduleWithFixedDelay(()->{
+                    try {
+                        var sample=measurements.offsetSample(phase,elapsed());
+                        Files.writeString(output.resolveSibling("offsets.jsonl"),JsonMapper.builder().build().writeValueAsString(sample)+"\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
+                        checkpoint();
+                    } catch(Exception failure) {samplerFailure.compareAndSet(null,failure.getClass().getSimpleName());}
+                },0,1,TimeUnit.SECONDS);
                 long ordinal=0,physical=0;int elapsedSeconds=0;double maximumPacingDelay=0;
                 var stages=new ArrayList<Map<String,Object>>();result.put("stages",stages);
                 for(var stage:plan.stages()) {
@@ -88,13 +95,14 @@ public final class ProductLoadProbe {
                     caughtUp=counts.get(config.projection())==ordinal&&counts.get(config.projection()+"-trend")==ordinal
                             &&counts.get("category_event")==ordinal&&counts.get("report_event")==ordinal
                             &&counts.get("broadcast_observation")==fixture.observations.size()&&counts.get("notification_event")==fixture.spikes.size()&&counts.get("pendingOutbox")==0;
-                    if(caughtUp&&measurements.partitions().stream().allMatch(p->p.get("lag") instanceof Number lag&&lag.longValue()==0))break;
+                    if(caughtUp&&measurements.partitions(false).stream().allMatch(p->p.get("lag") instanceof Number lag&&lag.longValue()==0))break;
                     caughtUp=false;Thread.sleep(1000);
                 }
                 result.put("drainSeconds",(System.nanoTime()-drainStart)/1e9);check(caughtUp,"DRAIN_TIMEOUT");
                 phase="VERIFY";stopSampler(scheduler);
                 if(samplerFailure.get()!=null){result.put("samplerFailure",samplerFailure.get());throw new IllegalStateException("SAMPLER_FAILED");}
                 result.put("finalSample",measurements.sample(phase,elapsed()));
+                result.put("finalOffsets",measurements.partitions(false));
                 result.put("reconciliation",fixture.verify(jdbc,config));
                 result.put("receivedToTransactionTimestampMillis",measurements.transactionTimestampLatencies());
                 result.put("healthyRankingEntries",jdbc.queryForObject("SELECT count(*) FROM ranking_entry WHERE status='HEALTHY'",Long.class));
@@ -106,8 +114,12 @@ public final class ProductLoadProbe {
             result.put("correct",false);result.put("failureType",failure.getClass().getSimpleName());
             if(failure.getMessage()!=null&&failure.getMessage().matches("[A-Z_0-9]+"))result.put("failureCode",failure.getMessage());
         }finally {
-            stopSampler(scheduler);result.putIfAbsent("publisherFinal",publisher.finish());factory.destroy();
-            result.put("finishedAt",Instant.now());checkpoint();
+            try {stopSampler(scheduler);}catch(Exception failure){result.put("correct",false);result.put("samplerStopFailure",failure.getClass().getSimpleName());}
+            try {result.putIfAbsent("publisherFinal",publisher.finish());}
+            finally {
+                try {factory.destroy();}
+                finally {result.put("finishedAt",Instant.now());checkpoint();synchronized(this){write(output,result);}}
+            }
         }
         System.out.println(JsonMapper.builder().build().writeValueAsString(Map.of("correct",result.get("correct"))));
         return Boolean.TRUE.equals(result.get("correct"));
@@ -123,7 +135,7 @@ public final class ProductLoadProbe {
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).get(10,TimeUnit.SECONDS);
         UUID spike=id("spike/"+index);Instant evaluated=Instant.ofEpochSecond(Math.floorDiv(at.getEpochSecond(),10)*10);
         tx.executeWithoutResult(status->{
-            jdbc.update("INSERT INTO spike_event VALUES (?,?,?,?,?,?,?,?,NULL)",spike,c.runId(),fixture.channels.get(index%CHANNELS),ts(evaluated),"chat-spike-v1",100,50,2);
+            jdbc.update("INSERT INTO spike_event(spike_id,run_id,channel_id,evaluated_at,algorithm_version,count,baseline,ratio,quality_warning) VALUES (?,?,?,?,?,?,?,?,NULL)",spike,c.runId(),fixture.channels.get(index%CHANNELS),ts(evaluated),"chat-spike-v1",100,50,2);
             jdbc.update("INSERT INTO spike_outbox(spike_id,run_id) VALUES (?,?)",spike,c.runId());
         });
         fixture.spikes.add(spike.toString());
@@ -134,11 +146,14 @@ public final class ProductLoadProbe {
         scheduler.shutdown();if(!scheduler.awaitTermination(45,TimeUnit.SECONDS)){scheduler.shutdownNow();throw new IllegalStateException("SAMPLER_STOP_TIMEOUT");}
     }
     private synchronized void checkpoint() {
+        result.put("phase",phase);result.put("elapsedSeconds",startNanos==0?0:elapsed());
+        write(output.resolveSibling("progress.json"),Map.of("plan",result.get("plan"),"phase",phase,"elapsedSeconds",result.get("elapsedSeconds")));
+    }
+    private void write(Path destination,Object value) {
         try {
-            result.put("phase",phase);result.put("elapsedSeconds",startNanos==0?0:elapsed());
-            Path temp=output.resolveSibling(output.getFileName()+".tmp");
-            synchronized(result){Files.writeString(temp,JsonMapper.builder().build().writeValueAsString(result));}
-            Files.move(temp,output,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);
+            Path temp=destination.resolveSibling(destination.getFileName()+".tmp");
+            synchronized(result){Files.writeString(temp,JsonMapper.builder().build().writeValueAsString(value));}
+            Files.move(temp,destination,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);
         }catch(Exception failure){throw new IllegalStateException("LOAD_RESULT_WRITE_FAILED");}
     }
 }

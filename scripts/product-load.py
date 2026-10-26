@@ -2,6 +2,7 @@
 """전체 제품의 격리 부하·소유 분석기 STOP/CONT·최종 대조. 실제 원천 호출 없음."""
 import datetime,hashlib,importlib.util,json,pathlib,re,shutil,sys,time
 sys.dont_write_bytecode=True
+from product_load_results import analyze
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('deployment_rehearsal',ROOT/'scripts/deploy-rehearsal.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -32,6 +33,14 @@ class ProductLoad(module.Rehearsal):
     def compose(self,*args,**kwargs):
         if not hasattr(self,'overlay'):return super().compose(*args,**kwargs)
         return self.command(['docker','compose','--env-file',str(self.envfile),'-p',self.project,'-f',str(ROOT/'deploy/compose.yaml'),'-f',str(self.overlay),*args],**kwargs)
+    def audit(self):
+        result=super().audit();_,info=self.owned('api')
+        network_ids=list(info['NetworkSettings']['Networks'])
+        networks=json.loads(self.command(['docker','network','inspect',*network_ids]).stdout)
+        if not all(n['Internal'] and n['Labels'].get('io.jigeumini.deployment.owner')==self.owner for n in networks):raise RuntimeError('LOAD_EXTERNAL_NETWORK')
+        result['testNetwork']={'apiNetworksInternal':True,'jmxPublished':False,'apiJvmArguments':info['Config']['Entrypoint'][1:3],
+            'probeHeapMaxBytes':384*1024**2,'apiMemoryLimitBytes':info['HostConfig']['Memory'],'apiNanoCpus':info['HostConfig']['NanoCpus']}
+        return result
     def resources(self):
         sample={'at':self.now()};ids=[]
         for service in ['api','kafka','postgres']:
@@ -55,41 +64,39 @@ class ProductLoad(module.Rehearsal):
             '-cp','/app/classes:/app/lib/*:/probe','io.chatpulse.operations.ProductLoadProbe',self.profile,'/output/load.json')
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('PROBE_OWNER_MISMATCH')
+        if any((info['NetworkSettings']['Ports'] or {}).values()) or not all(n['Internal'] for n in json.loads(self.command(['docker','network','inspect',*info['NetworkSettings']['Networks']]).stdout)):raise RuntimeError('PROBE_EXTERNAL_NETWORK')
         self.probe_id=info['Id'];api,_=self.owned('api');fault=None;last_sample=0
         while time.monotonic()<self.deadline-90:
             info=json.loads(self.command(['docker','inspect',self.probe_id]).stdout)[0]
-            path=self.output/'load.json'
+            path=self.output/'progress.json'
             progress=json.loads(path.read_text()) if path.exists() else {}
             if progress:
                 plan=progress['plan']
                 if (plan['name']!=self.profile or sum(s['seconds'] for s in plan['stages'])!=self.duration
                     or plan['faultAtSeconds']!=self.fault_at or plan['faultSeconds']!=self.fault_seconds):raise RuntimeError('LOAD_PLAN_MISMATCH')
-            if info['State']['Status']=='exited':break
+            if info['State']['Status']=='exited':
+                final=self.output/'load.json';progress=json.loads(final.read_text()) if final.exists() else progress
+                break
             elapsed=progress.get('elapsedSeconds',0)
             if fault is None and self.fault_at>=0 and elapsed>=self.fault_at:
                 self.command(['docker','kill','--signal','STOP',api]);self.paused=True
-                fault={'stoppedAt':self.now(),'generatorElapsedAtStop':elapsed,'monotonicStop':time.monotonic(),'signal':'SIGSTOP'}
+                fault={'stoppedAt':self.now(),'stoppedAtEpochMillis':time.time_ns()//1_000_000,'generatorElapsedAtStop':elapsed,'monotonicStop':time.monotonic(),'signal':'SIGSTOP'}
                 self.result['fault']=fault;self.checkpoint()
             if self.paused and time.monotonic()-fault['monotonicStop']>=self.fault_seconds:
                 self.command(['docker','kill','--signal','CONT',api]);self.paused=False
-                fault.update({'resumedAt':self.now(),'actualStoppedSeconds':time.monotonic()-fault['monotonicStop']});self.checkpoint()
+                fault.update({'resumedAt':self.now(),'resumedAtEpochMillis':time.time_ns()//1_000_000,'actualStoppedSeconds':time.monotonic()-fault['monotonicStop']});self.checkpoint()
             if time.monotonic()-last_sample>=10:self.resources();last_sample=time.monotonic()
             time.sleep(1)
         else:raise RuntimeError('LOAD_PROCESS_TIMEOUT')
         self.result['load']=progress;self.result['probeExitCode']=info['State']['ExitCode'];self.result['probeOomKilled']=info['State']['OOMKilled']
         self.checkpoint()
         if info['State']['ExitCode']!=0 or info['State']['OOMKilled'] or not progress.get('correct'):raise RuntimeError('LOAD_FAILED')
-        if self.fault_at>=0:
-            if not fault or 'resumedAt' not in fault:raise RuntimeError('LOAD_FAULT_NOT_EXECUTED')
-            def instant(value):return datetime.datetime.fromisoformat(str(value).replace('Z','+00:00'))
-            def offsets_at(sample):return max(instant(p['offsetsObservedAt']) for p in sample['partitions'])
-            after=[s for s in progress['samples']+[progress['finalSample']] if s.get('partitions') and offsets_at(s)>=instant(fault['resumedAt'])]
-            lagged=[s for s in progress['samples'] if s.get('partitions') and instant(fault['stoppedAt'])<=offsets_at(s)<instant(fault['resumedAt']) and any((p.get('lag') or 0)>0 for p in s['partitions'])]
-            recovered=next((s for s in after if len(s.get('partitions',[]))==24 and all(p.get('lag')==0 for p in s['partitions'])),None)
-            if not lagged or not recovered:raise RuntimeError('LOAD_FAULT_LAG_NOT_OBSERVED')
-            fault['firstZeroLagAt']=offsets_at(recovered).isoformat();fault['secondsResumeToFirstZeroLagSample']=(offsets_at(recovered)-instant(fault['resumedAt'])).total_seconds()
-            fault['stoppedLagSamples']=len(lagged)
-            fault.pop('monotonicStop',None)
+        if self.fault_at>=0 and (not fault or 'resumedAt' not in fault):raise RuntimeError('LOAD_FAULT_NOT_EXECUTED')
+        self.result['analysis']=analyze(progress,self.output/'offsets.jsonl',fault,self.result['resourceSamples'],self.duration)
+        if fault:fault.pop('monotonicStop',None)
+        self.checkpoint()
+        if not self.result['analysis']['measurementCoverage']['evidenceComplete']:raise RuntimeError('LOAD_EVIDENCE_INCOMPLETE')
+        if not self.result['analysis']['api']['healthyOutsideFault']:raise RuntimeError('LOAD_API_ERRORS_OUTSIDE_FAULT')
         return {'correct':True,'unique':progress['expectedUnique'],'physical':progress['expectedPhysical'],'inputSeconds':progress['inputSeconds'],'drainSeconds':progress['drainSeconds']}
     def scenarios(self):
         self.phase('PREPARE_PROBE',self.prepare);self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize)

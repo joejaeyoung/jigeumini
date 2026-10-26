@@ -42,22 +42,21 @@ final class ProductLoadMeasurements implements AutoCloseable {
     }
     Map<String,Object> sample(String phase,double elapsed) {
         long started=System.nanoTime();var out=new LinkedHashMap<String,Object>();
-        out.put("at",Instant.now());out.put("phase",phase);out.put("elapsedSeconds",elapsed);
+        out.put("at",Instant.now());out.put("startedAtEpochMillis",System.currentTimeMillis());out.put("phase",phase);out.put("elapsedSeconds",elapsed);
         out.put("publisherChannels",publisher.channelSnapshot());
         var channels=publisher.channelSnapshot().values();long accepted=0,ack=0,rejected=0;int pending=0;long oldest=0;
         for(var c:channels) {accepted+=c.accepted();ack+=c.acknowledged();rejected+=c.rejected();pending+=c.pending();if(c.oldest()!=null)oldest=Math.max(oldest,Duration.between(c.oldest(),Instant.now()).toMillis());}
         out.put("publisher",Map.of("attempted",accepted+rejected,"accepted",accepted,"acknowledged",ack,"rejected",rejected,"unconfirmed",accepted-ack,"pending",pending,"oldestAgeMillis",oldest));
-        try {out.put("partitions",partitions());}catch(Exception error){out.put("kafkaError",error.getClass().getSimpleName());}
         long dbStart=System.nanoTime();
         try {out.put("database",counts());}catch(RuntimeException error){out.put("databaseError",error.getClass().getSimpleName());}
         out.put("databaseQueryMillis",(System.nanoTime()-dbStart)/1e6);
         var responses=new ArrayList<Map<String,Object>>();
         for(String path:paths) {
             long begin=System.nanoTime();var value=new LinkedHashMap<String,Object>();value.put("path",path);
-            value.put("startedAt",Instant.now());
+            value.put("startedAt",Instant.now());value.put("startedAtEpochMillis",System.currentTimeMillis());
             try {value.put("status",http.send(HttpRequest.newBuilder(URI.create("http://api:8080"+path)).timeout(Duration.ofSeconds(2)).GET().build(),HttpResponse.BodyHandlers.discarding()).statusCode());}
             catch(Exception error){value.put("error",error.getClass().getSimpleName());}
-            value.put("millis",(System.nanoTime()-begin)/1e6);value.put("finishedAt",Instant.now());responses.add(value);
+            value.put("millis",(System.nanoTime()-begin)/1e6);value.put("finishedAt",Instant.now());value.put("finishedAtEpochMillis",System.currentTimeMillis());responses.add(value);
         }
         out.put("api",responses);
         out.put("generatorHeapUsedBytes",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
@@ -67,9 +66,14 @@ final class ProductLoadMeasurements implements AutoCloseable {
             var memory=(CompositeData)jmx.getMBeanServerConnection().getAttribute(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage");
             out.put("analyzerHeapUsedBytes",memory.get("used"));out.put("analyzerHeapMaxBytes",memory.get("max"));
         }catch(Exception error){out.put("analyzerHeapError",error.getClass().getSimpleName());try{if(jmx!=null)jmx.close();}catch(Exception ignored){}jmx=null;}
-        out.put("sampleSeconds",(System.nanoTime()-started)/1e9);out.put("finishedAt",Instant.now());return out;
+        out.put("sampleSeconds",(System.nanoTime()-started)/1e9);out.put("finishedAt",Instant.now());out.put("finishedAtEpochMillis",System.currentTimeMillis());return out;
     }
-    synchronized List<Map<String,Object>> partitions() throws Exception {
+    Map<String,Object> offsetSample(String phase,double elapsed) {
+        var result=new LinkedHashMap<String,Object>();result.put("at",Instant.now());result.put("phase",phase);result.put("elapsedSeconds",elapsed);
+        try {result.put("partitions",partitions(true));}catch(Exception error){result.put("kafkaError",error.getClass().getSimpleName());}
+        return result;
+    }
+    synchronized List<Map<String,Object>> partitions(boolean trackRates) throws Exception {
         // 입력 중에도 commit이 뒤에서 읽은 end를 넘지 않도록 commit→end 순서로 표본을 잡는다.
         // 하나의 원자 snapshot은 아니며 각 lag는 이 조회 구간의 상한이다.
         var commits=new LinkedHashMap<String,Map<TopicPartition,OffsetAndMetadata>>();
@@ -85,14 +89,14 @@ final class ProductLoadMeasurements implements AutoCloseable {
             var committed=commits.get(group.getKey());
             for(String topic:group.getValue())for(int p=0;p<3;p++) {
                 var tp=new TopicPartition(topic,p);var value=new LinkedHashMap<String,Object>();
-                value.put("group",group.getKey());value.put("topic",topic);value.put("partition",p);value.put("begin",begins.get(tp).offset());value.put("end",ends.get(tp).offset());value.put("offsetsObservedAt",observedAt);
+                value.put("group",group.getKey());value.put("topic",topic);value.put("partition",p);value.put("begin",begins.get(tp).offset());value.put("end",ends.get(tp).offset());value.put("offsetsObservedAt",observedAt);value.put("observedAtEpochMillis",observedAt.toEpochMilli());
                 var offset=committed.get(tp);String key=group.getKey()+"/"+topic+"/"+p;
                 value.put("committed",offset==null?null:offset.offset());value.put("lag",offset==null?null:ends.get(tp).offset()-offset.offset());
-                if(offset!=null) {Long prior=previous.put(key,offset.offset());value.put("committedRecordsPerSecond",prior==null?null:(offset.offset()-prior)/seconds);}
+                if(offset!=null&&trackRates) {Long prior=previous.put(key,offset.offset());value.put("committedRecordsPerSecond",prior==null?null:(offset.offset()-prior)/seconds);}
                 values.add(value);
             }
         }
-        previousAt=now;return values;
+        if(trackRates)previousAt=now;return values;
     }
     Map<String,Long> counts() {
         var counts=new LinkedHashMap<String,Long>();

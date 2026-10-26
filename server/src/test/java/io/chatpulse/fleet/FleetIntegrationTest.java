@@ -44,6 +44,12 @@ class FleetIntegrationTest {
                     "failureCode",report.path("failureCode").asText(),"deliveryCode",delivery.path("failureCode").asText(),"accepted",delivery.path("accepted").asLong(),
                     "acknowledged",delivery.path("acknowledged").asLong(),"rejected",delivery.path("rejected").asLong())));
         } catch(java.io.IOException|RuntimeException invalidReport){System.out.println("FLEET_CHILD_REPORT_INVALID");}
+        for(int index=0;index<reports.size();index++)try {
+            Path path=Path.of(reports.get(index)+".diagnostic.json");
+            if(Files.exists(path))System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"child",index,
+                    "reportPresent",Files.exists(reports.get(index)),"exitCode",children.get(index).exitValue(),"startup",JSON.readTree(Files.readString(path)))));
+            else System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"child",index,"startupDiagnosticPresent",false,"exitCode",children.get(index).exitValue())));
+        }catch(java.io.IOException|RuntimeException invalidDiagnostic){System.out.println("FLEET_CHILD_STARTUP_DIAGNOSTIC_INVALID");}
         if(source!=null)source.close();if(ds!=null)ds.close();
         if(root!=null){new JdbcTemplate(root).execute("DROP SCHEMA "+schema+" CASCADE");root.close();}
         try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){if(admin.listTopics().names().get(10,TimeUnit.SECONDS).contains(topic))admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}
@@ -71,7 +77,7 @@ class FleetIntegrationTest {
         jdbc.update("UPDATE collector_plan SET valid_until=clock_timestamp()-interval '1s'");assertThrows(IllegalStateException.class,()->tick(UUID.randomUUID(),1,Map.of()));
         assertEquals("PLAN_EXPIRED",leases.status().get("pendingReason"));
     }
-    @Test void twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts() throws Exception {
+    @RepeatedTest(5) void twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts() throws Exception {
         plan(List.of(CHANNEL,SECOND));var first=start(15432,1);var second=start(15432,1);awaitConnected(2);
         assertEquals(2,jdbc.queryForObject("SELECT count(DISTINCT owner) FROM collector_lease WHERE connected",Integer.class));
         stop(first);stop(second);assertEquals(0,((Number)leases.status().get("assigned")).intValue());
@@ -118,13 +124,45 @@ class FleetIntegrationTest {
         var diagnostic=JSON.readTree(Files.readString(report));assertTrue(diagnostic.path("complete").asBoolean());
         assertEquals(0,diagnostic.path("delivery").path("rejected").asInt());assertReconciled();
     }
+    @Test void initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission() throws Exception {
+        plan(List.of(CHANNEL));
+        try(var bootstrap=new ControlledTcpProxy(19092)) {
+            bootstrap.mode(ControlledTcpProxy.Mode.BLACKHOLE);
+            var child=start(15432,1,"BOOTSTRAP_GATE","localhost:"+bootstrap.port());
+            Path diagnostic=Path.of(reports.getFirst()+".diagnostic.json");
+            await().atMost(Duration.ofSeconds(15)).until(()->Files.exists(diagnostic)&&JSON.readTree(Files.readString(diagnostic)).path("phases").valueStream().anyMatch(p->p.path("phase").asText().equals("METADATA_TIMEOUT")));
+            assertTrue(bootstrap.discardedBytes()>0);assertEquals(0,((Number)leases.status().get("assigned")).intValue());assertTrue(source.accepted.isEmpty());
+            bootstrap.mode(ControlledTcpProxy.Mode.CUT);bootstrap.mode(ControlledTcpProxy.Mode.FORWARD);
+            awaitConnected(1);stop(child);
+            assertTrue(JSON.readTree(Files.readString(reports.getFirst())).path("complete").asBoolean());assertReconciled();
+        }
+    }
+    @Test void unavailableKafkaStartupExitsAfterBoundedMetadataAttemptsWithoutClaimingLease() throws Exception {
+        plan(List.of(CHANNEL));
+        try(var bootstrap=new ControlledTcpProxy(19092)) {
+            bootstrap.mode(ControlledTcpProxy.Mode.BLACKHOLE);
+            var child=start(15432,1,"BOOTSTRAP_GATE","localhost:"+bootstrap.port());
+            assertTrue(child.waitFor(20,TimeUnit.SECONDS));assertNotEquals(0,child.exitValue());
+            Path path=reports.getFirst();assertFalse(Files.exists(path));
+            var diagnostic=JSON.readTree(Files.readString(Path.of(path+".diagnostic.json")));
+            assertEquals(5,diagnostic.path("phases").valueStream().filter(p->p.path("phase").asText().equals("METADATA_TIMEOUT")).count());
+            assertEquals("FLEET_KAFKA_NOT_READY",diagnostic.path("codes").get(0).asText());
+            assertTrue(bootstrap.discardedBytes()>0);assertEquals(0,((Number)leases.status().get("assigned")).intValue());assertTrue(source.accepted.isEmpty());
+        }
+    }
     private Process start(int dbPort,int capacity) throws Exception {return start(dbPort,capacity,false);}
     private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {return start(dbPort,capacity,delayedReport?"DELAY_REPORT":null);}
     private Process start(int dbPort,int capacity,String fixtureMode) throws Exception {
-        Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();reports.add(report);
+        return start(dbPort,capacity,fixtureMode,null);
+    }
+    private Process start(int dbPort,int capacity,String fixtureMode,String bootstrap) throws Exception {
+        Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();
         var command=new ArrayList<>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()));
         if(fixtureMode!=null)command.add(fixtureMode);
-        var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
+        if(bootstrap!=null)command.add(bootstrap);
+        var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+        // 시작에 성공한 process/report만 함께 등록하여 진단이 소유 자원 정리를 막지 않게 한다.
+        children.add(child);reports.add(report);return child;
     }
     private void stop(Process process) throws Exception {process.destroy();assertTrue(process.waitFor(35,TimeUnit.SECONDS));}
     private static void signal(Process process,String name) throws Exception {if(process.isAlive())assertEquals(0,new ProcessBuilder("kill","-"+name,Long.toString(process.pid())).start().waitFor());}

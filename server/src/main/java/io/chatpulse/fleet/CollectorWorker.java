@@ -43,12 +43,22 @@ public final class CollectorWorker implements AutoCloseable {
         if(mode==SourceMode.OFFICIAL_AUTHORIZED||mode==SourceMode.UNOFFICIAL_POC&&limits.capacity()>3)throw new IllegalArgumentException("FLEET_SOURCE_MODE");
         // producer 생성/metadata 대기는 수신 큐를 차지하거나 임대 시간을 소비하기 전에 끝낸다.
         // 이후 broker 장애에는 기존 유한 버퍼와 실패 종료 계약을 그대로 적용한다.
-        try {if(kafka.partitionsFor(topic).isEmpty())throw new IllegalStateException("FLEET_KAFKA_NOT_READY");}
-        catch(RuntimeException failure){throw new IllegalStateException("FLEET_KAFKA_NOT_READY",failure);}
+        awaitKafkaMetadata(kafka,topic);
         this.source=new BudgetedChatSource(source,authority,limits.httpRequests(),limits.httpInterval());
         publisher=new BufferedKafkaPublisher(kafka,topic,new EventCodec(),limits.publisher(),authority);
         try {this.observer=observerFactory.apply(publisher,this.source);}
         catch(RuntimeException|Error failure){publisher.close();throw failure;}
+    }
+    /** 임대·원천 수신 전에만 metadata timeout을 최대5회 시도한다. 실행 중 발행 한도는 바꾸지 않는다. */
+    static void awaitKafkaMetadata(KafkaTemplate<String,byte[]> kafka,String topic) {
+        for(int attempt=1;attempt<=5;attempt++) {
+            try {
+                if(kafka.partitionsFor(topic).isEmpty())throw new IllegalStateException("FLEET_KAFKA_NOT_READY");
+                return;
+            } catch(org.apache.kafka.common.errors.TimeoutException pending) {
+                if(attempt==5)throw new IllegalStateException("FLEET_KAFKA_NOT_READY",pending);
+            } catch(RuntimeException failure){throw new IllegalStateException("FLEET_KAFKA_NOT_READY",failure);}
+        }
     }
     public UUID owner(){return owner;}
     public Map<String,Object> run() {return run(ignored->{ });}

@@ -9,18 +9,20 @@
 
 | 이슈 | 기술 목표 | 상태·선행 조건 |
 |---|---|---|
-| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 완료: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50) 최종 `bde3a47` Claude APPROVE·push40253684968/PR40253689010 SUCCESS 뒤 `c2aeffc`로 develop 병합. 단위147·실제100·하네스20·웹29/31; [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[근거](poc/evidence/trend-recovery-2026-10-26.json) |
-| [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 진행 중: [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51), `bc2ff5b`의 V13 복구16단계·기존 V12 회귀17단계·하네스20개 통과·Claude 정적 APPROVE; [검증](DEPLOYMENT_MIGRATION_VERIFICATION.md)·[근거](poc/evidence/migration-recovery-2026-10-26/summary.json), 최종 문서 HEAD 리뷰/CI 대기 |
-| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
-| [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
-| [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | 대기: 소유한 격리 replica 데이터 손실·새 디스크 복구 |
-| [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 대기: base backup/WAL·복원 목표·Kafka 위치 정렬 |
+| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 완료: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50) 최종 `bde3a47` Claude APPROVE·push40253684968/PR40253689010 성공 후 `c2aeffc`로 병합. [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[정제 근거](poc/evidence/trend-recovery-2026-10-26.json) |
+| [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51): V13 복구16단계·V12 회귀17단계 통과. 44615d0의 Outbox CI 실패 뒤 #52/#54 병합된07f2444를 통합해 최종 게이트 재검증. [검증](DEPLOYMENT_MIGRATION_VERIFICATION.md)·[근거](poc/evidence/migration-recovery-2026-10-26/summary.json) |
+| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 진행: 전체 집계·API uniform/hot/steps와 30분 soak 실제 통과. 실행 결과·최종 리뷰 정리 중(#43 브랜치) |
+| [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | [PR #58](https://github.com/joejaeyoung/jigeumini/pull/58) 실제 시계·DB/원천 분리·인계 시험 통과. 최종 통합 전 선행 #52/#54 반영 필요 |
+| [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | [PR #56](https://github.com/joejaeyoung/jigeumini/pull/56): f992ef1 실제 디스크 재구성7단계·마지막copy유실6단계와 정리 통과. 최종 리뷰·통합 진행 |
+| [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | [PR #57](https://github.com/joejaeyoung/jigeumini/pull/57): 4a6b7a8 실제 physical PITR·재정렬·WAL누락/보존공백12단계와 정리 통과. 최종 리뷰·통합 진행 |
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |
 | [#48 실제 다중 호스트/AZ](https://github.com/joejaeyoung/jigeumini/issues/48) | T08/T10/T15 | #43/#45 및 외부 계정·리전·AZ·예산 필요 |
 | [#49 외부 배포·운영 복구](https://github.com/joejaeyoung/jigeumini/issues/49) | T08/T13/T15/T16 | #42/#43/#46/#47/#48 및 배포 대상·도메인·운영 목표 필요 |
+| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | PR55에 포함되어07f2444로 병합: 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공. [조사](research/OUTBOX_READINESS.md)·[근거](poc/evidence/outbox-readiness-2026-10-26.json). 원래 CI 원인 미확정; PR51 통합 후 최종 CI 조건 확인 중 |
+| [#54 수집기 시작 진단·CI 인계](https://github.com/joejaeyoung/jigeumini/issues/54) | T08/T14 | 완료: PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공 후07f2444로 병합. 최종CI 단위151·실제125(Fleet13). [조사](research/FLEET_STARTUP.md)·[근거](poc/evidence/fleet-startup-2026-10-26.json)·[최종 게이트](poc/evidence/fleet-startup-final-gates-2026-10-26.json). 과거 CI 원인 미확정 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
-이번 검증을 위해 개발 Kafka/PostgreSQL을 다시 기동했다. 다른 worktree와 서비스는 변경하지 않는다.
+개발 Kafka/PostgreSQL은 필요한 통합 시험 때 기동한다. #46의 자체 격리 실험 전에는 자원 여유를 위해 개발 서비스만 볼륨 보존하여 종료했다. 다른 worktree와 서비스는 변경하지 않는다.
 
 ## 전체 코드 구조 개선 #39
 
@@ -145,13 +147,13 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T05 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 검증됨 | [고정/증설·복수 producer·늦은 시각](pipeline/EXPERIMENTS_VERIFICATION.md), [카테고리 결합](api/CATEGORIES_VERIFICATION.md) | 로컬3partition에서 채널 배치·append/eventTime 차이, 동일UUID 재전달·두producer bucket 정합성, 실제3→6증설의 키 이동·기존manifest 거부 | 실방송 전역 순서/외부 원천 중복 제거 보장이 아님; 운영 증설은 별도 이행 |
 | T07 | 검증됨 | [균등/80% 편향·shard 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 동일입력30000/물리30300, channelId/shard3의 partition·lag·p95/p99·DB/replay 대조; 현재 제품키 channelId 유지 결정 | 단일호스트·단회 측정. shard는 품질/offset 계약 이행 전 제품 채택 안 함 |
-| T08 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | 전체 제품 projection의 동시 부하·자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인 |
+| T08 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json)  #54 초기 bootstrap timeout의 제한 재시도·복구/유한 실패는 [조사](research/FLEET_STARTUP.md) 범위로 추가 검증.| partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한 | 전체 제품 projection의 동시 부하·자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인 |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절 | 원래디스크복귀범위; 유일replica디스크영구손실·AZ내구성미검증 |
 | T11 | 검증됨 | [실제 broker PAUSE/STOP·버퍼/메모리](pipeline/EXPERIMENTS_VERIFICATION.md), [품질 계측](api/QUALITY_RANKINGS.md#검증-범위), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 상한1000 부하·상한30 장애, 물리 accepted=ACK+unconfirmed·전량 거절, JVM heap/RSS·미확인 나이·종료 계측 경계 | [제품 한도·callback/종료·합성 공정성 검증](pipeline/PUBLISHER_VERIFICATION.md). JVM 강제 종료의 메모리 입력 복원 불가 |
 | T12 | 검증됨 | [직렬/비동기 동일입력 대조](pipeline/EXPERIMENTS_VERIFICATION.md) | 100/s1500개 통제 대조와500/s목표 비교, request/batch·p95/p99·메모리·계수·순서·replay. 비동기 후보 채택 | [제품 적용·채널 공정성과 callback/종료 검증](pipeline/PUBLISHER_VERIFICATION.md). 앱창과 Kafka request inflight는 별개 |
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의/공식 채팅 수신은 미검증. 수집기 임대 연결은 T14 근거 참조 |
-| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
+| T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json)  #54 초기 bootstrap timeout의 제한 재시도·복구/유한 실패는 [조사](research/FLEET_STARTUP.md) 범위로 추가 검증.| 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
 | T16 | 부분 검증 | [새 V13 적용·V12 복원](DEPLOYMENT_MIGRATION_VERIFICATION.md), [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·후속 #42 포함 관측8회17.105~26.540초(코드/검사강도 차이·운영RTO 아님) | 후속 #42에서 시험 V13 DDL 실패/중단 rollback·구 이미지 거부·V12 백업 복원/새6group재생·집계20/알림2 일치. 로컬RF1·합성 범위이며 일반 파괴적 migration·WAL PITR·외부배포/운영SLA는 미검증 |
 <!-- tech-status:end -->

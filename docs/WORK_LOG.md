@@ -263,3 +263,38 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - Standards의 초기heuristic1건과 Spec의 초기차단1건을 해소했고 bc2ff5b는 둘 다 남은지적0이다. Claude 정적리뷰도 APPROVE다. 비차단의10초JDBC timeout/느린호스트 kill창, 코드에서 파생된설정값/결과, 실제SQLSTATE미수집·marker판정범위를 검증문서에 명시한다. 최종문서HEAD Claude/push/PR CI는 PR51게이트에서 확인한다. T16은 WAL PITR·외부운영 등이남아 부분검증을 유지한다.
 
 - #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.
+
+### 2026-10-26 Outbox 거부 시험 준비 보완 #52
+
+F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외를 기대했으나 반환했다. 동일 HEAD push40254939425는 성공했다. 로컬 최소 하네스는 동적 변경20/생성 시 제한20 모두277byte 입력을64byte 한도에서 거부하여 원래 CI 실패를 재현하지 못했다. 실패 시 반환값/실제 producer 오류를 수집하지 않아 원인을 확정하지 않는다.
+
+시험 topic 생성 시64byte 제한을 함께 지정하고, 동일 topic·같은 필드 구성의 payload를 사용한 별도 실제 producer 제어 발행에서 RecordTooLargeException·offset0을 확인한 뒤 outbox를 호출한다. Outbox 자체는 하위 원인을 숨기는 기존 일반 오류 계약으로 확인하며, pending/offset/반환값을 정제 진단에 남긴다. 기본 크기 복구 뒤에는 OUTBOX_DELIVERY_UNAVAILABLE만15초 한도에서 재시도하며 성공/잘못된 pending/다른 오류를 구분한다. 독립 schema/topic20회 반복으로 거부→복구→추가 발행 없음까지 대조한다. 제품 코드는 바꾸지 않는다.
+
+사전 리팩토링 검토 Standards0/Spec1: 일반 Outbox 오류만으로 실제 broker의 크기 거부를 구별하지 못하는 근거 공백을 제어 발행으로 보완했다. [조사](research/OUTBOX_READINESS.md)에 공식4.1.2 소스와 추론/미재현 범위를 기록했다.
+
+`cb098c0`에서 `./scripts/check` 단위147·하네스20·JAR와 실제 Kafka/PostgreSQL 집중20회가 통과했다(2026-10-26 02:09:52 UTC 시작, 12.692초). 매회 독립 topic/schema로 실제 크기 거부, pending 유지·end0, 복구 뒤 end1·pending 해제·추가 발행 없음을 확인했다. 이번 fixture payload는276byte이며 사전 최소 probe의277byte와 구분한다. 복구 재시도는20회 모두0회였다. [정제 근거](poc/evidence/outbox-readiness-2026-10-26.json)에 원본 hash를 남겼다. 보완 후 Standards/Spec은 각각 지적0·차단0이다. 최종 Claude와 push/PR CI는 병합 게이트로 별도 확인한다.
+
+최종 리뷰 `b654ea4`는 Claude APPROVE였다. 비차단 의견의 근거 시각 중복 Z·숫자 타입을 정정하고, 제어 payload가 Outbox DB row를 직접 읽은 값은 아니라는 표현을 명확히 했다. 최종 commit은 다시 리뷰와 CI를 확인한다.
+
+
+### 2026-10-26 수집기 자식 JVM 시작 진단 #54
+
+F13 → T08/T14. PR51 push40254127191과 PR53 push40258124001의 기존 두 수집기 인계 시험이 연결2/실제1로 실패했다. PR53 최종65ff2d7은 Claude APPROVE와 PR CI 성공(실제119개)이지만 push 실패로 병합하지 않았다. 실패 시 한 자식의 정상 보고서만 있어 생성자 예외인지 실행 중 상실인지 아직 확정하지 않는다.
+
+수집기 fixture에 시작 단계·단조 경과 시간·예외 타입 체인·허용 코드만 쓰는 진단을 추가하고, 부모는 종료코드와 보고서 유무를 함께 남긴다. 기존 인계 시험을 독립 topic/schema5회로 관측한다. 이 초기 단계에서는 producer 최초 metadata 조회2초 제한을 가설로 두고 정책을 유지했다. 이후 별도 실제 bootstrap 차단에서 관측한 timeout 경계에 근거해 시작 견고성을 보완했으며, 과거 CI 내부 원인 규명으로 취급하지 않는다. #43의 30분 부하 측정 중에는 로컬 중량 빌드를 겹치지 않고 원격 CI로 관측한다.
+
+
+### #54 실제 초기 bootstrap 차단과 제한 재시도
+
+2026-10-26 · F13 → T08/T14. `ae01064`에서 실제 Kafka bootstrap TCP 응답을 버려 metadata2,008ms timeout·자식 종료1·보고서 누락을 재현했다. `ea3eb34`는 임대 전 TimeoutException만 최대5회 시도한다. 경로 복구 후 ACK10/ledger 일치와 영구 차단 후 timeout5회·임대/원천0을 확인했다. 과거 CI의 내부 원인은 계속 미확정이며 동일 원인으로 단정하지 않는다.
+
+`./scripts/check` 단위151·하네스20·JAR와 실제 Fleet13개(독립 인계5회)가 통과했다. 시작02:45:55.384 UTC·85.412초다. [조사](research/FLEET_STARTUP.md)와 [근거](poc/evidence/fleet-startup-2026-10-26.json)에 실패/성공 revision을 분리했다. Spec 지적0, Standards P2의 진단 오류로 cleanup 누락 가능성은 `f0b2fcf`에서 진단 오류 격리와 process/report 등록 순서로 수정했다. 제품 metadata 경계만 작게 추출하며 실행 중 발행 한도를 변경하지 않았다.
+
+후속 `f0b2fcf`도 단위151·하네스20·JAR 통과, Standards 재검토 차단0이다. 실제 Fleet13 실행 revision은 ea3eb34로 유지한다. 최종 Claude·push/PR CI 확인 뒤 PR55에 포함된 #52까지 통합한다.
+
+
+### #42 선행 시험 보완 통합
+
+PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI 단위151·실제125(Fleet13) 확인 후07f2444로 develop 병합했다. PR53도 포함된commit으로 GitHub에서병합상태가되었다. #54는완료·보드Done, #52는PR51최종CI조건을계속확인한다.
+
+#42에07f2444를통합했다. STATUS/WORK_LOG의충돌은각실행의revision/근거를보존하고현재상태로합쳤다. migration코드·fixture는불변이다. 기존44615d0 승인과실제리허설결과를유지하되새HEAD의check·Claude·push/PR CI를다시확인한다.

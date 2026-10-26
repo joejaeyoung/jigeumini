@@ -1,0 +1,443 @@
+{
+  "issue": 52,
+  "technicalGoals": [
+    "T03",
+    "T08",
+    "T10"
+  ],
+  "features": [
+    "F07",
+    "F09"
+  ],
+  "executedAt": "2026-10-26T02:09:52.470Z",
+  "revision": "cb098c028a636e9a4e96f59d5300645c7d25401a",
+  "scope": "LOCAL_SYNTHETIC_KAFKA_POSTGRES",
+  "commands": [
+    "./scripts/check",
+    "./gradlew --console=plain :server:integrationTest --tests 'io.chatpulse.notifications.NotificationIntegrationTest.brokerRejectionKeepsOutboxPendingUntilRecovery'"
+  ],
+  "unit": {
+    "tests": 147,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "harnessTests": 20,
+  "integration": {
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "time": 12.692
+  },
+  "phaseCounts": {
+    "BROKER_REJECTION_READY": 20,
+    "OUTBOX_REJECTION": 20,
+    "OUTBOX_RECOVERY": 20
+  },
+  "observations": [
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    },
+    {
+      "phase": "BROKER_REJECTION_READY",
+      "failureType": "RecordTooLargeException"
+    },
+    {
+      "phase": "OUTBOX_REJECTION",
+      "limitBytes": 64,
+      "payloadBytes": 276,
+      "publishResult": null,
+      "failureType": "IllegalStateException",
+      "brokerEnd": 0,
+      "pending": true
+    },
+    {
+      "phase": "OUTBOX_RECOVERY",
+      "brokerEnd": 1,
+      "retryCount": 0,
+      "pending": false
+    }
+  ],
+  "files": {
+    "server/build/test-results/integrationTest/TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml": {
+      "bytes": 1255109,
+      "sha256": "5cc2bcc3b0ca8f2416e2e1bb8c87797ea0b28bdc987675c2fd096962a8da6474"
+    },
+    "work/remaining-validation/outbox-readiness-check.log": {
+      "bytes": 1778,
+      "sha256": "3a43870edf4e0092c3f08617af83eb88a55223c2253d624f40853f92cb86ef7b"
+    },
+    "work/remaining-validation/outbox-readiness-integration.log": {
+      "bytes": 2778,
+      "sha256": "8f6bfc04782da0f397ffd7144bcf213c92aec52e76001b1533f08d3ea7520c25"
+    },
+    "work/remaining-validation/notification-config-probe.json": {
+      "bytes": 7545,
+      "sha256": "baedfd9278a13a29714b596aff23aa4b8b81e4c67d7b89f1f2a4df1c0204a442"
+    }
+  },
+  "limits": [
+    "Original CI failure was not reproduced in 40 local baseline trials; root cause remains unconfirmed.",
+    "20 isolated cases verify test readiness and outbox rejection/recovery, not all operational broker failures.",
+    "Full final push and PR CI are separate merge gates."
+  ]
+}

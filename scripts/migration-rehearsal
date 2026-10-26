@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 2 ]] || { echo '사용법: ./scripts/migration-rehearsal <시험 이미지 디렉터리> <새 결과 디렉터리>'; exit 2; }
+./gradlew --console=plain :server:testClasses >&2
+exec python3 scripts/migration-rehearsal.py "$@"

@@ -1,0 +1,42 @@
+{
+  "issue": 44,
+  "featureIds": [
+    "F13"
+  ],
+  "technicalIds": [
+    "T02",
+    "T11",
+    "T14"
+  ],
+  "scope": "ACTUAL_TWO_JVM_AND_REAL_KAFKA_POSTGRES_SYNTHETIC_SOURCE_ON_GITHUB_ACTIONS",
+  "revision": "94da3ad10fabea321d8ab16a0624e2a3184b9112",
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration"
+  ],
+  "runs": [
+    {
+      "run": 40260027568,
+      "event": "push",
+      "evidence": "push.json",
+      "overallConclusion": "SUCCESS",
+      "fleetPassed": 14,
+      "newBoundaryCasesPassed": 7
+    },
+    {
+      "run": 40260031297,
+      "event": "pr",
+      "evidence": "pr.json",
+      "overallConclusion": "FAILURE_EXISTING_OUTBOX_TEST",
+      "fleetPassed": 14,
+      "newBoundaryCasesPassed": 7
+    }
+  ],
+  "limitations": [
+    "Clock 주입이며 OS/NTP 자체를 바꾸지 않음",
+    "수집기2프로세스 검증과 동일 JVM producer barrier3개를 구분",
+    "broker fencing이 아닌 협력 worker의 마지막 permit 검사이며 검사 후 send 경합은 ACK 가능",
+    "합성 원천 공백1건은 복원되지 않음",
+    "이 CI는 #52/#54 통합 전; 최종 병합 게이트 별도"
+  ]
+}

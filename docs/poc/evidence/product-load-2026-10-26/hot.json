@@ -1,0 +1,1457 @@
+{
+  "scope": "SINGLE_HOST_RF1_WHOLE_PRODUCT_SYNTHETIC_LOAD",
+  "profile": "hot",
+  "startedAt": "2026-10-26T02:00:56.258494+00:00",
+  "finishedAt": "2026-10-26T02:03:27.812235+00:00",
+  "correct": true,
+  "cleanupComplete": true,
+  "sensitiveArtifactsRemoved": true,
+  "probeExitCode": 0,
+  "probeOomKilled": false,
+  "fixtureClasses": {
+    "ProductLoadFixture$Plan.class": "765c8ec971885eb8c053a83418e70838cf9106c903eafda53db140eee922305e",
+    "ProductLoadFixture$Stage.class": "27dfe55819f8ce17821ae3f5dde4e5a9f3fd55140083af8e2d09d6b0c21e4494",
+    "ProductLoadFixture.class": "e15db1a0f9fa84d1448e4a72cb25889b0c7f5c5d07eaffd9890400a7df90566b",
+    "ProductLoadMeasurements.class": "fd5696d15dcb21f9b98c1d3266ab05000b693475d7c3c974a045e13c0643f1f7",
+    "ProductLoadProbe.class": "d4afe6e82a54ce84f4205b510333394c16169105ca546d7e1a76608c9be83a72"
+  },
+  "loadContract": {
+    "channels": 20,
+    "seed": 20261026,
+    "durationSeconds": 120,
+    "faultAtSeconds": -1,
+    "faultSeconds": 0,
+    "resources": "deploy/compose.yaml limits; separate probe JVM Xmx384m in api service limits",
+    "jmx": "ISOLATED_INTERNAL_TEST_NETWORK_ONLY"
+  },
+  "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+  "images": {
+    "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+        "id": "sha256:d306c1278bcbf5c2b307aafe4026d6aefb17272d00cd39944a14f45500e839ee",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+        "id": "sha256:dc6b6773d06782bdc6fd57258fb405927dc79105eada2e4023808c6be3cd21ad",
+        "sizeBytes": 26068435,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "command": "./scripts/product-load work/remaining-validation/product-load-images-05.json hot work/remaining-validation/product-load-hot-05",
+  "analysisRevision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+  "clockBrackets": null,
+  "clockBracketMeaning": "INTERVAL_BOUND_WITH_ROUND_TRIP_UNCERTAINTY; NOT_EXACT_SKEW_OR_PROOF_OF_ABSOLUTE_SKEW_UNDER_250MS",
+  "files": {
+    "result.json": {
+      "bytes": 268420,
+      "sha256": "9dba622ce69fe5343abcb5db1901def2be71fe6b6c8359e6b26e601eb0916cc4"
+    },
+    "probe-output/load.json": {
+      "bytes": 145364,
+      "sha256": "60d80e2ed0985e4fc2ca6a3be6ace569aef7dc9a4c19ca90cbf97b8eef76a7d2"
+    },
+    "probe-output/offsets.jsonl": {
+      "bytes": 718300,
+      "sha256": "289c72509b5b53945ae5f3b6bd898317df2d142a87d218d09462bd98df04c014"
+    }
+  },
+  "phases": [
+    {
+      "name": "PREPARE_PROBE",
+      "startedAt": "2026-10-26T02:00:56.259076+00:00",
+      "passed": true,
+      "seconds": 0.0028303750150371343,
+      "result": {
+        "frozenClasses": 5
+      }
+    },
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-26T02:00:56.262092+00:00",
+      "passed": true,
+      "seconds": 3.0766035000269767,
+      "result": {
+        "dockerMemoryBytes": 8217145344,
+        "hostFreeDiskBytes": 190500556800,
+        "applicationImageUsers": [
+          "10001:10001",
+          "101:101"
+        ],
+        "maximumComposeMemoryBytes": 2617245696
+      }
+    },
+    {
+      "name": "INITIALIZE",
+      "startedAt": "2026-10-26T02:00:59.339091+00:00",
+      "passed": true,
+      "seconds": 11.798000334005337,
+      "result": {
+        "runtimeDdlRejected": true,
+        "runtimeDdlSqlState": "42501",
+        "groupsInitialized": 6,
+        "sourcesBound": 4
+      }
+    },
+    {
+      "name": "ANALYZER_IMAGE",
+      "startedAt": "2026-10-26T02:01:11.137768+00:00",
+      "passed": true,
+      "seconds": 11.446013791981386,
+      "result": {
+        "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+        "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+        "ready": true
+      }
+    },
+    {
+      "name": "RUNTIME_BOUNDARIES",
+      "startedAt": "2026-10-26T02:01:22.584494+00:00",
+      "passed": true,
+      "seconds": 0.5931557079893537,
+      "result": {
+        "api": {
+          "user": "10001:10001",
+          "readOnlyRoot": true,
+          "publishedPorts": [],
+          "networkCount": 2
+        },
+        "web": {
+          "user": "101:101",
+          "readOnlyRoot": true,
+          "publishedPorts": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "51863"
+            }
+          ],
+          "networkCount": 2
+        },
+        "postgres": {
+          "user": "",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        },
+        "kafka": {
+          "user": "appuser",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        },
+        "testNetwork": {
+          "apiNetworksInternal": true,
+          "jmxPublished": false,
+          "apiJvmArguments": [
+            "-Xms64m",
+            "-Xmx384m"
+          ],
+          "probeHeapMaxBytes": 402653184,
+          "apiMemoryLimitBytes": 671088640,
+          "apiNanoCpus": 1000000000
+        }
+      }
+    },
+    {
+      "name": "PRODUCT_LOAD",
+      "startedAt": "2026-10-26T02:01:23.178267+00:00",
+      "passed": true,
+      "seconds": 121.76482224999927,
+      "result": {
+        "correct": true,
+        "unique": 12000,
+        "physical": 12120,
+        "inputSeconds": 120.002677097,
+        "drainSeconds": 0.010911208
+      }
+    },
+    {
+      "name": "FINAL_GRACEFUL_STOP",
+      "startedAt": "2026-10-26T02:03:24.944749+00:00",
+      "passed": true,
+      "seconds": 1.2783908749988768,
+      "result": {
+        "seconds": 1.2783738330181222,
+        "exitCode": 143,
+        "oomKilled": false
+      }
+    }
+  ],
+  "plan": {
+    "name": "hot",
+    "stages": [
+      {
+        "name": "hot",
+        "seconds": 120,
+        "eventsPerSecond": 100,
+        "hot": true
+      }
+    ],
+    "faultAtSeconds": -1,
+    "faultSeconds": 0
+  },
+  "seed": 20261026,
+  "channels": 20,
+  "inputContract": {
+    "outboxIntervalSeconds": 30,
+    "observationIntervalSeconds": 30,
+    "observationTtlSeconds": 120,
+    "duplicateEvery": 100,
+    "sampleIntervalSeconds": 5,
+    "eventTime": "FIXED_BASE_PLUS_SCHEDULE",
+    "outboxSource": "SYNTHETIC_SQL_SEED",
+    "sourceSessions": "SYNTHETIC_COLLECTION_TELEMETRY"
+  },
+  "inputSeconds": 120.002677097,
+  "maximumPacingDelayMillis": 794.2375,
+  "expectedUnique": 12000,
+  "expectedPhysical": 12120,
+  "expectedObservations": 80,
+  "expectedOutbox": 4,
+  "drainSeconds": 0.010911208,
+  "reconciliation": {
+    "rankingLedger": {
+      "expectedRows": 12000,
+      "sha256": "1dac51536a1d5fbb02c9eadb5da0a1bd9cf834b30b854a828666ee340bac46b0",
+      "actualRows": 12000
+    },
+    "rankingBuckets": {
+      "expectedRows": 260,
+      "sha256": "660c81af503fc97248e78f19fa7aa92b5951dc1b2e9e58584f51407069e67ef5",
+      "actualRows": 260
+    },
+    "ranking-trendLedger": {
+      "expectedRows": 12000,
+      "sha256": "1dac51536a1d5fbb02c9eadb5da0a1bd9cf834b30b854a828666ee340bac46b0",
+      "actualRows": 12000
+    },
+    "ranking-trendBuckets": {
+      "expectedRows": 260,
+      "sha256": "660c81af503fc97248e78f19fa7aa92b5951dc1b2e9e58584f51407069e67ef5",
+      "actualRows": 260
+    },
+    "category_event": {
+      "expectedRows": 12000,
+      "sha256": "1dac51536a1d5fbb02c9eadb5da0a1bd9cf834b30b854a828666ee340bac46b0",
+      "actualRows": 12000
+    },
+    "report_event": {
+      "expectedRows": 12000,
+      "sha256": "1dac51536a1d5fbb02c9eadb5da0a1bd9cf834b30b854a828666ee340bac46b0",
+      "actualRows": 12000
+    },
+    "categoryBuckets": {
+      "expectedRows": 260,
+      "sha256": "58e163224398473affc1715a73275cf6c175574396e48deb1aeeacec68f52ba6",
+      "actualRows": 260
+    },
+    "reportBuckets": {
+      "expectedRows": 260,
+      "sha256": "660c81af503fc97248e78f19fa7aa92b5951dc1b2e9e58584f51407069e67ef5",
+      "actualRows": 260
+    },
+    "broadcast_observation": {
+      "expectedRows": 80,
+      "sha256": "a4850834a271c49dadac3aaa6c7f96556c22464e4ae9c70a5a34c748a3cc0686",
+      "actualRows": 80
+    },
+    "category_observation": {
+      "expectedRows": 80,
+      "sha256": "a4850834a271c49dadac3aaa6c7f96556c22464e4ae9c70a5a34c748a3cc0686",
+      "actualRows": 80
+    },
+    "report_observation": {
+      "expectedRows": 80,
+      "sha256": "a4850834a271c49dadac3aaa6c7f96556c22464e4ae9c70a5a34c748a3cc0686",
+      "actualRows": 80
+    },
+    "spike_event": {
+      "idsSha256": "14fe566c0d7f5bd8e7c9d77a6f444e11f214106bb56709bebcf1db1cb72353cf",
+      "expected": 4,
+      "actual": 4
+    },
+    "spike_outbox": {
+      "idsSha256": "14fe566c0d7f5bd8e7c9d77a6f444e11f214106bb56709bebcf1db1cb72353cf",
+      "expected": 4,
+      "actual": 4
+    },
+    "notification_event": {
+      "idsSha256": "14fe566c0d7f5bd8e7c9d77a6f444e11f214106bb56709bebcf1db1cb72353cf",
+      "expected": 4,
+      "actual": 4
+    }
+  },
+  "receivedToTransactionTimestampMillis": {
+    "ranking": {
+      "records": 12000,
+      "p50": 8.6,
+      "p95": 69.74229999999994,
+      "p99": 148.6878099999999,
+      "maximum": 185.979
+    },
+    "ranking-trend": {
+      "records": 12000,
+      "p50": 8.626,
+      "p95": 70.00499999999997,
+      "p99": 146.90355999999983,
+      "maximum": 270.576
+    }
+  },
+  "healthyRankingEntries": 100,
+  "publisherFinal": {
+    "complete": true,
+    "accepted": 12120,
+    "acknowledged": 12120,
+    "peakPending": 50,
+    "rejected": 0,
+    "unconfirmed": 0,
+    "untrackedRejected": 0,
+    "peakInFlight": 41,
+    "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+    "attempted": 12120,
+    "limits": {
+      "capacity": 1000,
+      "channelCapacity": 500,
+      "maxInFlight": 64
+    },
+    "queued": 0,
+    "failureCode": "NONE",
+    "failedCallbacks": 0,
+    "inFlight": 0,
+    "mode": "KAFKA",
+    "failedUnconfirmed": 0
+  },
+  "measurementCoverage": {
+    "offsetSamples": 118,
+    "offsetCompleteSamples": 118,
+    "offsetSuccessRatio": 1.0,
+    "normalSlowSamples": 24,
+    "databaseSuccessRatio": 1.0,
+    "analyzerHeapSuccessRatio": 1.0,
+    "generatorHeapSuccessRatio": 1.0,
+    "generatorRssSuccessRatio": 1.0,
+    "resourceSamples": 10,
+    "analyzerRssSuccessRatio": 1.0,
+    "requiredSuccessRatio": 0.9,
+    "minimumOffsetSamples": 96,
+    "minimumResourceSamples": 6,
+    "apiRecordedRatio": 1.0,
+    "slowTimeCoverage": {
+      "windowSeconds": 10,
+      "completeNormalWindows": 12,
+      "normalWindows": 12,
+      "completeNormalWindowRatio": 1.0,
+      "maximumNormalGapSeconds": 5.808,
+      "allowedNormalGapSeconds": 15,
+      "scope": "FULL_INPUT_WINDOWS_EXCLUDING_FAULT_OVERLAP; GAPS_INCLUDE_NORMAL_EDGES"
+    },
+    "evidenceComplete": true
+  },
+  "apiStatus": {
+    "duringFault": {},
+    "outsideFault": {
+      "200": 192
+    },
+    "healthyOutsideFault": true
+  },
+  "fault": null,
+  "recovery": null,
+  "apiLatencyMillis": [
+    {
+      "path": "/api/status",
+      "scope": "normal",
+      "samples": 24,
+      "min": 2.370917,
+      "p50": 2.984,
+      "p95": 7.207,
+      "p99": 143.239,
+      "max": 183.778083,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/categories",
+      "scope": "normal",
+      "samples": 24,
+      "min": 1.934167,
+      "p50": 32.023,
+      "p95": 55.689,
+      "p99": 60.175,
+      "max": 61.373208,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/channels/00000000000000000000000000000012/reports",
+      "scope": "normal",
+      "samples": 24,
+      "min": 1.81725,
+      "p50": 2.695,
+      "p95": 7.406,
+      "p99": 14.762,
+      "max": 16.860083,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/channels/00000000000000000000000000000012/timeline",
+      "scope": "normal",
+      "samples": 24,
+      "min": 14.536666,
+      "p50": 19.447,
+      "p95": 27.643,
+      "p99": 83.132,
+      "max": 99.669,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/notifications?channels=00000000000000000000000000000012",
+      "scope": "normal",
+      "samples": 24,
+      "min": 1.154333,
+      "p50": 1.911,
+      "p95": 3.74,
+      "p99": 9.575,
+      "max": 11.28675,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/rankings",
+      "scope": "normal",
+      "samples": 24,
+      "min": 1.859917,
+      "p50": 2.655,
+      "p95": 5.088,
+      "p99": 26.701,
+      "max": 33.125084,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/api/v1/spikes",
+      "scope": "normal",
+      "samples": 24,
+      "min": 1.175834,
+      "p50": 1.596,
+      "p95": 3.378,
+      "p99": 9.272,
+      "max": 10.9955,
+      "status": {
+        "200": 24
+      }
+    },
+    {
+      "path": "/readyz",
+      "scope": "normal",
+      "samples": 24,
+      "min": 0.709709,
+      "p50": 1.309,
+      "p95": 1.881,
+      "p99": 3.758,
+      "max": 4.310958,
+      "status": {
+        "200": 24
+      }
+    }
+  ],
+  "normalDatabaseCountQueryMillis": {
+    "samples": 24,
+    "min": 2.916375,
+    "p50": 5.022,
+    "p95": 12.33,
+    "p99": 144.611,
+    "max": 184.059584
+  },
+  "memoryBytes": {
+    "analyzerHeapUsedBytes": {
+      "samples": 24,
+      "min": 31018056,
+      "p50": 38976008.0,
+      "p95": 47775613.2,
+      "p99": 48286766.24,
+      "max": 48427552
+    },
+    "generatorHeapUsedBytes": {
+      "samples": 24,
+      "min": 15580856,
+      "p50": 25998644.0,
+      "p95": 33092919.2,
+      "p99": 33191745.92,
+      "max": 33213848
+    },
+    "generatorRssBytes": {
+      "samples": 24,
+      "min": 151269376,
+      "p50": 179081216.0,
+      "p95": 184846540.8,
+      "p99": 186528112.64,
+      "max": 187015168
+    },
+    "analyzerRssBytes": {
+      "samples": 10,
+      "min": 233238528,
+      "p50": 274192384.0,
+      "p95": 281793945.6,
+      "p99": 283470520.32,
+      "max": 283889664
+    }
+  },
+  "maximumSampledBufferAgeMillis": 0,
+  "minimumHostFreeDiskBytes": 190359769088,
+  "containerCpuPercent": {
+    "api": {
+      "samples": 10,
+      "min": 8.67,
+      "p50": 14.775,
+      "p95": 65.387,
+      "p99": 92.622,
+      "max": 99.43
+    },
+    "kafka": {
+      "samples": 10,
+      "min": 7.49,
+      "p50": 17.1,
+      "p95": 88.334,
+      "p99": 96.683,
+      "max": 98.77
+    },
+    "postgres": {
+      "samples": 10,
+      "min": 7.69,
+      "p50": 9.82,
+      "p95": 61.611,
+      "p99": 90.602,
+      "max": 97.85
+    },
+    "probe": {
+      "samples": 10,
+      "min": 2.32,
+      "p50": 4.875,
+      "p95": 59.551,
+      "p99": 92.43,
+      "max": 100.65
+    }
+  },
+  "partitions": [
+    {
+      "group": "deploy-live",
+      "topic": "chat.received.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 9866,
+      "committed": 9866,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 76.92307692307692,
+            "p50": 81.349,
+            "p95": 89.673,
+            "p99": 90.913,
+            "max": 134.54545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 70.14218009478674,
+            "p50": 81.349,
+            "p95": 89.762,
+            "p99": 102.634,
+            "max": 112.72727272727272
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 8.0,
+            "p99": 9.83,
+            "max": 24
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live",
+      "topic": "chat.received.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 1062,
+      "committed": 1062,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 7.504690431519699,
+            "p50": 8.893,
+            "p95": 9.93,
+            "p99": 10.823,
+            "max": 14.545454545454545
+          },
+          "committed": {
+            "samples": 117,
+            "min": 6.704980842911877,
+            "p50": 8.893,
+            "p95": 10.882,
+            "p99": 11.32,
+            "max": 11.818181818181817
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 1.15,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live",
+      "topic": "chat.received.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 1192,
+      "committed": 1192,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 8.506616257088847,
+            "p50": 9.901,
+            "p95": 11.263,
+            "p99": 11.854,
+            "max": 15.454545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 7.5829383886255926,
+            "p50": 9.901,
+            "p95": 11.893,
+            "p99": 12.601,
+            "max": 12.745098039215685
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-trend",
+      "topic": "chat.received.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 9866,
+      "committed": 9866,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 76.92307692307692,
+            "p50": 81.349,
+            "p95": 89.673,
+            "p99": 90.913,
+            "max": 134.54545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 70.14218009478674,
+            "p50": 81.349,
+            "p95": 89.762,
+            "p99": 102.634,
+            "max": 112.72727272727272
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 8.0,
+            "p99": 9.83,
+            "max": 24
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-trend",
+      "topic": "chat.received.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 1062,
+      "committed": 1062,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 7.504690431519699,
+            "p50": 8.893,
+            "p95": 9.93,
+            "p99": 10.823,
+            "max": 14.545454545454545
+          },
+          "committed": {
+            "samples": 117,
+            "min": 6.704980842911877,
+            "p50": 8.893,
+            "p95": 10.882,
+            "p99": 11.32,
+            "max": 11.818181818181817
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 1.15,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-trend",
+      "topic": "chat.received.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 1192,
+      "committed": 1192,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 8.506616257088847,
+            "p50": 9.901,
+            "p95": 11.263,
+            "p99": 11.854,
+            "max": 15.454545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 7.5829383886255926,
+            "p50": 9.901,
+            "p95": 11.893,
+            "p99": 12.601,
+            "max": 12.745098039215685
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-observations",
+      "topic": "broadcast.observed.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 12,
+      "committed": 12,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-observations",
+      "topic": "broadcast.observed.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 32,
+      "committed": 32,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-observations",
+      "topic": "broadcast.observed.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 36,
+      "committed": 36,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "chat.received.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 9866,
+      "committed": 9866,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 76.92307692307692,
+            "p50": 81.349,
+            "p95": 89.673,
+            "p99": 90.913,
+            "max": 134.54545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 70.14218009478674,
+            "p50": 81.43,
+            "p95": 90.188,
+            "p99": 102.634,
+            "max": 112.72727272727272
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 8.0,
+            "p99": 9.83,
+            "max": 24
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "chat.received.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 1062,
+      "committed": 1062,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 7.504690431519699,
+            "p50": 8.893,
+            "p95": 9.93,
+            "p99": 10.823,
+            "max": 14.545454545454545
+          },
+          "committed": {
+            "samples": 117,
+            "min": 6.704980842911877,
+            "p50": 8.885,
+            "p95": 10.882,
+            "p99": 11.32,
+            "max": 11.818181818181817
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 1.15,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "chat.received.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 1192,
+      "committed": 1192,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 8.506616257088847,
+            "p50": 9.901,
+            "p95": 11.263,
+            "p99": 11.854,
+            "max": 15.454545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 7.5829383886255926,
+            "p50": 9.901,
+            "p95": 11.893,
+            "p99": 12.598,
+            "max": 12.745098039215685
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 2.0,
+            "max": 3
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "broadcast.observed.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 12,
+      "committed": 12,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "broadcast.observed.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 32,
+      "committed": 32,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-categories",
+      "topic": "broadcast.observed.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 36,
+      "committed": 36,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "chat.received.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 9866,
+      "committed": 9866,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 76.92307692307692,
+            "p50": 81.349,
+            "p95": 89.673,
+            "p99": 90.913,
+            "max": 134.54545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 7.590132827324478,
+            "p50": 81.43,
+            "p95": 90.206,
+            "p99": 171.873,
+            "max": 259.14935707220576
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 10.9,
+            "p99": 120.11,
+            "max": 180
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "chat.received.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 1062,
+      "committed": 1062,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 7.504690431519699,
+            "p50": 8.893,
+            "p95": 9.93,
+            "p99": 10.823,
+            "max": 14.545454545454545
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.9487666034155597,
+            "p50": 8.885,
+            "p95": 10.893,
+            "p99": 17.533,
+            "max": 28.68447082096934
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 12.66,
+            "max": 19
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "chat.received.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 1192,
+      "committed": 1192,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 8.506616257088847,
+            "p50": 9.901,
+            "p95": 11.263,
+            "p99": 11.854,
+            "max": 15.454545454545453
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.9487666034155597,
+            "p50": 9.891,
+            "p95": 11.893,
+            "p99": 20.848,
+            "max": 32.640949554896146
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 2.0,
+            "p99": 15.0,
+            "max": 24
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "broadcast.observed.v1",
+      "partition": 0,
+      "begin": 0,
+      "end": 12,
+      "committed": 12,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 2.956,
+            "max": 2.9791459781529297
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "broadcast.observed.v1",
+      "partition": 1,
+      "begin": 0,
+      "end": 32,
+      "committed": 32,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 7.882,
+            "max": 7.94438927507448
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-reports",
+      "topic": "broadcast.observed.v1",
+      "partition": 2,
+      "begin": 0,
+      "end": 36,
+      "committed": 36,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 8.868,
+            "max": 8.937437934458789
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-notifications",
+      "topic": "chat.received.v1.spikes",
+      "partition": 0,
+      "begin": 0,
+      "end": 2,
+      "committed": 2,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.764,
+            "max": 0.99304865938431
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.764,
+            "max": 0.99304865938431
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-notifications",
+      "topic": "chat.received.v1.spikes",
+      "partition": 1,
+      "begin": 0,
+      "end": 2,
+      "committed": 2,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.831,
+            "max": 0.9910802775024778
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.831,
+            "max": 0.9910802775024778
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    },
+    {
+      "group": "deploy-live-notifications",
+      "topic": "chat.received.v1.spikes",
+      "partition": 2,
+      "begin": 0,
+      "end": 0,
+      "committed": 0,
+      "lag": 0,
+      "sampledByPhase": {
+        "hot": {
+          "input": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "committed": {
+            "samples": 117,
+            "min": 0.0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0.0
+          },
+          "lag": {
+            "samples": 118,
+            "min": 0,
+            "p50": 0.0,
+            "p95": 0.0,
+            "p99": 0.0,
+            "max": 0
+          }
+        }
+      }
+    }
+  ],
+  "minuteSamples": [
+    {
+      "minute": 0,
+      "samples": 12,
+      "maxAnalyzerHeapUsedBytes": 46722504,
+      "maxGeneratorRssBytes": 179806208,
+      "maximumBufferAgeMillis": 0
+    },
+    {
+      "minute": 1,
+      "samples": 12,
+      "maxAnalyzerHeapUsedBytes": 48427552,
+      "maxGeneratorRssBytes": 187015168,
+      "maximumBufferAgeMillis": 0
+    }
+  ]
+}

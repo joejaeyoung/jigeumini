@@ -1,0 +1,1781 @@
+{
+  "scope": "SINGLE_HOST_RF1_SYNTHETIC_MIGRATION_FIXTURE",
+  "owner": "cd1f59704b324417b53109c75e943764",
+  "project": "jigeumini-deploy-cd1f59704b324417b53109c75e943764",
+  "startedAt": "2026-10-26T01:24:10.996062+00:00",
+  "baseline": {
+    "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:01c4cdcd7101c9731365731a5f506411e2b9b695f7017895fc0bb7d2ba0550b5",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:9daae7177f5fbf80dae17565a96b7d9114e3fbb72b6775578fc8c9ddac4e9092",
+        "sizeBytes": 26068438,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "candidate": {
+    "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "47bf34cceaf0a6caadc37039c71f8849a7bf7aeff1e017369d149b4b1663a7c2",
+    "images": {
+      "server": {
+        "tag": "jigeumini/migration-fixture:candidate-bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:99b4e93d42de2019932cc206079c2c40662cb2c3ddef77fd21e3ada44b98369b",
+        "sizeBytes": 140751667,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:9daae7177f5fbf80dae17565a96b7d9114e3fbb72b6775578fc8c9ddac4e9092",
+        "sizeBytes": 26068438,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH",
+    "fixture": {
+      "kind": "candidate",
+      "version": "13",
+      "sqlSha256": "35e1396e075a660748a51c4cb6f2ccdeff4ff7fb35856c7a5adc2deab4c89a10",
+      "baselineImageId": "sha256:01c4cdcd7101c9731365731a5f506411e2b9b695f7017895fc0bb7d2ba0550b5",
+      "baselineBuildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+      "buildIdAlgorithm": "sha256(migration-fixture-v1 NUL baselineBuildId NUL sqlSha256)",
+      "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+    }
+  },
+  "phases": [
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-26T01:24:10.996996+00:00",
+      "result": {
+        "dockerMemoryBytes": 8217145344,
+        "hostFreeDiskBytes": 190790320128,
+        "applicationImageUsers": [
+          "10001:10001",
+          "101:101"
+        ],
+        "maximumComposeMemoryBytes": 2617245696
+      },
+      "passed": true,
+      "seconds": 3.412522416008869
+    },
+    {
+      "name": "INITIALIZE_V12",
+      "startedAt": "2026-10-26T01:24:14.410095+00:00",
+      "result": {
+        "runtimeDdlRejected": true,
+        "runtimeDdlSqlState": "42501",
+        "groupsInitialized": 6,
+        "sourcesBound": 4
+      },
+      "passed": true,
+      "seconds": 11.539881917007733
+    },
+    {
+      "name": "BASELINE_V12",
+      "startedAt": "2026-10-26T01:24:25.950550+00:00",
+      "result": {
+        "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+        "ready": true
+      },
+      "passed": true,
+      "seconds": 12.039122832997236
+    },
+    {
+      "name": "RUNTIME_BOUNDARIES",
+      "startedAt": "2026-10-26T01:24:37.990427+00:00",
+      "result": {
+        "api": {
+          "user": "10001:10001",
+          "readOnlyRoot": true,
+          "publishedPorts": [],
+          "networkCount": 2
+        },
+        "web": {
+          "user": "101:101",
+          "readOnlyRoot": true,
+          "publishedPorts": [
+            {
+              "HostIp": "127.0.0.1",
+              "HostPort": "53598"
+            }
+          ],
+          "networkCount": 2
+        },
+        "postgres": {
+          "user": "",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        },
+        "kafka": {
+          "user": "appuser",
+          "readOnlyRoot": false,
+          "publishedPorts": [],
+          "networkCount": 1
+        }
+      },
+      "passed": true,
+      "seconds": 0.4864991670183372
+    },
+    {
+      "name": "SEED_BEFORE_BACKUP",
+      "startedAt": "2026-10-26T01:24:38.477702+00:00",
+      "result": {
+        "observationsAcknowledged": 1,
+        "synthetic": true,
+        "outboxCreated": 1,
+        "batch": 0,
+        "chatAcknowledged": 10
+      },
+      "passed": true,
+      "seconds": 1.675424374989234
+    },
+    {
+      "name": "BASELINE_DATA",
+      "startedAt": "2026-10-26T01:24:40.153624+00:00",
+      "result": {
+        "processed_event": {
+          "rows": 20,
+          "sha256": "437c2ec20d2c832b3093f1cc5696db42a37cad511654a872d900a9182899de83"
+        },
+        "chat_bucket_10s": {
+          "rows": 2,
+          "sha256": "90746136e41b0adccab2482a0b8a99db6574e61ca2bbbe77460d613a3fae541c"
+        },
+        "broadcast_observation": {
+          "rows": 1,
+          "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d"
+        },
+        "category_event": {
+          "rows": 10,
+          "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3"
+        },
+        "category_bucket": {
+          "rows": 1,
+          "sha256": "8b86710402299b0bade591dc725ff070426c22b55b8619418835ea0f590ee491"
+        },
+        "report_event": {
+          "rows": 10,
+          "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3"
+        },
+        "report_bucket": {
+          "rows": 1,
+          "sha256": "b632dc45dbf6459766943886c15ab38e0f2f37bd06bc92f1365e02e73163ef1d"
+        },
+        "report_observation": {
+          "rows": 1,
+          "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d"
+        },
+        "notification_event": {
+          "rows": 1,
+          "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438"
+        },
+        "spike_event": {
+          "rows": 1,
+          "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438"
+        },
+        "spike_outbox": {
+          "rows": 1,
+          "sha256": "4bd635bc32e8bf3c47b3b502873150bd5579fe72f856086431485e3acb4280f3"
+        },
+        "rankingCount": 10,
+        "trendCount": 10,
+        "notificationCount": 1,
+        "pendingOutbox": 0
+      },
+      "passed": true,
+      "seconds": 1.0481957499869168
+    },
+    {
+      "name": "BACKUP_V12",
+      "startedAt": "2026-10-26T01:24:41.202419+00:00",
+      "result": {
+        "bytes": 79282,
+        "sha256": "06e620d532a5d69b282e33fb1474ac3289157a7c77ebcf4d1cd99edf35e86dc1",
+        "chat": 10,
+        "pendingOutbox": 1,
+        "schema": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        }
+      },
+      "passed": true,
+      "seconds": 4.061172375018941
+    },
+    {
+      "name": "INTERRUPTED_V13_ROLLBACK",
+      "startedAt": "2026-10-26T01:24:45.264142+00:00",
+      "result": {
+        "exitCode": 137,
+        "ddlAndBackfillReached": true,
+        "markerAttempts": 1,
+        "backendEnded": true,
+        "clientConnectionCheckMillis": 1000,
+        "schemaBefore": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        },
+        "schemaAfter": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        },
+        "businessSnapshotUnchanged": true
+      },
+      "passed": true,
+      "seconds": 6.1643469170085154
+    },
+    {
+      "name": "FAILED_V13_ROLLBACK",
+      "startedAt": "2026-10-26T01:24:51.429087+00:00",
+      "result": {
+        "migrationRejected": {
+          "failed": true,
+          "code": 2
+        },
+        "schemaBefore": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        },
+        "schemaAfter": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        },
+        "businessSnapshotUnchangedBeforeRestart": true,
+        "baselineRestartReady": true,
+        "failedDdlAbsent": true,
+        "ddlAndBackfillReached": true,
+        "markerAttempts": 1,
+        "flywayRepairInvoked": false
+      },
+      "passed": true,
+      "seconds": 19.093172374996357
+    },
+    {
+      "name": "MIGRATE_V13",
+      "startedAt": "2026-10-26T01:25:10.522835+00:00",
+      "result": {
+        "migration": {
+          "migrated": true
+        },
+        "schema": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t",
+            "13|13|SQL|V13__release_probe.sql|-1095343522|t"
+          ],
+          "migrationProbeExists": true,
+          "backfill": [
+            "ranking|deploy-v1|10",
+            "ranking-trend|deploy-v1|10"
+          ]
+        }
+      },
+      "passed": true,
+      "seconds": 2.328505582991056
+    },
+    {
+      "name": "CANDIDATE_V13",
+      "startedAt": "2026-10-26T01:25:12.852156+00:00",
+      "result": {
+        "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "buildId": "47bf34cceaf0a6caadc37039c71f8849a7bf7aeff1e017369d149b4b1663a7c2",
+        "ready": true
+      },
+      "passed": true,
+      "seconds": 11.730214249982964
+    },
+    {
+      "name": "SEED_AFTER_MIGRATION",
+      "startedAt": "2026-10-26T01:25:24.583298+00:00",
+      "result": {
+        "synthetic": true,
+        "observationsAcknowledged": 1,
+        "chatAcknowledged": 10,
+        "batch": 1,
+        "outboxCreated": 0
+      },
+      "passed": true,
+      "seconds": 1.6336267919978127
+    },
+    {
+      "name": "BASELINE_V12_REJECTS_V13",
+      "startedAt": "2026-10-26T01:25:27.435837+00:00",
+      "result": {
+        "baselineRejected": {
+          "exitCode": 2,
+          "oomKilled": false,
+          "diagnosticCode": "SCHEMA_NOT_READY"
+        },
+        "schemaUnchanged": true,
+        "candidateRestartReady": true
+      },
+      "passed": true,
+      "seconds": 19.492841667000903
+    },
+    {
+      "name": "RESTORE_V12_NEW_DATABASE",
+      "startedAt": "2026-10-26T01:25:46.929781+00:00",
+      "result": {
+        "startedAt": "2026-10-26T01:25:48.131775+00:00",
+        "secondsToVerifiedCatchup": 25.163080500002252,
+        "backupChatGap": 10,
+        "chatGapAfterRecovery": 0,
+        "businessSnapshotDifferences": [],
+        "newGroups": 6,
+        "oldGroupsModified": false,
+        "restoredIntoNewDatabase": true,
+        "originalDatabase": "chatpulse",
+        "restoredDatabase": "restored",
+        "alignmentStartRejected": {
+          "exitCode": 2,
+          "oomKilled": false,
+          "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+        },
+        "restoredSchema": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+          ],
+          "migrationProbeExists": false,
+          "backfill": []
+        },
+        "originalSchema": {
+          "versions": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13"
+          ],
+          "history": [
+            "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+            "2|2|SQL|V2__collection_quality.sql|400568744|t",
+            "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+            "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+            "5|5|SQL|V5__projection_failure.sql|65347692|t",
+            "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+            "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+            "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+            "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+            "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+            "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+            "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t",
+            "13|13|SQL|V13__release_probe.sql|-1095343522|t"
+          ],
+          "migrationProbeExists": true,
+          "backfill": [
+            "ranking|deploy-v1|10",
+            "ranking-trend|deploy-v1|10"
+          ]
+        },
+        "runtimeBuildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7"
+      },
+      "passed": true,
+      "seconds": 27.25304512499133
+    },
+    {
+      "name": "RESTORED_BROWSER",
+      "startedAt": "2026-10-26T01:26:14.183461+00:00",
+      "result": {
+        "checks": [
+          {
+            "path": "/",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/explore",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/surges",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/saved",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/notifications",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/categories",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          },
+          {
+            "path": "/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/reports",
+            "status": 200,
+            "refresh": true,
+            "overflow": false,
+            "titleVisible": true,
+            "nosniff": true
+          }
+        ],
+        "reportDetail": {
+          "path": "/reports/b5872bb6-cdb7-3bf8-b97f-ef38d3b23130",
+          "referenceCount": 20,
+          "rendered": true
+        },
+        "apiResponses": [
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/spikes",
+            "status": 200
+          },
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/spikes",
+            "status": 200
+          },
+          {
+            "path": "/api/channels",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/rankings",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/notifications",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/notifications",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/categories",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/categories",
+            "status": 200
+          },
+          {
+            "path": "/api/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/timeline",
+            "status": 200
+          },
+          {
+            "path": "/api/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/timeline",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/reports",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/channels/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/reports",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/reports/b5872bb6-cdb7-3bf8-b97f-ef38d3b23130",
+            "status": 200
+          },
+          {
+            "path": "/api/v1/reports/b5872bb6-cdb7-3bf8-b97f-ef38d3b23130",
+            "status": 200
+          }
+        ],
+        "failedApiRequests": 0,
+        "mobileOverflow": false,
+        "pageErrors": 0,
+        "apiErrorUi": true,
+        "apiRetryRecovered": true,
+        "staticHeadersVerified": true,
+        "revision": {
+          "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434"
+        }
+      },
+      "passed": true,
+      "seconds": 11.373158667003736
+    },
+    {
+      "name": "FINAL_GRACEFUL_STOP",
+      "startedAt": "2026-10-26T01:26:25.557310+00:00",
+      "result": {
+        "seconds": 1.242787583003519,
+        "exitCode": 143,
+        "oomKilled": false
+      },
+      "passed": true,
+      "seconds": 1.2427992089942563
+    }
+  ],
+  "failedCandidate": {
+    "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "2066a4d7cfe70d768f0ca2184a7461fb1b6a6192d77f862af999c60673c5427f",
+    "images": {
+      "server": {
+        "tag": "jigeumini/migration-fixture:failed-bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:430ef3764c84a027df2d315a5764b884973c31f67eb3ee6e06d76e8d67fd241b",
+        "sizeBytes": 140751862,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:9daae7177f5fbf80dae17565a96b7d9114e3fbb72b6775578fc8c9ddac4e9092",
+        "sizeBytes": 26068438,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH",
+    "fixture": {
+      "kind": "failed",
+      "version": "13",
+      "sqlSha256": "44ab378388f06fe429f24200d9b24c282e1ced262bf43816ca6c83c6e7210058",
+      "baselineImageId": "sha256:01c4cdcd7101c9731365731a5f506411e2b9b695f7017895fc0bb7d2ba0550b5",
+      "baselineBuildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+      "buildIdAlgorithm": "sha256(migration-fixture-v1 NUL baselineBuildId NUL sqlSha256)",
+      "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+    }
+  },
+  "interruptedCandidate": {
+    "revision": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "883dc0348ef6bfd48f1c65e9a1a1ce6d5c86c12b9d482fc3355397a41f621e62",
+    "images": {
+      "server": {
+        "tag": "jigeumini/migration-fixture:interrupted-bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:c24b92ace05ea703e5dafe2d6088ead8736a122bd2a8e5d7c445d339d07544ba",
+        "sizeBytes": 140751926,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+        "id": "sha256:9daae7177f5fbf80dae17565a96b7d9114e3fbb72b6775578fc8c9ddac4e9092",
+        "sizeBytes": 26068438,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH",
+    "fixture": {
+      "kind": "interrupted",
+      "version": "13",
+      "sqlSha256": "78296c316b06d9a01b3e1f378eedf0ab3107df414d3cd0fb17dbbf774c5cc9ed",
+      "baselineImageId": "sha256:01c4cdcd7101c9731365731a5f506411e2b9b695f7017895fc0bb7d2ba0550b5",
+      "baselineBuildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+      "buildIdAlgorithm": "sha256(migration-fixture-v1 NUL baselineBuildId NUL sqlSha256)",
+      "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+    }
+  },
+  "syntheticEventBase": "2026-10-26T01:22:38+00:00",
+  "backupSnapshot": {
+    "processed_event": {
+      "sha256": "437c2ec20d2c832b3093f1cc5696db42a37cad511654a872d900a9182899de83",
+      "rows": 20
+    },
+    "chat_bucket_10s": {
+      "sha256": "90746136e41b0adccab2482a0b8a99db6574e61ca2bbbe77460d613a3fae541c",
+      "rows": 2
+    },
+    "broadcast_observation": {
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+      "rows": 1
+    },
+    "category_event": {
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+      "rows": 10
+    },
+    "category_bucket": {
+      "sha256": "8b86710402299b0bade591dc725ff070426c22b55b8619418835ea0f590ee491",
+      "rows": 1
+    },
+    "report_event": {
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3",
+      "rows": 10
+    },
+    "report_bucket": {
+      "sha256": "b632dc45dbf6459766943886c15ab38e0f2f37bd06bc92f1365e02e73163ef1d",
+      "rows": 1
+    },
+    "report_observation": {
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d",
+      "rows": 1
+    },
+    "notification_event": {
+      "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438",
+      "rows": 1
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "ac12e8d23f9f5787b5e65ff193d909375322699e08e998f8f881e118f60cfa48",
+      "rows": 2
+    },
+    "rankingCount": 10,
+    "trendCount": 10,
+    "notificationCount": 1,
+    "pendingOutbox": 1
+  },
+  "dumpSha256": "06e620d532a5d69b282e33fb1474ac3289157a7c77ebcf4d1cd99edf35e86dc1",
+  "backupSchema": {
+    "versions": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ],
+    "history": [
+      "1|1|SQL|V1__chat_projection.sql|-1967057049|t",
+      "2|2|SQL|V2__collection_quality.sql|400568744|t",
+      "3|3|SQL|V3__buffer_observation.sql|1585710560|t",
+      "4|4|SQL|V4__replay_run.sql|-1418273441|t",
+      "5|5|SQL|V5__projection_failure.sql|65347692|t",
+      "6|6|SQL|V6__spike_notifications.sql|207584326|t",
+      "7|7|SQL|V7__broadcast_observations.sql|-1392568125|t",
+      "8|8|SQL|V8__category_projection.sql|-1521307666|t",
+      "9|9|SQL|V9__broadcast_reports.sql|-431015998|t",
+      "10|10|SQL|V10__replay_build_identity.sql|-1086802615|t",
+      "11|11|SQL|V11__collector_leases.sql|1448145383|t",
+      "12|12|SQL|V12__deployment_source_identity.sql|-1025071032|t"
+    ],
+    "migrationProbeExists": false,
+    "backfill": []
+  },
+  "expectedSnapshot": {
+    "processed_event": {
+      "rows": 40,
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c"
+    },
+    "chat_bucket_10s": {
+      "rows": 4,
+      "sha256": "5f4259d4f70398850fb126a9ad194f55680298aec569e2a7e9c67fb416e83225"
+    },
+    "broadcast_observation": {
+      "rows": 2,
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76"
+    },
+    "category_event": {
+      "rows": 20,
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0"
+    },
+    "category_bucket": {
+      "rows": 2,
+      "sha256": "c648c35f62d6154a4d7d1fb39e7501edb884da11b39c68d21cd564f65280536b"
+    },
+    "report_event": {
+      "rows": 20,
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0"
+    },
+    "report_bucket": {
+      "rows": 2,
+      "sha256": "fd42def8319f192bf33a4ff70e89b1a681bd9fd4c4c874ccff1ba8e84f73b433"
+    },
+    "report_observation": {
+      "rows": 2,
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76"
+    },
+    "notification_event": {
+      "rows": 2,
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2"
+    },
+    "spike_event": {
+      "rows": 2,
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2"
+    },
+    "spike_outbox": {
+      "rows": 2,
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c"
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "restoredPlanBefore": {
+    "clusterId": "i1Imk9MyQG-xnoMMH5JP6w",
+    "partitions": [
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ],
+    "safeForStartup": false,
+    "recoverableFromRetainedLog": true
+  },
+  "restoredSnapshot": {
+    "processed_event": {
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c",
+      "rows": 40
+    },
+    "chat_bucket_10s": {
+      "sha256": "5f4259d4f70398850fb126a9ad194f55680298aec569e2a7e9c67fb416e83225",
+      "rows": 4
+    },
+    "broadcast_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "category_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "category_bucket": {
+      "sha256": "c648c35f62d6154a4d7d1fb39e7501edb884da11b39c68d21cd564f65280536b",
+      "rows": 2
+    },
+    "report_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "report_bucket": {
+      "sha256": "fd42def8319f192bf33a4ff70e89b1a681bd9fd4c4c874ccff1ba8e84f73b433",
+      "rows": 2
+    },
+    "report_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "notification_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c",
+      "rows": 2
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "restoredPlanAfter": {
+    "recoverableFromRetainedLog": true,
+    "clusterId": "i1Imk9MyQG-xnoMMH5JP6w",
+    "partitions": [
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 3,
+        "databaseNext": 3,
+        "committed": 3,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ],
+    "safeForStartup": true
+  },
+  "originalGroupsAfterRecovery": {
+    "clusterId": "i1Imk9MyQG-xnoMMH5JP6w",
+    "recoverableFromRetainedLog": true,
+    "safeForStartup": true,
+    "partitions": [
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 3,
+        "databaseNext": 3,
+        "committed": 2,
+        "code": "SAFE_OVERLAP"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ]
+  },
+  "correct": true,
+  "sensitiveArtifactsRemoved": true,
+  "cleanupComplete": true,
+  "finishedAt": "2026-10-26T01:26:28.454743+00:00"
+}

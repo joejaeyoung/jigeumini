@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 3 ]] || { echo '사용법: ./scripts/product-load <이미지 manifest> <smoke|uniform|hot|steps|soak> <새 결과 디렉터리>'; exit 2; }
+./gradlew --console=plain :server:testClasses >&2
+exec python3 -B scripts/product-load.py "$@"

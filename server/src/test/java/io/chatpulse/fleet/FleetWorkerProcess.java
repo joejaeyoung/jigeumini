@@ -17,11 +17,15 @@ import tools.jackson.databind.json.JsonMapper;
 public final class FleetWorkerProcess {
     private static final JsonMapper JSON=JsonMapper.builder().build();
     public static void main(String[] args) throws Exception {
+        var diagnostic=new StartupDiagnostic(Path.of(args[4]+".diagnostic.json"));
+        try {execute(args,diagnostic);}catch(Exception|LinkageError failure){diagnostic.failed(failure);throw failure;}
+    }
+    private static void execute(String[] args,StartupDiagnostic diagnostic) throws Exception {
+        diagnostic.phase("STARTING");
         if(org.slf4j.LoggerFactory.getILoggerFactory() instanceof ch.qos.logback.classic.LoggerContext c)c.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).setLevel(ch.qos.logback.classic.Level.OFF);
         Path report=Path.of(args[4]);String mode=args.length>5?args[5]:"NORMAL";
         var clock=new AdjustableClock(args.length>6?Long.parseLong(args[6]):0);
-        var diagnostic=new Diagnostic(report);diagnostic.phase("STARTING");
-        var factory=KafkaSupport.producerFactory("localhost:19092");
+        var factory=KafkaSupport.producerFactory(args.length>7?args[7]:"localhost:19092");
         var producerProbe=new FleetProducerProbe();factory.addPostProcessor(producerProbe::wrap);
         boolean delayedReport=mode.equals("DELAY_REPORT");
         if(mode.equals("DELAY_PRODUCER"))factory.addPostProcessor(producer->{
@@ -31,16 +35,30 @@ public final class FleetWorkerProcess {
                 Files.writeString(Path.of(report+".producer-ready"),"PRODUCER_READY",StandardOpenOption.CREATE_NEW);return producer;}
             catch(Exception failure){producer.close(Duration.ZERO);throw new IllegalStateException("SYNTHETIC_PRODUCER_DELAY_FAILED");}
         });
+        factory.addPostProcessor(producer->{
+            @SuppressWarnings("unchecked") var observed=(org.apache.kafka.clients.producer.Producer<String,byte[]>)java.lang.reflect.Proxy.newProxyInstance(
+                    FleetWorkerProcess.class.getClassLoader(),new Class<?>[]{org.apache.kafka.clients.producer.Producer.class},(proxy,method,values)->{
+                        boolean metadata=method.getName().equals("partitionsFor");
+                        if(metadata)diagnostic.phase("METADATA_REQUEST");
+                        try {var value=method.invoke(producer,values);if(metadata)diagnostic.phase("METADATA_READY");return value;}
+                        catch(java.lang.reflect.InvocationTargetException failure){
+                            if(metadata)diagnostic.phase(failure.getCause() instanceof org.apache.kafka.common.errors.TimeoutException?"METADATA_TIMEOUT":"METADATA_FAILED");
+                            throw failure.getCause();
+                        }
+                    });return observed;
+        });
         try(var ds=PostgresSupport.open(args[0],"chatpulse","local-chatpulse",false)) {
             diagnostic.phase("DATABASE_OPEN");
             var source=new ChatSource(){public String resolveRoom(String channel){return channel;}public String readToken(String room){return "SYNTHETIC_TOKEN";}public URI socketUri(String room){return URI.create("ws://127.0.0.1:"+args[2]);}};
             var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
+            diagnostic.phase("KAFKA_TEMPLATE_READY");
             var invalidMessages=new AtomicLong();
             CollectionObserver fixtureObserver=new CollectionObserver(){public void loss(String channel,Instant from,Instant to,String reason){
                 if(reason.equals("INVALID_MESSAGE"))try {atomic(Path.of(report+".invalid-observed.json"),Map.of("invalidFrames",invalidMessages.incrementAndGet(),"workerInstant",clock.instant().toString()));}
                 catch(Exception failure){throw new IllegalStateException("FIXTURE_OBSERVATION_FAILED");}
             }};
             var limits=new CollectorWorker.Limits(Integer.parseInt(args[3]),Duration.ofSeconds(6),Duration.ofSeconds(delayedReport?1:90),200,Duration.ofMillis(100),new BufferedKafkaPublisher.Limits(30,20,4));
+            diagnostic.phase("WORKER_CONSTRUCTING");
             try(var worker=new CollectorWorker(new CollectorLeases(ds),SourceMode.SYNTHETIC,limits,source,kafka,args[1],(publisher,budget)->fixtureObserver,clock);
                 var control=new ClockControl(report,clock,worker::requestStop)) {
                 atomic(Path.of(report+".ready.json"),Map.of("workerId",worker.owner().toString(),"clockOffsetSeconds",clock.offset.get()));
@@ -52,8 +70,7 @@ public final class FleetWorkerProcess {
                     Files.writeString(report,JSON.writeValueAsString(recorded),StandardOpenOption.CREATE_NEW);diagnostic.phase("REPORT_COMPLETE");
                 }catch(Exception failure){throw new IllegalStateException("FLEET_RESULT_FAILED");}});
             }
-        }catch(Exception failure){diagnostic.failed(failure);throw new IllegalStateException("FLEET_FIXTURE_FAILED");}
-        finally{factory.destroy();}
+        }finally{factory.destroy();}
     }
     private static final class AdjustableClock extends Clock {
         private final AtomicLong offset;private final ZoneId zone;
@@ -79,13 +96,29 @@ public final class FleetWorkerProcess {
         }
         public void close() throws Exception {task.shutdownNow();if(!task.awaitTermination(2,TimeUnit.SECONDS))throw new IllegalStateException("CLOCK_CONTROL_STOP_TIMEOUT");}
     }
-    private static final class Diagnostic {
-        private final Path file;private String phase="STARTING";
-        Diagnostic(Path report){file=Path.of(report+".diagnostic.json");}
-        synchronized void phase(String value) throws Exception {phase=value;atomic(file,Map.of("phase",phase,"observedAt",Instant.now().toString()));}
-        synchronized void failed(Exception failure) throws Exception {atomic(file,Map.of("phase",phase,"observedAt",Instant.now().toString(),"failureType",failure.getClass().getSimpleName(),"code","FLEET_FIXTURE_FAILED"));}
-    }
     private static void atomic(Path path,Object value) throws Exception {
         Path temporary=Path.of(path+".tmp");Files.writeString(temporary,JSON.writeValueAsString(value));Files.move(temporary,path,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);
+    }
+    /** 원문 예외 메시지는 저장하지 않고 단계·경과 시간·타입·고정 코드만 남긴다. */
+    private static final class StartupDiagnostic {
+        private static final Set<String> CODES=Set.of("FLEET_KAFKA_NOT_READY","FLEET_RESULT_FAILED","SYNTHETIC_PRODUCER_DELAY_FAILED","SYNTHETIC_RELEASE_TIMEOUT");
+        private final Path path;private final long started=System.nanoTime();private final List<Map<String,Object>> phases=new ArrayList<>();
+        StartupDiagnostic(Path path){this.path=path;}
+        synchronized void phase(String name) throws java.io.IOException {
+            phases.add(Map.of("phase",name,"elapsedMs",TimeUnit.NANOSECONDS.toMillis(System.nanoTime()-started)));
+            write(List.of(),List.of());
+        }
+        synchronized void failed(Throwable failure) throws java.io.IOException {
+            var types=new ArrayList<String>();var codes=new ArrayList<String>();
+            for(Throwable cause=failure;cause!=null&&types.size()<8;cause=cause.getCause()){
+                types.add(cause.getClass().getName());if(cause.getMessage()!=null&&CODES.contains(cause.getMessage()))codes.add(cause.getMessage());
+            }
+            write(types,codes);
+        }
+        private void write(List<String> types,List<String> codes) throws java.io.IOException {
+            Path temporary=Path.of(path+".tmp");
+            Files.writeString(temporary,JsonMapper.builder().build().writeValueAsString(Map.of("phases",phases,"exceptionTypes",types,"codes",codes)));
+            Files.move(temporary,path,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 }

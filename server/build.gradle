@@ -114,7 +114,7 @@ tasks.register('diskLossExperiment', JavaExec) {
     if (project.hasProperty('diskScenario') && project.hasProperty('diskOutput')) args(project.property('diskScenario'), project.property('diskOutput'))
 }
 
-tasks.register('productLoadFixtures', Copy) {
+tasks.register('productLoadFixtures', Sync) {
     description = '격리 부하 원천의 테스트 전용 WebSocket 의존성 고정'
     dependsOn testClasses
     from(configurations.testRuntimeClasspath) { include 'Java-WebSocket-*.jar' }

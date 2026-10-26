@@ -26,7 +26,10 @@ class ProductLoad(module.Rehearsal):
             'api':{'environment':{'JAVA_TOOL_OPTIONS':'-Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=api -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'},'healthcheck':{'test':['CMD-SHELL',"JAVA_TOOL_OPTIONS= java -Xmx32m -cp '/app/classes:/app/lib/*' io.chatpulse.poc.PocApplication ops probe"]}},
             'load-probe':{'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True}}
         }
-        if self.plan['sourceMode']=='WEBSOCKET':services['synthetic-source']={'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True},'secrets':[],'mem_limit':'256m','cpus':1.0}
+        if self.plan['sourceMode']=='WEBSOCKET':services['synthetic-source']={
+            'image':'${SERVER_IMAGE:?}','read_only':True,'cap_drop':['ALL'],'security_opt':['no-new-privileges:true'],
+            'tmpfs':['/tmp:size=64m'],'networks':['data'],'labels':{'io.jigeumini.deployment.owner':'${DEPLOYMENT_OWNER:?}'},
+            'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True},'mem_limit':'256m','cpus':1.0,'stop_grace_period':'60s'}
         for service,cpus in RESOURCE_PROFILES[self.plan['resourceProfile']].items():services.setdefault(service,{})['cpus']=cpus
         self.overlay.write_text(json.dumps({'services':services}))
         self.frozen_plan.write_text(json.dumps(self.plan))
@@ -104,6 +107,11 @@ class ProductLoad(module.Rehearsal):
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('PROBE_OWNER_MISMATCH')
         if any((info['NetworkSettings']['Ports'] or {}).values()) or not all(n['Internal'] for n in json.loads(self.command(['docker','network','inspect',*info['NetworkSettings']['Networks']]).stdout)):raise RuntimeError('PROBE_EXTERNAL_NETWORK')
+        if service=='synthetic-source':
+            isolation={'secretMounts':sum(m['Destination']=='/run/secrets' or m['Destination'].startswith('/run/secrets/') for m in info['Mounts']),
+                       'pipelineEnvironmentVariables':sum(e.startswith('PIPELINE_') for e in info['Config']['Env'])}
+            self.result['syntheticSourceIsolation']=isolation;self.checkpoint()
+            if any(isolation.values()):raise RuntimeError('SOURCE_CREDENTIALS_INHERITED')
         self.result.setdefault('fixtureResources',{})[service]={k:info['HostConfig'][k] for k in ('Memory','NanoCpus','PidsLimit')}
         return info['Id']
     def load(self):

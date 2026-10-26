@@ -3,7 +3,7 @@ import datetime,hashlib,json,pathlib,sys
 sys.dont_write_bytecode=True
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/"scripts"))
-from product_load_capacity import analyze_capacity,include_runtime_diagnostics
+from product_load_capacity import LIMITS,analyze_capacity,include_runtime_diagnostics
 
 def digest(path):return {'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
 def summarize(directory):
@@ -30,6 +30,7 @@ def summarize(directory):
     result['payloadProfileDefaulted']='payloadProfile' not in plan
     result['seed']=plan.get('seed')
     result['sourceProcess']=run.get('sourceProcess')
+    if 'syntheticSourceIsolation' in run:result['syntheticSourceIsolation']=run['syntheticSourceIsolation']
     result['finalOffsets']={'count':len(load.get('finalOffsets',[])),'totalLag':sum(p['lag'] for p in load.get('finalOffsets',[]) if p.get('lag') is not None)}
     result['reconciliation']=load.get('reconciliation')
     result['measurementErrors']=run.get('measurementErrors',[])
@@ -83,7 +84,7 @@ def main(root,output):
             'analysisCodeSha256':hashlib.sha256((ROOT/'scripts/product_load_capacity.py').read_bytes()).hexdigest(),
             'analysisProvenance':'RECALCULATED_FROM_ORIGINAL_LOAD_SOURCE_AND_OFFSETS; RECORDED_CLASSIFICATION_PRESERVED',
             'technicalIds':['T02','T07','T08','T11','T12','T14','T16'],
-            'environment':environment,'provisionalLimits':next((json.loads((root/r['name']/'result.json').read_text())['capacityAnalysis']['provisionalLimits'] for r in reversed(runs) if 'capacityAnalysis' in json.loads((root/r['name']/'result.json').read_text())),{}),
+            'environment':environment,'provisionalLimits':LIMITS,
             'runs':runs,'limitations':['Public source policies/network/TLS and fleet lease overhead are not measured.','Metadata external fetch is disabled. API load is seven-route mixture on a fresh database.','Collector-probe includes oracle, API client and sampling overhead. Full-table count queries every five seconds are included.','Short fixed-resource limits do not establish cloud/AZ/HA or long-retention capacity.','Direct smoke overlapped correctness regression and is excluded from sizing.']}
     output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');print(json.dumps({'runs':len(runs),'output':str(output),'bytes':output.stat().st_size}))
 if __name__=='__main__':main(pathlib.Path(sys.argv[1]),pathlib.Path(sys.argv[2]))

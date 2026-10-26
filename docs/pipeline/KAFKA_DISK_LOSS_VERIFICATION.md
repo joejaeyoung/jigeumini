@@ -45,3 +45,6 @@ LocalKafkaCluster의 기존 소유권 경계를 재사용하고 readonly disk pr
 두 실행 모두 이번 실행의 container/volume/schema만 정리했다. 기존 개발 데이터·다른 서비스는 유지했다. 최종 source 불가 진단은 일반 metadata/API 실패와 구분하도록 고정 오류와 실제 broker 복귀 조건을 요구한다.
 
 `last-copy`의 `correct=true`는 의도한 손실 경계와 정리 검사가 통과했다는 뜻이며 source 복구 성공이 아니다. `sourceRecoverySucceeded=false`와 tailCopiesRemaining0은 앞선 실제 디스크/입력 대조에서 도출한 판정이다. 조사 사례 D(모든 replica를 빈 디스크로 시작)는 실행하지 않았다. `cleanupComplete`는 소유 container/volume/schema 정리를 뜻하며 gitignored 결과 JSON과 `.probe-classes`의 고정 시험 class는 재현 근거로 남는다.
+
+
+#60을 통합한 `ac934e31e84d1cf8b623c1bc391c0901414f8ae0`의 [기본 검사](../poc/evidence/kafka-disk-loss-2026-10-26/integrated-check.json)는 단위159·하네스24·JAR 통과다. [경로 감사](../poc/evidence/kafka-disk-loss-2026-10-26/path-audit.json)는 실제 실행f992ef1 대비 실험3종·스크립트·replay/pipeline·Gradle·HA Compose·DB 공통·migration/resources 불변을 확인한다. fleet 변경은 승인14816f8과 동일하며 디스크 실험을 ac934e3에서 재실행한 기록은 아니다. 초기 integratedCheck의7e0ca6f 값은 당시 실행 이력으로 보존한다.

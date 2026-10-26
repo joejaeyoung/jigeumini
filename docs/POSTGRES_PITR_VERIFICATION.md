@@ -59,3 +59,6 @@ physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접
 첫 사전 검사 실패는 volume 생성 전이므로 그 결과의 `physicalBackupAndArchiveVolumesRemoved=true`는 생성했던 데이터를 삭제했다는 뜻이 아니라 소유 잔여 자원이 없다는 확인이다. 원본과 커밋된 preflight-failure.json의 SHA256은 같다.
 
 4a6b7a8 대비 통합3986b15의 main resources·deploy 전체(DB 초기화/Dockerfile 포함)·이미지 생성 스크립트·web·루트 Gradle 설정도 불변이다. server/build.gradle은 디스크 시험용 JavaExec task만 추가했고 제품 의존성은 바꾸지 않았다. 44449cd→3986b15는 문서/근거만 변경됐다. 이 경로별 대조는 통합 JAR와 실제 실행한4a6b7a8 이미지의 byte 동일성을 주장하지 않는다.
+
+
+#60 통합과 문서 보완을 포함한 `4e16f50a172afcf975d36f88e5629df4f997c62e`의 [기본 검사](poc/evidence/postgres-pitr-2026-10-26/integrated-check.json)는 단위159·하네스24·JAR 통과다. [경로 감사](poc/evidence/postgres-pitr-2026-10-26/path-audit.json)에 실제 실행4a6b7a8 대비 PITR/배포 실행기·deploy·DeploymentProbe·PocApplication·operations/pipeline/db·resources/web·루트Gradle 불변을 기록했다. #60의 fleet 임대 경로는 이 analyzer/recovery 시나리오와 구분한다. 새 이미지로 PITR를 다시 실행하거나 JAR 전체의 byte 동일성을 확인한 것은 아니다.

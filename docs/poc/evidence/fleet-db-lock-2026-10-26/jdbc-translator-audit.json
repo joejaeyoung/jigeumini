@@ -1,0 +1,6 @@
+{
+  "checkedAt": "2026-10-26T04:37:03.010136+00:00",
+  "jarRevision": "4e16f50a172afcf975d36f88e5629df4f997c62e",
+  "classpathRootErrorCodeOverrides": [],
+  "scope": "실제 실행 JAR와 내장 의존 JAR의 classpath root sql-error-codes.xml 유무를 확인했다. Spring 내장 org/springframework/jdbc/support/sql-error-codes.xml과 구분한다."
+}

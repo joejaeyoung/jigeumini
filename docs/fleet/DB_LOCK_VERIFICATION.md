@@ -31,7 +31,7 @@ DB SQLSTATE 분류는 CollectorLeases의 transaction 완료 경계에 모으고,
 
 ## 고정 코드의 전체 회귀
 
-`ea7da9b326a1cbf7160cb661df289509b2283175`의 `./scripts/check`에서 단위159·하네스24·실행 JAR가 통과했다. 실제 Fleet23개(기존20개와 새3개)를 모두 실행했고 실패/오류0이다. 기존 blackhole 시험은 실제 plan 잠금 뒤 단절을 주입하도록 강화했다. JAR·각 XML·현재 실행에서 만들어진 관측 파일의 SHA256을 [기본 검사](../poc/evidence/fleet-db-lock-2026-10-26/check.json)와 [전체 Fleet 근거](../poc/evidence/fleet-db-lock-2026-10-26/full-fleet.json)에 보관한다. 실행 중 docs만 추가됐고 제품·시험 코드는 고정됐다.
+`ea7da9b326a1cbf7160cb661df289509b2283175`의 `./scripts/check`에서 단위159·하네스24·실행 JAR가 통과했다. 실제 Fleet23개(기존20개와 새3개)를 모두 실행했고 실패/오류0이다. 기존 blackhole 시험의 주입 시점을 실제 plan 잠금 응답 직후로 고정했다. 잠금 없이 tick 사이에 단절되는 별도 blackhole 시험은 이 revision에서 실행하지 않았으며 이전94da3ad의 비고정 주입 근거와 구분한다. JAR·각 XML·현재 실행에서 만들어진 관측 파일의 SHA256을 [기본 검사](../poc/evidence/fleet-db-lock-2026-10-26/check.json)와 [전체 Fleet 근거](../poc/evidence/fleet-db-lock-2026-10-26/full-fleet.json)에 보관한다. 실행 중 docs만 추가됐고 제품·시험 코드는 고정됐다.
 
 [집중 실행 근거](../poc/evidence/fleet-db-lock-2026-10-26/focused.json)의6.228초는 해당 실행의 관측값이다. 전체 회귀의 시각·개별 계수는 별도 근거를 사용하며 운영 RTO 상한으로 일반화하지 않는다. 웹 코드 변경은 없고 전체 push/PR CI에서는 실제 통합 suite와 웹 검증을 다시 확인한다.
 

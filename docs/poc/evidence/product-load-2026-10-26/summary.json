@@ -40,7 +40,7 @@
       "profile": "uniform",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "uniform.json",
-      "sha256": "a3894fdc4e8009ae938eef804c80a1c2d351a633f4b69c6bac2093fe6a516cfd",
+      "sha256": "6f6f991762f79c26d1e163fababd392311c34c26940ab668eba42b86a3721ade",
       "inputSeconds": 120.003576638,
       "unique": 12000,
       "physical": 12120,
@@ -51,14 +51,15 @@
         "partitions": "uniform.json#/partitions",
         "apiLatency": "uniform.json#/apiLatencyMillis",
         "memory": "uniform.json#/memoryBytes",
-        "minuteSamples": "uniform.json#/minuteSamples"
+        "minuteSamples": "uniform.json#/minuteSamples",
+        "cpu": "uniform.json#/containerCpuPercent"
       }
     },
     {
       "profile": "hot",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "hot.json",
-      "sha256": "9a072d425d87814d162458b0714f7e20a0bb936d6a4ccee54563aa9520d7d8a5",
+      "sha256": "2c02412cba4c2b4f80fcc5a144eb144da3244ae3343e72e60c13a57a4221fa77",
       "inputSeconds": 120.002677097,
       "unique": 12000,
       "physical": 12120,
@@ -69,14 +70,15 @@
         "partitions": "hot.json#/partitions",
         "apiLatency": "hot.json#/apiLatencyMillis",
         "memory": "hot.json#/memoryBytes",
-        "minuteSamples": "hot.json#/minuteSamples"
+        "minuteSamples": "hot.json#/minuteSamples",
+        "cpu": "hot.json#/containerCpuPercent"
       }
     },
     {
       "profile": "steps",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "steps.json",
-      "sha256": "46c5cd44bf269cc7c604c0e02102a529e0ab5a44f2f6c38e8045ce464613626b",
+      "sha256": "710707079ec7769e1ec43aaddd8094605a513dd5ebd7a8bdcd6d67a47f055037",
       "inputSeconds": 180.003815165,
       "unique": 21000,
       "physical": 21210,
@@ -87,14 +89,15 @@
         "partitions": "steps.json#/partitions",
         "apiLatency": "steps.json#/apiLatencyMillis",
         "memory": "steps.json#/memoryBytes",
-        "minuteSamples": "steps.json#/minuteSamples"
+        "minuteSamples": "steps.json#/minuteSamples",
+        "cpu": "steps.json#/containerCpuPercent"
       }
     },
     {
       "profile": "soak",
       "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
       "evidence": "soak.json",
-      "sha256": "763cbf287e9da17110d846aad67d6c7cb800f94960eafc3b5c9a7eac18608106",
+      "sha256": "5966df8c26b3c2bb626063d7592e3b0a574181f1f63d2eb34da28276f208bc85",
       "inputSeconds": 1800.007581735,
       "unique": 90000,
       "physical": 90900,
@@ -105,14 +108,15 @@
         "partitions": "soak.json#/partitions",
         "apiLatency": "soak.json#/apiLatencyMillis",
         "memory": "soak.json#/memoryBytes",
-        "minuteSamples": "soak.json#/minuteSamples"
+        "minuteSamples": "soak.json#/minuteSamples",
+        "cpu": "soak.json#/containerCpuPercent"
       }
     },
     {
       "profile": "smoke",
       "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
       "evidence": "smoke.json",
-      "sha256": "478f93372646938367c98f2835ef75684c09638ad90488564a7a198d274db0b4",
+      "sha256": "17ca5bbd529a9f7256d440c846e00b865e561c78980a1d2ca347ff7af5850bc0",
       "inputSeconds": 60.004691152,
       "unique": 1200,
       "physical": 1212,
@@ -123,7 +127,8 @@
         "partitions": "smoke.json#/partitions",
         "apiLatency": "smoke.json#/apiLatencyMillis",
         "memory": "smoke.json#/memoryBytes",
-        "minuteSamples": "smoke.json#/minuteSamples"
+        "minuteSamples": "smoke.json#/minuteSamples",
+        "cpu": "smoke.json#/containerCpuPercent"
       }
     }
   ],
@@ -133,13 +138,20 @@
     "harness": 24,
     "integrationRevision": "0904368441febca2a85195711bdcc9241d1d74a3",
     "actualKafkaPostgres": 100,
-    "scope": "HISTORICAL_COMMAND_RESULTS; FINAL_HEAD_CI_IS_SEPARATE"
+    "scope": "HISTORICAL_COMMAND_RESULTS; FINAL_HEAD_CI_IS_SEPARATE",
+    "integratedCheck": {
+      "revision": "420efa30624deb27cf3b5cc3f9d6cca9c5b4ac6d",
+      "unit": 151,
+      "harness": 24,
+      "jar": "PASS"
+    }
   },
   "review": {
     "soakEntryRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
     "verdict": "APPROVE_FOR_SOAK_ENTRY",
     "session": "e85497ba-6427-4337-ad5a-be04cf0a8342",
-    "finalHeadReviewPending": true
+    "finalHeadReviewPending": true,
+    "finalGateRecord": "PR59 exact final HEAD review/CI comments; entry verdict above is historical"
   },
   "limitations": [
     "ONE_EXECUTION_PER_PROFILE; NOT_A_MAXIMUM_CAPACITY_OR_SLA",
@@ -157,11 +169,17 @@
     "HASH_EXPECTATION_REUSES_PRODUCT_CODEC; RANKING_ORDER_AND_GROWTH_RATE_NOT_INDEPENDENTLY_COMPARED",
     "NOTIFICATION_DUPLICATES_NOT_INJECTED; CHAT_DUPLICATES_ONLY",
     "WHOLE_RUN_LATENCY_QUANTILES_NOT_NORMAL_INTERVAL_QUANTILES; HIGHER_SOAK_P95_CAUSE_UNRESOLVED",
-    "DOCKER_STATS_MEMORY_IS_NOT_RSS; ANALYZER_RSS_FROM_PROC_VM_RSS"
+    "DOCKER_STATS_MEMORY_IS_NOT_RSS; ANALYZER_RSS_FROM_PROC_VM_RSS",
+    "SINGLE_HOST_1CPU_LIMITS_KAFKA_CPU_P99_NEAR_LIMIT_AT_50_PER_S; NOT_SUSTAINABLE_CAPACITY",
+    "CPU_POINT_SAMPLES; CGROUP_THROTTLING_AND_TIME_CORRELATION_UNMEASURED",
+    "OFFSET_POLLING_EIGHT_LOGICAL_ADMIN_CALLS_PER_SECOND_ADDS_OBSERVATION_LOAD",
+    "PARTITION_RATES_AND_LAG_FULL_RUN_INCLUDE_STOP_AND_CATCH_UP",
+    "GENERATOR_PACING_MAX_692.672MS_CAUSE_UNRESOLVED",
+    "UNIFORM_CHAT_DUPLICATES_CONCENTRATED_ON_CHANNEL_INDEX_19"
   ],
   "curation": {
     "script": "scripts/product-load-summary.py",
-    "quantile": "linear interpolation at (N-1)*p; summaries rounded to 3 decimals",
+    "quantile": "curator distributions: linear interpolation at (N-1)*p, rounded to 3 decimals; transaction latency: copied from probe SQL percentile_cont",
     "sourceFilesField": "files in each profile evidence",
     "detailsFields": [
       "partitions",
@@ -170,6 +188,8 @@
       "memoryBytes",
       "minuteSamples"
     ],
-    "dataLocation": "profile evidence paths are relative to this index"
+    "dataLocation": "profile evidence paths are relative to this index",
+    "scriptSha256": "8a2e348b80e0408f7d388e95ab492ef13044a4b819a652be4ab16bf182a747f2",
+    "commandProvenance": "reconstructed from curator arguments, not a contemporaneous shell transcript"
   }
 }

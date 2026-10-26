@@ -335,3 +335,7 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 164f66a의Claude REQUEST_CHANGES는문서/근거범위3건이었다. API는단일순차probe(명목1.6요청/s)이며webproxy·collector를실행하지않고 JMX/healthcheck실험overlay를사용함을명시했다. 실제경로는전역4개·고정채널3개·readyz이며모두단일채널이라는리뷰전제는코드와다르다. soak p95가uniform보다높은원인은미규명으로남기고, 전체quantile을정상구간quantile로바꾸지않는다. 정상/장애분해자료가없어지연안정성주장을하지않는다.
 
 개별근거의files/partitions/apiLatencyMillis/memoryBytes/minuteSamples를색인에명시했다. 해당데이터와원본hash는기존파일에있었으나이전리뷰에첨부되지않았다. 사용한정제스크립트를scripts로보존하고원본5개실행에서공유JSON과동일한지대조한다. 순위/증가율·해시알고리즘자체·알림중복은독립검증에서제외한다. DB count7개는계측부하이며docker stats메모리와VmRSS도구분했다. #42 c34dc2b에포함된#52/#54를통합했으며문서충돌은양쪽이력을보존했다.
+
+### #43 환경 한계·통계 범위 재검토
+
+최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.

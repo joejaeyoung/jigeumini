@@ -47,7 +47,11 @@
     "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
   },
   "command": "./scripts/product-load work/remaining-validation/product-load-images-06.json soak work/remaining-validation/product-load-soak-06",
-  "analysisRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+  "harnessRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+  "curatorSha256": "8a2e348b80e0408f7d388e95ab492ef13044a4b819a652be4ab16bf182a747f2",
+  "commandProvenance": "RECONSTRUCTED_FROM_CURATOR_ARGUMENTS_NOT_CAPTURED_SHELL",
+  "latencyQuantileSource": "PROBE_SQL_PERCENTILE_CONT_COPIED_FROM_RESULT",
+  "partitionDistributionScope": "FULL_GENERATOR_PHASE_INCLUDING_STOP_AND_CATCH_UP",
   "clockBrackets": [
     {
       "phase": "START",

@@ -85,7 +85,7 @@ class Rehearsal:
             return found['rankingCount']==chat and found['trendCount']==chat and found['notificationCount']==notifications and found['pendingOutbox']==0 and found['category_event']['rows']==chat and found['report_event']['rows']==chat
         self.until(complete,90);return found
     def preflight(self):
-        assert not self.command(['git','status','--porcelain']).stdout.strip()
+        if self.command(['git','status','--porcelain']).stdout.strip():raise RuntimeError('REHEARSAL_REQUIRES_CLEAN_COMMIT')
         assert self.command(['git','rev-parse','HEAD']).stdout.strip()==self.candidate['revision']
         info=json.loads(self.command(['docker','info','--format','{{json .}}']).stdout)
         assert info['MemTotal']>=6*1024**3 and shutil.disk_usage(ROOT).free>=2*1024**3

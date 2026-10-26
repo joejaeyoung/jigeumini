@@ -1,4 +1,6 @@
 -- 새 테이블과 backfill 반영 뒤 프로세스를 종료하는 리허설 전용이다.
+SET LOCAL application_name = 'migration-interruption-fixture';
+SET LOCAL client_connection_check_interval = '1s';
 CREATE TABLE release_migration_probe (
     projection varchar(100) NOT NULL,
     run_id varchar(80) NOT NULL,

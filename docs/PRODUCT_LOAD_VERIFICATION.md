@@ -95,4 +95,4 @@ Kafka는 1 CPU 한도 부근의 표본이 있었지만 cgroup cpu.stat의 thrott
 
 ## #62 하네스 변경과 기존 결과의 관계
 
-2026-10-26의 [용량 경계](CAPACITY_VERIFICATION.md) 작업에서 DIRECT 입력의 같은 tick 안 `eventTime + i ms` 차이를 제거하고, 공통 계획 시각으로 단계를 결정하도록 바꿨다. telemetry 시작 순서와 200ms commit 가시성 질의도 추가됐다. 기존 #43의 고정 입력·원본·revision은 그대로 보존하며 새 하네스로 동일 비용을 재현했다고 해석하지 않는다. 정본 `smoke`의 분석기 STOP/CONT·최종 대조를 새 하네스에서 별도로 확인한다.
+2026-10-26의 [용량 경계](CAPACITY_VERIFICATION.md) 작업에서 DIRECT 입력의 같은 tick 안 `eventTime + i ms` 차이를 제거하고, 공통 계획 시각으로 단계를 결정하도록 바꿨다. telemetry 시작 순서와 200ms commit 가시성 질의도 추가됐다. 기존 #43의 고정 입력·원본·revision은 그대로 보존하며 새 하네스로 동일 비용을 재현했다고 해석하지 않는다. 정본 `smoke`를 `8dd13ce`에서 다시 실행해 STOP 20.539초·고정 end 회복 2.263초·고유 1,200건 대조·최종 lag 0과 정리를 확인했다. [추가 회귀 근거](poc/evidence/capacity-2026-10-26/review-regression.json)는 기존 #43 기록과 별도다.

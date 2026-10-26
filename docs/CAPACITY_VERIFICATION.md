@@ -41,7 +41,7 @@
 ## 임시 연구 기준과 해석
 
 - 합성 원천의 예정 tick 시각부터 실제 collector 수신까지 전체 메시지의 p95 ≤1초·최대 ≤3초. 원천과 collector는 같은 Docker VM 시계를 쓴다. source의 비동기 송신 큐 적체도 포함하며, 단계별 수신량을 계획과 대조한다.
-- 순위 ledger가 **commit 후 독립 질의에서 보일 때까지** p95 ≤2초. 각 100ms 창에서 reservoir 방식으로 한 건을 골라 최대 10표본/s를 읽고, 활성 partition별 최소 5표본과 p95도 검사한다. 200ms 폴링·질의·표본 선택 대기 시간이 더해진 상한이며 모든 projection의 commit 지연은 아니다. 다른 projection은 lag·최종 대조로 검사한다. `latency`의 quantile은 10초 안에 보인 표본만 집계한다. `notVisibleWithin10Seconds`가 하나라도 있으면 SLO 실패이며, 그 비율이 5%를 넘으면 전체 표본 p95는 10초 초과(정확한 값 미관측)로 설명한다.
+- 순위 ledger가 **commit 후 독립 질의에서 보일 때까지** p95 ≤2초. 각 100ms 창에서 reservoir 방식으로 한 건을 골라 최대 10표본/s를 읽고, 활성 partition별 최소 5표본과 p95도 검사한다. 200ms 폴링·질의·표본 선택 대기 시간이 더해진 상한이며 모든 projection의 commit 지연은 아니다. 다른 projection은 lag·최종 대조로 검사한다. `latency`의 quantile은 timeout으로 제외되지 않고 질의에서 보인 표본을 집계하며, 10초 초과 값은 histogram overflow로 기록한다. `notVisibleWithin10Seconds`가 하나라도 있으면 SLO 실패이며, 그 비율이 5%를 넘으면 전체 표본 p95는 10초 초과(정확한 값 미관측)로 설명한다.
 - API p95 ≤500ms, 오류·동시성 초과 미발행 0. 요청 스케줄 지연 p95 >100ms 또는 입력률 95% 미달은 생성기/계측 한계로 구분한다.
 - 최종 UUID·내용 hash·bucket·관측·알림·outbox 대조 및 24개 group/topic/partition 위치의 lag=0. 최종 drain 성공만으로 지속 처리 용량을 인정하지 않는다.
 - 단계 앞 1/3 이후 group/topic별 lag 회귀 기울기가 **해당 topic에서 관측한** 입력률 2%/s(최소 0.01건/s)를 넘고, 마지막 평균이 첫 평균보다 입력 1초분 이상 증가하며 입력 2초분보다 크면 지속 증가로 판정한다(건수 하한 1). 별도로 관측한 partition별 end에 10초 넘게 도달하지 못한 경우도 실패다. 1초 표본은 원자 snapshot이 아니며 표본 수·간격도 함께 공개한다.
@@ -149,3 +149,12 @@ Kafka 총 디스크 = 초당 입력 × record 바이트 × 86,400 × 보존 일�
 실패를 포함한 23회 원본을 보존했다. 원본 판정과 현재 판정 코드 hash로 재계산한 분류를 함께 기록하며, 초기 DNS/연결 힙 부족 실행의 누락 지표가 `GENERATOR_LIMITED`였던 오분류는 `MEASUREMENT_INCOMPLETE`로 수정됐다. 당시 원본을 다시 쓴 것은 아니다. 부하 입력의 실제 실행과 offline 판정 재계산을 구분한다.
 
 [로컬 회귀](poc/evidence/capacity-2026-10-26/local-gates.json)는 Java 165·하네스 34·JAR, 앞선 0c8b456의 실제 Kafka/DB 135다. 제품 main source/JAR는 그대로이며 하네스 후속 변경을 포함한 최종 CI는 [PR #66](https://github.com/joejaeyoung/jigeumini/pull/66)에서 확인한다. [정리](poc/evidence/capacity-2026-10-26/cleanup.json): 소유 시험 컨테이너 0, 기존 개발 2개·다른 서비스 6개의 ID/이름/실행 상태가 같다. 사용자 미리보기 API/웹은 HTTP 200으로 유지하고 원래 공개 수집 PID는 종료됐다. 볼륨 내용 checksum은 측정하지 않았다.
+
+
+### 리뷰 보완 후 정본 명령 회귀
+
+`8dd13ce`에서 [추가 회귀 2회](poc/evidence/capacity-2026-10-26/review-regression.json)를 실행했다. 기존 정본 `smoke`는 20채널 DIRECT·20건/s·60초, 분석기 STOP 20.539초 뒤 고정 end 회복 2.263초·readiness 표본 5.093초, 고유 1,200/물리 1,212건 대조·최종 24개 lag 0으로 통과했다. 장애를 포함한 기능 회귀이며 용량 SLO 통과로 표시하지 않는다.
+
+WebSocket 회귀는 20채널·100건/s·API 10요청/s·1KiB·준비 30초+측정 30초다. 고유 6,000/물리 6,060건 대조·순위 p95 227ms·API p95 47ms·최종 24개 lag 0, 임시 SLO를 통과했다. 실제 inspect의 합성 원천 secret mount·PIPELINE 환경은 각각 0개였다. 이전 `extends`가 시험용 secret을 상속하던 문제를 독립 서비스 정의로 제거했다.
+
+제품 main source는 그대로이며 fixture Sync 변경 후 빌드 식별자/JAR가 달라진 회귀의 hash는 별도로 기록했다. 기존 23회 포화 경계 실험을 이 이미지로 재실행한 것은 아니다. 두 회귀의 소유 자원을 정리하고 기존 8개 container·미리보기 HTTP 200을 확인했다. Standards의 가시성 timeout/overflow 표현 보완과 Spec의 차단 지적 0건을 반영했다. 정확한 최종 HEAD의 Claude 승인·CI는 PR66에 기록한다.

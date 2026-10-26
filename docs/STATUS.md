@@ -7,12 +7,14 @@
 `technicaltest/capacity-limits` · [이슈 #62](https://github.com/joejaeyoung/jigeumini/issues/62) · F01/F10/F13/F14 → T02/T07/T08/T11/T12/T14/T16.
 [검증·인프라 산정](CAPACITY_VERIFICATION.md) · [23회 정제 근거](poc/evidence/capacity-2026-10-26/summary.json) · [PR #66](https://github.com/joejaeyoung/jigeumini/pull/66).
 
-- 연결 저부하 150개는 두 번 통과, 180개는 두 번 입력 전 실패했다. Xmx384m·container 640MiB 조건이며 두 번째 180개와 300개 실행에서 JVM heap 부족 근거를 확인했다.  실패 도중 최고 172개를 운영 최대치로 쓰지 않는다.
+- 연결 저부하 150개는 두 번 통과, 180개는 두 번 입력 전 실패했다. Xmx384m·container 640MiB 조건이며 두 번째 180개와 300개 실행에서 JVM heap 부족 근거를 확인했다. 실패 도중 최고 172개를 운영 최대치로 쓰지 않는다.
 - 20채널 균등 2,000건/s는 60/120초 단기 기준 통과(카테고리 lag 증가 추세), 2,500건/s는 두 번 카테고리 적체로 기준을 넘었다. 80% 편향에서는 2,000건/s도 적체됐다. DB만 또는 API·DB 각각 2 CPU인 대조도 3,000건/s를 통과하지 못했다.
 - 조회 100요청/s는 통과, 200요청/s는 동시성 한도 대조에서도 기준을 넘었다. 별도 축의 통과값을 동시에 운영할 수 있다고 해석하지 않는다.
 - **복합 후보 100채널·500건/s·API 10요청/s**, 1KiB 합성 한글·80% 편향·5분은 통과했다. 고유 150,000/물리 151,500건 대조, 순위 가시성 p95 279ms·API p95 76ms·실패/미발행 0·최종 24개 lag 0이다. 앞선 100채널·1,000건/s·API 50요청/s는 적체·지연으로 실패했다.
 
-제품 JAR는 실행 내내 동일하며 main source·공개 수집 상한은 변경하지 않았다. 로컬 Java 165개·하네스 34개·앞선 실제 Kafka/DB 135개와 [소유 자원 정리](poc/evidence/capacity-2026-10-26/cleanup.json)를 확인했다. develop 통합의 정확한 HEAD Claude 승인·최종 CI·병합 기록은 PR66에 연결한다. 단일 VM/RF1·fresh DB·짧은 합성 입력의 범위이며 실제 원천/TLS/fleet·장기 보존·다중 AZ의 수용량은 미검증이다.
+용량 측정 23회의 제품 JAR는 동일하며 main source·공개 수집 상한은 변경하지 않았다. 로컬 Java 165개·하네스 34개·앞선 실제 Kafka/DB 135개와 [소유 자원 정리](poc/evidence/capacity-2026-10-26/cleanup.json)를 확인했다. develop 통합의 정확한 HEAD Claude 승인·최종 CI·병합 기록은 PR66에 연결한다. 단일 VM/RF1·fresh DB·짧은 합성 입력의 범위이며 실제 원천/TLS/fleet·장기 보존·다중 AZ의 수용량은 미검증이다.
+
+리뷰 보완 `8dd13ce`의 [추가 회귀 2회](poc/evidence/capacity-2026-10-26/review-regression.json)도 통과했다. 정본 DIRECT smoke는 실제 STOP/CONT 뒤 1,200건 대조·최종 lag 0, 독립 WebSocket 원천은 6,000건 대조·SLO 통과·secret mount/PIPELINE 환경 0을 확인했다. 기존 23회 용량 결과와 실행 revision·JAR를 구분한다.
 
 | 후속 이슈 | 기술 목표 | 남은 작업 |
 |---|---|---|
@@ -191,7 +193,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md), [공개 목록 대안·실측](research/CHZZK_PUBLIC_CATALOG.md), [정제 근거](poc/evidence/public-catalog-research-2026-10-26.json) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개. 무인증 공개 목록20페이지/1,000행/고유995개·상세1회 팔로워 필드 확인 | 공개 목록 어댑터 구현·cursor 끝까지 순회·전체 채팅 접근·장기 수집 미검증. 공식 인증/동의는 별도 선택 경로. 수집기 임대 연결은 T14 근거 참조 |
 | T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json), [시작 metadata 경계](research/FLEET_STARTUP.md), [시계·분리 장애](fleet/FAILURE_BOUNDARIES_VERIFICATION.md), [유휴 잠금·미배정 복구](fleet/DB_LOCK_VERIFICATION.md), [최종 게이트](poc/evidence/fleet-db-lock-2026-10-26/final-gates.json), [용량 경계](CAPACITY_VERIFICATION.md) | 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집. 두 JVM 시계/DB/WS 분리·이전 owner marker 차단과 별도 동일 JVM permit/send/ACK 경합. #60 실제 plan 잠금 뒤 DB blackhole, 유휴 종료·미배정 충돌 제한 재시도·epoch2 인계, 재시도5회 뒤6번째 충돌 종료·보유 임대 재시도0. 최종 CI Fleet23 포함 통합135 통과. #62는 별도 합성 원천의 ChannelProbe 연결 비용만 추가 측정. | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift 미검증. 실제 commit 응답 유실·잠금 없는 tick 사이 blackhole 별도 재검증 안 함. 과거 Linux 시작 실패와 CI 최종 SQLSTATE는 미확정. 100채널 fleet 임대/다중 호스트 수용량은 검증하지 않음. |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) , [실제 디스크 유실](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조  #45 단일 replica 삭제/재구성·ISR1 ACK거부·최신tail copy0의 SOURCE_UNAVAILABLE 확인. | 로컬6노드·소유 volume 삭제 범위; 실제 AZ·물리 디스크 고장·운영 부하는 미검증 |
-| T16 | 부분 검증 | [새 V13 적용·V12 복원](DEPLOYMENT_MIGRATION_VERIFICATION.md), [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [physical PITR](POSTGRES_PITR_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·후속 #42 포함 관측8회17.105~26.540초(코드/검사강도 차이·운영RTO 아님)  #46 named target pause/승격·새6group 재정렬·보존입력10건 재생·선택 snapshot차이0·WAL누락/retention gap 거부. #62 동일 자원 pass/fail·DB 저장 증가·초기 인프라 비교 후보 산정. | 시험 V13 실패/중단 rollback·V12 복원, physical base/WAL named target까지 로컬 검증. 일반 파괴적 migration·외부 archive 내구성·임의 timestamp RPO·외부 배포/SLA는 미검증 DB 보존 상한 #63과 외부 #48/#49 필요. |
+| T16 | 부분 검증 | [새 V13 적용·V12 복원](DEPLOYMENT_MIGRATION_VERIFICATION.md), [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [physical PITR](POSTGRES_PITR_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·후속 #42 포함 관측8회17.105~26.540초(코드/검사강도 차이·운영RTO 아님)  #46 named target pause/승격·새6group 재정렬·보존입력10건 재생·선택 snapshot차이0·WAL누락/retention gap 거부. #62 동일 자원 pass/fail·DB 저장 증가·초기 인프라 비교 후보 산정. | 시험 V13 실패/중단 rollback·V12 복원, physical base/WAL named target까지 로컬 검증. 일반 파괴적 migration·외부 archive 내구성·임의 timestamp RPO·외부 배포/SLA는 미검증. DB 보존 상한 #63과 외부 #48/#49 필요. |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.

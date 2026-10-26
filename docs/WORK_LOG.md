@@ -414,3 +414,7 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 76ae909의 Claude는 로컬12단계 범위 APPROVE이며 실행4a6b7a8 이후 코드 불변과 미첨부 파일 확인을 요청했다. 알림 physical3/logical2·원래group SAFE_OVERLAP, 선택snapshot 범위, 목표미달 하네스 분류를 명확히 했다. 첫 사전 검사 실패 JSON도 hash만 남기지 않고 정제 근거에 함께 보관한다. 개발 서비스 종료는 부하/디스크 실험 종료 뒤 사용자 허용 범위에서 volume 삭제 없이 실행했고, PITR 뒤 #44 회귀용으로 재기동했다. volume 전후checksum과 archiver실패원인은 측정하지 않았다.
 
 선행31e0773(#42~45/#52/#54)을 통합하고 README/STATUS/WORK_LOG의 양쪽 이력을 보존했다. PITR 하네스/DeploymentProbe/ops/compose의 실제 코드 불변을 대조하고 통합 check와 최종HEAD 리뷰/CI를 별도 확인한다. 공통 소유 자원 수명을 유지하며 의미 없는 추가 추상화는 만들지 않았다.
+
+통합 `44449cd` check는 단위152·하네스24·JAR 통과다. 실행4a6b7a8 대비 PITR스크립트/helper·DeploymentProbe·PocApplication·operations/pipeline/db·compose 경로의 diff0과 파일 존재를 확인했다. 새 product코드 영향은 collector/Clock 경로로 한정되어 이 PITR 실행은 반복하지 않는다.
+
+#42 최종c34dc2b Claude APPROVE·push40262248304/PR40262253338 SUCCESS와 각각단위151·실제125(실패0)를 확인해 PR51을03b9648로 develop 병합했다. #42와 #52의 모든 완료조건·보드를 완료했다. #52 원래 CI 원인 미확정 기록은 유지한다.

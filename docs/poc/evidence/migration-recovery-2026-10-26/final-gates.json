@@ -1,0 +1,53 @@
+{
+  "issue": 42,
+  "pr": 51,
+  "head": "c34dc2b6a253a9664aa4ebf4acdfd9fab2e75f31",
+  "reviewSession": "8c1936cd-5f1e-470c-bdc7-e2d36d1987d6",
+  "runs": [
+    {
+      "event": "push",
+      "run": 40262248304,
+      "status": "SUCCESS",
+      "suites": {
+        "test": {
+          "tests": 151,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "integrationTest": {
+          "tests": 125,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "event": "pr",
+      "run": 40262253338,
+      "status": "SUCCESS",
+      "suites": {
+        "test": {
+          "tests": 151,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "integrationTest": {
+          "tests": 125,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    }
+  ],
+  "merge": {
+    "mergeCommit": {
+      "oid": "03b964824c0d7d8bcb467e99399d959aea4f3101"
+    },
+    "mergedAt": "2026-10-26T03:17:45Z",
+    "state": "MERGED"
+  }
+}

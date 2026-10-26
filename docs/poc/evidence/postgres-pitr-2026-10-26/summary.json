@@ -53,5 +53,24 @@
     "RECOVERY_ENDED_BEFORE_TARGET is a harness classification of PostgreSQL log text, not a SQLSTATE",
     "Selected business snapshot items only; not all database columns",
     "Cluster ID mismatch and cleanup failure paths not separately executed"
-  ]
+  ],
+  "integratedCheck": {
+    "revision": "44449cd15f3a85b75934fc49b248c8a62ecb6d5b",
+    "unitTests": 152,
+    "harnessTests": 24,
+    "jarBuild": "PASS",
+    "unchangedExecutionPathsFrom4a6b7a8": [
+      "scripts/postgres-pitr",
+      "scripts/postgres-pitr.py",
+      "scripts/deploy-rehearsal.py",
+      "deploy/compose.yaml",
+      "deploy/fixtures/pitr/archive-wal",
+      "deploy/fixtures/pitr/restore-wal",
+      "server/src/test/java/io/chatpulse/operations/DeploymentProbe.java",
+      "server/src/main/java/io/chatpulse/poc/PocApplication.java",
+      "server/src/main/java/io/chatpulse/operations",
+      "server/src/main/java/io/chatpulse/pipeline",
+      "server/src/main/java/io/chatpulse/db"
+    ]
+  }
 }

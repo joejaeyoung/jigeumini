@@ -108,13 +108,21 @@ final class LocalKafkaCluster implements AutoCloseable {
         assertOwned();checkVolume(project+"_broker"+id+"-data",id);
         compose("up","-d","--no-deps","--no-build","--pull","never","broker"+id);
     }
+    List<Map<String,Object>> brokerStates() throws Exception {
+        var states=new ArrayList<Map<String,Object>>();
+        for(int id=1;id<=3;id++){var info=brokerInfo(id);var state=info.path("State");states.add(Map.of("broker",id,"running",state.path("Running").asBoolean(),"exitCode",state.path("ExitCode").asInt(),"oomKilled",state.path("OOMKilled").asBoolean()));}
+        return List.copyOf(states);
+    }
     private JsonNode stoppedBroker(int id) throws Exception {
+        var info=brokerInfo(id);if(info.path("State").path("Running").asBoolean())throw new IllegalStateException("HA_DISK_BROKER_RUNNING");return info;
+    }
+    private JsonNode brokerInfo(int id) throws Exception {
         if(!started||id<1||id>3)throw new IllegalArgumentException("HA_NODE");assertOwned();
         String cid=compose("ps","--all","--quiet","broker"+id).strip();if(!cid.matches("[a-f0-9]{64}"))throw new IllegalStateException("HA_DISK_CONTAINER_MISSING");
         var info=JsonMapper.builder().build().readTree(command(List.of("docker","inspect",cid),Map.of(),Duration.ofSeconds(10))).get(0);
         var labels=info.path("Config").path("Labels");
         if(!owner.equals(labels.path("io.chatpulse.ha.owner").asText())||!project.equals(labels.path("com.docker.compose.project").asText())
-            ||!("broker"+id).equals(labels.path("com.docker.compose.service").asText())||info.path("State").path("Running").asBoolean())throw new IllegalStateException("HA_DISK_CONTAINER_SCOPE");
+            ||!("broker"+id).equals(labels.path("com.docker.compose.service").asText()))throw new IllegalStateException("HA_DISK_CONTAINER_SCOPE");
         return info;
     }
     private String volume(JsonNode info,int id) throws Exception {
@@ -136,8 +144,8 @@ final class LocalKafkaCluster implements AutoCloseable {
         Path classes=diskProbeClasses;
         if(classes==null||!diskProbeHash.equals(HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(classes.resolve("io/chatpulse/pipeline/KafkaDiskProbe.class"))))))throw new IllegalStateException("HA_DISK_PROBE_CHANGED");
         try {
-            String output=command(List.of("docker","run","--name",helper,"--label","io.chatpulse.ha.owner="+owner,"--network","none","--read-only","--memory","128m","--cpus","0.5",
-                "--mount","type=volume,src="+name+",dst=/data,readonly","--mount","type=bind,src="+classes+",dst=/probe,readonly","--entrypoint","java","apache/kafka:4.1.2","-Xmx64m","-cp","/opt/kafka/libs/*:/probe","io.chatpulse.pipeline.KafkaDiskProbe","/data",topic),Map.of(),Duration.ofSeconds(30));
+            String output=command(List.of("docker","run","--pull","never","--name",helper,"--label","io.chatpulse.ha.owner="+owner,"--network","none","--read-only","--memory","128m","--cpus","0.5",
+                "--mount","type=volume,src="+name+",dst=/data,readonly","--mount","type=bind,src="+classes+",dst=/probe,readonly","--entrypoint","java","apache/kafka:4.1.2","-Xmx64m","-XX:-UsePerfData","-cp","/opt/kafka/libs/*:/probe","io.chatpulse.pipeline.KafkaDiskProbe","/data",topic),Map.of(),Duration.ofSeconds(30));
             return JsonMapper.builder().build().readValue(output,Map.class);
         } finally {
             String ids=command(List.of("docker","ps","-a","--filter","name=^/"+helper+"$","--filter","label=io.chatpulse.ha.owner="+owner,"--format","{{.ID}}"),Map.of(),Duration.ofSeconds(10)).strip();
@@ -167,6 +175,11 @@ final class LocalKafkaCluster implements AutoCloseable {
         if(!started){cleaned=true;return;}
         if(cleaned)return;
         try {
+            String helpers=command(List.of("docker","ps","-a","--filter","label=io.chatpulse.ha.owner="+owner,"--filter","name=^/"+project+"-disk-probe-[1-3]$","--format","{{.Names}}"),Map.of(),Duration.ofSeconds(10)).strip();
+            if(!helpers.isBlank())for(String helper:helpers.split("\\s+")) {
+                if(!helper.matches(java.util.regex.Pattern.quote(project)+"-disk-probe-[1-3]"))throw new IllegalStateException("HA_DISK_HELPER_SCOPE");
+                command(List.of("docker","rm","-f",helper),Map.of(),Duration.ofSeconds(10));
+            }
             assertOwned(true);compose("down","--timeout","2");
             String names=command(List.of("docker","volume","ls","--filter","label=io.chatpulse.ha.owner="+owner,"--format","{{.Name}}"),Map.of(),Duration.ofSeconds(10)).strip();
             if(!names.isEmpty())for(String name:names.split("\\s+")) {

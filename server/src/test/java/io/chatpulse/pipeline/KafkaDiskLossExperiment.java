@@ -35,7 +35,7 @@ public final class KafkaDiskLossExperiment {
         result.put("scope","LOCAL_OWNED_VOLUME_REMOVAL_NO_AZ_POWER_LOSS_OR_BIT_CORRUPTION_CLAIM");
         var session=new Session(output,result);var hook=new Thread(session::close,"disk-owned-cleanup");Runtime.getRuntime().addShutdownHook(hook);
         try {session.open();if(args[0].equals("recover"))session.recover();else session.lastCopy();result.put("correct",true);}
-        catch(Exception failure){result.put("correct",false);result.put("failureTypes",types(failure));result.put("failedPhase",session.phase);if(failure.getMessage()!=null&&failure.getMessage().matches("DISK_[A-Z_]+"))result.put("failureCode",failure.getMessage());}
+        catch(Exception failure){result.put("correct",false);result.put("failureTypes",types(failure));result.put("failedPhase",session.phase);if(failure.getMessage()!=null&&failure.getMessage().matches("(DISK|HA|KAFKA)_[A-Z_]+"))result.put("failureCode",failure.getMessage());}
         finally {session.close();Runtime.getRuntime().removeShutdownHook(hook);result.put("cleanupComplete",session.cleaned);if(!session.cleaned)result.put("correct",false);result.put("finishedAt",Instant.now().toString());session.save();}
         System.out.println(JSON.writeValueAsString(Map.of("correct",result.get("correct"),"cleanupComplete",session.cleaned)));
         if(!Boolean.TRUE.equals(result.get("correct")))System.exit(2);
@@ -85,8 +85,13 @@ public final class KafkaDiskLossExperiment {
             measure("ISR_ONE_REJECTS_ACK_ALL",()->{
                 for(int node:followers)cluster.stopBroker(node);
                 until(30,()->description().partitions().getFirst().isr().size()==1);
-                boolean startupRejected=false;try{KafkaSupport.ensureTopic(cluster.bootstrap(),topic,KafkaTopicPolicy.ha());}catch(IllegalStateException expected){startupRejected=true;}
-                require(startupRejected,"DISK_ISR_STARTUP_ACCEPTED");
+                var resource=new org.apache.kafka.common.config.ConfigResource(org.apache.kafka.common.config.ConfigResource.Type.TOPIC,topic);
+                var actualConfig=admin.describeConfigs(List.of(resource)).all().get(8,TimeUnit.SECONDS).get(resource);
+                boolean policyNotReady=false;try{KafkaTopicPolicy.ha().verify(description(),actualConfig);}catch(KafkaTopicPolicy.NotReady expected){policyNotReady=true;}
+                require(policyNotReady,"DISK_ISR_POLICY_NOT_REJECTED");
+                Throwable startupFailure=null;try{KafkaSupport.ensureTopic(cluster.bootstrap(),topic,KafkaTopicPolicy.ha());}catch(IllegalStateException expected){startupFailure=expected;}
+                boolean deadlineObserved=false;for(Throwable cause=startupFailure;cause!=null;cause=cause.getCause())if("TOPIC_VISIBILITY_DEADLINE".equals(cause.getMessage()))deadlineObserved=true;
+                require(startupFailure!=null&&deadlineObserved,"DISK_ISR_STARTUP_REJECTION_UNCONFIRMED");
                 var control=event();var settings=new HashMap<String,Object>(factory.getConfigurationProperties());settings.put("retries",0);settings.put("enable.idempotence",false);
                 Throwable direct=null;
                 try(var producer=new KafkaProducer<String,byte[]>(settings,new StringSerializer(),new ByteArraySerializer())) {
@@ -94,7 +99,7 @@ public final class KafkaDiskLossExperiment {
                 }
                 require(direct!=null&&(types(direct).contains("NotEnoughReplicasException")||types(direct).contains("NotEnoughReplicasAfterAppendException")),"DISK_DIRECT_REJECTION_MISSING");
                 var product=publishOne(false);require(!Boolean.TRUE.equals(product.get("acknowledged")),"DISK_ISR_ONE_ACKNOWLEDGED");
-                return Map.of("startupRejected",true,"controlProducerRetries",0,"controlFailureTypes",types(direct),"productDelivery",product,"snapshot",snapshot());
+                return Map.of("startupRejected",true,"startupFailureTypes",types(startupFailure),"startupCode","TOPIC_VISIBILITY_DEADLINE","policyNotReadyObserved",policyNotReady,"controlProducerRetries",0,"controlFailureTypes",types(direct),"productDelivery",product,"snapshot",snapshot());
             });
             measure("ISR_RESTORED_RECONCILIATION",()->{
                 for(int node:followers)cluster.startBroker(node);fullIsr();publish(2);drain();consumer.close();consumer=null;
@@ -125,10 +130,12 @@ public final class KafkaDiskLossExperiment {
             });
             measure("RETURN_STALE_AND_EMPTY_DISKS",()->{
                 cluster.startBroker(stale);var onlyStale=observeSource(manifest);
-                cluster.recreateBroker(fresh);cluster.recreateBroker(latest);
+                cluster.recreateBroker(fresh);var afterFirstEmpty=observeSource(manifest);cluster.recreateBroker(latest);
+                until(60,()->new HashSet<>(admin.describeCluster().nodes().get(8,TimeUnit.SECONDS).stream().map(n->n.id()).toList()).equals(Set.of(1,2,3)));
+                var returned=cluster.brokerStates();require(returned.stream().allMatch(state->Boolean.TRUE.equals(state.get("running"))&&!Boolean.TRUE.equals(state.get("oomKilled"))),"DISK_RETURNED_BROKER_NOT_RUNNING");
                 // ELR/lastKnownElr 의 실제 결과를 보존한다. unclean election·minISR 변경은 하지 않는다.
                 boolean ready=waitOptional(60,()->description().partitions().getFirst().leader()!=null&&description().partitions().getFirst().isr().size()==3);
-                var restored=observeSource(manifest);var row=new LinkedHashMap<String,Object>();row.put("onlyStale",onlyStale);row.put("allNodesReturned",true);row.put("fullIsrObserved",ready);row.put("source",restored);
+                var restored=observeSource(manifest);var row=new LinkedHashMap<String,Object>();row.put("onlyStale",onlyStale);row.put("afterFirstEmptyDisk",afterFirstEmpty);row.put("allNodesReturned",true);row.put("returnedBrokerStates",returned);row.put("registeredBrokerIds",admin.describeCluster().nodes().get(8,TimeUnit.SECONDS).stream().map(n->n.id()).sorted().toList());row.put("fullIsrObserved",ready);row.put("source",restored);
                 if(restored.get("metadataTopicId")!=null)require(restored.get("metadataTopicId").equals(manifest.topicId()),"DISK_TOPIC_ID_CHANGED");
                 row.put("topicIdVerified",Objects.equals(restored.get("metadataTopicId"),manifest.topicId()));
                 var database=dbIds();require(database.equals(acknowledged),"DISK_DATABASE_BASELINE_CHANGED");row.put("databaseUniqueRetained",database.size());
@@ -136,6 +143,8 @@ public final class KafkaDiskLossExperiment {
                     var records=readBroker();var digests=digests(records);long retainedTail=tail.entrySet().stream().filter(e->Objects.equals(digests.get(e.getKey()),e.getValue())).count();
                     require(retainedTail==0,"DISK_REMOVED_TAIL_REAPPEARED");row.put("brokerPhysical",records.size());row.put("oldAcknowledgedTailMissing",10);row.put("brokerDigest",digests);
                 } else {row.put("brokerPhysical",null);row.put("oldAcknowledgedTailMissing",null);}
+                if(!Boolean.TRUE.equals(restored.get("available")))require(Set.of("SOURCE_UNAVAILABLE","OFFSET_TRUNCATED").contains(restored.get("captureCode")),"DISK_UNEXPECTED_SOURCE_FAILURE");
+                require(!Boolean.TRUE.equals(restored.get("oldManifestAccepted"))&&Set.of("SOURCE_UNAVAILABLE","OFFSET_TRUNCATED").contains(restored.getOrDefault("validationCode",restored.get("captureCode"))),"DISK_OLD_MANIFEST_REJECTION_MISSING");
                 row.put("lossBoundaryVerified",true);row.put("sourceRecoverySucceeded",false);row.put("physicalTailCopiesRemaining",0);return row;
             });
         }
@@ -160,7 +169,7 @@ public final class KafkaDiskLossExperiment {
         ProducerRecord<String,byte[]> record(ChatEvent event){return new ProducerRecord<>(topic,0,event.receivedAt().toEpochMilli(),event.channelId(),codec.encode(event));}
         Map<String,Object> publishOne(boolean required) throws Exception {
             var event=event();var row=new LinkedHashMap<String,Object>();row.put("eventId",event.eventId());row.put("startedAt",Instant.now().toString());deliveries.add(row);
-            try {var metadata=kafka.send(record(event)).get(12,TimeUnit.SECONDS).getRecordMetadata();acknowledged.add(event.eventId());String digest=KafkaDiskProbe.digest(ByteBuffer.wrap(event.channelId().getBytes(StandardCharsets.UTF_8)),ByteBuffer.wrap(codec.encode(event)));
+            try {var submitted=record(event);var metadata=kafka.send(submitted).get(12,TimeUnit.SECONDS).getRecordMetadata();acknowledged.add(event.eventId());String digest=KafkaDiskProbe.digest(ByteBuffer.wrap(submitted.key().getBytes(StandardCharsets.UTF_8)),ByteBuffer.wrap(submitted.value()));
                 acknowledgedDigest.put(metadata.partition()+":"+metadata.offset(),digest);row.put("acknowledged",true);row.put("partition",metadata.partition());row.put("offset",metadata.offset());row.put("sha256",digest);
             }catch(Exception failure){row.put("acknowledged",false);row.put("failureTypes",types(failure));if(required)throw failure;}
             finally {row.put("finishedAt",Instant.now().toString());save();}

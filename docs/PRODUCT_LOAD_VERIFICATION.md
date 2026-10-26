@@ -91,3 +91,8 @@ Kafka는 1 CPU 한도 부근의 표본이 있었지만 cgroup cpu.stat의 thrott
 최초 smoke는 probe 컨테이너 소유 자원 조회 실패로 중단했고 cleanup을 확인했다. 이후 무부하0lag 오인과 느린 API에 따른 offset 계측 공백을 발견하여 독립 offset loop·CONT 후 고정 end를 도입했다. 정상 시계열 시간 공백 검사, 장애 후 readiness503의 복구 구간 분류, 부분 samples JSONL과 시계 불확실성 기록을 보완했다. 중간 uniform 중단 실행은 최종 성능 결과에 포함하지 않는다.
 
 입력·기대값은 ProductLoadFixture, 실측은 ProductLoadMeasurements, 오케스트레이션/대조는 ProductLoadProbe, 결과 판정은 product_load_results.py로 책임을 나눴다. 실제 제품 집계 구현을 부하 전용 구현으로 대체하지 않았다. 초기 Claude 지적을 반영한03eb75f는 soak 진입 APPROVE였으며, 최종 근거 HEAD 승인과 push/PR CI는 별도 병합 게이트다.
+
+
+## #62 하네스 변경과 기존 결과의 관계
+
+2026-10-26의 [용량 경계](CAPACITY_VERIFICATION.md) 작업에서 DIRECT 입력의 같은 tick 안 `eventTime + i ms` 차이를 제거하고, 공통 계획 시각으로 단계를 결정하도록 바꿨다. telemetry 시작 순서와 200ms commit 가시성 질의도 추가됐다. 기존 #43의 고정 입력·원본·revision은 그대로 보존하며 새 하네스로 동일 비용을 재현했다고 해석하지 않는다. 정본 `smoke`를 `8dd13ce`에서 다시 실행해 STOP 20.539초·고정 end 회복 2.263초·고유 1,200건 대조·최종 lag 0과 정리를 확인했다. [추가 회귀 근거](poc/evidence/capacity-2026-10-26/review-regression.json)는 기존 #43 기록과 별도다.

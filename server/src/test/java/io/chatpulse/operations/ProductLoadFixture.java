@@ -12,21 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /** 생성 입력에서 기대 UUID·내용·10초 합계를 계산한다. 제품 집계 SQL을 호출하지 않는다. */
 final class ProductLoadFixture {
     static final long SEED = 20261026;
-    static final int CHANNELS = 20;
-    record Stage(String name, int seconds, int eventsPerSecond, boolean hot) { }
-    record Plan(String name, List<Stage> stages, int faultAtSeconds, int faultSeconds) {
-        int seconds() { return stages.stream().mapToInt(Stage::seconds).sum(); }
-        long uniqueEvents() { return stages.stream().mapToLong(s -> (long)s.seconds()*s.eventsPerSecond()).sum(); }
-        static Plan named(String name) {
-            return switch(name) {
-                case "smoke" -> new Plan(name,List.of(new Stage(name,60,20,false)),15,20);
-                case "uniform", "hot" -> new Plan(name,List.of(new Stage(name,120,100,name.equals("hot"))),-1,0);
-                case "steps" -> new Plan(name,List.of(new Stage("rate50",60,50,false),new Stage("rate100",60,100,false),new Stage("rate200",60,200,false)),-1,0);
-                case "soak" -> new Plan(name,List.of(new Stage(name,1800,50,false)),300,20);
-                default -> throw new IllegalArgumentException("LOAD_PROFILE");
-            };
-        }
-    }
     final NavigableMap<String,String> events = new TreeMap<>();
     final NavigableMap<String,Long> buckets = new TreeMap<>();
     final NavigableMap<String,String> observations = new TreeMap<>();
@@ -35,14 +20,14 @@ final class ProductLoadFixture {
     final Map<String,String> categories = new TreeMap<>();
     private final EventCodec codec = new EventCodec();
 
-    ProductLoadFixture() {
+    ProductLoadFixture(int count) {
         var values = new ArrayList<String>();
-        for(int i=0;i<CHANNELS;i++) values.add(String.format("%032x",i+1));
+        for(int i=0;i<count;i++) values.add(String.format("%032x",i+1));
         Collections.shuffle(values,new Random(SEED));channels=List.copyOf(values);
-        for(int i=0;i<CHANNELS;i++) categories.put(channels.get(i),"synthetic-"+(i%3));
+        for(int i=0;i<count;i++) categories.put(channels.get(i),"synthetic-"+(i%3));
     }
     String channel(long ordinal, boolean hot) {
-        int index = hot ? ordinal%5!=4 ? 0 : 1+(int)(ordinal/5%19) : (int)(ordinal%CHANNELS);
+        int index = hot ? ordinal%5!=4 ? 0 : 1+(int)(ordinal/5%(channels.size()-1)) : (int)(ordinal%channels.size());
         return channels.get(index);
     }
     static UUID id(String name) { return UUID.nameUUIDFromBytes(("product-load/"+SEED+"/"+name).getBytes(StandardCharsets.UTF_8)); }
@@ -50,11 +35,12 @@ final class ProductLoadFixture {
         String channel=channel(ordinal,hot);
         return new ChatEvent(1,id("chat/"+ordinal),"CHZZK_UNOFFICIAL",channel,"synthetic",id("session/"+channel),null,"CHAT",at,Instant.now(),false,"product-load-test");
     }
-    void accepted(ChatEvent event) {
+    synchronized void accepted(ChatEvent event) {
         check(events.put(event.eventId().toString(),event.channelId()+"|"+event.eventTime()+"|"+codec.hash(event))==null,"GENERATOR_DUPLICATE_ID");
         String key=event.channelId()+"|"+Math.floorDiv(event.eventTime().getEpochSecond(),10)*10;
         buckets.merge(key,1L,Long::sum);
     }
+    synchronized int uniqueCount() {return events.size();}
     Map<String,Object> verify(JdbcTemplate jdbc, RuntimeEnvironment c) throws Exception {
         var checks=new LinkedHashMap<String,Object>();
         for(String projection:List.of(c.projection(),c.projection()+"-trend")) {

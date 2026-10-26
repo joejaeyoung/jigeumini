@@ -84,6 +84,7 @@ class Rehearsal:
             found=self.probe('snapshot')
             return found['rankingCount']==chat and found['trendCount']==chat and found['notificationCount']==notifications and found['pendingOutbox']==0 and found['category_event']['rows']==chat and found['report_event']['rows']==chat
         self.until(complete,90);return found
+    def memory_budget_bytes(self):return (640+640+768+384+64)*1024**2
     def preflight(self):
         if self.command(['git','status','--porcelain']).stdout.strip():raise RuntimeError('REHEARSAL_REQUIRES_CLEAN_COMMIT')
         assert self.command(['git','rev-parse','HEAD']).stdout.strip()==self.candidate['revision']
@@ -95,10 +96,10 @@ class Rehearsal:
             if not match:raise RuntimeError('DOCKER_MEMORY_UNAVAILABLE')
             scale={'B':1,'kB':1000,'KB':1000,'KiB':1024,'MB':1000**2,'MiB':1024**2,'GB':1000**3,'GiB':1024**3,'TB':1000**4,'TiB':1024**4}[match[2]]
             usage+=float(match[1])*scale
-        assert usage+(640+640+768+384+64)*1024**2<=info['MemTotal']*.90
+        assert usage+self.memory_budget_bytes()<=info['MemTotal']*.90
         for manifest in [self.baseline,self.candidate]:
             for item in manifest['images'].values():assert json.loads(self.command(['docker','image','inspect',item['id']]).stdout)[0]['Id']==item['id']
-        return {'dockerMemoryBytes':info['MemTotal'],'hostFreeDiskBytes':shutil.disk_usage(ROOT).free,'applicationImageUsers':['10001:10001','101:101'],'maximumComposeMemoryBytes':(640+640+768+384+64)*1024**2}
+        return {'dockerMemoryBytes':info['MemTotal'],'hostFreeDiskBytes':shutil.disk_usage(ROOT).free,'applicationImageUsers':['10001:10001','101:101'],'maximumComposeMemoryBytes':self.memory_budget_bytes()}
     def initialize(self):
         self.started=True;self.compose('up','-d','--wait','--wait-timeout','120','postgres','kafka',timeout=150)
         self.ops('migrate');self.ops('bind-sources');initialized=self.ops('initialize-groups')

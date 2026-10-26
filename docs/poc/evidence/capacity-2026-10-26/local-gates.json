@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "sourceAsCommitted": "c015e205801897fa22e70836201824dfeda9e509",
+  "checkHeadAtExecution": "7bcc64d0728f11a40aa734e22f1cbb80a6e3b1e5",
+  "checkScope": "WORKING_TREE_SOURCE_THEN_COMMITTED_AS_c015e20; PRODUCT_MAIN_SOURCE_UNCHANGED",
+  "checkCommand": "./scripts/check",
+  "harnessTests": 34,
+  "checkLogSha256": "e4515bade82b9e80c708ce4035b90b80ec997f2ce9c77f9f819a38d756bd41a0",
+  "productJarSha256": "e2f1d2b0eff4a4e5d9cd8bba61ca14c666e3ae643f893898cf52040a89ec2504",
+  "suites": {
+    "test": {
+      "command": "./scripts/check",
+      "scope": "CURRENT_SOURCE",
+      "totals": {
+        "tests": 165,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "files": {
+        "TEST-io.chatpulse.categories.CategoryQueriesTest.xml": "bd21489103223c4f1d2ead2516788e5dd7bcba4d3ed97bea7ca25aa9f71686a7",
+        "TEST-io.chatpulse.discovery.OfficialBroadcastCatalogTest.xml": "bf4168989e9092434a67889820d6092deed7f16a0278a79354207a00269be226",
+        "TEST-io.chatpulse.discovery.SelectionCliTest.xml": "3ac7ae69b457ba1407f8ce3396de1e377a86b18a1950fdca8df15494f9cf7b94",
+        "TEST-io.chatpulse.discovery.SelectionPolicyTest.xml": "51ed94b0cc17f8418d532360e315be66ac07da071ed929a66dce0ab843100cc2",
+        "TEST-io.chatpulse.fleet.CollectorLeaseFailureTest.xml": "c22779a79150a9f859f14e68e2cace067b00af1ddb0acc7dd50c550f391ace18",
+        "TEST-io.chatpulse.fleet.CollectorStartupTest.xml": "7f65efda868f16467df2a99e4ef1bcd62df52c2ab61cfb45e685a08c089e89bd",
+        "TEST-io.chatpulse.fleet.FleetCliTest.xml": "25ac995fab1c91fc984a98b208c4230997f773f344c5083f6ebd8a1bb442bccc",
+        "TEST-io.chatpulse.fleet.FleetPlanTest.xml": "30c7aef913cc76177da32662f5bd8bf9eccc90131bf00ab04e75459ec2557ab3",
+        "TEST-io.chatpulse.fleet.LeaseAuthorityTest.xml": "53b2e051fcd294114bb7ef6cf99ebf20b75a7545553b2a3f756965a61b34e1c6",
+        "TEST-io.chatpulse.fleet.LeasedObservationsTest.xml": "cf00b1e84bcd16af0dc198976ecbb79f1325152ce6df7f404409ac6fa50d6584",
+        "TEST-io.chatpulse.metadata.ChzzkMetadataSourceTest.xml": "dac5920affab5b08b492f6820185f15877491400bfb4ad3585eda8edde904332",
+        "TEST-io.chatpulse.metadata.MetadataControllerTest.xml": "8cc0535806987afc1b5b2744d9a67d7579bfec36564dac46865cb04264656636",
+        "TEST-io.chatpulse.metadata.MetadataServiceTest.xml": "492486313536d5c9fbdb9b781d223dee2e995f700a28db003823f4b2b4ef8925",
+        "TEST-io.chatpulse.notifications.NotificationControllerTest.xml": "9768ee44ea55ae5752ba2701bcc8365b00c76837e75c3b8f033d1e8ba0d509a0",
+        "TEST-io.chatpulse.notifications.SpikeDetectedTest.xml": "99ed53e59e0d0845dd073ec6ca9c901deedd2f25debdd56b07d389f110c9b161",
+        "TEST-io.chatpulse.observations.BroadcastObservedTest.xml": "d1cca935384544b29be3c3ffe87b1440739c37381bc4318c143e2b315a40b15f",
+        "TEST-io.chatpulse.observations.ObservationCollectorTest.xml": "57715a4dc32afc33d5b2fa78bc52c0bf212d8cbceea8af7d60ee88987b1446b2",
+        "TEST-io.chatpulse.observations.ObservationControllerTest.xml": "3fa3692faf466bc45aec68421970b89f5635effcce160ba852417365427442a2",
+        "TEST-io.chatpulse.operations.ProductLoadHarnessTest.xml": "570fbe59aee0ed5357ade500e57e6ea19683f142cb904380dc0dc6c3d500843b",
+        "TEST-io.chatpulse.operations.RuntimeEnvironmentTest.xml": "b38c864622a1566ecc8023fa57b2b50e65ff764e84a2c95e1d2acf254f15f51b",
+        "TEST-io.chatpulse.pipeline.BatchConsumersTest.xml": "404166b7db2985cfcc15dc713d4084b8a3d892c9527bfc7868b09c44c3d78872",
+        "TEST-io.chatpulse.pipeline.BufferedKafkaPublisherTest.xml": "07780db8fd94d5992cbf77c80145e92da6c66c1307c726cb6127e04558c2637e",
+        "TEST-io.chatpulse.pipeline.DeadLetterTest.xml": "2731ef607b641875407001bf0cea17d2efcb75be6bab74e92949f52ad32bc5d6",
+        "TEST-io.chatpulse.pipeline.EventCodecTest.xml": "cf41e3dd153bf6e4a73a3d44a996bb414573efcf1c9f5d850bebf9f0359c3c7d",
+        "TEST-io.chatpulse.pipeline.ExperimentPublisherTest.xml": "7fd003ab81f9856142b305a1ebad509e4165d7fd365a4ed34708ab028476ecd5",
+        "TEST-io.chatpulse.pipeline.ExperimentSamplerTest.xml": "a99506d62199fab72bab59c5d413c27adc83cc987b2704c8dd972c78e8b931ce",
+        "TEST-io.chatpulse.pipeline.KafkaSupportTest.xml": "9491468fcd0553d97a920700143ce1010162ddc28bfb37e1b870b925cb10e752",
+        "TEST-io.chatpulse.pipeline.KafkaTopicPolicyTest.xml": "fd3deb8c8c2ebdeafa29822ff91be576a1858564b7fd53fac2b2954d44f934a2",
+        "TEST-io.chatpulse.poc.ChannelProbeTest.xml": "e11c1e2498ab4eb196c8d76819c206804dc97437f7c28f9d6d4de0b1d0bab3cf",
+        "TEST-io.chatpulse.poc.ChatProtocolTest.xml": "4b8e608d4e5ace7493d4bb8e0f640dbec31d4af78f079f86697b3f87e5c300c8",
+        "TEST-io.chatpulse.poc.ChzzkHttpSourceTest.xml": "159ed0ff1cb26eb71d3868833f9f25b3c9d49b1802de945cbf2582ed57361383",
+        "TEST-io.chatpulse.quality.QualityPolicyTest.xml": "9a7b452d9c9c57e1eec279c07f3d3fbc80c63816777b40bf3cd7f4fc98a2222f",
+        "TEST-io.chatpulse.quality.QualityScheduleTest.xml": "1b50a1636e11633a28574249491e5917e267d9f10a97769888c06d4ef7edd682",
+        "TEST-io.chatpulse.quality.RankingControllerTest.xml": "5a438860c8fda034b69dc88866f72418471787d3ebec017652fd9e52605b27e3",
+        "TEST-io.chatpulse.quality.TrendPolicyTest.xml": "dffb33b5afa78844461a8c06ce5e28cccfb8fc9cd87601bcbe5d1b525ce2a8e2",
+        "TEST-io.chatpulse.replay.ReplayManifestTest.xml": "029d43a40088140e60c8d267dc4cbf406f8ccfc0ac8c503ce9bd13e337ecb85a",
+        "TEST-io.chatpulse.reports.ReportPolicyTest.xml": "f08008a69da7539f19d0a6aa0db666ae02d7408491658ca1083e25a52263584d"
+      }
+    },
+    "integrationTest": {
+      "command": "./scripts/integration",
+      "scope": "EARLIER_0c8b456_ACTUAL_KAFKA_DB_REGRESSION; PRODUCT_JAR_UNCHANGED",
+      "totals": {
+        "tests": 135,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "files": {
+        "TEST-io.chatpulse.categories.CategoryIntegrationTest.xml": "c5929c09d4decf1a0d4c305fb154c618b2da4b3445ffbcb65d693db3e15b81b7",
+        "TEST-io.chatpulse.fleet.FleetIntegrationTest.xml": "dc995dd04803f7a1e1efb44450246bcbd59076ca2d6a1aaddbd190954960311b",
+        "TEST-io.chatpulse.fleet.FleetRuntimeIntegrationTest.xml": "57923b2d3b1f97a5be3354b03dfc6c0cf6e4d66f79a5d7a59266b2ca1fa7c6a8",
+        "TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml": "ac9338970fe82dec1f641cc89472e0d4b38ff74f9c3b3291d7a459546b1957b9",
+        "TEST-io.chatpulse.observations.ObservationIntegrationTest.xml": "f107bac1f8aa77a53f1f5b306297ec58370479ab3ba7ed41f64ba0dbe0e40875",
+        "TEST-io.chatpulse.operations.RecoveryPlanIntegrationTest.xml": "011b5bd477d4e541a30f8dde1e83b435c2c8b629b3b1c70ebdf515192fe146b1",
+        "TEST-io.chatpulse.pipeline.DeadLetterIntegrationTest.xml": "c3e5e2b0bcfcb1ea6239a681505fd10e91ee9967ba7b1e51678d3752a911196c",
+        "TEST-io.chatpulse.pipeline.KafkaSupportIntegrationTest.xml": "76a10b4ae1364c5412be621a712974b52836e1e0372586cea21a54d11f7afa20",
+        "TEST-io.chatpulse.pipeline.LoadExperimentIntegrationTest.xml": "e939c80c0cb1f8316c383b504bfd143ad298cda72965e20049124a1203c85fbe",
+        "TEST-io.chatpulse.pipeline.PartitionExpansionIntegrationTest.xml": "8a572ef3e335c0818fdb837e0af09192f595d459c3b048fcd9462dc85fabbbf5",
+        "TEST-io.chatpulse.pipeline.PipelineIntegrationTest.xml": "3e366ced6569114ae71731b31ce457e02ccfcf2e609216f9abcc10133203d5b2",
+        "TEST-io.chatpulse.pipeline.RankingIntegrationTest.xml": "e2df8a1831b2507acc2edaa649a55e3cfeed41d51ceae8210c88029bc2152f15",
+        "TEST-io.chatpulse.pipeline.TrendRecoveryIntegrationTest.xml": "0cb0e814aa6d46f6438d1db8d285c2490b1f659782bdafd79fecc71ecd0481e5",
+        "TEST-io.chatpulse.replay.ReplayIntegrationTest.xml": "3f93f922c597db7bd6f1b4f540af295276ae4a2220976daff26cd732dbaa6d3d",
+        "TEST-io.chatpulse.reports.ReportIntegrationTest.xml": "a04de1bae10f0156d48227e995bf33100c8320489efd9b3d3f195166f6b17f7f"
+      }
+    }
+  },
+  "productMainUnchangedFromBase": true,
+  "curationValidation": {
+    "at": "2026-10-26T11:32:47.796171+00:00",
+    "runs": 23,
+    "exactReproduction": true,
+    "originalArtifactHashesMatch": true,
+    "allRunsCleaned": true,
+    "allPassingRunsReconciledWith24ZeroLagPositions": true,
+    "heapDiagnosticSanitizedToFixedCodes": true,
+    "curatorSha256": "1d9e8fc562d883b4c8b928e4a84a8050b369c89c388ff0fae843da218538375b",
+    "summarySha256": "c99c47fb9e0e0dbd2aa3a88427a1ea740a3848f32a9afbfce104b956ebcd1bc6"
+  }
+}

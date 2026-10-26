@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "c015e205801897fa22e70836201824dfeda9e509",
+  "runtimeArtifact": "tomcat-embed-websocket-11.0.27.jar",
+  "runtimeArtifactSha256": "cbcd7ed6d7428fa71af6572d541a3ef74ceff42dfc523273950fe586062dc60f",
+  "inspectedClass": "org.apache.tomcat.websocket.WsFrameBase",
+  "command": "javap -c -p -classpath <runtime-tomcat-websocket-jar> org.apache.tomcat.websocket.WsFrameBase",
+  "bytecodeOutputSha256": "9a95caaafa1f0735d5ad5349383a7268b0c306cc8ec555c05a505b12c78f0516",
+  "observedCalls": [
+    "WsSession.getMaxTextMessageBufferSize",
+    "java.nio.CharBuffer.allocate",
+    "putfield messageBufferText"
+  ],
+  "productFrameLimitBytes": 1048576,
+  "interpretation": "CONSTRUCTOR_ALLOCATES_TEXT_CHAR_BUFFER_AT_CONFIGURED_MESSAGE_LIMIT; APPROXIMATELY_2_MiB_CHAR_ARRAY_PER_CONNECTION_PLUS_OTHER_MEMORY",
+  "limitation": "NO_HEAP_HISTOGRAM_OR_RETAINED_SIZE_MEASUREMENT; NO_HEAP_DUMP_SAVED",
+  "productSourceHashes": {
+    "server/src/main/java/io/chatpulse/poc/ChatProtocol.java": "39617681768b0c218d3df4d856ee9c177c454bb73873af9b1ce87c9fa5656f51",
+    "server/src/main/java/io/chatpulse/poc/ChannelProbe.java": "ecdb21c06834a1018f09d2b5b1ecf96baf8541b1a022a9801c0722e092e0a3ea"
+  }
+}

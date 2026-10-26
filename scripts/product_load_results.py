@@ -71,7 +71,7 @@ def analyze(load,offset_file,fault,resources,duration):
         'generatorHeapSuccessRatio':ratio(sum('generatorHeapUsedBytes' in s for s in normal),len(normal)),
         'generatorRssSuccessRatio':ratio(sum('generatorRssBytes' in s for s in normal),len(normal)),
         'resourceSamples':len(resources),'analyzerRssSuccessRatio':ratio(sum('analyzerRssBytes' in s for s in resources),len(resources)),
-        'containerStatsSuccessRatio':ratio(sum(len(s.get('containers',[]))==4 for s in resources),len(resources)),
+        'containerStatsSuccessRatio':ratio(sum(len(s.get('containers',[]))==len(s.get('containerRoles',{'api':0,'kafka':0,'postgres':0,'probe':0})) for s in resources),len(resources)),
         'requiredSuccessRatio':0.90,'minimumOffsetSamples':int(duration*0.8),'minimumResourceSamples':max(2,int(duration/20))}
     api={'duringStop':{},'duringRecovery':{},'normal':{}}
     for r in responses:

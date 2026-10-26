@@ -256,3 +256,10 @@ F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외�
 `cb098c0`에서 `./scripts/check` 단위147·하네스20·JAR와 실제 Kafka/PostgreSQL 집중20회가 통과했다(2026-10-26 02:09:52 UTC 시작, 12.692초). 매회 독립 topic/schema로 실제 크기 거부, pending 유지·end0, 복구 뒤 end1·pending 해제·추가 발행 없음을 확인했다. 이번 fixture payload는276byte이며 사전 최소 probe의277byte와 구분한다. 복구 재시도는20회 모두0회였다. [정제 근거](poc/evidence/outbox-readiness-2026-10-26.json)에 원본 hash를 남겼다. 보완 후 Standards/Spec은 각각 지적0·차단0이다. 최종 Claude와 push/PR CI는 병합 게이트로 별도 확인한다.
 
 최종 리뷰 `b654ea4`는 Claude APPROVE였다. 비차단 의견의 근거 시각 중복 Z·숫자 타입을 정정하고, 제어 payload가 Outbox DB row를 직접 읽은 값은 아니라는 표현을 명확히 했다. 최종 commit은 다시 리뷰와 CI를 확인한다.
+
+
+### 2026-10-26 수집기 자식 JVM 시작 진단 #54
+
+F13 → T08/T14. PR51 push40254127191과 PR53 push40258124001의 기존 두 수집기 인계 시험이 연결2/실제1로 실패했다. PR53 최종65ff2d7은 Claude APPROVE와 PR CI 성공(실제119개)이지만 push 실패로 병합하지 않았다. 실패 시 한 자식의 정상 보고서만 있어 생성자 예외인지 실행 중 상실인지 아직 확정하지 않는다.
+
+수집기 fixture에 시작 단계·단조 경과 시간·예외 타입 체인·허용 코드만 쓰는 진단을 추가하고, 부모는 종료코드와 보고서 유무를 함께 남긴다. 기존 인계 시험을 독립 topic/schema5회로 관측한다. producer 최초 metadata 조회2초 제한은 가설이며 실제 실패 진단 전 제품 timeout/재시도 정책을 바꾸지 않는다. #43의 30분 부하 측정 중에는 로컬 중량 빌드를 겹치지 않고 원격 CI로 관측한다.

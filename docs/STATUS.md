@@ -18,7 +18,9 @@
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |
 | [#48 실제 다중 호스트/AZ](https://github.com/joejaeyoung/jigeumini/issues/48) | T08/T10/T15 | #43/#45 및 외부 계정·리전·AZ·예산 필요 |
 | [#49 외부 배포·운영 복구](https://github.com/joejaeyoung/jigeumini/issues/49) | T08/T13/T15/T16 | #42/#43/#46/#47/#48 및 배포 대상·도메인·운영 목표 필요 |
-| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | 로컬 보완 검증 완료: `cb098c0` 단위147·하네스20·실제 broker 독립20회 통과. Standards/Spec 차단0. [조사](research/OUTBOX_READINESS.md)·[근거](poc/evidence/outbox-readiness-2026-10-26.json). 원래 CI 원인은 미확정이며 최종 Claude·push/PR CI·병합 대기 |
+| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | 로컬 보완 검증 완료: `cb098c0` 단위147·하네스20·실제 broker 독립20회 통과. Standards/Spec 차단0. [조사](research/OUTBOX_READINESS.md)·[근거](poc/evidence/outbox-readiness-2026-10-26.json). 원래 CI 원인은 미확정이며 최종65ff2d7 Claude APPROVE·PR40258127624 성공, push40258124001 기존 Fleet 실패로 병합 대기(#54) |
+
+| [#54 수집기 시작 진단·CI 인계](https://github.com/joejaeyoung/jigeumini/issues/54) | T08/T14 | 진행: PR51/53 push에서 연결2/실제1, child 보고서 누락. 시작 단계·예외 타입 진단과 독립5회 인계로 실제 원인 관측; 원인 미확정 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
 이번 검증을 위해 개발 Kafka/PostgreSQL을 다시 기동했다. 다른 worktree와 서비스는 변경하지 않는다.

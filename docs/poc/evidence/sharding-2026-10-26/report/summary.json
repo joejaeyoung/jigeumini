@@ -1,0 +1,2253 @@
+{
+  "formatVersion": 1,
+  "experiments": [
+    {
+      "file": "00-shard-control-3.json",
+      "sha256": "909ee81d91ab0a476432e343ce9a13534ee7bcbedb5192874c17a5489575c277",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:50:01.113359Z",
+      "finishedAt": "2026-10-26T14:50:38.665574Z",
+      "environment": {
+        "maxHeapBytes": 805306368,
+        "replicationFactor": 1,
+        "postgresql": "16.14",
+        "processors": 15,
+        "os": "Mac OS X",
+        "architecture": "aarch64",
+        "brokers": 1,
+        "java": "21.0.11",
+        "kafka": "4.1.2",
+        "acks": "all",
+        "kafkaMaxInFlight": 1,
+        "poolMaximum": 4
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-control-3",
+      "plan": {
+        "name": "shard-control-3",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 3,
+        "hot": true,
+        "routing": "CHANNEL_KEY",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "uniqueEvents": 30000,
+        "seconds": 15,
+        "eventsPerSecond": 2000
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.005834875,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p99": 2.307875,
+        "p50": 0.371208,
+        "p95": 1.624333,
+        "maximum": 20.918666
+      },
+      "producer": {
+        "rejected": 0,
+        "capacity": 1000,
+        "complete": true,
+        "acknowledged": 30300,
+        "accepted": 30300,
+        "unconfirmed": 0,
+        "failedCallbacks": 0,
+        "firstPublisherHighWater": 82,
+        "second": {
+          "rejected": 0,
+          "capacity": 1000,
+          "complete": true,
+          "acknowledged": 15150,
+          "accepted": 15150,
+          "unconfirmed": 0,
+          "highWater": 41,
+          "failedCallbacks": 0
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.003917958,
+      "producerSettledSeconds": 15.010325375,
+      "acknowledgedPerSecondIncludingDrain": 2018.6096266368802,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 5356.192955589587,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.169218989280245,
+        "record-queue-time-max": 18.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.93621563917804,
+        "records-per-request-avg": 26.302083333333332,
+        "request-rate": 12.829349638688159
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 5356.298621745788,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.134762633996937,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 337.04865514249485,
+        "records-per-request-avg": 26.302083333333332,
+        "request-rate": 12.835342794856965
+      },
+      "databaseA": {
+        "projection": "load-a",
+        "runId": "experiment",
+        "bucketTotal": 30000,
+        "processedEvents": 30000
+      },
+      "databaseB": {},
+      "metricsA": {
+        "uniqueObserved": 30000,
+        "deliveredRecords": 30300,
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p99": 386.808,
+          "p50": 94.833,
+          "p95": 331.079,
+          "maximum": 438.62
+        },
+        "partitionRecords": {
+          "0": 1580,
+          "1": 1896,
+          "2": 26824
+        },
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        },
+        "duplicateDeliveries": 300
+      },
+      "metricsB": {
+        "uniqueObserved": 0,
+        "deliveredRecords": 0,
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p99": null,
+          "p50": null,
+          "p95": null,
+          "maximum": null
+        },
+        "partitionRecords": {},
+        "channelRecords": {},
+        "duplicateDeliveries": 0
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 0.1089355,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.758ecfe8c5cb4243b418df1b7c06a822",
+        "topicId": "55Es2eBfTEyA65vYGcVGXA",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 1580
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 1896
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 26824
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:50:21.269386Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 17.237855125,
+      "appendOrderAudit": {
+        "records": 30300,
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            1
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            1
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            1
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            1
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            1
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            1
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            2
+          ]
+        },
+        "eventTimeBelowPriorMaximum": 599
+      },
+      "routingAudit": {
+        "hotPartitionCount": 1,
+        "hotRecordsByPartition": [
+          0,
+          0,
+          24300
+        ],
+        "requiredDistributionPassed": true,
+        "misplacedRecords": 0,
+        "partitionCount": 3,
+        "maximumHotShare": 1.0,
+        "splitVerified": false,
+        "mode": "CHANNEL_KEY",
+        "hotPhysicalRecords": 24300
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 40980328,
+        "clientRssBytes": 250511360,
+        "clientCpuLoad": 0.054606404205375936,
+        "clientCpuNanos": 11535828000,
+        "kafkaTopicBytes": 13990514,
+        "databaseSchemaBytes": 11468800
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 20.612,
+      "sampleCount": 4,
+      "maximumSampleCostSeconds": 2.7434424159999997,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            2,
+            2,
+            288
+          ],
+          "maximumLagTotal": 291,
+          "observedAssignments": [
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.0012285,
+              "toSeconds": 6.828245125,
+              "inputPerSecondByPartition": [
+                105.46334358750738,
+                126.55601230500886,
+                1791.851502924969
+              ],
+              "commitPerSecondByPartition": [
+                105.31686672141362,
+                126.26305857282134,
+                1749.6661654899663
+              ]
+            },
+            {
+              "fromSeconds": 6.828245125,
+              "toSeconds": 14.579236083,
+              "inputPerSecondByPartition": [
+                105.14784553564951,
+                126.17741464277941,
+                1785.836169207927
+              ],
+              "commitPerSecondByPartition": [
+                105.27686129704294,
+                126.43544616556628,
+                1799.769871438418
+              ]
+            },
+            {
+              "fromSeconds": 14.579236083,
+              "toSeconds": 16.337696291,
+              "inputPerSecondByPartition": [
+                25.590570543066836,
+                30.708684651680205,
+                425.9408297057125
+              ],
+              "commitPerSecondByPartition": [
+                25.590570543066836,
+                30.708684651680205,
+                528.3031118779799
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    },
+    {
+      "file": "01-shard-explicit-3.json",
+      "sha256": "a7fa4a28e010efcc3974017bf790ec745a82d869e3dc9335960af8227a4bd2cc",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:50:40.088040Z",
+      "finishedAt": "2026-10-26T14:51:17.010072Z",
+      "environment": {
+        "java": "21.0.11",
+        "kafka": "4.1.2",
+        "maxHeapBytes": 805306368,
+        "replicationFactor": 1,
+        "postgresql": "16.14",
+        "processors": 15,
+        "os": "Mac OS X",
+        "architecture": "aarch64",
+        "brokers": 1,
+        "poolMaximum": 4,
+        "acks": "all",
+        "kafkaMaxInFlight": 1
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-explicit-3",
+      "plan": {
+        "name": "shard-explicit-3",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 3,
+        "hot": true,
+        "routing": "EXPLICIT_EVENT_ID",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "eventsPerSecond": 2000,
+        "uniqueEvents": 30000,
+        "seconds": 15
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.000456792,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p95": 1.668542,
+        "p99": 2.215625,
+        "p50": 0.498542,
+        "maximum": 10.721917
+      },
+      "producer": {
+        "failedCallbacks": 0,
+        "rejected": 0,
+        "capacity": 1000,
+        "complete": true,
+        "acknowledged": 30300,
+        "accepted": 30300,
+        "unconfirmed": 0,
+        "firstPublisherHighWater": 41,
+        "second": {
+          "failedCallbacks": 0,
+          "rejected": 0,
+          "capacity": 1000,
+          "complete": true,
+          "acknowledged": 15150,
+          "accepted": 15150,
+          "unconfirmed": 0,
+          "highWater": 41
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.004910208,
+      "producerSettledSeconds": 15.006051875,
+      "acknowledgedPerSecondIncludingDrain": 2019.1839355050356,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 6208.224,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.8293333333333335,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.8987524739265,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.359642491884921
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 6208.325333333333,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.812444444444444,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.996174036836,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.362989323843417
+      },
+      "databaseA": {
+        "processedEvents": 30000,
+        "projection": "load-a",
+        "runId": "experiment",
+        "bucketTotal": 30000
+      },
+      "databaseB": {},
+      "metricsA": {
+        "duplicateDeliveries": 300,
+        "uniqueObserved": 30000,
+        "deliveredRecords": 30300,
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p95": 45.447,
+          "p99": 98.73,
+          "p50": 19.229,
+          "maximum": 148.904
+        },
+        "partitionRecords": {
+          "0": 10072,
+          "1": 10082,
+          "2": 10146
+        },
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        }
+      },
+      "metricsB": {
+        "duplicateDeliveries": 0,
+        "uniqueObserved": 0,
+        "deliveredRecords": 0,
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p95": null,
+          "p99": null,
+          "p50": null,
+          "maximum": null
+        },
+        "partitionRecords": {},
+        "channelRecords": {}
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 0.105875125,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.86a46c0b62364ddba77bce33593b87ef",
+        "topicId": "Th0eMo6PQkaeDxfXKsjcdA",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10072
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10082
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10146
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:50:59.618987Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 17.237945791,
+      "appendOrderAudit": {
+        "eventTimeBelowPriorMaximum": 598,
+        "records": 30300,
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            0,
+            1,
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            0,
+            1,
+            2
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            0,
+            1,
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            0,
+            1,
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            0,
+            1,
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            0,
+            1,
+            2
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            0,
+            1,
+            2
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0,
+            1,
+            2
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0,
+            1,
+            2
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            0,
+            1,
+            2
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            0,
+            1,
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0,
+            1,
+            2
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0,
+            1,
+            2
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            0,
+            1,
+            2
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            0,
+            1,
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            0,
+            1,
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0,
+            1,
+            2
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            0,
+            1,
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            0,
+            1,
+            2
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      "routingAudit": {
+        "splitVerified": true,
+        "mode": "EXPLICIT_EVENT_ID",
+        "hotPhysicalRecords": 24300,
+        "hotPartitionCount": 3,
+        "hotRecordsByPartition": [
+          8047,
+          8117,
+          8136
+        ],
+        "requiredDistributionPassed": true,
+        "misplacedRecords": 0,
+        "partitionCount": 3,
+        "maximumHotShare": 0.3348148148148148
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 44387120,
+        "clientRssBytes": 250953728,
+        "clientCpuLoad": 0.0518315503610622,
+        "clientCpuNanos": 11959819000,
+        "kafkaTopicBytes": 13968618,
+        "databaseSchemaBytes": 11419648
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 18.827,
+      "sampleCount": 3,
+      "maximumSampleCostSeconds": 2.793143834,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            0,
+            0,
+            0
+          ],
+          "maximumLagTotal": 0,
+          "observedAssignments": [
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.000928375,
+              "toSeconds": 7.803995584,
+              "inputPerSecondByPartition": [
+                664.7386035605784,
+                676.5288390584718,
+                677.9385411288721
+              ],
+              "commitPerSecondByPartition": [
+                664.7386035605784,
+                676.5288390584718,
+                677.9385411288721
+              ]
+            },
+            {
+              "fromSeconds": 7.803995584,
+              "toSeconds": 15.112057417,
+              "inputPerSecondByPartition": [
+                668.4398834642426,
+                657.2193982146894,
+                664.471663071108
+              ],
+              "commitPerSecondByPartition": [
+                668.4398834642426,
+                657.2193982146894,
+                664.471663071108
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    },
+    {
+      "file": "02-shard-explicit-3.json",
+      "sha256": "67ec087f01019672d081fbaf22ed63c94b6dfb82e2b17c2d013c8418be11a864",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:51:18.331726Z",
+      "finishedAt": "2026-10-26T14:51:57.777803Z",
+      "environment": {
+        "java": "21.0.11",
+        "brokers": 1,
+        "architecture": "aarch64",
+        "os": "Mac OS X",
+        "processors": 15,
+        "postgresql": "16.14",
+        "replicationFactor": 1,
+        "maxHeapBytes": 805306368,
+        "kafka": "4.1.2",
+        "kafkaMaxInFlight": 1,
+        "acks": "all",
+        "poolMaximum": 4
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-explicit-3",
+      "plan": {
+        "name": "shard-explicit-3",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 3,
+        "hot": true,
+        "routing": "EXPLICIT_EVENT_ID",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "seconds": 15,
+        "uniqueEvents": 30000,
+        "eventsPerSecond": 2000
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.003475292,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p50": 0.4525,
+        "p99": 2.339542,
+        "p95": 1.824125,
+        "maximum": 12.601792
+      },
+      "producer": {
+        "failedCallbacks": 0,
+        "unconfirmed": 0,
+        "accepted": 30300,
+        "acknowledged": 30300,
+        "complete": true,
+        "capacity": 1000,
+        "rejected": 0,
+        "firstPublisherHighWater": 41,
+        "second": {
+          "failedCallbacks": 0,
+          "highWater": 41,
+          "unconfirmed": 0,
+          "accepted": 15150,
+          "acknowledged": 15150,
+          "complete": true,
+          "capacity": 1000,
+          "rejected": 0
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.004302125,
+      "producerSettledSeconds": 15.008513917,
+      "acknowledgedPerSecondIncludingDrain": 2018.8532016098131,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 6208.130666666667,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.827555555555556,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.92122937330424,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.359642491884921
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 6208.293333333333,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.868444444444444,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 337.00367033700365,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.362617321293536
+      },
+      "databaseA": {
+        "bucketTotal": 30000,
+        "runId": "experiment",
+        "projection": "load-a",
+        "processedEvents": 30000
+      },
+      "databaseB": {},
+      "metricsA": {
+        "duplicateDeliveries": 300,
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        },
+        "partitionRecords": {
+          "0": 10072,
+          "1": 10082,
+          "2": 10146
+        },
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p50": 19.484,
+          "p99": 108.76,
+          "p95": 52.016,
+          "maximum": 160.427
+        },
+        "deliveredRecords": 30300,
+        "uniqueObserved": 30000
+      },
+      "metricsB": {
+        "duplicateDeliveries": 0,
+        "channelRecords": {},
+        "partitionRecords": {},
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p50": null,
+          "p99": null,
+          "p95": null,
+          "maximum": null
+        },
+        "deliveredRecords": 0,
+        "uniqueObserved": 0
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 0.001826375,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.78754489cad44379a7f9fa3d37b90c3f",
+        "topicId": "jSU4pNzAR1-7bDkHPzUHog",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10072
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10082
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10146
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:51:37.644033Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 19.954303958,
+      "appendOrderAudit": {
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            0,
+            1,
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            0,
+            1,
+            2
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            0,
+            1,
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            0,
+            1,
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            0,
+            1,
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            0,
+            1,
+            2
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            0,
+            1,
+            2
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0,
+            1,
+            2
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0,
+            1,
+            2
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            0,
+            1,
+            2
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            0,
+            1,
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0,
+            1,
+            2
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0,
+            1,
+            2
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            0,
+            1,
+            2
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            0,
+            1,
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            0,
+            1,
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0,
+            1,
+            2
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            0,
+            1,
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            0,
+            1,
+            2
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            0,
+            1,
+            2
+          ]
+        },
+        "records": 30300,
+        "eventTimeBelowPriorMaximum": 598
+      },
+      "routingAudit": {
+        "mode": "EXPLICIT_EVENT_ID",
+        "splitVerified": true,
+        "maximumHotShare": 0.3348148148148148,
+        "partitionCount": 3,
+        "misplacedRecords": 0,
+        "requiredDistributionPassed": true,
+        "hotRecordsByPartition": [
+          8047,
+          8117,
+          8136
+        ],
+        "hotPartitionCount": 3,
+        "hotPhysicalRecords": 24300
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 34796736,
+        "clientRssBytes": 266354688,
+        "clientCpuLoad": 0.05401760787483984,
+        "clientCpuNanos": 11978546000,
+        "kafkaTopicBytes": 13968477,
+        "databaseSchemaBytes": 11452416
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 17.498,
+      "sampleCount": 3,
+      "maximumSampleCostSeconds": 2.7985251250000003,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            18,
+            11,
+            12
+          ],
+          "maximumLagTotal": 41,
+          "observedAssignments": [
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.000788417,
+              "toSeconds": 7.81146425,
+              "inputPerSecondByPartition": [
+                666.3955989581523,
+                677.27813995939,
+                678.8144986889766
+              ],
+              "commitPerSecondByPartition": [
+                664.0910608637724,
+                675.8698111239357,
+                677.27813995939
+              ]
+            },
+            {
+              "fromSeconds": 7.81146425,
+              "toSeconds": 15.010463,
+              "inputPerSecondByPartition": [
+                676.0662376834001,
+                665.6481222475556,
+                672.8713489497411
+              ],
+              "commitPerSecondByPartition": [
+                678.5665853880027,
+                667.1761125114795,
+                674.5382474194763
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    },
+    {
+      "file": "03-shard-control-3.json",
+      "sha256": "3a98ace58595eeaf0383d821554716c3b2e2e8c5c1edb0a56dbf0c8fc60ba68f",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:51:59.200763Z",
+      "finishedAt": "2026-10-26T14:52:38.231367Z",
+      "environment": {
+        "kafka": "4.1.2",
+        "maxHeapBytes": 805306368,
+        "replicationFactor": 1,
+        "postgresql": "16.14",
+        "processors": 15,
+        "os": "Mac OS X",
+        "architecture": "aarch64",
+        "brokers": 1,
+        "java": "21.0.11",
+        "acks": "all",
+        "kafkaMaxInFlight": 1,
+        "poolMaximum": 4
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-control-3",
+      "plan": {
+        "name": "shard-control-3",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 3,
+        "hot": true,
+        "routing": "CHANNEL_KEY",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "uniqueEvents": 30000,
+        "seconds": 15,
+        "eventsPerSecond": 2000
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.006301125,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p99": 2.363083,
+        "p50": 0.405708,
+        "p95": 1.712542,
+        "maximum": 10.677875
+      },
+      "producer": {
+        "rejected": 0,
+        "capacity": 1000,
+        "complete": true,
+        "acknowledged": 30300,
+        "accepted": 30300,
+        "unconfirmed": 0,
+        "failedCallbacks": 0,
+        "firstPublisherHighWater": 41,
+        "second": {
+          "rejected": 0,
+          "capacity": 1000,
+          "complete": true,
+          "acknowledged": 15150,
+          "accepted": 15150,
+          "unconfirmed": 0,
+          "highWater": 41,
+          "failedCallbacks": 0
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.004174917,
+      "producerSettledSeconds": 15.011191542,
+      "acknowledgedPerSecondIncludingDrain": 2018.4929538673132,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 5352.217291507269,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.121652639632747,
+        "record-queue-time-max": 16.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.8837695403705,
+        "records-per-request-avg": 26.256499133448873,
+        "request-rate": 12.848727353562298
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 5352.302218821729,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.155317521040551,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.996174036836,
+        "records-per-request-avg": 26.302083333333332,
+        "request-rate": 12.833059027623326
+      },
+      "databaseA": {
+        "projection": "load-a",
+        "runId": "experiment",
+        "bucketTotal": 30000,
+        "processedEvents": 30000
+      },
+      "databaseB": {},
+      "metricsA": {
+        "uniqueObserved": 30000,
+        "deliveredRecords": 30300,
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p99": 703.799,
+          "p50": 341.105,
+          "p95": 660.135,
+          "maximum": 726.936
+        },
+        "partitionRecords": {
+          "0": 1580,
+          "1": 1896,
+          "2": 26824
+        },
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        },
+        "duplicateDeliveries": 300
+      },
+      "metricsB": {
+        "uniqueObserved": 0,
+        "deliveredRecords": 0,
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p99": null,
+          "p50": null,
+          "p95": null,
+          "maximum": null
+        },
+        "partitionRecords": {},
+        "channelRecords": {},
+        "duplicateDeliveries": 0
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 0.214904125,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.b26438e276364c17b280ab6975c7fb8c",
+        "topicId": "6cJbcxoCRUm9cFfDLzSTIg",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 1580
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 1896
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 26824
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:52:19.235421Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 18.845498292,
+      "appendOrderAudit": {
+        "records": 30300,
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            1
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            1
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            1
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            1
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            1
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            1
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            2
+          ]
+        },
+        "eventTimeBelowPriorMaximum": 630
+      },
+      "routingAudit": {
+        "hotPhysicalRecords": 24300,
+        "hotPartitionCount": 1,
+        "hotRecordsByPartition": [
+          0,
+          0,
+          24300
+        ],
+        "requiredDistributionPassed": true,
+        "misplacedRecords": 0,
+        "partitionCount": 3,
+        "maximumHotShare": 1.0,
+        "splitVerified": false,
+        "mode": "CHANNEL_KEY"
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 177009056,
+        "clientRssBytes": 514965504,
+        "clientCpuLoad": 0.05789463665167432,
+        "clientCpuNanos": 12000683000,
+        "kafkaTopicBytes": 13990807,
+        "databaseSchemaBytes": 11419648
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 16.183,
+      "sampleCount": 4,
+      "maximumSampleCostSeconds": 2.7312658749999983,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            3,
+            2,
+            696
+          ],
+          "maximumLagTotal": 699,
+          "observedAssignments": [
+            [
+              1,
+              1,
+              1
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.000627083,
+              "toSeconds": 6.789479833,
+              "inputPerSecondByPartition": [
+                105.46700987143963,
+                126.53095178710424,
+                1791.3188645901919
+              ],
+              "commitPerSecondByPartition": [
+                105.17240928520656,
+                126.38365149398771,
+                1688.797860581083
+              ]
+            },
+            {
+              "fromSeconds": 6.789479833,
+              "toSeconds": 13.568036833,
+              "inputPerSecondByPartition": [
+                105.33215255105178,
+                126.42808786589828,
+                1788.7287810665305
+              ],
+              "commitPerSecondByPartition": [
+                105.18462852787103,
+                126.28056384271754,
+                1870.4570899086632
+              ]
+            },
+            {
+              "fromSeconds": 13.568036833,
+              "toSeconds": 16.299731917,
+              "inputPerSecondByPartition": [
+                54.910960186799564,
+                65.89315222415948,
+                929.0934463606486
+              ],
+              "commitPerSecondByPartition": [
+                56.00917939053556,
+                66.62529835998347,
+                981.0758220041522
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    },
+    {
+      "file": "04-shard-control-1.json",
+      "sha256": "827930b81d32230b8b5b5f8ff9399f11a8dfbb33ca2e6f2c45830e0682f6d012",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:52:39.716900Z",
+      "finishedAt": "2026-10-26T14:53:21.169560Z",
+      "environment": {
+        "postgresql": "16.14",
+        "processors": 15,
+        "os": "Mac OS X",
+        "architecture": "aarch64",
+        "brokers": 1,
+        "java": "21.0.11",
+        "kafka": "4.1.2",
+        "maxHeapBytes": 805306368,
+        "replicationFactor": 1,
+        "acks": "all",
+        "kafkaMaxInFlight": 1,
+        "poolMaximum": 4
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-control-1",
+      "plan": {
+        "name": "shard-control-1",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 1,
+        "hot": true,
+        "routing": "CHANNEL_KEY",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "uniqueEvents": 30000,
+        "seconds": 15,
+        "eventsPerSecond": 2000
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.000686416,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p99": 2.484875,
+        "p50": 0.402,
+        "p95": 1.851791,
+        "maximum": 14.266291
+      },
+      "producer": {
+        "capacity": 1000,
+        "complete": true,
+        "acknowledged": 30300,
+        "accepted": 30300,
+        "unconfirmed": 0,
+        "failedCallbacks": 0,
+        "rejected": 0,
+        "firstPublisherHighWater": 41,
+        "second": {
+          "capacity": 1000,
+          "complete": true,
+          "acknowledged": 15150,
+          "accepted": 15150,
+          "unconfirmed": 0,
+          "highWater": 41,
+          "failedCallbacks": 0,
+          "rejected": 0
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.004975916,
+      "producerSettledSeconds": 15.006482,
+      "acknowledgedPerSecondIncludingDrain": 2019.1265876234677,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 5352.198928844682,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.227237949502678,
+        "record-queue-time-max": 11.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.9287223395974,
+        "records-per-request-avg": 26.256499133448873,
+        "request-rate": 12.851869969315606
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 5348.2591743119265,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 3.194189602446483,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 337.0261612386546,
+        "records-per-request-avg": 26.302083333333332,
+        "request-rate": 12.834486286896368
+      },
+      "databaseA": {
+        "bucketTotal": 30000,
+        "processedEvents": 30000,
+        "projection": "load-a",
+        "runId": "experiment"
+      },
+      "databaseB": {},
+      "metricsA": {
+        "uniqueObserved": 30000,
+        "deliveredRecords": 30300,
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p99": 1295.963,
+          "p50": 1118.526,
+          "p95": 1259.047,
+          "maximum": 1326.513
+        },
+        "partitionRecords": {
+          "0": 1580,
+          "1": 1896,
+          "2": 26824
+        },
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        },
+        "duplicateDeliveries": 300
+      },
+      "metricsB": {
+        "uniqueObserved": 0,
+        "deliveredRecords": 0,
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p99": null,
+          "p50": null,
+          "p95": null,
+          "maximum": null
+        },
+        "partitionRecords": {},
+        "channelRecords": {},
+        "duplicateDeliveries": 0
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 1.1841245,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.89217183a0ee493ea9f0647c4e0201db",
+        "topicId": "GhOrsiSyRH-DZRMM12Dx9w",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 1580
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 1896
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 26824
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:53:01.657040Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 19.340775833,
+      "appendOrderAudit": {
+        "records": 30300,
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            1
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            1
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            1
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            1
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            1
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            1
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            2
+          ]
+        },
+        "eventTimeBelowPriorMaximum": 630
+      },
+      "routingAudit": {
+        "hotPartitionCount": 1,
+        "hotRecordsByPartition": [
+          0,
+          0,
+          24300
+        ],
+        "requiredDistributionPassed": true,
+        "misplacedRecords": 0,
+        "partitionCount": 3,
+        "maximumHotShare": 1.0,
+        "splitVerified": false,
+        "mode": "CHANNEL_KEY",
+        "hotPhysicalRecords": 24300
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 38132416,
+        "clientRssBytes": 272990208,
+        "clientCpuLoad": 0.041718891151241916,
+        "clientCpuNanos": 10064118000,
+        "kafkaTopicBytes": 13990847,
+        "databaseSchemaBytes": 11354112
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 19.511,
+      "sampleCount": 4,
+      "maximumSampleCostSeconds": 2.805486417,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            84,
+            101,
+            2011
+          ],
+          "maximumLagTotal": 2196,
+          "observedAssignments": [
+            [
+              3
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.000769041,
+              "toSeconds": 7.816092625,
+              "inputPerSecondByPartition": [
+                105.43389421353484,
+                126.54626380726452,
+                1789.305311507368
+              ],
+              "commitPerSecondByPartition": [
+                94.68577878399974,
+                113.62293454079969,
+                1531.9903099740932
+              ]
+            },
+            {
+              "fromSeconds": 7.816092625,
+              "toSeconds": 15.57602175,
+              "inputPerSecondByPartition": [
+                97.4235702184973,
+                116.88251083092204,
+                1654.6542878379703
+              ],
+              "commitPerSecondByPartition": [
+                108.2484113538859,
+                129.8980936246631,
+                1767.7996511340557
+              ]
+            },
+            {
+              "fromSeconds": 15.57602175,
+              "toSeconds": 18.346240958,
+              "inputPerSecondByPartition": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "commitPerSecondByPartition": [
+                0.0,
+                0.0,
+                408.9929045066388
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    },
+    {
+      "file": "05-shard-explicit-1.json",
+      "sha256": "283a2b590fb07fa456fbf26d19a498d5405c53a735a7a070f1213a57377598e6",
+      "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+      "startedAt": "2026-10-26T14:53:22.618108Z",
+      "finishedAt": "2026-10-26T14:54:08.730922Z",
+      "environment": {
+        "os": "Mac OS X",
+        "architecture": "aarch64",
+        "brokers": 1,
+        "java": "21.0.11",
+        "kafka": "4.1.2",
+        "maxHeapBytes": 805306368,
+        "replicationFactor": 1,
+        "postgresql": "16.14",
+        "processors": 15,
+        "kafkaMaxInFlight": 1,
+        "poolMaximum": 4,
+        "acks": "all"
+      },
+      "outcome": "TARGET_INPUT_COMPLETED",
+      "correct": true,
+      "cleanupComplete": true,
+      "measurementIssueCodes": [],
+      "cleanupIssueCodes": [],
+      "cleanupEvidenceScope": null,
+      "verificationComplete": true,
+      "profile": "shard-explicit-1",
+      "plan": {
+        "name": "shard-explicit-1",
+        "rate": 2000,
+        "seconds": 15,
+        "consumers": 1,
+        "hot": true,
+        "routing": "EXPLICIT_EVENT_ID",
+        "serial": false,
+        "independent": false,
+        "pauseSeconds": 0,
+        "fault": "none",
+        "membership": false,
+        "pollStall": false,
+        "duplicates": true,
+        "twoProducers": true
+      },
+      "seed": 20261025,
+      "eventTimeBase": "2026-10-26T14:49:56Z",
+      "targets": {
+        "seconds": 15,
+        "eventsPerSecond": 2000,
+        "uniqueEvents": 30000
+      },
+      "attemptedRecords": 30300,
+      "generatedUnique": 30000,
+      "generatorSeconds": 15.005588167,
+      "generatorScheduleLagMillis": {
+        "samples": 750,
+        "p95": 1.649042,
+        "p99": 2.215625,
+        "p50": 0.374625,
+        "maximum": 16.516625
+      },
+      "producer": {
+        "complete": true,
+        "acknowledged": 30300,
+        "accepted": 30300,
+        "unconfirmed": 0,
+        "failedCallbacks": 0,
+        "rejected": 0,
+        "capacity": 1000,
+        "firstPublisherHighWater": 41,
+        "second": {
+          "complete": true,
+          "acknowledged": 15150,
+          "accepted": 15150,
+          "unconfirmed": 0,
+          "highWater": 41,
+          "failedCallbacks": 0,
+          "rejected": 0,
+          "capacity": 1000
+        },
+        "applicationTotalCapacity": 2000
+      },
+      "publisherDrainSeconds": 0.0052845,
+      "producerSettledSeconds": 15.011676125,
+      "acknowledgedPerSecondIncludingDrain": 2018.427633704711,
+      "pendingObservedAfterRejection": null,
+      "producerMetrics": {
+        "batch-size-avg": 6208.2,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.806222222222222,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 336.93621563917804,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.360014229811455
+      },
+      "secondProducerMetrics": {
+        "batch-size-avg": 6208.309333333334,
+        "buffer-available-bytes": 8388608.0,
+        "record-error-total": 0.0,
+        "record-queue-time-avg": 5.790222222222222,
+        "record-queue-time-max": 7.0,
+        "record-retry-total": 0.0,
+        "record-send-rate": 337.00367033700365,
+        "records-per-request-avg": 40.4,
+        "request-rate": 8.36280331843153
+      },
+      "databaseA": {
+        "bucketTotal": 30000,
+        "processedEvents": 30000,
+        "projection": "load-a",
+        "runId": "experiment"
+      },
+      "databaseB": {},
+      "metricsA": {
+        "deliveredRecords": 30300,
+        "receivedToDbMillis": {
+          "samples": 30000,
+          "p95": 3239.65,
+          "p99": 3751.877,
+          "p50": 1407.189,
+          "maximum": 4067.877
+        },
+        "partitionRecords": {
+          "0": 10072,
+          "1": 10082,
+          "2": 10146
+        },
+        "channelRecords": {
+          "01e1880424863bd4aacb8d2be3532478": 316,
+          "11a44908ebac3c5da6244e2216b7b0ac": 316,
+          "2a0e67eaf7933440b0a09cfcaaf923af": 316,
+          "2ea264e906a23175825a13862526bb14": 315,
+          "37bc73829832358695552b9e3ff0848d": 24000,
+          "572ed5f1a4673501a2e599fd5a6133b5": 316,
+          "58263511becc33f4acb3d059ec6da31c": 316,
+          "69f69fae09483d51bcac18983a6f7677": 316,
+          "73ade6d6861b3074b44d763ce3a6aca4": 316,
+          "7c732f6ba286321aa16a92627f758ccd": 316,
+          "a3771d31a03135caba0faed4a6125bcb": 315,
+          "b38b63daab7e32e7a859c5b499c825d2": 316,
+          "b396fc0c2609354a811db084de6197ce": 316,
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": 316,
+          "bab9bf529dd338a58f3a68fd412b8fb3": 316,
+          "bd54af9553283349974e8bcdf2a93895": 315,
+          "c019fe98bc063e77be36a6b3dc4b4f0d": 316,
+          "c40a81fa59883bea82deed3a7bdef89b": 315,
+          "dfdb0e0ccec03076b8cb9b2f1a274175": 316,
+          "e111a88873b53802962ffba37a509fdc": 316
+        },
+        "duplicateDeliveries": 300,
+        "uniqueObserved": 30000
+      },
+      "metricsB": {
+        "deliveredRecords": 0,
+        "receivedToDbMillis": {
+          "samples": 0,
+          "p95": null,
+          "p99": null,
+          "p50": null,
+          "maximum": null
+        },
+        "partitionRecords": {},
+        "channelRecords": {},
+        "duplicateDeliveries": 0,
+        "uniqueObserved": 0
+      },
+      "metricsAScope": "ALL_GROUP_MEMBERS",
+      "postInputDrainSeconds": 2.805798667,
+      "expectedBucketsMatch": true,
+      "replayManifest": {
+        "formatVersion": 1,
+        "topic": "exp.chat.5a4fe38289284e20b108fd119af7ce0a",
+        "topicId": "_MfY10n9TZC_beMwUPsefg",
+        "partitions": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10072
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10082
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10146
+          }
+        ],
+        "eventFrom": null,
+        "eventTo": null,
+        "schemaVersion": 1,
+        "algorithmVersion": "bucket-10s-v1",
+        "capturedAt": "2026-10-26T14:53:44.716098Z"
+      },
+      "replayBucketDifferences": 0,
+      "replaySeconds": 23.842603084,
+      "appendOrderAudit": {
+        "channelPartitions": {
+          "01e1880424863bd4aacb8d2be3532478": [
+            0,
+            1,
+            2
+          ],
+          "11a44908ebac3c5da6244e2216b7b0ac": [
+            0,
+            1,
+            2
+          ],
+          "2a0e67eaf7933440b0a09cfcaaf923af": [
+            0,
+            1,
+            2
+          ],
+          "2ea264e906a23175825a13862526bb14": [
+            0,
+            1,
+            2
+          ],
+          "37bc73829832358695552b9e3ff0848d": [
+            0,
+            1,
+            2
+          ],
+          "572ed5f1a4673501a2e599fd5a6133b5": [
+            0,
+            1,
+            2
+          ],
+          "58263511becc33f4acb3d059ec6da31c": [
+            0,
+            1,
+            2
+          ],
+          "69f69fae09483d51bcac18983a6f7677": [
+            0,
+            1,
+            2
+          ],
+          "73ade6d6861b3074b44d763ce3a6aca4": [
+            0,
+            1,
+            2
+          ],
+          "7c732f6ba286321aa16a92627f758ccd": [
+            0,
+            1,
+            2
+          ],
+          "a3771d31a03135caba0faed4a6125bcb": [
+            0,
+            1,
+            2
+          ],
+          "b38b63daab7e32e7a859c5b499c825d2": [
+            0,
+            1,
+            2
+          ],
+          "b396fc0c2609354a811db084de6197ce": [
+            0,
+            1,
+            2
+          ],
+          "b3daf2fad33d3c768a8b86b3dd4f1dc1": [
+            0,
+            1,
+            2
+          ],
+          "bab9bf529dd338a58f3a68fd412b8fb3": [
+            0,
+            1,
+            2
+          ],
+          "bd54af9553283349974e8bcdf2a93895": [
+            0,
+            1,
+            2
+          ],
+          "c019fe98bc063e77be36a6b3dc4b4f0d": [
+            0,
+            1,
+            2
+          ],
+          "c40a81fa59883bea82deed3a7bdef89b": [
+            0,
+            1,
+            2
+          ],
+          "dfdb0e0ccec03076b8cb9b2f1a274175": [
+            0,
+            1,
+            2
+          ],
+          "e111a88873b53802962ffba37a509fdc": [
+            0,
+            1,
+            2
+          ]
+        },
+        "eventTimeBelowPriorMaximum": 598,
+        "records": 30300
+      },
+      "routingAudit": {
+        "misplacedRecords": 0,
+        "partitionCount": 3,
+        "maximumHotShare": 0.3348148148148148,
+        "splitVerified": true,
+        "mode": "EXPLICIT_EVENT_ID",
+        "hotPhysicalRecords": 24300,
+        "hotPartitionCount": 3,
+        "hotRecordsByPartition": [
+          8047,
+          8117,
+          8136
+        ],
+        "requiredDistributionPassed": true
+      },
+      "events": [],
+      "failureCode": null,
+      "countConservation": true,
+      "resourcePeaks": {
+        "clientHeapUsedBytes": 39112344,
+        "clientRssBytes": 226377728,
+        "clientCpuLoad": 0.04161879194644067,
+        "clientCpuNanos": 9342623000,
+        "kafkaTopicBytes": 13968573,
+        "databaseSchemaBytes": 11321344
+      },
+      "maximumPending": 41,
+      "maximumOldestUnackedMillis": 18.752,
+      "sampleCount": 4,
+      "maximumSampleCostSeconds": 2.773065916000001,
+      "groupMeasurements": {
+        "groupA": {
+          "maximumLagByPartition": [
+            1360,
+            1025,
+            2447
+          ],
+          "maximumLagTotal": 4832,
+          "observedAssignments": [
+            [
+              3
+            ]
+          ],
+          "rates": [
+            {
+              "fromSeconds": 0.000755625,
+              "toSeconds": 6.803562292,
+              "inputPerSecondByPartition": [
+                665.0196340204182,
+                676.6324879301469,
+                677.5144768346833
+              ],
+              "commitPerSecondByPartition": [
+                539.6302114254984,
+                560.6509469836151,
+                556.6819969132015
+              ]
+            },
+            {
+              "fromSeconds": 6.803562292,
+              "toSeconds": 14.581671167,
+              "inputPerSecondByPartition": [
+                673.2999092918972,
+                669.7000625360879,
+                677.5425858255295
+              ],
+              "commitPerSecondByPartition": [
+                608.1169698206365,
+                639.3584970228384,
+                468.6229080330275
+              ]
+            },
+            {
+              "fromSeconds": 14.581671167,
+              "toSeconds": 17.817672333,
+              "inputPerSecondByPartition": [
+                96.10626944996592,
+                83.43631109804114,
+                82.50924097472958
+              ],
+              "commitPerSecondByPartition": [
+                516.3780586845436,
+                400.1852698961603,
+                838.6894382225321
+              ]
+            }
+          ]
+        }
+      },
+      "recoverySamples": []
+    }
+  ]
+}

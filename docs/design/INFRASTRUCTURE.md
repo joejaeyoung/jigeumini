@@ -88,7 +88,7 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 | 항목 | 다음 결정·검증 | 추적 |
 |---|---|---|
-| hot 방송 샤딩 | 실제 분포/consumer/DB 대조, 품질·관측·replay·전환 계약 | [#67](https://github.com/joejaeyoung/jigeumini/issues/67), [도입 검토](../pipeline/SHARDING_REVIEW.md), [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
+| hot 방송 샤딩 | #67 단순 bucket 실제 분산 대조 완료. 전체 제품 품질·관측·replay·전환과 지속 부하 검증 | [도입 검토](../pipeline/SHARDING_REVIEW.md), [#68](https://github.com/joejaeyoung/jigeumini/issues/68), [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
 | 저장·보존/복구 창 | dedup/replay 하한을 지키는 유한 정리, 장기 DB·Kafka 증가/삭제량 | [#63](https://github.com/joejaeyoung/jigeumini/issues/63) |
 | 수집 worker 수 | 연결 버퍼 비용 개선·재측정, 채널 수와 입력률 동시 제한 | [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
 | 처리 자원 | 전체 projection/API 동시 부하, SQL/잠금·pool·계측 비용 분리, 반복·지속 실행 | [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
@@ -96,4 +96,3 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 | 외부 운영 | 목표 부하/SLO/RPO/RTO, 공급자/SKU/월견적, 도메인/TLS, Kafka 인증·비밀 회전·중앙 경보·외부 백업 복원, PG 전환·앱 가용성 | [#49](https://github.com/joejaeyoung/jigeumini/issues/49) |
 
 남은 로컬 구현·측정은 외부 계정 없이 진행할 수 있다. 유료 자원 생성·main 릴리스는 대상과 비용 조건이 준비된 별도 실행이다. 이번 검토에서 외부 인프라를 생성하지 않았다.
-

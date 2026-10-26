@@ -546,3 +546,16 @@ Standards 재검토에서 가시성이 10초 뒤 처음 확인되면 histogram o
 기존 matrix-1-sharded-3의 hot 방송 partition 집합은 [2]이고 전체 분포는1,790/1,999/26,511이었다. Kafka의 기본 hash에서 세 suffix가 같은 partition에 충돌하는 사례를 회귀로 고정했다. 이전 p95 차이를 hot 방송 분산의 효과로 설명한 것은 근거가 부족하므로 즉시 사용자에게 정정하고 검증 문서와 T07 상태를 부분 검증으로 고쳤다. 과거 원본은 바꾸지 않았다.
 
 실험 라우팅을 CHANNEL_KEY/SUFFIX_HASH/EXPLICIT_EVENT_ID로 명시하고 제품의 channelId 키를 보존하는 eventId 기반 실제 partition 배정을 후보로 추가했다. 재발행 순번·producer와 무관한 위치, 실제 hot 분포, 배정 불일치, DB/replay 대조를 확인한다. 기존 suffix 프로필은 과거 재현용으로 유지한다. 같은 broadcast에 대한 quality 단일 partition 조회, 모든 projection의 단일 consumer, category/report 채널 advisory lock을 코드에서 확인했다. 단순 count 실험을 전체 제품에 확대하지 않도록 설계 변경 조건을 정리한다.
+
+
+## 2026-10-26 · 샤딩 재검증·인프라 정리 #67
+
+깨끗한 96d2cf4에서 14:49:58~14:54:08 UTC에 명시 분할/기존 hash를 소비자 3명은 역순 반복, 1명은 단회로 총 6회 비교했다. 2,000건/s·15초·20채널·80% 편향·1% 중복·두 producer·P3/RF1·동일 eventTime·동일 runtime hash 조건이다. 모든 실행에서 고유 30,000/물리 30,300/DB 30,000·고정 범위 replay 차이 0·계수 보존·소유 자원 정리를 확인했다. 기존 container 8개의 ID/이름은 보존했다. [정제 결과](poc/evidence/sharding-2026-10-26/report/summary.json), [명령·환경·정리](poc/evidence/sharding-2026-10-26/execution.json).
+
+hot 물리 24,300건을 8,047/8,117/8,136으로 실제 분산했고 배정 불일치는 0이었다. C3 p95는 기존 331.079/660.135ms·명시 45.447/52.016ms, C1 단회는 1,259.047→3,239.650ms로 악화됐다. 단순 bucket·fresh schema·짧은 공유 호스트 대조이므로 개선 배수/운영 최대치를 확정하지 않는다. C1 악화의 fetch/batch/SQL 원인은 미분리다. lag/자원 표본 3~4개와 최대 2.81초의 계측 비용도 명시했다.
+
+[도입 검토](pipeline/SHARDING_REVIEW.md)에 routing 소유권·전체 기대 partition 품질·consumer 병렬성·전역 멱등성·DB 채널 잠금·정지/배출 전환/복귀·과거 정책 복원 조건을 남겼다. 일반 S1/hot S3 제품 대조는 [#68](https://github.com/joejaeyoung/jigeumini/issues/68)로 분리하고 #65 병목 진단과 연결했다. [인프라 문서](design/INFRASTRUCTURE.md)에 현재 P3/RF1/단일 JVM 배치와 RF3/다중 장애 영역 후보를 구분했다. 서버 사양·보존 용량·비용·PG/API HA와 실제 외부 검증은 #63~#65/#48/#49로 남는다.
+
+초기 구현 상태(cda9a19와 같은 source)의 로컬 실제 Kafka/DB 136개가 통과했다. 소비자별 초기 할당 검사를 보완한 상태(96d2cf4와 같은 source)에서 단위 167·하네스 34·JAR 빌드와 실제 LoadExperiment 4개를 통과했다. 실행당 HEAD/작업 트리 검증 범위는 근거 파일에서 구분한다. 리팩토링은 ExperimentRouting에 배정/분포 검사를 모으고 기존 생성·집계·replay·정리 수명을 재사용하는 범위다. 제품 main/web/deploy source는 변경하지 않았다. 최종 HEAD의 Claude 승인·push/PR CI·develop 병합은 PR 댓글로 연결한다.
+
+2026-10-27 KST 최종 Spec 검토는 지적 0건이다. Standards의 비차단 지적 1건을 반영해 공통 보고서의 C4 유휴 할당 문구를 실제 consumer 할당 표본을 확인하는 일반 안내로 고쳤다. 이번 C1/C3 실행에 C4 검증을 포함한 것으로 읽히지 않게 했고 보고서를 정본 정제기로 다시 생성했다. 원본 수치와 summary hash는 동일하다.

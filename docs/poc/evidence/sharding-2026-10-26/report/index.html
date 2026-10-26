@@ -1,0 +1,2243 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>지금이니 부하·복구 실험</title><style>body{margin:32px;font:15px/1.7 system-ui;color:#173c30}h1{font-size:28px}table{border-collapse:collapse;white-space:nowrap}th,td{padding:10px;border-bottom:1px solid #cdded5;text-align:right}th:first-child,td:first-child{text-align:left}thead{background:#e6f5ee}.table{overflow:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f6f3;padding:16px}summary{padding:12px;cursor:pointer}</style><h1>합성 부하·복구 실험</h1><p>전체 6회 · 원본 입력 목표 완료 6회 · 목표 미달 0회 · 대조 실패 0회 · 계측 확인 필요 0회 · 볼륨 정리 근거 없음 0회</p><ul><li>단일 로컬 broker·RF1·공유 PostgreSQL의 합성 실험이다. 공개 플랫폼에 부하를 주지 않았다.</li><li>목표 입력 완료, 수락/ACK/거절/미확인 보존, DB 정합성, 자원 정리를 각각 판정한다. 실패도 결과에 포함한다.</li><li>과거 broker-fault의 cleanupComplete는 컨테이너 제거만 확인했다. 이미지 익명 볼륨의 삭제 근거는 없으며 소유권 없는 잔여 볼륨을 임의 삭제하지 않는다.</li><li>이전 하네스는 입력 종료 후 계측 실패를 correct에 반영하지 못했다. 해당 원본을 보존하고 계측 확인 필요로 별도 판정한다.</li><li>지연은 receivedAt부터 실제 DB commit 뒤 계측 시각까지다. heartbeat 실험의 A 지연은 부모 JVM 표본만 포함한다.</li><li>입력률/commit률은 표본 차분이다. Kafka·DB 조회는 원자적 snapshot이 아니며 표본 간 비용과 오차가 있다.</li><li>회복 시간은 재개 뒤 최초 0 lag 표본까지의 관측 상한이다. 표본 사이 순간 최대 lag/정확한 회복 시각은 모른다.</li><li>JVM 메모리는 계측용 eventId/지연 표본도 포함한다. Docker CPU/메모리/IO는 공유 서비스 전체 값이다.</li><li>균등 채널이 균등 partition을 뜻하지 않는다. consumer 수와 실제 partition 할당은 groupMeasurements의 관측 표본에서 확인한다.</li><li>복제 HA·외부 네트워크·다중 호스트·실방송·장기 디스크 보존·전체 제품 projection의 동시 비용은 검증하지 않았다.</li></ul><div class="table"><table><thead><tr><th>실행 파일</th><th>결과</th><th>입력/목표</th><th>ACK</th><th>DB A/B</th><th>p95/p99 A (ms)</th><th>최대 lag A</th><th>입력 후 drain (s)</th><th>replay 차이</th></tr></thead><tbody><tr><td>00-shard-control-3.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>331.1/386.8</td><td>291</td><td>0.1</td><td>0</td></tr><tr><td>01-shard-explicit-3.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>45.4/98.7</td><td>0</td><td>0.1</td><td>0</td></tr><tr><td>02-shard-explicit-3.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>52.0/108.8</td><td>41</td><td>0.0</td><td>0</td></tr><tr><td>03-shard-control-3.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>660.1/703.8</td><td>699</td><td>0.2</td><td>0</td></tr><tr><td>04-shard-control-1.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>1,259.0/1,296.0</td><td>2196</td><td>1.2</td><td>0</td></tr><tr><td>05-shard-explicit-1.json</td><td>목표 완료</td><td>30000/30000</td><td>30300</td><td>30000/—</td><td>3,239.7/3,751.9</td><td>4832</td><td>2.8</td><td>0</td></tr></tbody></table></div><h2>프로필별 근거</h2><details><summary>shard-control-3</summary><pre>{
+  &quot;file&quot;: &quot;00-shard-control-3.json&quot;,
+  &quot;sha256&quot;: &quot;909ee81d91ab0a476432e343ce9a13534ee7bcbedb5192874c17a5489575c277&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:50:01.113359Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:50:38.665574Z&quot;,
+  &quot;environment&quot;: {
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;replicationFactor&quot;: 1,
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;processors&quot;: 15,
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;acks&quot;: &quot;all&quot;,
+    &quot;kafkaMaxInFlight&quot;: 1,
+    &quot;poolMaximum&quot;: 4
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-control-3&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-control-3&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 3,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;CHANNEL_KEY&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;uniqueEvents&quot;: 30000,
+    &quot;seconds&quot;: 15,
+    &quot;eventsPerSecond&quot;: 2000
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.005834875,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p99&quot;: 2.307875,
+    &quot;p50&quot;: 0.371208,
+    &quot;p95&quot;: 1.624333,
+    &quot;maximum&quot;: 20.918666
+  },
+  &quot;producer&quot;: {
+    &quot;rejected&quot;: 0,
+    &quot;capacity&quot;: 1000,
+    &quot;complete&quot;: true,
+    &quot;acknowledged&quot;: 30300,
+    &quot;accepted&quot;: 30300,
+    &quot;unconfirmed&quot;: 0,
+    &quot;failedCallbacks&quot;: 0,
+    &quot;firstPublisherHighWater&quot;: 82,
+    &quot;second&quot;: {
+      &quot;rejected&quot;: 0,
+      &quot;capacity&quot;: 1000,
+      &quot;complete&quot;: true,
+      &quot;acknowledged&quot;: 15150,
+      &quot;accepted&quot;: 15150,
+      &quot;unconfirmed&quot;: 0,
+      &quot;highWater&quot;: 41,
+      &quot;failedCallbacks&quot;: 0
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.003917958,
+  &quot;producerSettledSeconds&quot;: 15.010325375,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2018.6096266368802,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5356.192955589587,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.169218989280245,
+    &quot;record-queue-time-max&quot;: 18.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.93621563917804,
+    &quot;records-per-request-avg&quot;: 26.302083333333332,
+    &quot;request-rate&quot;: 12.829349638688159
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5356.298621745788,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.134762633996937,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 337.04865514249485,
+    &quot;records-per-request-avg&quot;: 26.302083333333332,
+    &quot;request-rate&quot;: 12.835342794856965
+  },
+  &quot;databaseA&quot;: {
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;runId&quot;: &quot;experiment&quot;,
+    &quot;bucketTotal&quot;: 30000,
+    &quot;processedEvents&quot;: 30000
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;uniqueObserved&quot;: 30000,
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p99&quot;: 386.808,
+      &quot;p50&quot;: 94.833,
+      &quot;p95&quot;: 331.079,
+      &quot;maximum&quot;: 438.62
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 1580,
+      &quot;1&quot;: 1896,
+      &quot;2&quot;: 26824
+    },
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    },
+    &quot;duplicateDeliveries&quot;: 300
+  },
+  &quot;metricsB&quot;: {
+    &quot;uniqueObserved&quot;: 0,
+    &quot;deliveredRecords&quot;: 0,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p99&quot;: null,
+      &quot;p50&quot;: null,
+      &quot;p95&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;partitionRecords&quot;: {},
+    &quot;channelRecords&quot;: {},
+    &quot;duplicateDeliveries&quot;: 0
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 0.1089355,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.758ecfe8c5cb4243b418df1b7c06a822&quot;,
+    &quot;topicId&quot;: &quot;55Es2eBfTEyA65vYGcVGXA&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1580
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1896
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 26824
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:50:21.269386Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 17.237855125,
+  &quot;appendOrderAudit&quot;: {
+    &quot;records&quot;: 30300,
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        1
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        1
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        1
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        1
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        1
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        1
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        2
+      ]
+    },
+    &quot;eventTimeBelowPriorMaximum&quot;: 599
+  },
+  &quot;routingAudit&quot;: {
+    &quot;hotPartitionCount&quot;: 1,
+    &quot;hotRecordsByPartition&quot;: [
+      0,
+      0,
+      24300
+    ],
+    &quot;requiredDistributionPassed&quot;: true,
+    &quot;misplacedRecords&quot;: 0,
+    &quot;partitionCount&quot;: 3,
+    &quot;maximumHotShare&quot;: 1.0,
+    &quot;splitVerified&quot;: false,
+    &quot;mode&quot;: &quot;CHANNEL_KEY&quot;,
+    &quot;hotPhysicalRecords&quot;: 24300
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 40980328,
+    &quot;clientRssBytes&quot;: 250511360,
+    &quot;clientCpuLoad&quot;: 0.054606404205375936,
+    &quot;clientCpuNanos&quot;: 11535828000,
+    &quot;kafkaTopicBytes&quot;: 13990514,
+    &quot;databaseSchemaBytes&quot;: 11468800
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 20.612,
+  &quot;sampleCount&quot;: 4,
+  &quot;maximumSampleCostSeconds&quot;: 2.7434424159999997,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        2,
+        2,
+        288
+      ],
+      &quot;maximumLagTotal&quot;: 291,
+      &quot;observedAssignments&quot;: [
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.0012285,
+          &quot;toSeconds&quot;: 6.828245125,
+          &quot;inputPerSecondByPartition&quot;: [
+            105.46334358750738,
+            126.55601230500886,
+            1791.851502924969
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            105.31686672141362,
+            126.26305857282134,
+            1749.6661654899663
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 6.828245125,
+          &quot;toSeconds&quot;: 14.579236083,
+          &quot;inputPerSecondByPartition&quot;: [
+            105.14784553564951,
+            126.17741464277941,
+            1785.836169207927
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            105.27686129704294,
+            126.43544616556628,
+            1799.769871438418
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 14.579236083,
+          &quot;toSeconds&quot;: 16.337696291,
+          &quot;inputPerSecondByPartition&quot;: [
+            25.590570543066836,
+            30.708684651680205,
+            425.9408297057125
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            25.590570543066836,
+            30.708684651680205,
+            528.3031118779799
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details><details><summary>shard-explicit-3</summary><pre>{
+  &quot;file&quot;: &quot;01-shard-explicit-3.json&quot;,
+  &quot;sha256&quot;: &quot;a7fa4a28e010efcc3974017bf790ec745a82d869e3dc9335960af8227a4bd2cc&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:50:40.088040Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:51:17.010072Z&quot;,
+  &quot;environment&quot;: {
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;replicationFactor&quot;: 1,
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;processors&quot;: 15,
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;poolMaximum&quot;: 4,
+    &quot;acks&quot;: &quot;all&quot;,
+    &quot;kafkaMaxInFlight&quot;: 1
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-explicit-3&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-explicit-3&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 3,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;eventsPerSecond&quot;: 2000,
+    &quot;uniqueEvents&quot;: 30000,
+    &quot;seconds&quot;: 15
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.000456792,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p95&quot;: 1.668542,
+    &quot;p99&quot;: 2.215625,
+    &quot;p50&quot;: 0.498542,
+    &quot;maximum&quot;: 10.721917
+  },
+  &quot;producer&quot;: {
+    &quot;failedCallbacks&quot;: 0,
+    &quot;rejected&quot;: 0,
+    &quot;capacity&quot;: 1000,
+    &quot;complete&quot;: true,
+    &quot;acknowledged&quot;: 30300,
+    &quot;accepted&quot;: 30300,
+    &quot;unconfirmed&quot;: 0,
+    &quot;firstPublisherHighWater&quot;: 41,
+    &quot;second&quot;: {
+      &quot;failedCallbacks&quot;: 0,
+      &quot;rejected&quot;: 0,
+      &quot;capacity&quot;: 1000,
+      &quot;complete&quot;: true,
+      &quot;acknowledged&quot;: 15150,
+      &quot;accepted&quot;: 15150,
+      &quot;unconfirmed&quot;: 0,
+      &quot;highWater&quot;: 41
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.004910208,
+  &quot;producerSettledSeconds&quot;: 15.006051875,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2019.1839355050356,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.224,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.8293333333333335,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.8987524739265,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.359642491884921
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.325333333333,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.812444444444444,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.996174036836,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.362989323843417
+  },
+  &quot;databaseA&quot;: {
+    &quot;processedEvents&quot;: 30000,
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;runId&quot;: &quot;experiment&quot;,
+    &quot;bucketTotal&quot;: 30000
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;duplicateDeliveries&quot;: 300,
+    &quot;uniqueObserved&quot;: 30000,
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p95&quot;: 45.447,
+      &quot;p99&quot;: 98.73,
+      &quot;p50&quot;: 19.229,
+      &quot;maximum&quot;: 148.904
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 10072,
+      &quot;1&quot;: 10082,
+      &quot;2&quot;: 10146
+    },
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    }
+  },
+  &quot;metricsB&quot;: {
+    &quot;duplicateDeliveries&quot;: 0,
+    &quot;uniqueObserved&quot;: 0,
+    &quot;deliveredRecords&quot;: 0,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p95&quot;: null,
+      &quot;p99&quot;: null,
+      &quot;p50&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;partitionRecords&quot;: {},
+    &quot;channelRecords&quot;: {}
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 0.105875125,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.86a46c0b62364ddba77bce33593b87ef&quot;,
+    &quot;topicId&quot;: &quot;Th0eMo6PQkaeDxfXKsjcdA&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10072
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10082
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10146
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:50:59.618987Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 17.237945791,
+  &quot;appendOrderAudit&quot;: {
+    &quot;eventTimeBelowPriorMaximum&quot;: 598,
+    &quot;records&quot;: 30300,
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  &quot;routingAudit&quot;: {
+    &quot;splitVerified&quot;: true,
+    &quot;mode&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;hotPhysicalRecords&quot;: 24300,
+    &quot;hotPartitionCount&quot;: 3,
+    &quot;hotRecordsByPartition&quot;: [
+      8047,
+      8117,
+      8136
+    ],
+    &quot;requiredDistributionPassed&quot;: true,
+    &quot;misplacedRecords&quot;: 0,
+    &quot;partitionCount&quot;: 3,
+    &quot;maximumHotShare&quot;: 0.3348148148148148
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 44387120,
+    &quot;clientRssBytes&quot;: 250953728,
+    &quot;clientCpuLoad&quot;: 0.0518315503610622,
+    &quot;clientCpuNanos&quot;: 11959819000,
+    &quot;kafkaTopicBytes&quot;: 13968618,
+    &quot;databaseSchemaBytes&quot;: 11419648
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 18.827,
+  &quot;sampleCount&quot;: 3,
+  &quot;maximumSampleCostSeconds&quot;: 2.793143834,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        0,
+        0,
+        0
+      ],
+      &quot;maximumLagTotal&quot;: 0,
+      &quot;observedAssignments&quot;: [
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.000928375,
+          &quot;toSeconds&quot;: 7.803995584,
+          &quot;inputPerSecondByPartition&quot;: [
+            664.7386035605784,
+            676.5288390584718,
+            677.9385411288721
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            664.7386035605784,
+            676.5288390584718,
+            677.9385411288721
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 7.803995584,
+          &quot;toSeconds&quot;: 15.112057417,
+          &quot;inputPerSecondByPartition&quot;: [
+            668.4398834642426,
+            657.2193982146894,
+            664.471663071108
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            668.4398834642426,
+            657.2193982146894,
+            664.471663071108
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details><details><summary>shard-explicit-3</summary><pre>{
+  &quot;file&quot;: &quot;02-shard-explicit-3.json&quot;,
+  &quot;sha256&quot;: &quot;67ec087f01019672d081fbaf22ed63c94b6dfb82e2b17c2d013c8418be11a864&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:51:18.331726Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:51:57.777803Z&quot;,
+  &quot;environment&quot;: {
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;processors&quot;: 15,
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;replicationFactor&quot;: 1,
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;kafkaMaxInFlight&quot;: 1,
+    &quot;acks&quot;: &quot;all&quot;,
+    &quot;poolMaximum&quot;: 4
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-explicit-3&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-explicit-3&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 3,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;seconds&quot;: 15,
+    &quot;uniqueEvents&quot;: 30000,
+    &quot;eventsPerSecond&quot;: 2000
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.003475292,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p50&quot;: 0.4525,
+    &quot;p99&quot;: 2.339542,
+    &quot;p95&quot;: 1.824125,
+    &quot;maximum&quot;: 12.601792
+  },
+  &quot;producer&quot;: {
+    &quot;failedCallbacks&quot;: 0,
+    &quot;unconfirmed&quot;: 0,
+    &quot;accepted&quot;: 30300,
+    &quot;acknowledged&quot;: 30300,
+    &quot;complete&quot;: true,
+    &quot;capacity&quot;: 1000,
+    &quot;rejected&quot;: 0,
+    &quot;firstPublisherHighWater&quot;: 41,
+    &quot;second&quot;: {
+      &quot;failedCallbacks&quot;: 0,
+      &quot;highWater&quot;: 41,
+      &quot;unconfirmed&quot;: 0,
+      &quot;accepted&quot;: 15150,
+      &quot;acknowledged&quot;: 15150,
+      &quot;complete&quot;: true,
+      &quot;capacity&quot;: 1000,
+      &quot;rejected&quot;: 0
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.004302125,
+  &quot;producerSettledSeconds&quot;: 15.008513917,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2018.8532016098131,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.130666666667,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.827555555555556,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.92122937330424,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.359642491884921
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.293333333333,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.868444444444444,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 337.00367033700365,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.362617321293536
+  },
+  &quot;databaseA&quot;: {
+    &quot;bucketTotal&quot;: 30000,
+    &quot;runId&quot;: &quot;experiment&quot;,
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;processedEvents&quot;: 30000
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;duplicateDeliveries&quot;: 300,
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 10072,
+      &quot;1&quot;: 10082,
+      &quot;2&quot;: 10146
+    },
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p50&quot;: 19.484,
+      &quot;p99&quot;: 108.76,
+      &quot;p95&quot;: 52.016,
+      &quot;maximum&quot;: 160.427
+    },
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;uniqueObserved&quot;: 30000
+  },
+  &quot;metricsB&quot;: {
+    &quot;duplicateDeliveries&quot;: 0,
+    &quot;channelRecords&quot;: {},
+    &quot;partitionRecords&quot;: {},
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p50&quot;: null,
+      &quot;p99&quot;: null,
+      &quot;p95&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;deliveredRecords&quot;: 0,
+    &quot;uniqueObserved&quot;: 0
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 0.001826375,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.78754489cad44379a7f9fa3d37b90c3f&quot;,
+    &quot;topicId&quot;: &quot;jSU4pNzAR1-7bDkHPzUHog&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10072
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10082
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10146
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:51:37.644033Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 19.954303958,
+  &quot;appendOrderAudit&quot;: {
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        0,
+        1,
+        2
+      ]
+    },
+    &quot;records&quot;: 30300,
+    &quot;eventTimeBelowPriorMaximum&quot;: 598
+  },
+  &quot;routingAudit&quot;: {
+    &quot;mode&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;splitVerified&quot;: true,
+    &quot;maximumHotShare&quot;: 0.3348148148148148,
+    &quot;partitionCount&quot;: 3,
+    &quot;misplacedRecords&quot;: 0,
+    &quot;requiredDistributionPassed&quot;: true,
+    &quot;hotRecordsByPartition&quot;: [
+      8047,
+      8117,
+      8136
+    ],
+    &quot;hotPartitionCount&quot;: 3,
+    &quot;hotPhysicalRecords&quot;: 24300
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 34796736,
+    &quot;clientRssBytes&quot;: 266354688,
+    &quot;clientCpuLoad&quot;: 0.05401760787483984,
+    &quot;clientCpuNanos&quot;: 11978546000,
+    &quot;kafkaTopicBytes&quot;: 13968477,
+    &quot;databaseSchemaBytes&quot;: 11452416
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 17.498,
+  &quot;sampleCount&quot;: 3,
+  &quot;maximumSampleCostSeconds&quot;: 2.7985251250000003,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        18,
+        11,
+        12
+      ],
+      &quot;maximumLagTotal&quot;: 41,
+      &quot;observedAssignments&quot;: [
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.000788417,
+          &quot;toSeconds&quot;: 7.81146425,
+          &quot;inputPerSecondByPartition&quot;: [
+            666.3955989581523,
+            677.27813995939,
+            678.8144986889766
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            664.0910608637724,
+            675.8698111239357,
+            677.27813995939
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 7.81146425,
+          &quot;toSeconds&quot;: 15.010463,
+          &quot;inputPerSecondByPartition&quot;: [
+            676.0662376834001,
+            665.6481222475556,
+            672.8713489497411
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            678.5665853880027,
+            667.1761125114795,
+            674.5382474194763
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details><details><summary>shard-control-3</summary><pre>{
+  &quot;file&quot;: &quot;03-shard-control-3.json&quot;,
+  &quot;sha256&quot;: &quot;3a98ace58595eeaf0383d821554716c3b2e2e8c5c1edb0a56dbf0c8fc60ba68f&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:51:59.200763Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:52:38.231367Z&quot;,
+  &quot;environment&quot;: {
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;replicationFactor&quot;: 1,
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;processors&quot;: 15,
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;acks&quot;: &quot;all&quot;,
+    &quot;kafkaMaxInFlight&quot;: 1,
+    &quot;poolMaximum&quot;: 4
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-control-3&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-control-3&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 3,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;CHANNEL_KEY&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;uniqueEvents&quot;: 30000,
+    &quot;seconds&quot;: 15,
+    &quot;eventsPerSecond&quot;: 2000
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.006301125,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p99&quot;: 2.363083,
+    &quot;p50&quot;: 0.405708,
+    &quot;p95&quot;: 1.712542,
+    &quot;maximum&quot;: 10.677875
+  },
+  &quot;producer&quot;: {
+    &quot;rejected&quot;: 0,
+    &quot;capacity&quot;: 1000,
+    &quot;complete&quot;: true,
+    &quot;acknowledged&quot;: 30300,
+    &quot;accepted&quot;: 30300,
+    &quot;unconfirmed&quot;: 0,
+    &quot;failedCallbacks&quot;: 0,
+    &quot;firstPublisherHighWater&quot;: 41,
+    &quot;second&quot;: {
+      &quot;rejected&quot;: 0,
+      &quot;capacity&quot;: 1000,
+      &quot;complete&quot;: true,
+      &quot;acknowledged&quot;: 15150,
+      &quot;accepted&quot;: 15150,
+      &quot;unconfirmed&quot;: 0,
+      &quot;highWater&quot;: 41,
+      &quot;failedCallbacks&quot;: 0
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.004174917,
+  &quot;producerSettledSeconds&quot;: 15.011191542,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2018.4929538673132,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5352.217291507269,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.121652639632747,
+    &quot;record-queue-time-max&quot;: 16.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.8837695403705,
+    &quot;records-per-request-avg&quot;: 26.256499133448873,
+    &quot;request-rate&quot;: 12.848727353562298
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5352.302218821729,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.155317521040551,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.996174036836,
+    &quot;records-per-request-avg&quot;: 26.302083333333332,
+    &quot;request-rate&quot;: 12.833059027623326
+  },
+  &quot;databaseA&quot;: {
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;runId&quot;: &quot;experiment&quot;,
+    &quot;bucketTotal&quot;: 30000,
+    &quot;processedEvents&quot;: 30000
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;uniqueObserved&quot;: 30000,
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p99&quot;: 703.799,
+      &quot;p50&quot;: 341.105,
+      &quot;p95&quot;: 660.135,
+      &quot;maximum&quot;: 726.936
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 1580,
+      &quot;1&quot;: 1896,
+      &quot;2&quot;: 26824
+    },
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    },
+    &quot;duplicateDeliveries&quot;: 300
+  },
+  &quot;metricsB&quot;: {
+    &quot;uniqueObserved&quot;: 0,
+    &quot;deliveredRecords&quot;: 0,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p99&quot;: null,
+      &quot;p50&quot;: null,
+      &quot;p95&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;partitionRecords&quot;: {},
+    &quot;channelRecords&quot;: {},
+    &quot;duplicateDeliveries&quot;: 0
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 0.214904125,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.b26438e276364c17b280ab6975c7fb8c&quot;,
+    &quot;topicId&quot;: &quot;6cJbcxoCRUm9cFfDLzSTIg&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1580
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1896
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 26824
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:52:19.235421Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 18.845498292,
+  &quot;appendOrderAudit&quot;: {
+    &quot;records&quot;: 30300,
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        1
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        1
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        1
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        1
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        1
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        1
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        2
+      ]
+    },
+    &quot;eventTimeBelowPriorMaximum&quot;: 630
+  },
+  &quot;routingAudit&quot;: {
+    &quot;hotPhysicalRecords&quot;: 24300,
+    &quot;hotPartitionCount&quot;: 1,
+    &quot;hotRecordsByPartition&quot;: [
+      0,
+      0,
+      24300
+    ],
+    &quot;requiredDistributionPassed&quot;: true,
+    &quot;misplacedRecords&quot;: 0,
+    &quot;partitionCount&quot;: 3,
+    &quot;maximumHotShare&quot;: 1.0,
+    &quot;splitVerified&quot;: false,
+    &quot;mode&quot;: &quot;CHANNEL_KEY&quot;
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 177009056,
+    &quot;clientRssBytes&quot;: 514965504,
+    &quot;clientCpuLoad&quot;: 0.05789463665167432,
+    &quot;clientCpuNanos&quot;: 12000683000,
+    &quot;kafkaTopicBytes&quot;: 13990807,
+    &quot;databaseSchemaBytes&quot;: 11419648
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 16.183,
+  &quot;sampleCount&quot;: 4,
+  &quot;maximumSampleCostSeconds&quot;: 2.7312658749999983,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        3,
+        2,
+        696
+      ],
+      &quot;maximumLagTotal&quot;: 699,
+      &quot;observedAssignments&quot;: [
+        [
+          1,
+          1,
+          1
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.000627083,
+          &quot;toSeconds&quot;: 6.789479833,
+          &quot;inputPerSecondByPartition&quot;: [
+            105.46700987143963,
+            126.53095178710424,
+            1791.3188645901919
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            105.17240928520656,
+            126.38365149398771,
+            1688.797860581083
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 6.789479833,
+          &quot;toSeconds&quot;: 13.568036833,
+          &quot;inputPerSecondByPartition&quot;: [
+            105.33215255105178,
+            126.42808786589828,
+            1788.7287810665305
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            105.18462852787103,
+            126.28056384271754,
+            1870.4570899086632
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 13.568036833,
+          &quot;toSeconds&quot;: 16.299731917,
+          &quot;inputPerSecondByPartition&quot;: [
+            54.910960186799564,
+            65.89315222415948,
+            929.0934463606486
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            56.00917939053556,
+            66.62529835998347,
+            981.0758220041522
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details><details><summary>shard-control-1</summary><pre>{
+  &quot;file&quot;: &quot;04-shard-control-1.json&quot;,
+  &quot;sha256&quot;: &quot;827930b81d32230b8b5b5f8ff9399f11a8dfbb33ca2e6f2c45830e0682f6d012&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:52:39.716900Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:53:21.169560Z&quot;,
+  &quot;environment&quot;: {
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;processors&quot;: 15,
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;replicationFactor&quot;: 1,
+    &quot;acks&quot;: &quot;all&quot;,
+    &quot;kafkaMaxInFlight&quot;: 1,
+    &quot;poolMaximum&quot;: 4
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-control-1&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-control-1&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 1,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;CHANNEL_KEY&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;uniqueEvents&quot;: 30000,
+    &quot;seconds&quot;: 15,
+    &quot;eventsPerSecond&quot;: 2000
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.000686416,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p99&quot;: 2.484875,
+    &quot;p50&quot;: 0.402,
+    &quot;p95&quot;: 1.851791,
+    &quot;maximum&quot;: 14.266291
+  },
+  &quot;producer&quot;: {
+    &quot;capacity&quot;: 1000,
+    &quot;complete&quot;: true,
+    &quot;acknowledged&quot;: 30300,
+    &quot;accepted&quot;: 30300,
+    &quot;unconfirmed&quot;: 0,
+    &quot;failedCallbacks&quot;: 0,
+    &quot;rejected&quot;: 0,
+    &quot;firstPublisherHighWater&quot;: 41,
+    &quot;second&quot;: {
+      &quot;capacity&quot;: 1000,
+      &quot;complete&quot;: true,
+      &quot;acknowledged&quot;: 15150,
+      &quot;accepted&quot;: 15150,
+      &quot;unconfirmed&quot;: 0,
+      &quot;highWater&quot;: 41,
+      &quot;failedCallbacks&quot;: 0,
+      &quot;rejected&quot;: 0
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.004975916,
+  &quot;producerSettledSeconds&quot;: 15.006482,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2019.1265876234677,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5352.198928844682,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.227237949502678,
+    &quot;record-queue-time-max&quot;: 11.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.9287223395974,
+    &quot;records-per-request-avg&quot;: 26.256499133448873,
+    &quot;request-rate&quot;: 12.851869969315606
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 5348.2591743119265,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 3.194189602446483,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 337.0261612386546,
+    &quot;records-per-request-avg&quot;: 26.302083333333332,
+    &quot;request-rate&quot;: 12.834486286896368
+  },
+  &quot;databaseA&quot;: {
+    &quot;bucketTotal&quot;: 30000,
+    &quot;processedEvents&quot;: 30000,
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;runId&quot;: &quot;experiment&quot;
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;uniqueObserved&quot;: 30000,
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p99&quot;: 1295.963,
+      &quot;p50&quot;: 1118.526,
+      &quot;p95&quot;: 1259.047,
+      &quot;maximum&quot;: 1326.513
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 1580,
+      &quot;1&quot;: 1896,
+      &quot;2&quot;: 26824
+    },
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    },
+    &quot;duplicateDeliveries&quot;: 300
+  },
+  &quot;metricsB&quot;: {
+    &quot;uniqueObserved&quot;: 0,
+    &quot;deliveredRecords&quot;: 0,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p99&quot;: null,
+      &quot;p50&quot;: null,
+      &quot;p95&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;partitionRecords&quot;: {},
+    &quot;channelRecords&quot;: {},
+    &quot;duplicateDeliveries&quot;: 0
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 1.1841245,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.89217183a0ee493ea9f0647c4e0201db&quot;,
+    &quot;topicId&quot;: &quot;GhOrsiSyRH-DZRMM12Dx9w&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1580
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 1896
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 26824
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:53:01.657040Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 19.340775833,
+  &quot;appendOrderAudit&quot;: {
+    &quot;records&quot;: 30300,
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        1
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        1
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        1
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        1
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        1
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        1
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        2
+      ]
+    },
+    &quot;eventTimeBelowPriorMaximum&quot;: 630
+  },
+  &quot;routingAudit&quot;: {
+    &quot;hotPartitionCount&quot;: 1,
+    &quot;hotRecordsByPartition&quot;: [
+      0,
+      0,
+      24300
+    ],
+    &quot;requiredDistributionPassed&quot;: true,
+    &quot;misplacedRecords&quot;: 0,
+    &quot;partitionCount&quot;: 3,
+    &quot;maximumHotShare&quot;: 1.0,
+    &quot;splitVerified&quot;: false,
+    &quot;mode&quot;: &quot;CHANNEL_KEY&quot;,
+    &quot;hotPhysicalRecords&quot;: 24300
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 38132416,
+    &quot;clientRssBytes&quot;: 272990208,
+    &quot;clientCpuLoad&quot;: 0.041718891151241916,
+    &quot;clientCpuNanos&quot;: 10064118000,
+    &quot;kafkaTopicBytes&quot;: 13990847,
+    &quot;databaseSchemaBytes&quot;: 11354112
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 19.511,
+  &quot;sampleCount&quot;: 4,
+  &quot;maximumSampleCostSeconds&quot;: 2.805486417,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        84,
+        101,
+        2011
+      ],
+      &quot;maximumLagTotal&quot;: 2196,
+      &quot;observedAssignments&quot;: [
+        [
+          3
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.000769041,
+          &quot;toSeconds&quot;: 7.816092625,
+          &quot;inputPerSecondByPartition&quot;: [
+            105.43389421353484,
+            126.54626380726452,
+            1789.305311507368
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            94.68577878399974,
+            113.62293454079969,
+            1531.9903099740932
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 7.816092625,
+          &quot;toSeconds&quot;: 15.57602175,
+          &quot;inputPerSecondByPartition&quot;: [
+            97.4235702184973,
+            116.88251083092204,
+            1654.6542878379703
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            108.2484113538859,
+            129.8980936246631,
+            1767.7996511340557
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 15.57602175,
+          &quot;toSeconds&quot;: 18.346240958,
+          &quot;inputPerSecondByPartition&quot;: [
+            0.0,
+            0.0,
+            0.0
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            0.0,
+            0.0,
+            408.9929045066388
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details><details><summary>shard-explicit-1</summary><pre>{
+  &quot;file&quot;: &quot;05-shard-explicit-1.json&quot;,
+  &quot;sha256&quot;: &quot;283a2b590fb07fa456fbf26d19a498d5405c53a735a7a070f1213a57377598e6&quot;,
+  &quot;codeCommit&quot;: &quot;96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd&quot;,
+  &quot;runtimeClassesSha256&quot;: &quot;847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76&quot;,
+  &quot;startedAt&quot;: &quot;2026-10-26T14:53:22.618108Z&quot;,
+  &quot;finishedAt&quot;: &quot;2026-10-26T14:54:08.730922Z&quot;,
+  &quot;environment&quot;: {
+    &quot;os&quot;: &quot;Mac OS X&quot;,
+    &quot;architecture&quot;: &quot;aarch64&quot;,
+    &quot;brokers&quot;: 1,
+    &quot;java&quot;: &quot;21.0.11&quot;,
+    &quot;kafka&quot;: &quot;4.1.2&quot;,
+    &quot;maxHeapBytes&quot;: 805306368,
+    &quot;replicationFactor&quot;: 1,
+    &quot;postgresql&quot;: &quot;16.14&quot;,
+    &quot;processors&quot;: 15,
+    &quot;kafkaMaxInFlight&quot;: 1,
+    &quot;poolMaximum&quot;: 4,
+    &quot;acks&quot;: &quot;all&quot;
+  },
+  &quot;outcome&quot;: &quot;TARGET_INPUT_COMPLETED&quot;,
+  &quot;correct&quot;: true,
+  &quot;cleanupComplete&quot;: true,
+  &quot;measurementIssueCodes&quot;: [],
+  &quot;cleanupIssueCodes&quot;: [],
+  &quot;cleanupEvidenceScope&quot;: null,
+  &quot;verificationComplete&quot;: true,
+  &quot;profile&quot;: &quot;shard-explicit-1&quot;,
+  &quot;plan&quot;: {
+    &quot;name&quot;: &quot;shard-explicit-1&quot;,
+    &quot;rate&quot;: 2000,
+    &quot;seconds&quot;: 15,
+    &quot;consumers&quot;: 1,
+    &quot;hot&quot;: true,
+    &quot;routing&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;serial&quot;: false,
+    &quot;independent&quot;: false,
+    &quot;pauseSeconds&quot;: 0,
+    &quot;fault&quot;: &quot;none&quot;,
+    &quot;membership&quot;: false,
+    &quot;pollStall&quot;: false,
+    &quot;duplicates&quot;: true,
+    &quot;twoProducers&quot;: true
+  },
+  &quot;seed&quot;: 20261025,
+  &quot;eventTimeBase&quot;: &quot;2026-10-26T14:49:56Z&quot;,
+  &quot;targets&quot;: {
+    &quot;seconds&quot;: 15,
+    &quot;eventsPerSecond&quot;: 2000,
+    &quot;uniqueEvents&quot;: 30000
+  },
+  &quot;attemptedRecords&quot;: 30300,
+  &quot;generatedUnique&quot;: 30000,
+  &quot;generatorSeconds&quot;: 15.005588167,
+  &quot;generatorScheduleLagMillis&quot;: {
+    &quot;samples&quot;: 750,
+    &quot;p95&quot;: 1.649042,
+    &quot;p99&quot;: 2.215625,
+    &quot;p50&quot;: 0.374625,
+    &quot;maximum&quot;: 16.516625
+  },
+  &quot;producer&quot;: {
+    &quot;complete&quot;: true,
+    &quot;acknowledged&quot;: 30300,
+    &quot;accepted&quot;: 30300,
+    &quot;unconfirmed&quot;: 0,
+    &quot;failedCallbacks&quot;: 0,
+    &quot;rejected&quot;: 0,
+    &quot;capacity&quot;: 1000,
+    &quot;firstPublisherHighWater&quot;: 41,
+    &quot;second&quot;: {
+      &quot;complete&quot;: true,
+      &quot;acknowledged&quot;: 15150,
+      &quot;accepted&quot;: 15150,
+      &quot;unconfirmed&quot;: 0,
+      &quot;highWater&quot;: 41,
+      &quot;failedCallbacks&quot;: 0,
+      &quot;rejected&quot;: 0,
+      &quot;capacity&quot;: 1000
+    },
+    &quot;applicationTotalCapacity&quot;: 2000
+  },
+  &quot;publisherDrainSeconds&quot;: 0.0052845,
+  &quot;producerSettledSeconds&quot;: 15.011676125,
+  &quot;acknowledgedPerSecondIncludingDrain&quot;: 2018.427633704711,
+  &quot;pendingObservedAfterRejection&quot;: null,
+  &quot;producerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.2,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.806222222222222,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 336.93621563917804,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.360014229811455
+  },
+  &quot;secondProducerMetrics&quot;: {
+    &quot;batch-size-avg&quot;: 6208.309333333334,
+    &quot;buffer-available-bytes&quot;: 8388608.0,
+    &quot;record-error-total&quot;: 0.0,
+    &quot;record-queue-time-avg&quot;: 5.790222222222222,
+    &quot;record-queue-time-max&quot;: 7.0,
+    &quot;record-retry-total&quot;: 0.0,
+    &quot;record-send-rate&quot;: 337.00367033700365,
+    &quot;records-per-request-avg&quot;: 40.4,
+    &quot;request-rate&quot;: 8.36280331843153
+  },
+  &quot;databaseA&quot;: {
+    &quot;bucketTotal&quot;: 30000,
+    &quot;processedEvents&quot;: 30000,
+    &quot;projection&quot;: &quot;load-a&quot;,
+    &quot;runId&quot;: &quot;experiment&quot;
+  },
+  &quot;databaseB&quot;: {},
+  &quot;metricsA&quot;: {
+    &quot;deliveredRecords&quot;: 30300,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 30000,
+      &quot;p95&quot;: 3239.65,
+      &quot;p99&quot;: 3751.877,
+      &quot;p50&quot;: 1407.189,
+      &quot;maximum&quot;: 4067.877
+    },
+    &quot;partitionRecords&quot;: {
+      &quot;0&quot;: 10072,
+      &quot;1&quot;: 10082,
+      &quot;2&quot;: 10146
+    },
+    &quot;channelRecords&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: 316,
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: 316,
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: 316,
+      &quot;2ea264e906a23175825a13862526bb14&quot;: 315,
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: 24000,
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: 316,
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: 316,
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: 316,
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: 316,
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: 316,
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: 315,
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: 316,
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: 316,
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: 316,
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: 316,
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: 315,
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: 316,
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: 315,
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: 316,
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: 316
+    },
+    &quot;duplicateDeliveries&quot;: 300,
+    &quot;uniqueObserved&quot;: 30000
+  },
+  &quot;metricsB&quot;: {
+    &quot;deliveredRecords&quot;: 0,
+    &quot;receivedToDbMillis&quot;: {
+      &quot;samples&quot;: 0,
+      &quot;p95&quot;: null,
+      &quot;p99&quot;: null,
+      &quot;p50&quot;: null,
+      &quot;maximum&quot;: null
+    },
+    &quot;partitionRecords&quot;: {},
+    &quot;channelRecords&quot;: {},
+    &quot;duplicateDeliveries&quot;: 0,
+    &quot;uniqueObserved&quot;: 0
+  },
+  &quot;metricsAScope&quot;: &quot;ALL_GROUP_MEMBERS&quot;,
+  &quot;postInputDrainSeconds&quot;: 2.805798667,
+  &quot;expectedBucketsMatch&quot;: true,
+  &quot;replayManifest&quot;: {
+    &quot;formatVersion&quot;: 1,
+    &quot;topic&quot;: &quot;exp.chat.5a4fe38289284e20b108fd119af7ce0a&quot;,
+    &quot;topicId&quot;: &quot;_MfY10n9TZC_beMwUPsefg&quot;,
+    &quot;partitions&quot;: [
+      {
+        &quot;partition&quot;: 0,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10072
+      },
+      {
+        &quot;partition&quot;: 1,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10082
+      },
+      {
+        &quot;partition&quot;: 2,
+        &quot;start&quot;: 0,
+        &quot;end&quot;: 10146
+      }
+    ],
+    &quot;eventFrom&quot;: null,
+    &quot;eventTo&quot;: null,
+    &quot;schemaVersion&quot;: 1,
+    &quot;algorithmVersion&quot;: &quot;bucket-10s-v1&quot;,
+    &quot;capturedAt&quot;: &quot;2026-10-26T14:53:44.716098Z&quot;
+  },
+  &quot;replayBucketDifferences&quot;: 0,
+  &quot;replaySeconds&quot;: 23.842603084,
+  &quot;appendOrderAudit&quot;: {
+    &quot;channelPartitions&quot;: {
+      &quot;01e1880424863bd4aacb8d2be3532478&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;11a44908ebac3c5da6244e2216b7b0ac&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2a0e67eaf7933440b0a09cfcaaf923af&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;2ea264e906a23175825a13862526bb14&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;37bc73829832358695552b9e3ff0848d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;572ed5f1a4673501a2e599fd5a6133b5&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;58263511becc33f4acb3d059ec6da31c&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;69f69fae09483d51bcac18983a6f7677&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;73ade6d6861b3074b44d763ce3a6aca4&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;7c732f6ba286321aa16a92627f758ccd&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;a3771d31a03135caba0faed4a6125bcb&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b38b63daab7e32e7a859c5b499c825d2&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b396fc0c2609354a811db084de6197ce&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;b3daf2fad33d3c768a8b86b3dd4f1dc1&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bab9bf529dd338a58f3a68fd412b8fb3&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;bd54af9553283349974e8bcdf2a93895&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c019fe98bc063e77be36a6b3dc4b4f0d&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;c40a81fa59883bea82deed3a7bdef89b&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;dfdb0e0ccec03076b8cb9b2f1a274175&quot;: [
+        0,
+        1,
+        2
+      ],
+      &quot;e111a88873b53802962ffba37a509fdc&quot;: [
+        0,
+        1,
+        2
+      ]
+    },
+    &quot;eventTimeBelowPriorMaximum&quot;: 598,
+    &quot;records&quot;: 30300
+  },
+  &quot;routingAudit&quot;: {
+    &quot;misplacedRecords&quot;: 0,
+    &quot;partitionCount&quot;: 3,
+    &quot;maximumHotShare&quot;: 0.3348148148148148,
+    &quot;splitVerified&quot;: true,
+    &quot;mode&quot;: &quot;EXPLICIT_EVENT_ID&quot;,
+    &quot;hotPhysicalRecords&quot;: 24300,
+    &quot;hotPartitionCount&quot;: 3,
+    &quot;hotRecordsByPartition&quot;: [
+      8047,
+      8117,
+      8136
+    ],
+    &quot;requiredDistributionPassed&quot;: true
+  },
+  &quot;events&quot;: [],
+  &quot;failureCode&quot;: null,
+  &quot;countConservation&quot;: true,
+  &quot;resourcePeaks&quot;: {
+    &quot;clientHeapUsedBytes&quot;: 39112344,
+    &quot;clientRssBytes&quot;: 226377728,
+    &quot;clientCpuLoad&quot;: 0.04161879194644067,
+    &quot;clientCpuNanos&quot;: 9342623000,
+    &quot;kafkaTopicBytes&quot;: 13968573,
+    &quot;databaseSchemaBytes&quot;: 11321344
+  },
+  &quot;maximumPending&quot;: 41,
+  &quot;maximumOldestUnackedMillis&quot;: 18.752,
+  &quot;sampleCount&quot;: 4,
+  &quot;maximumSampleCostSeconds&quot;: 2.773065916000001,
+  &quot;groupMeasurements&quot;: {
+    &quot;groupA&quot;: {
+      &quot;maximumLagByPartition&quot;: [
+        1360,
+        1025,
+        2447
+      ],
+      &quot;maximumLagTotal&quot;: 4832,
+      &quot;observedAssignments&quot;: [
+        [
+          3
+        ]
+      ],
+      &quot;rates&quot;: [
+        {
+          &quot;fromSeconds&quot;: 0.000755625,
+          &quot;toSeconds&quot;: 6.803562292,
+          &quot;inputPerSecondByPartition&quot;: [
+            665.0196340204182,
+            676.6324879301469,
+            677.5144768346833
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            539.6302114254984,
+            560.6509469836151,
+            556.6819969132015
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 6.803562292,
+          &quot;toSeconds&quot;: 14.581671167,
+          &quot;inputPerSecondByPartition&quot;: [
+            673.2999092918972,
+            669.7000625360879,
+            677.5425858255295
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            608.1169698206365,
+            639.3584970228384,
+            468.6229080330275
+          ]
+        },
+        {
+          &quot;fromSeconds&quot;: 14.581671167,
+          &quot;toSeconds&quot;: 17.817672333,
+          &quot;inputPerSecondByPartition&quot;: [
+            96.10626944996592,
+            83.43631109804114,
+            82.50924097472958
+          ],
+          &quot;commitPerSecondByPartition&quot;: [
+            516.3780586845436,
+            400.1852698961603,
+            838.6894382225321
+          ]
+        }
+      ]
+    }
+  },
+  &quot;recoverySamples&quot;: []
+}</pre></details></html>

@@ -26,6 +26,9 @@ final class ProductLoadWebSockets implements AutoCloseable {
     private final AtomicLong received=new AtomicLong();
     private final ConcurrentMap<String,LongAdder> receivedByChannel=new ConcurrentHashMap<>();
     private final JsonMapper json=JsonMapper.builder().build();
+    private final Map<String,ProductLoadLatency> sourceDelays=new ConcurrentHashMap<>();
+    private final AtomicLong sourceClockErrors=new AtomicLong();
+    private volatile long sourceStart;
     private double connectionSeconds;
     ProductLoadWebSockets(ProductLoadPlan plan,ProductLoadFixture fixture,BufferedKafkaPublisher publisher,CollectionObserver observer,ProductLoadVisibility visibility) {
         this.plan=plan;this.fixture=fixture;this.publisher=publisher;this.observer=observer;this.visibility=visibility;
@@ -45,7 +48,12 @@ final class ProductLoadWebSockets implements AutoCloseable {
                 var frame=new ArrayList<ChatEvent>();
                 for(var event:events){frame.add(event);if(received.incrementAndGet()%100==0)frame.add(event);}
                 publisher.accept(frame);
-                for(var event:events){fixture.accepted(event);visibility.accepted(event);receivedByChannel.computeIfAbsent(event.channelId(),ignored->new LongAdder()).increment();}
+                for(var event:events){
+                    double delay=Duration.between(event.eventTime().plusSeconds(2),event.receivedAt()).toNanos()/1e6;
+                    if(delay < -250)sourceClockErrors.incrementAndGet();
+                    sourceDelays.computeIfAbsent(plan.phaseAtMillis(event.eventTime().toEpochMilli()+2000-sourceStart),ignored->new ProductLoadLatency()).add(Math.max(0,delay));
+                    fixture.accepted(event);visibility.accepted(event);receivedByChannel.computeIfAbsent(event.channelId(),ignored->new LongAdder()).increment();
+                }
             }
         };
         for(String channel:fixture.channels) {
@@ -60,7 +68,7 @@ final class ProductLoadWebSockets implements AutoCloseable {
         throw new IllegalStateException("COLLECTOR_CONNECT_TIMEOUT");
     }
     long startSource() throws Exception {
-        long at=System.currentTimeMillis()+2000;
+        long at=System.currentTimeMillis()+2000;sourceStart=at;
         var response=http.send(HttpRequest.newBuilder(URI.create("http://synthetic-source:18086/start")).timeout(Duration.ofSeconds(3)).POST(HttpRequest.BodyPublishers.ofString(Long.toString(at))).build(),HttpResponse.BodyHandlers.ofString());
         check(response.statusCode()==200,"SOURCE_START_REJECTED");return at;
     }
@@ -83,7 +91,10 @@ final class ProductLoadWebSockets implements AutoCloseable {
         for(var state:stats){var value=state.snapshot(false);if(((Number)value.get("connections")).longValue()==1)connected++;
             pongs+=((Number)value.get("serverPongs")).longValue();frames+=((Number)value.get("frames")).longValue();bytes+=((Number)value.get("receivedFrameBytes")).longValue();
             ((Map<?,?>)value.get("reasons")).forEach((k,v)->reasons.merge(k.toString(),((Number)v).longValue(),Long::sum));}
-        return Map.of("requestedChannels",plan.channels(),"connectedOnce",connected,"connectionSeconds",connectionSeconds,"connectionStartsPerSecond",50,"received",received.get(),"serverPongs",pongs,"frames",frames,"frameBytes",bytes,"reasons",reasons);
+        var result=new LinkedHashMap<String,Object>();
+        result.putAll(Map.of("requestedChannels",plan.channels(),"connectedOnce",connected,"connectionSeconds",connectionSeconds,"connectionStartsPerSecond",50,"received",received.get(),"serverPongs",pongs,"frames",frames,"frameBytes",bytes,"reasons",reasons));
+        result.put("sourceClockErrors",sourceClockErrors.get());
+        result.put("sourceScheduledToReceived",sourceDelays.entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,e->e.getValue().snapshot())));return result;
     }
     @Override public void close() throws InterruptedException {
         stop.set(true);collectors.shutdown();if(!collectors.awaitTermination(20,TimeUnit.SECONDS)){collectors.shutdownNow();collectors.awaitTermination(10,TimeUnit.SECONDS);}

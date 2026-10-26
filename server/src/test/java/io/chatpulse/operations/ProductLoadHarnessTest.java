@@ -43,6 +43,16 @@ class ProductLoadHarnessTest {
     @Test void eventAndConnectionBudgetsRemainFinite() {
         assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",1001,List.of(new ProductLoadPlan.Stage("steady",30,10,false)),-1,0,"DIRECT",10,32,"BASELINE"));
         assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("steady",1800,10000,false)),-1,0,"DIRECT",10,32,"BASELINE"));
-        assertEquals(90000,ProductLoadPlan.named("soak").uniqueEvents());
+        var plan=new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("warmup",30,100,false),new ProductLoadPlan.Stage("steady",60,100,false)),-1,0,"WEBSOCKET",10,32,"BASELINE");
+        assertEquals("warmup",plan.phaseAtMillis(29999));assertEquals("steady",plan.phaseAtMillis(30000));assertEquals("DRAIN",plan.phaseAtMillis(90000));
+    }
+    @Test void repeatedInputOrderDoesNotAlwaysSampleTheFirstChannel() {
+        var window=new ProductLoadVisibility.SampleWindow();var selected=new HashSet<String>();
+        for(int tick=0;tick<100;tick++)for(int channel=0;channel<20;channel++) {
+            var pending=new ProductLoadVisibility.Pending(UUID.randomUUID(),java.time.Instant.EPOCH,"steady",channel%3,Integer.toString(channel));
+            var completed=window.offer(pending,tick*100_000_000L+channel);
+            if(completed!=null)selected.add(completed.channel());
+        }
+        assertTrue(selected.size()>15,"동일 순서의 20채널에서도 첫 채널만 고르지 않아야 한다");
     }
 }

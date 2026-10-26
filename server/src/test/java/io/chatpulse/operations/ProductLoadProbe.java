@@ -43,28 +43,30 @@ public final class ProductLoadProbe {
         var publisher=new BufferedKafkaPublisher(kafka,config.topic(),new EventCodec(),new BufferedKafkaPublisher.Limits(1000,500,64));
         var scheduler=Executors.newScheduledThreadPool(2);
         var finalMetrics=new LinkedHashMap<String,java.util.function.Supplier<Map<String,Object>>>();
+        var inputEpoch=new java.util.concurrent.atomic.AtomicLong();
+        java.util.function.Supplier<String> measuredPhase=()->startNanos==0?"INITIALIZE":plan.phaseAtMillis((System.nanoTime()-startNanos)/1_000_000L);
         try(var ds=PostgresSupport.open(config.jdbcUrl(),config.user(),config.password(),false)) {
             var jdbc=new JdbcTemplate(ds);var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
             try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0));
-                    var visibility=new ProductLoadVisibility(jdbc,config,()->phase);var apiTraffic=new ProductLoadApiTraffic(plan,fixture.channels,()->phase);
+                    var visibility=new ProductLoadVisibility(jdbc,config,event->plan.phaseAtMillis(event.eventTime().toEpochMilli()+2000-inputEpoch.get()));var apiTraffic=new ProductLoadApiTraffic(plan,fixture.channels,measuredPhase);
                     var sockets=plan.websocket()?new ProductLoadWebSockets(plan,fixture,publisher,telemetry,visibility):null) {
                 finalMetrics.put("apiTraffic",apiTraffic::snapshot);finalMetrics.put("commitVisibility",visibility::snapshot);
                 if(sockets!=null)finalMetrics.put("collector",sockets::snapshot);
                 telemetry.start();long startEpoch=System.currentTimeMillis();
                 if(sockets!=null){sockets.connect();result.put("collectorStartup",sockets.snapshot());startEpoch=sockets.startSource();}
-                Instant base=Instant.ofEpochMilli(startEpoch).minusSeconds(2).truncatedTo(ChronoUnit.MICROS);result.put("eventBase",base);result.put("channelOrder",fixture.channels);
+                inputEpoch.set(startEpoch);Instant base=Instant.ofEpochMilli(startEpoch).minusSeconds(2).truncatedTo(ChronoUnit.MICROS);result.put("eventBase",base);result.put("channelOrder",fixture.channels);
                 if(sockets==null)for(String channel:fixture.channels) {telemetry.start(channel);telemetry.connected(channel,id("session/"+channel),base);}
                 startNanos=System.nanoTime()+(startEpoch-System.currentTimeMillis())*1_000_000L;result.put("inputStartedAtEpochMillis",startEpoch);pace(startNanos);apiTraffic.start();
                 scheduler.scheduleWithFixedDelay(()->{
                     try {
-                        var sample=measurements.sample(phase,elapsed());
+                        var sample=measurements.sample(measuredPhase.get(),elapsed());
                         Files.writeString(output.resolveSibling("samples.jsonl"),JsonMapper.builder().build().writeValueAsString(sample)+"\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
                         synchronized(this){samples.add(sample);checkpoint();}
                     } catch(Exception failure) {samplerFailure.compareAndSet(null,failure.getClass().getSimpleName());}
                 },0,5,TimeUnit.SECONDS);
                 scheduler.scheduleWithFixedDelay(()->{
                     try {
-                        var sample=measurements.offsetSample(phase,elapsed());
+                        var sample=measurements.offsetSample(measuredPhase.get(),elapsed());
                         Files.writeString(output.resolveSibling("offsets.jsonl"),JsonMapper.builder().build().writeValueAsString(sample)+"\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
                         checkpoint();
                     } catch(Exception failure) {samplerFailure.compareAndSet(null,failure.getClass().getSimpleName());}
@@ -84,7 +86,7 @@ public final class ProductLoadProbe {
                             if(sockets==null) {
                                 var frame=new ArrayList<io.chatpulse.poc.ChatEvent>();var unique=new ArrayList<io.chatpulse.poc.ChatEvent>();
                                 for(int i=0;i<stage.eventsPerSecond()/10;i++) {
-                                    var event=fixture.event(ordinal++,stage.hot(),base.plusSeconds(elapsedSeconds).plusMillis(tick*100L+i));
+                                    var event=fixture.event(ordinal++,stage.hot(),base.plusSeconds(elapsedSeconds).plusMillis(tick*100L));
                                     unique.add(event);frame.add(event);if(ordinal%100==0)frame.add(event);
                                 }
                                 publisher.accept(frame);physical+=frame.size();unique.forEach(event->{fixture.accepted(event);visibility.accepted(event);});

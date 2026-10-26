@@ -33,22 +33,16 @@ record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultA
     int seconds() {return stages.stream().mapToInt(Stage::seconds).sum();}
     long uniqueEvents() {return stages.stream().mapToLong(s->(long)s.seconds()*s.eventsPerSecond()).sum();}
     boolean websocket() {return sourceMode.equals("WEBSOCKET");}
+    String phaseAtMillis(long millis) {
+        if(millis<0)return "INITIALIZE";
+        for(var stage:stages){if(millis<stage.seconds()*1000L)return stage.name();millis-=stage.seconds()*1000L;}
+        return "DRAIN";
+    }
     static ProductLoadPlan read(String input) throws Exception {
         if(Files.isRegularFile(Path.of(input))) {
             if(Files.size(Path.of(input))>65536)throw new IllegalArgumentException("LOAD_PLAN_SIZE");
             return JsonMapper.builder().build().readValue(Files.readString(Path.of(input)),ProductLoadPlan.class);
         }
-        return named(input);
-    }
-    static ProductLoadPlan named(String name) {
-        var stages=switch(name) {
-            case "smoke" -> List.of(new Stage(name,60,20,false));
-            case "uniform","hot" -> List.of(new Stage(name,120,100,name.equals("hot")));
-            case "steps" -> List.of(new Stage("rate50",60,50,false),new Stage("rate100",60,100,false),new Stage("rate200",60,200,false));
-            case "soak" -> List.of(new Stage(name,1800,50,false));
-            default -> throw new IllegalArgumentException("LOAD_PROFILE");
-        };
-        return new ProductLoadPlan(name,20,stages,name.equals("smoke")?15:name.equals("soak")?300:-1,
-                Set.of("smoke","soak").contains(name)?20:0,"DIRECT",0,32,"BASELINE");
+        throw new IllegalArgumentException("LOAD_PLAN_FILE_REQUIRED");
     }
 }

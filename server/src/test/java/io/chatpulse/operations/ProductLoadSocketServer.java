@@ -92,7 +92,7 @@ public final class ProductLoadSocketServer {
                 var frames=new LinkedHashMap<String,List<Map<String,Object>>>();
                 for(int i=0;i<stage.eventsPerSecond()/10;i++) {
                     String channel=fixture.channel(ordinal++,stage.hot());
-                    frames.computeIfAbsent(channel,ignored->new ArrayList<>()).add(Map.of("msgTypeCode",1,"msgTime",epochMillis-2000+elapsedSeconds*1000L+tick*100L+i,"msg","SYNTHETIC"));
+                    frames.computeIfAbsent(channel,ignored->new ArrayList<>()).add(Map.of("msgTypeCode",1,"msgTime",epochMillis-2000+elapsedSeconds*1000L+tick*100L,"msg","SYNTHETIC"));
                 }
                 for(var entry:frames.entrySet()) {
                     var connection=connections.get(entry.getKey());

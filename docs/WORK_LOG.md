@@ -356,3 +356,10 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 ### #43 환경 한계·통계 범위 재검토
 
 최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.
+
+
+### #60 유휴 plan 잠금 실패 재현
+
+F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실패를 확인하고 병합을 보류했다. 원래 실패의80개 DB 표본에서 이전 PID의 idle in transaction, 대기 PID의 transactionid 잠금17개 표본을 확인했다. 최종 SQLSTATE는 당시 보고서에 없어 확정하지 않는다.
+
+실제 plan 행 FOR UPDATE 응답 직후 클라이언트를 멈추는 시험 전용 장벽을 넣고 대기 worker 등록 후 DB blackhole을 주입했다. 수정 전 로컬1개가 epoch2 기대/실제1로 실패했다. 표본 사이 수분 공백이 있어 이 실행의495초를 복구 시간으로 사용하지 않는다. 원본·hash는 work/remaining-validation/fleet-lock-red-01에 보존했다. 가설은 유휴 transaction 잠금 유지, 대기 worker 시작 지연, 단순 실행 속도 저하 순서이며 등록/잠금/대기 상태를 따로 확인한다.

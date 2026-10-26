@@ -59,7 +59,7 @@ public final class FleetWorkerProcess {
             }};
             var limits=new CollectorWorker.Limits(Integer.parseInt(args[3]),Duration.ofSeconds(6),Duration.ofSeconds(delayedReport?1:90),200,Duration.ofMillis(100),new BufferedKafkaPublisher.Limits(30,20,4));
             diagnostic.phase("WORKER_CONSTRUCTING");
-            try(var worker=new CollectorWorker(new CollectorLeases(ds),SourceMode.SYNTHETIC,limits,source,kafka,args[1],(publisher,budget)->fixtureObserver,clock);
+            try(var worker=new CollectorWorker(new CollectorLeases(mode.equals("PLAN_LOCK_GATE")?new PlanLockGate(ds,report):ds),SourceMode.SYNTHETIC,limits,source,kafka,args[1],(publisher,budget)->fixtureObserver,clock);
                 var control=new ClockControl(report,clock,worker::requestStop)) {
                 atomic(Path.of(report+".ready.json"),Map.of("workerId",worker.owner().toString(),"clockOffsetSeconds",clock.offset.get()));
                 diagnostic.phase("WORKER_READY");

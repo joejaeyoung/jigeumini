@@ -21,6 +21,8 @@
 | [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | PR55에 포함되어07f2444로 병합: 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공. [조사](research/OUTBOX_READINESS.md)·[근거](poc/evidence/outbox-readiness-2026-10-26.json). 원래 CI 원인 미확정; PR51 통합 후 최종 CI 조건 확인 중 |
 | [#54 수집기 시작 진단·CI 인계](https://github.com/joejaeyoung/jigeumini/issues/54) | T08/T14 | 완료: PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공 후07f2444로 병합. 최종CI 단위151·실제125(Fleet13). [조사](research/FLEET_STARTUP.md)·[근거](poc/evidence/fleet-startup-2026-10-26.json)·[최종 게이트](poc/evidence/fleet-startup-final-gates-2026-10-26.json). 과거 CI 원인 미확정 |
 
+| [#60 DB 유휴 임대 transaction·대기 복구](https://github.com/joejaeyoung/jigeumini/issues/60) | T02/T08/T11/T14 | PR58 e90dc32의 PR CI40263104263 실패: 이전 idle transaction이 plan 잠금을 유지하고 대기 worker가 종료. 실제 SQL 잠금 장벽으로 epoch2 기대/실제1을 로컬 재현. 서버 유휴 기한·미배정 잠금 충돌의 제한 재시도 구현 중. #44와 함께 최종 게이트 확인 |
+
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
 개발 Kafka/PostgreSQL은 필요한 통합 시험 때 기동한다. #46의 자체 격리 실험 전에는 자원 여유를 위해 개발 서비스만 볼륨 보존하여 종료했다. 다른 worktree와 서비스는 변경하지 않는다.
 

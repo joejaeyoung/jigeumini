@@ -154,26 +154,34 @@ class FleetIntegrationTest {
     @Test void databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver() throws Exception {
         source.automatic=false;plan(List.of(CHANNEL));
         try(var database=new ControlledTcpProxy(15432);var websocket=new ControlledTcpProxy(source.getPort())) {
-            var a=start(database.port(),websocket.port(),1,"NORMAL",0);var original=ready(0);awaitConnected(1);
+            var a=start(database.port(),websocket.port(),1,"PLAN_LOCK_GATE",0);var original=ready(0);awaitConnected(1);
             var before=source.marker(false);awaitMarker(before,1);var oldSession=eventsAt(before).getFirst().collectionSessionId();
-            var b=start(15432,source.getPort(),1,"NORMAL",0);ready(1);
+            var b=start(15432,source.getPort(),1,"NORMAL",0);var standby=ready(1);
+            await().atMost(Duration.ofSeconds(5)).until(()->jdbc.queryForObject("SELECT count(*) FROM collector_worker WHERE worker_id=?",Integer.class,standby)==1);
             var lease=leaseViews().getFirst();long began=System.nanoTime(),wsBytes=websocket.forwardedBytes();
             var backendSamples=new ArrayList<Object>();boundaryEvidence.put("backendSamples",backendSamples);backendSamples.add(backendStates());
-            database.mode(ControlledTcpProxy.Mode.BLACKHOLE);
-            await().atMost(Duration.ofSeconds(3)).until(()->database.discardedBytes()>0);backendSamples.add(backendStates());
-            var during=source.marker(false);awaitMarker(during,1);assertTrue(websocket.forwardedBytes()>wsBytes);
-            await().atMost(Duration.ofSeconds(10)).untilAsserted(()->{if(backendSamples.size()<80)backendSamples.add(backendStates());assertEquals(2L,epoch());});
-            double takeoverSeconds=(System.nanoTime()-began)/1e9;assertTrue(a.isAlive(),"DB 응답 대기 중 이전 프로세스 생존 확인");
-            awaitConnected(1);var after=source.marker(false);awaitMarker(after,1);
-            assertTrue(eventsAt(after).stream().noneMatch(e->e.collectionSessionId().equals(oldSession)));
-            assertOldOwnerCannotChangeCurrent(original,1);
-            long wsDuringBlackhole=websocket.forwardedBytes()-wsBytes;database.mode(ControlledTcpProxy.Mode.CUT);database.mode(ControlledTcpProxy.Mode.FORWARD);
+            Path gate=reports.getFirst();Files.writeString(Path.of(gate+".plan-lock-arm"),"ARM",StandardOpenOption.CREATE_NEW);
+            try {
+                await().atMost(Duration.ofSeconds(5)).until(()->Files.exists(Path.of(gate+".plan-locked")));
+                int lockedPid=Integer.parseInt(Files.readString(Path.of(gate+".plan-locked")));
+                boundaryEvidence.put("planLockBackendPid",lockedPid);backendSamples.add(backendStates());
+                database.mode(ControlledTcpProxy.Mode.BLACKHOLE);
+                // 잠금 응답은 수신했지만 다음 SQL을 보내지 않는다. 실제 DB는 idle in transaction 상태다.
+                var during=source.marker(false);awaitMarker(during,1);assertTrue(websocket.forwardedBytes()>wsBytes);
+                await().atMost(Duration.ofSeconds(10)).untilAsserted(()->{if(backendSamples.size()<100)backendSamples.add(backendStates());assertEquals(2L,epoch());});
+                double takeoverSeconds=(System.nanoTime()-began)/1e9;assertTrue(a.isAlive());
+                assertEquals(0,jdbc.queryForObject("SELECT count(*) FROM pg_stat_activity WHERE pid=?",Integer.class,lockedPid));
+                awaitConnected(1);var after=source.marker(false);awaitMarker(after,1);
+                assertTrue(eventsAt(after).stream().noneMatch(e->e.collectionSessionId().equals(oldSession)));
+                assertOldOwnerCannotChangeCurrent(original,1);
+                boundaryEvidence.put("beforeBlackhole",lease);boundaryEvidence.put("takeoverSeconds",takeoverSeconds);
+                boundaryEvidence.put("previousProcessAliveAtTakeover",true);boundaryEvidence.put("planLockBackendEndedBeforeTakeover",true);
+                boundaryEvidence.put("sourceForwardedBytesDuringBlackhole",websocket.forwardedBytes()-wsBytes);
+                boundaryEvidence.put("oldSessionPostTakeoverMarker",0);
+            } finally {Files.writeString(Path.of(gate+".plan-lock-release"),"RELEASE");}
+            database.mode(ControlledTcpProxy.Mode.CUT);database.mode(ControlledTcpProxy.Mode.FORWARD);
             assertTrue(a.waitFor(30,TimeUnit.SECONDS));assertFalse(report(0).path("complete").asBoolean());
-            assertEquals(2L,epoch());stop(b);
-            boundaryEvidence.put("beforeBlackhole",lease);boundaryEvidence.put("takeoverSeconds",takeoverSeconds);
-            boundaryEvidence.put("previousProcessAliveAtTakeover",true);boundaryEvidence.put("databaseDiscardedBytes",database.discardedBytes());
-            boundaryEvidence.put("sourceForwardedBytesDuringBlackhole",wsDuringBlackhole);
-            boundaryEvidence.put("oldSessionPostTakeoverMarker",0);assertReconciled();
+            assertEquals(2L,epoch());stop(b);boundaryEvidence.put("databaseDiscardedBytes",database.discardedBytes());assertReconciled();
         }
     }
     @Test void websocketOnlyDisconnectionKeepsLeaseAndReconnectsWithoutRecoveringSourceGap() throws Exception {

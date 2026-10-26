@@ -12,7 +12,7 @@
 | [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 진행 중: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50), 보강 `43bedc2`의 단위147·하네스20·실제100개와 Claude APPROVE; [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[정제 근거](poc/evidence/trend-recovery-2026-10-26.json), 최종 문서 HEAD 리뷰/CI 대기 |
 | [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 대기: 격리 시험 migration의 이전 schema 복원·보존 입력 재생 |
 | [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
-| [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
+| [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 구현 중: 실제 receipt Clock ±300초·실행 중 점프, DB blackhole/WS 단절·오래된 소유자 marker, 최종 permit/send/ACK callback 경계를 분리. [조사](research/COLLECTOR_FAILURE_BOUNDARIES.md); 검증은 #43 30분 실행 종료 뒤 진행 |
 | [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | 대기: 소유한 격리 replica 데이터 손실·새 디스크 복구 |
 | [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 대기: base backup/WAL·복원 목표·Kafka 위치 정렬 |
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |

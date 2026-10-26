@@ -585,3 +585,15 @@ origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으
 최초 최종HEAD afc1548은 Claude APPROVE·차단0이었다. 비차단 중 Gradle tasks 속성 누락 실패를 실제 종료1로 재현해 인자 조건부 설정으로 수정한다. 600 최초 SLO 초과/반복 시계 무효를 STATUS·인프라 요약에서도 구분하고 실패 후 close 전 수신 비활성화를 PROTOCOL에 명시한다. baseline Gradle 종료값은 미캡처 null·기대값·출처를 나누고 로그에 있는 자식 exit3/2를 추출한다. 제품 GC 종류 미계측과 스레드956/1257~1259, 전역 조립 예산 부재를 한계로 남긴다. 정확한 최대치/정상 시계450·600 반복 검증은 #65의 명시적 완료 조건으로 이관했으며 Spec 재검토의 남은 지적은0건이다. 최종 보완 HEAD의 Claude/CI는 다시 확인한다.
 
 보완 뒤 `./gradlew --console=plain tasks` 종료0, 문서77개 링크·기술목표16/기능16 검사와 diff 공백 검사를 통과했다. Java main/test source는876bb68과 같으며 추가 변경은 Gradle 태스크 설정·정제 출처·문서다.
+
+## 2026-10-27 · #64 종료와 #65 진단 시작
+
+PR70 최종129a46d는 Claude 후속 APPROVE, push40360372869/PR40360383027 성공과 양쪽 XML176/136·실패/오류/skip0,하네스34·웹29·Chromium31을 확인해5d8e441로 develop에 병합했다. #64는 수집 메모리/수명 개선 범위로 닫고 최대치 조건은 #65에 명시적으로 이관했다. 최종 main/test는876bb68과 같으나 build.gradle 변경으로 buildId/JAR hash는 다르다. tasks 재현과 보완 뒤 lifecycle8연결3회도근거에보존했다. T11 전역조립예산/동시큰프레임 미검증과운영확대전재개조건을STATUS에보완했다.
+
+#65 최초전체제품재현은발행버퍼상한과+2.044초시계잔차로중단됐다. 원본을보존하고27회시계표본을감사했다. 기존8container보존·소유시험자원정리를확인했으며다른worktree는변경하지않았다. origin/develop에서technicaltest/projection-bottlenecks로분기해계측부터진행한다.
+
+## 2026-10-27 · #65 진단 하네스
+
+- T02/T07/T08/T11/T12/T14. 양방향 벽/단조 시계 검증과 누락 회귀, 원천 tick 잔차를 추가했다.
+- 기존 전체 COUNT·COUNT 생략·COUNT/du 생략 계획을 명시하고 종료 대조는 유지한다. SQL 통계와 JVM 설정/스레드 분류는 값·원문 없이 숫자로 기록한다.
+- [조사](research/PROJECTION_PERFORMANCE.md)에 네 가지 가설과 공식 자료를 연결했다. 제품 처리 코드 최적화 전 기준선이다. `./scripts/check` 서버 176개·하네스 37개·JAR 통과. 실제 고정 자원 대조는 다음 실행에서 기록한다.

@@ -6,7 +6,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** 기존 회귀 profile과 용량 실험이 공유하는 유한 입력 계약. */
 record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultAtSeconds, int faultSeconds,
-        String sourceMode, int apiRequestsPerSecond, int apiMaxInFlight, String resourceProfile, String payloadProfile) {
+        String sourceMode, int apiRequestsPerSecond, int apiMaxInFlight, String resourceProfile, String payloadProfile,
+        String measurementProfile, boolean diagnostics) {
     record Stage(String name, int seconds, int eventsPerSecond, boolean hot) {
         Stage {
             if (name==null || !name.matches("[a-z][a-z0-9_-]{0,39}") || seconds<10 || seconds>1800
@@ -16,6 +17,8 @@ record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultA
     }
     ProductLoadPlan {
         if(payloadProfile==null)payloadProfile="MINIMAL";
+        if(measurementProfile==null)measurementProfile="FULL";
+        if(!Set.of("FULL","NO_COUNTS","NO_COUNTS_OR_DU").contains(measurementProfile))throw new IllegalArgumentException("LOAD_MEASUREMENT_PROFILE");
         if(!Set.of("MINIMAL","KOREAN_1K").contains(payloadProfile) || ("DIRECT".equals(sourceMode) && !payloadProfile.equals("MINIMAL")))
             throw new IllegalArgumentException("LOAD_PAYLOAD_PROFILE");
         if(name==null || !name.matches("[a-z][a-z0-9_-]{0,39}") || channels<2 || channels>1000

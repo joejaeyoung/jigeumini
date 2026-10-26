@@ -230,6 +230,14 @@ java -Dloader.path=server/build/classes/java/test \
 
 채널 수·입력률·조회량·합성 WebSocket·자원 대조를 지정하는 용량 계획과 판정 기준은 [용량 경계 측정](docs/CAPACITY_VERIFICATION.md)을 따른다. 사용자 지정 계획은 `capacityAnalysis`의 생성기/계측 한계와 SLO 통과 여부를 별도로 확인한다.
 
+병목 진단 계획에는 `measurementProfile`과 `diagnostics`를 선택할 수 있다. 기본값은 `FULL`·`false`다.
+`NO_COUNTS`는 입력 중 5초 주기 전체 COUNT만 끄고, `NO_COUNTS_OR_DU`는 container 내부 `du`도 끈다.
+모든 모드에서 종료 후 ledger·bucket·offset 대조는 유지한다. `diagnostics: true`는 소유 시험 DB에만
+`pg_stat_statements`를 켜고 고정 SQL 분류·실행 횟수·시간·블록·WAL 및 JVM 스레드 위치 개수를 남긴다.
+SQL 텍스트·값·스레드 이름·원본 stack은 결과에 넣지 않는다. 진단 자체의 비용은 동일 설정 대조로 해석한다.
+probe 벽시계/단조시계 잔차의 절댓값이 250ms를 넘거나 측정이 없으면 용량 통과로 판정하지 않는다.
+[조사와 가설](docs/research/PROJECTION_PERFORMANCE.md)에 계측 범위와 해석 한계를 정리했다.
+
 각 출력 경로는 새 디렉터리여야 한다. soak은50건/s·20채널·30분과 분석기20초 정지/재개를 포함한다. 관측/세션/heartbeat와 outbox는 합성 입력이다. 결과는 `result.json`과 `probe-output/load.json`, 독립1초 offset 표본은 `probe-output/offsets.jsonl`, 느린 계측 원본은 `probe-output/samples.jsonl`에 바로 남는다. API/DB 지연·별도 JVM 메모리는5초 주기로 따로 읽고, 종료 후 모든 집계를 대조한다. 복구 시간은 재개 뒤 첫 Kafka end를 고정해 해당 위치까지 따라잡은 표본 시각이다. 입력 종료 뒤 전체0lag도 확인한다. API 준비 회복 시각은 고정 offset 복구와 별도로 기록하며 둘 다 회복한 뒤2초까지를 장애/회복 구간으로 분류한다(시험 예산60초). 호스트와 VM의 시계 차이는 시작·재개 시 호출 전후 구간으로 남긴다. 정상 구간 계측 성공률90%·최소 표본 수·API200을 완료 조건으로 검사한다. API/DB/heap/RSS/버퍼는 정상10초 창의90% 이상을 함께 관측하고 정상 구간의 완전한 표본 간격이15초를 넘으면 실패한다. heap용 JMX는 시험 내부망에만 열고 자동 정리한다. 표본 시간은 실제 간격으로 해석하며 운영 용량/SLA를 뜻하지 않는다. 이미지·고정 복사한 시험 클래스는 로컬에 남는다.
 
 | 위치 | 내용 |

@@ -45,9 +45,10 @@ public final class ProductLoadProbe {
         var finalMetrics=new LinkedHashMap<String,java.util.function.Supplier<Map<String,Object>>>();
         var inputEpoch=new java.util.concurrent.atomic.AtomicLong();
         java.util.function.Supplier<String> measuredPhase=()->startNanos==0?"INITIALIZE":plan.phaseAtMillis((System.nanoTime()-startNanos)/1_000_000L);
-        try(var ds=PostgresSupport.open(config.jdbcUrl(),config.user(),config.password(),false)) {
+        String jdbcUrl=config.jdbcUrl()+(config.jdbcUrl().contains("?")?"&":"?")+"ApplicationName=projection-probe";
+        try(var ds=PostgresSupport.open(jdbcUrl,config.user(),config.password(),false)) {
             var jdbc=new JdbcTemplate(ds);var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
-            try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0));
+            try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0),plan);
                     var visibility=new ProductLoadVisibility(jdbc,config,event->plan.phaseAtMillis(event.eventTime().toEpochMilli()+2000-inputEpoch.get()));var apiTraffic=new ProductLoadApiTraffic(plan,fixture.channels,measuredPhase);
                     var sockets=plan.websocket()?new ProductLoadWebSockets(plan,fixture,publisher,telemetry,visibility):null) {
                 finalMetrics.put("apiTraffic",apiTraffic::snapshot);finalMetrics.put("commitVisibility",visibility::snapshot);

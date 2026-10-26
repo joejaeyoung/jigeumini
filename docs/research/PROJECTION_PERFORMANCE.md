@@ -1,0 +1,60 @@
+# 카테고리·리포트 비용 조사
+
+2026-10-27 · #65 · F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14
+
+## 기존 근거와 첫 재현
+
+#62에서는 고정 1 CPU의 전체 제품에서 균등 2,500건/s와 80% 편향 2,000건/s에 카테고리 적체가 있었다.
+#64 메모리 수정 후 `129a46d`의 첫 2,500건/s 재현은 약 41초에 발행 버퍼 상한에 닿았다.
+ACK 56,055·거절 252·최대 pending 1,000이며 제품 process는 살아 있었다. 이 실행에서는 probe의
+벽시계와 단조 경과 차이도 약 +2,044ms 움직였다. 입력이 끝나지 않았으므로 제품 최대치가 아니다.
+기존 용량·메모리·이번 시험 27회의 표본 감사에서 절댓값 250ms 초과는 이 실행과 이미 제외한
+600채널 반복(-2,045ms) 두 건이었다. 원본과 이전 판정은 보존한다.
+
+## 가설과 구분할 대조
+
+1. 카테고리의 건별 SQL 왕복이 주원인이면 partition 진행 위치를 배치당 한 번 저장하는 변경 등으로
+   해당 호출 수와 같은 입력의 처리 시간이 함께 줄어야 한다.
+2. 리포트 세션 재구성이 주원인이면 관측 없는 채팅 배치의 이력 조회·세션 계산을 줄였을 때,
+   450/600채널의 관측 입력과 채팅 입력을 나눈 대조에서 개선 범위가 달라야 한다.
+3. 공유 pool/CPU 경쟁이 주원인이면 SQL 서버 실행 시간 외에 풀 대기 표본과 API 지연이 늘고,
+   API만·DB만 CPU를 바꾼 대조가 다른 결과를 보여야 한다.
+4. 계측이 주원인이면 같은 제품·입력에서 전체 COUNT만 끈 대조와 `du`를 추가로 끈 대조가 개선돼야 한다.
+   Kafka polling과 다른 container의 간섭은 이 대조만으로 제거되지 않는다.
+
+처리 코드를 먼저 바꾸지 않고 진단 하네스를 깨끗한 commit으로 고정한다. 각 대조는 fresh DB,
+같은 입력/자원/계측으로 실행하며 실제 수집 원천을 호출하지 않는다.
+
+## 공식 자료와 적용 범위
+
+- [PostgreSQL 16 pg_stat_statements](https://www.postgresql.org/docs/16/pgstatstatements.html):
+  preload와 DB별 extension이 필요하다. 정규화된 query별 호출 수·서버 실행 시간·블록·WAL을 읽는다.
+  JDBC 왕복·pool 대기·전체 transaction 시간과 같지 않다. query ID는 서로 다른 DB 실행의 전역 식별자가 아니다.
+  진단 DB에서 utility 추적과 종료 시 저장을 끄고, 결과에는 고정 family/operation·template hash·숫자만 남긴다.
+- [PostgreSQL 16 통계](https://www.postgresql.org/docs/16/monitoring-stats.html):
+  누적 통계의 갱신/조회 시점에 제약이 있다. `pg_stat_activity`의 wait는 순간 표본이다.
+  wait 표본 수를 누적 대기 시간이나 병목의 원인으로 단정하지 않는다.
+- [HikariCP JMX](https://github.com/brettwooldridge/HikariCP/wiki/MBean-%28JMX%29-Monitoring-and-Management):
+  pool MBean은 `registerMbeans=true`가 필요하며 각 수치는 원자적으로 함께 읽는 값이 아니다.
+  이번에는 제품 pool 설정을 바꾸지 않고 아래 JVM stack의 풀 획득 위치만 분류한다.
+- [Java 21 ThreadMXBean](https://docs.oracle.com/en/java/javase/21/docs/api/java.management/java/lang/management/ThreadMXBean.html):
+  platform thread만 관측한다. 최대 40개 frame을 메모리에서 분류하고 상태·카테고리/리포트·pool/JDBC/소켓 위치의
+  개수만 출력한다. 이름과 stack은 저장하지 않는다. 5초 표본에서 대기가 안 보인다고 대기가 없었다고 결론내리지 않는다.
+
+## 계측 계약
+
+`scripts/product-load`의 `measurementProfile`은 FULL, NO_COUNTS, NO_COUNTS_OR_DU다.
+후자의 두 모드는 주기 COUNT를 의도적으로 생략했다는 표본을 남긴다. 이를 DB 계측 성공으로 위장하지 않고
+선언한 계획과 표본의 일치를 검사한다. 입력 종료 뒤 COUNT·모든 projection 대조·최종 24개 offset 검사는 유지한다.
+`diagnostics`는 기본 false이며 true일 때 SQL 통계와 JVM stack 개수를 추가한다. 실제 GC 이름과 허용 VM 옵션은
+probe/API에서 읽는다. 설정 인수 전체를 저장하지 않는다.
+
+시계 검증은 입력 시작 epoch와 probe의 단조 경과에 대한 벽시계 잔차를 양방향으로 검사한다.
+독립 합성 원천도 100ms tick마다 잔차의 최소·최대를 기록한다. 이는 관측된 시계 이동을 검출하는 장치이며
+두 process의 절대 시계 동기화나 물리 네트워크의 지연을 증명하지 않는다. 이번 2초 이동의 원인은 미확정이다.
+호스트 시각 변경이나 공유 Docker 재시작은 하지 않는다.
+
+## 아직 검증하지 않은 것
+
+진단 하네스 추가 시점에는 SQL 병목 원인과 개선 수치를 확정하지 않았다. 원천/TLS/fleet,
+장기 보존 DB, RF3 및 다중 호스트/AZ는 이 시험의 범위 밖이다. 진행 상태는 [STATUS](../STATUS.md)에서 관리한다.

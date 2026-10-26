@@ -40,7 +40,7 @@
       "profile": "uniform",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "uniform.json",
-      "sha256": "6f6f991762f79c26d1e163fababd392311c34c26940ab668eba42b86a3721ade",
+      "sha256": "556408ead3901a8cce44c2cd5408b0c289aee37aa23b56fff155da87bded75bf",
       "inputSeconds": 120.003576638,
       "unique": 12000,
       "physical": 12120,
@@ -59,7 +59,7 @@
       "profile": "hot",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "hot.json",
-      "sha256": "2c02412cba4c2b4f80fcc5a144eb144da3244ae3343e72e60c13a57a4221fa77",
+      "sha256": "ed91722065ffbe9d14d96c9339b6a81c343c2db2450075edf1abf680ef2e3512",
       "inputSeconds": 120.002677097,
       "unique": 12000,
       "physical": 12120,
@@ -78,7 +78,7 @@
       "profile": "steps",
       "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
       "evidence": "steps.json",
-      "sha256": "710707079ec7769e1ec43aaddd8094605a513dd5ebd7a8bdcd6d67a47f055037",
+      "sha256": "c3725b0f2bdc387ab74bf2df65c0d4aa4d0dcc2354f9a53893d778b13382fbed",
       "inputSeconds": 180.003815165,
       "unique": 21000,
       "physical": 21210,
@@ -97,7 +97,7 @@
       "profile": "soak",
       "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
       "evidence": "soak.json",
-      "sha256": "5966df8c26b3c2bb626063d7592e3b0a574181f1f63d2eb34da28276f208bc85",
+      "sha256": "e34af2ea0c2ccf82fbf88b2e1cc0ab9e479356b56c1016a1fb388369d5b584c3",
       "inputSeconds": 1800.007581735,
       "unique": 90000,
       "physical": 90900,
@@ -116,7 +116,7 @@
       "profile": "smoke",
       "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
       "evidence": "smoke.json",
-      "sha256": "17ca5bbd529a9f7256d440c846e00b865e561c78980a1d2ca347ff7af5850bc0",
+      "sha256": "66a512e25696bbe2ef55c6a2aafca72ad090a7779f8c811d21c3019ad17311dc",
       "inputSeconds": 60.004691152,
       "unique": 1200,
       "physical": 1212,
@@ -150,8 +150,9 @@
     "soakEntryRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
     "verdict": "APPROVE_FOR_SOAK_ENTRY",
     "session": "e85497ba-6427-4337-ad5a-be04cf0a8342",
-    "finalHeadReviewPending": true,
-    "finalGateRecord": "PR59 exact final HEAD review/CI comments; entry verdict above is historical"
+    "finalGateRecord": "PR59 exact final HEAD review/CI comments; entry verdict above is historical",
+    "finalHeadRevision": "357435d9032bf287f64e13d08b2e41f08427dc30",
+    "finalHeadVerdict": "APPROVE"
   },
   "limitations": [
     "ONE_EXECUTION_PER_PROFILE; NOT_A_MAXIMUM_CAPACITY_OR_SLA",
@@ -186,10 +187,12 @@
       "apiLatencyMillis",
       "normalDatabaseCountQueryMillis",
       "memoryBytes",
-      "minuteSamples"
+      "minuteSamples",
+      "containerCpuPercent"
     ],
     "dataLocation": "profile evidence paths are relative to this index",
-    "scriptSha256": "8a2e348b80e0408f7d388e95ab492ef13044a4b819a652be4ab16bf182a747f2",
+    "scriptSha256": "e7fced75e36eaf79fb820be03f7ef93406e8b820297761ffae70bd5a7f3e82ec",
     "commandProvenance": "reconstructed from curator arguments, not a contemporaneous shell transcript"
-  }
+  },
+  "updatedAt": "2026-10-26T03:22:39.510599+00:00"
 }

@@ -297,6 +297,27 @@ F13 → T02/T11/T14. `origin/develop` c2aeffc에서 `technicaltest/collector-bou
 
 - #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.
 
+
+### 2026-10-26 PostgreSQL physical PITR 하네스 #46
+
+F16/F08 → T02/T04/T16. origin/develop에서 technicaltest/postgres-pitr를 분기하고 선행 #42의 공통 리허설을 통합했다. #43의30분 부하 종료 전에는 로컬 중량 빌드/DB 실험을 겹치지 않고 CI 컴파일부터 확인한다.
+
+base/T/C·named target pause/쓰기거부·resume/새timeline·Kafka 새group 초기offset/최종업무대조·필수WAL누락FATAL·retentiongap거부를 순차 검사한다. 원본 physical backup/archive와 모든 복구 PGDATA를 소유 volume으로 분리하고 성공/실패 모두 공통 정리 수명으로 회수한다. 새로운 overlay 쓰기도 run의 PREPARE 단계로 옮겨 파일 생성 실패 뒤 비밀 정리가 가능하도록 했다.
+
+사전 Spec/Standards는 동적 import의 pyc가 clean preflight를 깨는 문제, WAL helper0644 실행 모드, 새group 초기offset 독립 검사 공백을 찾아 수정했다. import bytecode 억제·100755·최초 offset 없음→DB next==commit 직접 관측을 반영했다. 테스트용 DeploymentProbe만 실제 deleteRecords 음성 시나리오를 추가하고 제품 복구/소비 코드는 재사용했다. 정적 리뷰와 실제 성공을 구분하며 실행 결과는 후속 근거로 기록한다.
+
+
+### #46 진입 승인 후 보완
+
+Claude64537f8은 APPROVE FOR EXPERIMENT였다. 비차단 권고를 반영해 실제 retention gap 삭제 전에 이번 소유 Kafka cluster ID 일치를 요구하고, WAL 복사본 차이가 필요한 segment 하나뿐인지 hash inventory로 확인한다. 누락 WAL이 실제 restore helper 사용 목록에 없음을 검사하고 복원 서버 버전도 원본과 대조한다. maintenance profile의 helper를 cleanup에 포함하며 trim 전 복원 DB의 보존 로그 복구 가능성도 확인한다. 원본 backup/archive를 그대로 보존한 새 복원 디스크만 사용한다.
+
+
+### #46 실제 physical PITR 완료
+
+2026-10-26 clean4a6b7a8에서첫실행자원사전검사실패를수치trace로확인했다. 허용90%초과여서개발Kafka/DB만볼륨보존종료한뒤같은HEAD로재실행했다. 03:00:10.979~03:01:43.582 UTC12단계통과. baseSHA256/pg_verifybackup·필수WAL3개·target0/5051778pause·readonly25006·timeline1→2·새6group정렬·chat10재생·업무snapshot차이0을확인했다. 누락WAL은목표미달FATAL, 실제begin11>DBnext10은4projection RETENTION_GAP·새group/DB불변이었다.
+
+[검증](POSTGRES_PITR_VERIFICATION.md)·[정제근거](poc/evidence/postgres-pitr-2026-10-26/summary.json)에시각/commit/image/probe/hash/LSN/집합을연결했다. archive failed_count4는숨기지않고원인미확정으로기록했다. 모든소유volume·container·비밀정리true이며다른서비스는유지했다. 단위147·하네스20·JAR통과. 기존배포소유권/그룹정렬경계를재사용하고물리복원책임만분리하는리팩토링을점검했다. 최종리뷰/CI는별도다.
+
 ## 2026-10-26 전체 제품 부하·지속 실행 #43
 
 - F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12. fetch한 origin/develop에서 `technicaltest/product-soak`를 만들고 최종 CI 중인 #42를 fast-forward로 포함했다. #42 병합 뒤 develop 기준을 통합한다.
@@ -388,6 +409,16 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 
 통합 `7e0ca6f`의 `./scripts/check` 단위152·하네스24·JAR가 통과했다. 실행 코드 불변은 f992ef1 대비 실험3종/스크립트/replay/pipeline 경로의 diff0으로 확인했다. 최종 CI와 정확한 HEAD Claude 판정은 PR56에 연결한다.
 
+### #46 최종 근거 리뷰와 선행 통합
+
+76ae909의 Claude는 로컬12단계 범위 APPROVE이며 실행4a6b7a8 이후 코드 불변과 미첨부 파일 확인을 요청했다. 알림 physical3/logical2·원래group SAFE_OVERLAP, 선택snapshot 범위, 목표미달 하네스 분류를 명확히 했다. 첫 사전 검사 실패 JSON도 hash만 남기지 않고 정제 근거에 함께 보관한다. 개발 서비스 종료는 부하/디스크 실험 종료 뒤 사용자 허용 범위에서 volume 삭제 없이 실행했고, PITR 뒤 #44 회귀용으로 재기동했다. volume 전후checksum과 archiver실패원인은 측정하지 않았다.
+
+선행31e0773(#42~45/#52/#54)을 통합하고 README/STATUS/WORK_LOG의 양쪽 이력을 보존했다. PITR 하네스/DeploymentProbe/ops/compose의 실제 코드 불변을 대조하고 통합 check와 최종HEAD 리뷰/CI를 별도 확인한다. 공통 소유 자원 수명을 유지하며 의미 없는 추가 추상화는 만들지 않았다.
+
+통합 `44449cd` check는 단위152·하네스24·JAR 통과다. 실행4a6b7a8 대비 PITR스크립트/helper·DeploymentProbe·PocApplication·operations/pipeline/db·compose 경로의 diff0과 파일 존재를 확인했다. 새 product코드 영향은 collector/Clock 경로로 한정되어 이 PITR 실행은 반복하지 않는다.
+
+#42 최종c34dc2b Claude APPROVE·push40262248304/PR40262253338 SUCCESS와 각각단위151·실제125(실패0)를 확인해 PR51을03b9648로 develop 병합했다. #42와 #52의 모든 완료조건·보드를 완료했다. #52 원래 CI 원인 미확정 기록은 유지한다.
+
 
 ### #60 유휴 plan 잠금 실패 재현
 
@@ -408,3 +439,16 @@ F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실�
 ### #45 유휴 임대 잠금 수정 통합
 
 31e0773의 push40263229427은 #44와 같은 blackhole 시험에서 실패했고 PR40263232084는 성공했다. 실패를 이유 없이 재실행하거나 병합하지 않았다. #60의14816f8(Claude APPROVE, 로컬 단위159·실제Fleet23 근거)을 통합한다. 문서 충돌은 #42/#43/#52의 완료와 #45 실제 디스크 근거, #60 실패/수정 이력을 함께 보존했다. 디스크 실험·probe·cluster·replay/pipeline 경로가 f992ef1 대비 불변인지 다시 확인하고 최종 HEAD의 check·Claude·두 CI를 확인한다.
+
+## 2026-10-26 기술 검증 최종 기록 정리
+
+이 정리 당시 #43~46의357435d/e90dc32/31e0773/3986b15는 각각 Claude APPROVE였다. 이후 #44/#45 CI 실패는 위 #60에서 따로 수정하며 과거 승인을 새 HEAD에 재사용하지 않는다. 이 문서 보완은 구현/실험 결과를 바꾸지 않고 리뷰의 비차단 설명을 정리한다. #43의 단기 CPU 해석 한계·장애 없는 profile 라벨·curator 출처, #44의 실행별 수치 출처·blackhole 인과 한계·미실행 경계, #45의 손실 경계 성공/원천 복구 실패·중간 container 생성 표본·미실행 D, #46의 코드 경로 대조/이미지 identity 한계를 명시했다. 원본5개를 정제 스크립트로 다시 계산해 공유 근거의 모든 필드 일치를 확인했다.
+
+로컬 실험 종료 후 `./scripts/infra down`으로 개발 서비스만 종료했다. 소유 실행 container0·기존 named volume2개, 다른 프로젝트의 실행 container 이름6개를 이전 목록과 대조했다. volume 내용 checksum과 다른 container ID의 전후 비교는 하지 않았다. 정제 근거를 보관하며 PoC/API/web는 재기동하지 않았다. 각 PR 최종 CI/병합 결과와 외부 조건이 필요한 #47~49의 열린 상태는 후속 기록에 반영한다.
+
+
+### #46 잠금 복구·문서 보완 통합
+
+#60 승인14816f8과 #45 통합ac934e3을 반영했다. #46 이전3986b15의 PR40263423850은 성공했지만 push40263419936은 취소되어 두 최종 CI 성공으로 취급하지 않는다. 보존한 validation-closeout의 비차단 설명·한국어 근거·PITR 비밀 파일 위치 정정을 함께 통합했다. 문서 충돌은 각 실제 실행과 검증 이력을 모두 남겼다. 제품/시험 fleet 경로는14816f8과 동일하며 PITR/배포/분석기/복구 경로의 실제 실행4a6b7a8 대비 불변을 다시 대조한다. 이미지 byte 동일성을 주장하거나 디스크/PITR 실험을 새 코드에서 재실행했다고 쓰지 않는다.
+
+#60 최종 Claude 비차단은 잠금1초<SQL3초의 순서 의존, 마지막 충돌과 재시도 수의 차이, DB 표본 수 해석으로 문서에 보완했다. 기존 승인 코드와 시험에는 변경이 없다.03:23 정리 뒤 #60 시험을 위해 개발 서비스를 다시 기동했고,04:30:28 UTC에 다시 종료했다. 새 정리에서는 다른6개 container의 ID·이름도 일치했고 개발volume2개를 보존했다. volume 내용 checksum은 측정하지 않았다.

@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-10-26T03:23:22.428371+00:00",
+  "command": "./scripts/infra down",
+  "project": "chat-pulse",
+  "runningProjectContainers": 0,
+  "volumeNamesRetained": 2,
+  "volumeNameSetUnchanged": true,
+  "volumeContentChecksumsMeasured": false,
+  "otherRunningContainerCount": 6,
+  "otherRunningContainerNameSetUnchanged": true,
+  "otherComparisonScope": "종료 전 docker ps의 container 이름 목록과 종료 후 목록을 대조함. 종료 전 container ID는 기록하지 않음"
+}

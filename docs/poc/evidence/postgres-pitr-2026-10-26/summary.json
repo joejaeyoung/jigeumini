@@ -1,0 +1,88 @@
+{
+  "issue": 46,
+  "featureIds": [
+    "F16",
+    "F08"
+  ],
+  "technicalIds": [
+    "T02",
+    "T04",
+    "T16"
+  ],
+  "scope": "LOCAL_PHYSICAL_PITR_NAMED_TARGET_AND_KAFKA_REALIGNMENT",
+  "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+  "executedAt": "2026-10-26T03:00:10.978976+00:00",
+  "finishedAt": "2026-10-26T03:01:43.581820+00:00",
+  "command": "fnm exec --using=24.20.0 ./scripts/postgres-pitr work/remaining-validation/pitr-images-01.json work/remaining-validation/pitr-02",
+  "evidence": "primary.json",
+  "sha256": "e6fd85dde0dbe214212765c5c40217a48742edf30b018a8e2eec79a8f37b6d3f",
+  "phasesPassed": 12,
+  "correct": true,
+  "cleanupComplete": true,
+  "preflightFailure": {
+    "resultSha256": "71f1d208918423d3db131c034ccb1d8406140063953caa7a9762ed2466fea551",
+    "failureType": "AssertionError",
+    "actualTrace": "preflight-diagnosis.json",
+    "resolution": "개발용 Kafka/PostgreSQL을 volume 삭제 옵션 없이 종료한 뒤 같은 HEAD로 재실행; 다른 서비스 유지",
+    "result": "preflight-failure.json",
+    "developmentServices": "Stopped after soak/disk tests with volumes retained; restarted for #44 regression; volume checksums not measured"
+  },
+  "localCheck": {
+    "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+    "unitTests": 147,
+    "harnessTests": 20,
+    "jarBuild": "PASS"
+  },
+  "rpoScope": {
+    "targetChat": 10,
+    "latestChat": 20,
+    "chatReplayed": 10,
+    "finalBusinessSnapshotDifferences": [],
+    "pendingOutboxAtTarget": 1,
+    "notificationsAfterReplay": 2,
+    "arbitraryWallClockRpoSeconds": null,
+    "notificationPhysicalAfterReplay": 3,
+    "originalNotificationGroupAfterReplay": "SAFE_OVERLAP_COMMIT_2_DB_NEXT_3"
+  },
+  "limits": [
+    "지정 named restore point 검증이며 arbitrary timestamp target은 실행하지 않음",
+    "로컬단회·동일host volume archive, 외부archive내구성/RTO/RPO/SLA 미검증",
+    "archiver failed_count4를 관측; required segment3개는 모두 확보되고 hash 검증, 실패원인 로그는 수집하지 않아 미확정",
+    "restore pause시간은PGDATA복사/설정준비 이후 시작; 전체재해복구시간이 아님",
+    "Kafka retention gap은 이번ownedcluster의deleteRecords로주입; 자연retention시간경과와구분",
+    "RECOVERY_ENDED_BEFORE_TARGET is a harness classification of PostgreSQL log text, not a SQLSTATE",
+    "Selected business snapshot items only; not all database columns",
+    "Cluster ID mismatch and cleanup failure paths not separately executed"
+  ],
+  "integratedCheck": {
+    "revision": "44449cd15f3a85b75934fc49b248c8a62ecb6d5b",
+    "unitTests": 152,
+    "harnessTests": 24,
+    "jarBuild": "PASS",
+    "unchangedExecutionPathsFrom4a6b7a8": [
+      "scripts/postgres-pitr",
+      "scripts/postgres-pitr.py",
+      "scripts/deploy-rehearsal.py",
+      "deploy/compose.yaml",
+      "deploy/fixtures/pitr/archive-wal",
+      "deploy/fixtures/pitr/restore-wal",
+      "server/src/test/java/io/chatpulse/operations/DeploymentProbe.java",
+      "server/src/main/java/io/chatpulse/poc/PocApplication.java",
+      "server/src/main/java/io/chatpulse/operations",
+      "server/src/main/java/io/chatpulse/pipeline",
+      "server/src/main/java/io/chatpulse/db"
+    ],
+    "additionalUnchangedPaths": {
+      "server/src/main/resources": "UNCHANGED",
+      "deploy": "UNCHANGED",
+      "scripts/deploy-images": "UNCHANGED",
+      "scripts/deploy-images.py": "UNCHANGED",
+      "web": "UNCHANGED",
+      "build.gradle": "UNCHANGED",
+      "gradle": "UNCHANGED",
+      "settings.gradle": "UNCHANGED"
+    },
+    "buildGradleDifference": "diskLossExperiment 시험용 JavaExec task만 추가했으며 제품 의존성은 불변",
+    "identityLimit": "경로 비교는 통합 JAR/이미지와 실제 실행4a6b7a8의 byte 동일성을 주장하지 않음"
+  }
+}

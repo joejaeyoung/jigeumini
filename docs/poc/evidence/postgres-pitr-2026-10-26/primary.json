@@ -1,0 +1,1502 @@
+{
+  "scope": "LOCAL_PHYSICAL_PITR_NAMED_TARGET_AND_KAFKA_REALIGNMENT",
+  "owner": "8f5e594997a6463d9f972cd7d7963af7",
+  "project": "jigeumini-deploy-8f5e594997a6463d9f972cd7d7963af7",
+  "startedAt": "2026-10-26T03:00:10.978976+00:00",
+  "baseline": {
+    "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:b83839d3b337e220b6a43f02e5df365d8bd85952c2678de293134b47a7e08da1",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:4e9f90c417dfdaf234ad0ac9993a28df389db6b2908ddd76e899e3c8cdadfb0a",
+        "sizeBytes": 26068440,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "candidate": {
+    "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:b83839d3b337e220b6a43f02e5df365d8bd85952c2678de293134b47a7e08da1",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:4e9f90c417dfdaf234ad0ac9993a28df389db6b2908ddd76e899e3c8cdadfb0a",
+        "sizeBytes": 26068440,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "phases": [
+    {
+      "name": "PREPARE",
+      "startedAt": "2026-10-26T03:00:10.979580+00:00",
+      "passed": true,
+      "seconds": 0.0001016249880194664
+    },
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-26T03:00:10.979840+00:00",
+      "result": {
+        "dockerMemoryBytes": 8217145344,
+        "hostFreeDiskBytes": 190616576000,
+        "applicationImageUsers": [
+          "10001:10001",
+          "101:101"
+        ],
+        "maximumComposeMemoryBytes": 4093640704,
+        "additionalRestoredPostgres": 3,
+        "helperMemoryBytes": 268435456
+      },
+      "passed": true,
+      "seconds": 4.680587082984857
+    },
+    {
+      "name": "FREEZE_PROBE",
+      "startedAt": "2026-10-26T03:00:15.675255+00:00",
+      "result": {
+        "class": "io.chatpulse.operations.DeploymentProbe",
+        "sha256": "0138241cd56d8d31e52643879254895912f13cf641dc8029137d77a0c0762165",
+        "bytes": 16711
+      },
+      "passed": true,
+      "seconds": 0.000765874981880188
+    },
+    {
+      "name": "INITIALIZE_ARCHIVE",
+      "startedAt": "2026-10-26T03:00:15.680143+00:00",
+      "result": {
+        "runtimeDdlRejected": true,
+        "runtimeDdlSqlState": "42501",
+        "groupsInitialized": 6,
+        "sourcesBound": 4
+      },
+      "passed": true,
+      "seconds": 11.77347529202234
+    },
+    {
+      "name": "BASE_BACKUP",
+      "startedAt": "2026-10-26T03:00:27.454378+00:00",
+      "result": {
+        "startedAt": "2026-10-26T03:00:27.534375+00:00",
+        "finishedAt": "2026-10-26T03:00:27.974989+00:00",
+        "verified": true,
+        "manifestSha256": "8b541b38a97c5a87efb4909cbc48a608f007eea84ca12750cb9f4547518db772",
+        "walRanges": [
+          {
+            "Timeline": 1,
+            "Start-LSN": "0/3000028",
+            "End-LSN": "0/3000100"
+          }
+        ],
+        "files": 1399,
+        "includedWal": [
+          "000000010000000000000003"
+        ]
+      },
+      "passed": true,
+      "seconds": 0.6879922499647364
+    },
+    {
+      "name": "TARGET_T",
+      "startedAt": "2026-10-26T03:00:28.142827+00:00",
+      "result": {
+        "chat": 10,
+        "pendingOutbox": 1,
+        "lsn": "0/5051778",
+        "requiredWalAbsentFromBase": true
+      },
+      "passed": true,
+      "seconds": 12.052112459030468
+    },
+    {
+      "name": "LATEST_C_AND_ARCHIVE",
+      "startedAt": "2026-10-26T03:00:40.195417+00:00",
+      "result": {
+        "chat": 20,
+        "notifications": 2,
+        "archivedFiles": 6,
+        "targetWalSha256": "e0206e2ccbc7a70ab5b2c4d1a5c2cfb03965006cd4589b25021c89833b02f466"
+      },
+      "passed": true,
+      "seconds": 11.257589749991894
+    },
+    {
+      "name": "MISSING_REQUIRED_WAL",
+      "startedAt": "2026-10-26T03:00:51.453526+00:00",
+      "result": {
+        "requiredWal": "000000010000000000000005",
+        "missingFromArchiveCopy": true,
+        "absentFromBase": true,
+        "targetReached": false,
+        "writableSuccess": false,
+        "exitCode": 1,
+        "failureCode": "RECOVERY_ENDED_BEFORE_TARGET",
+        "sourceArchivePreserved": true,
+        "archiveCopyDiffersOnlyByRequiredWal": true,
+        "archiveFilesActuallyUsed": [
+          "000000010000000000000003",
+          "000000010000000000000004"
+        ]
+      },
+      "passed": true,
+      "seconds": 3.857523791026324
+    },
+    {
+      "name": "RESTORE_TO_TARGET_PAUSE",
+      "startedAt": "2026-10-26T03:00:55.311605+00:00",
+      "result": {
+        "secondsToTargetPause": 2.7845946669694968,
+        "snapshotDifferences": [],
+        "inRecovery": true,
+        "pauseState": "paused",
+        "readonlySqlState": "25006",
+        "markerIds": [
+          "0",
+          "1"
+        ],
+        "archiveFilesActuallyUsed": [
+          "000000010000000000000003",
+          "000000010000000000000004",
+          "000000010000000000000005"
+        ],
+        "state": {
+          "replayLsn": "0/5051778",
+          "lastReplayTransaction": "2026-10-26T03:00:39.688873+00:00",
+          "systemIdentifier": "7700805993116987425",
+          "timeline": 1,
+          "target": "pitr_8f5e594997a6463d9f972cd7d7963af7_target",
+          "serverVersion": "16.14"
+        }
+      },
+      "passed": true,
+      "seconds": 3.5092604169622064
+    },
+    {
+      "name": "PROMOTE_AFTER_TARGET_VERIFICATION",
+      "startedAt": "2026-10-26T03:00:58.821505+00:00",
+      "result": {
+        "secondsToWritable": 2.189626000006683,
+        "timelineHistoryFile": "00000002.history",
+        "timelineHistorySha256": "80f5c4ceaa91e5cc06d10d99fe9b0746603fbe8463daac0a1cc879f22f7518d6",
+        "control": {
+          "systemIdentifier": "7700805993116987425",
+          "timeline": 2
+        },
+        "targetSnapshotUnchanged": true,
+        "separateConnectionReadCommittedMarker": true
+      },
+      "passed": true,
+      "seconds": 2.1896482500014827
+    },
+    {
+      "name": "KAFKA_REALIGN_AND_REPLAY",
+      "startedAt": "2026-10-26T03:01:01.011922+00:00",
+      "result": {
+        "secondsToVerifiedCatchup": 21.08337649999885,
+        "newGroups": 6,
+        "alignmentStartRejected": {
+          "exitCode": 2,
+          "oomKilled": false,
+          "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+        },
+        "oldGroupsModified": false,
+        "businessSnapshotDifferences": [],
+        "chatRecoveredFromKafka": 10
+      },
+      "passed": true,
+      "seconds": 21.083396166039165
+    },
+    {
+      "name": "KAFKA_RETENTION_GAP",
+      "startedAt": "2026-10-26T03:01:22.096117+00:00",
+      "result": {
+        "trim": {
+          "lowWatermark": 11,
+          "end": 20,
+          "previousBegin": 0,
+          "partition": 0
+        },
+        "gaps": [
+          {
+            "group": "deploy-live",
+            "topic": "chat.received.v1",
+            "partition": 0,
+            "begin": 11,
+            "end": 20,
+            "databaseNext": 10,
+            "committed": 20,
+            "code": "RETENTION_GAP"
+          },
+          {
+            "group": "deploy-live-trend",
+            "topic": "chat.received.v1",
+            "partition": 0,
+            "begin": 11,
+            "end": 20,
+            "databaseNext": 10,
+            "committed": 20,
+            "code": "RETENTION_GAP"
+          },
+          {
+            "group": "deploy-live-categories",
+            "topic": "chat.received.v1",
+            "partition": 0,
+            "begin": 11,
+            "end": 20,
+            "databaseNext": 10,
+            "committed": 20,
+            "code": "RETENTION_GAP"
+          },
+          {
+            "group": "deploy-live-reports",
+            "topic": "chat.received.v1",
+            "partition": 0,
+            "begin": 11,
+            "end": 20,
+            "databaseNext": 10,
+            "committed": 20,
+            "code": "RETENTION_GAP"
+          }
+        ],
+        "newGroupsRejected": {
+          "codes": [
+            "RECOVERY_RETENTION_GAP"
+          ],
+          "error": "OPERATIONS_FAILED"
+        },
+        "newGroupOffsetsAbsent": true,
+        "oldGroupOffsetsUnchanged": true,
+        "startupRejected": {
+          "exitCode": 2,
+          "oomKilled": false,
+          "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+        },
+        "snapshotUnchanged": true
+      },
+      "passed": true,
+      "seconds": 19.42461154202465
+    }
+  ],
+  "targetName": "pitr_8f5e594997a6463d9f972cd7d7963af7_target",
+  "frozenProbe": {
+    "class": "io.chatpulse.operations.DeploymentProbe",
+    "sha256": "0138241cd56d8d31e52643879254895912f13cf641dc8029137d77a0c0762165",
+    "bytes": 16711
+  },
+  "postgres": {
+    "serverVersion": "16.14",
+    "walLevel": "replica",
+    "archiveMode": "on",
+    "fullPageWrites": "on",
+    "fsync": "on",
+    "walSegmentBytes": 16777216,
+    "systemIdentifier": "7700805993116987425",
+    "timeline": 1
+  },
+  "baseBackup": {
+    "startedAt": "2026-10-26T03:00:27.534375+00:00",
+    "finishedAt": "2026-10-26T03:00:27.974989+00:00",
+    "verified": true,
+    "manifestSha256": "8b541b38a97c5a87efb4909cbc48a608f007eea84ca12750cb9f4547518db772",
+    "walRanges": [
+      {
+        "Timeline": 1,
+        "Start-LSN": "0/3000028",
+        "End-LSN": "0/3000100"
+      }
+    ],
+    "files": 1399,
+    "includedWal": [
+      "000000010000000000000003"
+    ]
+  },
+  "targetSnapshot": {
+    "processed_event": {
+      "rows": 20,
+      "sha256": "437c2ec20d2c832b3093f1cc5696db42a37cad511654a872d900a9182899de83"
+    },
+    "chat_bucket_10s": {
+      "rows": 2,
+      "sha256": "520a7b295905dab05a25fc4e3d8091db2ec8e4155685013da2d1499e54582a7a"
+    },
+    "broadcast_observation": {
+      "rows": 1,
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d"
+    },
+    "category_event": {
+      "rows": 10,
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3"
+    },
+    "category_bucket": {
+      "rows": 1,
+      "sha256": "86fb9267c61d8f915d7b9e3795e713ccf383d31459fbd005c5aae25c4a7fcf15"
+    },
+    "report_event": {
+      "rows": 10,
+      "sha256": "96c768afc908736233913a57cf3ee075d25b54c3593810652ac2a12c9b5a3ab3"
+    },
+    "report_bucket": {
+      "rows": 1,
+      "sha256": "4389a0d3a767c186ccf190554cc9c94a3ebf39cdcf61f9bdfbbc7d1d71fd18dd"
+    },
+    "report_observation": {
+      "rows": 1,
+      "sha256": "b03ba2d197171f5b11a1838431a0e1d78113dceeca9bb22bb0df688a0fb4859d"
+    },
+    "notification_event": {
+      "rows": 1,
+      "sha256": "9f91ef37bce77466f51ea5e05fe9f24a68af991de0a335cf8135a9e85c1a0438"
+    },
+    "spike_event": {
+      "rows": 2,
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2"
+    },
+    "spike_outbox": {
+      "rows": 2,
+      "sha256": "ac12e8d23f9f5787b5e65ff193d909375322699e08e998f8f881e118f60cfa48"
+    },
+    "rankingCount": 10,
+    "trendCount": 10,
+    "notificationCount": 1,
+    "pendingOutbox": 1
+  },
+  "targetLsn": "0/5051778",
+  "requiredTargetWal": "000000010000000000000005",
+  "latestSnapshot": {
+    "processed_event": {
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c",
+      "rows": 40
+    },
+    "chat_bucket_10s": {
+      "sha256": "c3bdf5e7bff3dd16d4d17756619e52e8d0924313e339cc09982cf5a81c4cf776",
+      "rows": 4
+    },
+    "broadcast_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "category_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "category_bucket": {
+      "sha256": "028b07f8007a26a7b2f8b4d7e8487ce5568583a956c83d8036b032aa9b902153",
+      "rows": 2
+    },
+    "report_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "report_bucket": {
+      "sha256": "be81e75aa4e1578c7cd2d5a772ba5cf16ad62b0b64f90562ef0ee764ed30c547",
+      "rows": 2
+    },
+    "report_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "notification_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c",
+      "rows": 2
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "walContinuity": {
+    "fromLsn": "0/3000028",
+    "throughTargetLsn": "0/5051778",
+    "segmentBytes": 16777216,
+    "requiredSegments": [
+      "000000010000000000000003",
+      "000000010000000000000004",
+      "000000010000000000000005"
+    ],
+    "missingSegments": []
+  },
+  "archiveHashes": {
+    "000000010000000000000001": "e4b08349850f20b0f82cd22295aeb6a7ce3ef5c0016bace591d00a8f1c26c5f8",
+    "000000010000000000000002": "0d955f26d691ff61ad7a2f54762eb37da858f4afc1ce6fc2533404c2be55c252",
+    "000000010000000000000003": "403b940851d3291a495af67ea46039f93f2c689e209f576607a7d4d283b3feb9",
+    "000000010000000000000003.00000028.backup": "52a695ca95fe6db24ee6023291a098465750c37af64a4f6825df1ea526e397ff",
+    "000000010000000000000004": "1f74215456eacd3be8f1ecd4990060e8e4e32c51639abd1e22794cc1896ffeaa",
+    "000000010000000000000005": "e0206e2ccbc7a70ab5b2c4d1a5c2cfb03965006cd4589b25021c89833b02f466"
+  },
+  "archiver": {
+    "archived_count": 6,
+    "failed_count": 4,
+    "last_archived_wal": "000000010000000000000005",
+    "last_archived_time": "2026-10-26T03:00:50.455038+00:00"
+  },
+  "restoredPlanBefore": {
+    "recoverableFromRetainedLog": true,
+    "safeForStartup": false,
+    "partitions": [
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 20,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 2,
+        "code": "KAFKA_AHEAD_DATABASE"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ],
+    "clusterId": "B95oStc1R1S-5RBPcsUTwQ"
+  },
+  "newGroupsBeforePreparation": {
+    "partitions": [
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": null,
+        "code": "MISSING_GROUP_OFFSET"
+      }
+    ],
+    "safeForStartup": false,
+    "recoverableFromRetainedLog": true,
+    "clusterId": "B95oStc1R1S-5RBPcsUTwQ"
+  },
+  "newGroupsBeforeStartup": {
+    "recoverableFromRetainedLog": true,
+    "safeForStartup": true,
+    "partitions": [
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 10,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 10,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 1,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 1,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 10,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 1,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 10,
+        "committed": 10,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 1,
+        "committed": 1,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "pitr-recovered-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ],
+    "clusterId": "B95oStc1R1S-5RBPcsUTwQ"
+  },
+  "replayedSnapshot": {
+    "processed_event": {
+      "sha256": "51fb3ea22f52deefd3df8f40861d9486ea6c0bbc16c7cc13baf187d88920d85c",
+      "rows": 40
+    },
+    "chat_bucket_10s": {
+      "sha256": "c3bdf5e7bff3dd16d4d17756619e52e8d0924313e339cc09982cf5a81c4cf776",
+      "rows": 4
+    },
+    "broadcast_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "category_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "category_bucket": {
+      "sha256": "028b07f8007a26a7b2f8b4d7e8487ce5568583a956c83d8036b032aa9b902153",
+      "rows": 2
+    },
+    "report_event": {
+      "sha256": "d9d9a8f8285c66b6b12cb39cb1123288c053893cf8b2c865963fe80357c5f3a0",
+      "rows": 20
+    },
+    "report_bucket": {
+      "sha256": "be81e75aa4e1578c7cd2d5a772ba5cf16ad62b0b64f90562ef0ee764ed30c547",
+      "rows": 2
+    },
+    "report_observation": {
+      "sha256": "b5b66d88fa395b6c0283ed6697746ca1e0815fd175c241cb294d300c538f5d76",
+      "rows": 2
+    },
+    "notification_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_event": {
+      "sha256": "13550f6fe9237dd2f1a34a53cd6f6adb0241d3b646e12d466cd40df4098289b2",
+      "rows": 2
+    },
+    "spike_outbox": {
+      "sha256": "cfbd1ce3c4c5b5fda42fcd189cc0c30d5ba7631f7913ac82ac8455e0163afa4c",
+      "rows": 2
+    },
+    "rankingCount": 20,
+    "trendCount": 20,
+    "notificationCount": 2,
+    "pendingOutbox": 0
+  },
+  "originalGroupsAfterReplay": {
+    "clusterId": "B95oStc1R1S-5RBPcsUTwQ",
+    "recoverableFromRetainedLog": true,
+    "safeForStartup": true,
+    "partitions": [
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-trend",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-observations",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 0,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-notifications",
+        "topic": "chat.received.v1.spikes",
+        "partition": 2,
+        "begin": 0,
+        "end": 3,
+        "databaseNext": 3,
+        "committed": 2,
+        "code": "SAFE_OVERLAP"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-categories",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 20,
+        "databaseNext": 20,
+        "committed": 20,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "chat.received.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 0,
+        "begin": 0,
+        "end": 2,
+        "databaseNext": 2,
+        "committed": 2,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 1,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      },
+      {
+        "group": "deploy-live-reports",
+        "topic": "broadcast.observed.v1",
+        "partition": 2,
+        "begin": 0,
+        "end": 0,
+        "databaseNext": 0,
+        "committed": 0,
+        "code": "ALIGNED"
+      }
+    ]
+  },
+  "correct": true,
+  "sensitiveArtifactsRemoved": true,
+  "cleanupComplete": true,
+  "physicalBackupAndArchiveVolumesRemoved": true,
+  "finishedAt": "2026-10-26T03:01:43.581820+00:00"
+}

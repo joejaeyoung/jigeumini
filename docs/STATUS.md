@@ -11,7 +11,7 @@
 |---|---|---|
 | [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 완료: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50) 최종 `bde3a47` Claude APPROVE·push40253684968/PR40253689010 SUCCESS 뒤 `c2aeffc`로 develop 병합. 단위147·실제100·하네스20·웹29/31; [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[근거](poc/evidence/trend-recovery-2026-10-26.json) |
 | [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 진행 중: [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51), `bc2ff5b`의 V13 복구16단계·기존 V12 회귀17단계·하네스20개 통과·Claude 정적 APPROVE; [검증](DEPLOYMENT_MIGRATION_VERIFICATION.md)·[근거](poc/evidence/migration-recovery-2026-10-26/summary.json), 최종 문서 HEAD 리뷰/CI 대기 |
-| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
+| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 진행 중: 격리 이미지의 그룹6개·API 동시 실행, 독립 입력 기대값·그룹별 lag·heap/RSS·분석기 STOP/CONT 하네스 구현. smoke와 최소30분 부하 실행 전 |
 | [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
 | [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | 대기: 소유한 격리 replica 데이터 손실·새 디스크 복구 |
 | [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 대기: base backup/WAL·복원 목표·Kafka 위치 정렬 |

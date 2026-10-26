@@ -191,6 +191,19 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 
 ## 코드와 문서
 
+전체 제품 합성 부하(#43, F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12)는 깨끗한 commit의 이미지로 실행한다. 분석기·Kafka·DB·생성기를 새 Compose에 만들고 종료 시 해당 자원과 생성 비밀만 정리한다. 공개 원천은 호출하지 않는다.
+
+```bash
+./scripts/deploy-images work/product-load-images.json
+./scripts/product-load work/product-load-images.json smoke work/product-load-smoke
+./scripts/product-load work/product-load-images.json uniform work/product-load-uniform
+./scripts/product-load work/product-load-images.json hot work/product-load-hot
+./scripts/product-load work/product-load-images.json steps work/product-load-steps
+./scripts/product-load work/product-load-images.json soak work/product-load-soak
+```
+
+각 출력 경로는 새 디렉터리여야 한다. soak은50건/s·20채널·30분과 분석기20초 정지/재개를 포함한다. 관측/세션/heartbeat와 outbox는 합성 입력이다. 결과는 `result.json`과 `probe-output/load.json`에 남고, 그룹별 offset·API/DB 지연·별도 JVM 메모리·최종 모든 집계 대조를 기록한다. heap용 JMX는 시험 내부망에만 열고 자동 정리한다. 표본 시간은 실제 간격으로 해석하며 운영 용량/SLA를 뜻하지 않는다. 이미지·고정 복사한 시험 클래스는 로컬에 남는다.
+
 | 위치 | 내용 |
 |---|---|
 | `server/src/main/java/io/chatpulse/poc` | HTTP 어댑터, 프로토콜, 연결 감독, 통계·실행기 |

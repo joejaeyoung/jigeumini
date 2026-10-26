@@ -35,7 +35,7 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         try{experiment.open();experiment.scenario(false);experiment.scenario(true);experiment.result.put("correct",true);}
         catch(Exception failure){experiment.result.put("correct",false);experiment.result.put("failedPhase",experiment.phase);experiment.result.put("failureType",failure.getClass().getSimpleName());
             if(failure.getCause()!=null)experiment.result.put("causeType",failure.getCause().getClass().getSimpleName());
-            if(failure.getMessage()!=null&&failure.getMessage().matches("RETENTION_[A-Z_]+"))experiment.result.put("failureCode",failure.getMessage());}
+            if(failure.getMessage()!=null&&failure.getMessage().matches("(RETENTION|HA)_[A-Z_]+"))experiment.result.put("failureCode",failure.getMessage());}
         finally{experiment.close();Runtime.getRuntime().removeShutdownHook(hook);experiment.result.put("cleanupComplete",experiment.cleaned);if(!experiment.cleaned)experiment.result.put("correct",false);experiment.result.put("finishedAt",Instant.now().toString());experiment.save();}
         System.out.println(JSON.writeValueAsString(Map.of("correct",experiment.result.get("correct"),"cleanupComplete",experiment.cleaned)));
         if(!Boolean.TRUE.equals(experiment.result.get("correct")))System.exit(2);
@@ -77,7 +77,11 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         config.put("segment.bytes",bytes?"33554432":"1048576");config.put("segment.ms",bytes?"604800000":"1000");config.put("file.delete.delay.ms","1000");
         admin.createTopics(List.of(new NewTopic(topic,3,(short)1).configs(config))).all().get(10,TimeUnit.SECONDS);
         var row=new LinkedHashMap<String,Object>();result.put(bytes?"bytesFirst":"timeFirst",row);row.put("startedAt",Instant.now().toString());
-        var resource=new ConfigResource(ConfigResource.Type.TOPIC,topic);var effective=admin.describeConfigs(List.of(resource)).all().get(5,TimeUnit.SECONDS).get(resource);
+        var effective=KafkaSupport.awaitTopic(admin,topic,(description,settings)->{
+            require(description.partitions().size()==3,"RETENTION_PARTITION_MISMATCH");
+            for(var p:description.partitions())if(p.leader()==null||p.leader().id()<0||p.isr().size()!=1)throw new KafkaTopicPolicy.NotReady();
+            for(var entry:config.entrySet())require(settings.get(entry.getKey())!=null&&settings.get(entry.getKey()).value().equals(entry.getValue()),"RETENTION_CONFIG_MISMATCH");
+        },Duration.ofSeconds(10),System::nanoTime,Thread::sleep);
         var actual=new LinkedHashMap<String,String>();for(String key:config.keySet())actual.put(key,effective.get(key).value());require(actual.equals(config),"RETENTION_CONFIG_MISMATCH");row.put("effectiveConfig",actual);
         var producerConfig=Map.<String,Object>of("bootstrap.servers",bootstrap,"acks","all","enable.idempotence",true,"compression.type","none","linger.ms",5,"batch.size",65536,"delivery.timeout.ms",10000,"request.timeout.ms",5000);
         try(var producer=new KafkaProducer<String,byte[]>(producerConfig,new StringSerializer(),new ByteArraySerializer());var source=new ReplaySource(bootstrap,topic,UUID.randomUUID())) {
@@ -119,11 +123,11 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         for(int p=0;p<3;p++){starts.put(new TopicPartition(topic,p),OffsetSpec.earliest());ends.put(new TopicPartition(topic,p),OffsetSpec.latest());}
         var earliest=admin.listOffsets(starts).all().get(5,TimeUnit.SECONDS);var latest=admin.listOffsets(ends).all().get(5,TimeUnit.SECONDS);
         var bounds=new ArrayList<Map<String,Object>>();for(var tp:starts.keySet())bounds.add(Map.of("partition",tp.partition(),"earliest",earliest.get(tp).offset(),"end",latest.get(tp).offset()));
-        String listing=command("docker","exec",name,"find","/var/lib/kafka/data","-maxdepth","2","-type","f","-printf","%P %s\n");
+        String listing=command("docker","exec",name,"find","/var/lib/kafka/data","-maxdepth","2","-type","f","-exec","stat","-c","%n %s","{}","+");
         var files=new ArrayList<Map<String,Object>>();long logBytes=0,deletedBytes=0;
         for(String line:listing.lines().toList()) {
-            String[] parts=line.split(" ");if(parts.length!=2||!parts[0].startsWith(topic+"-"))continue;
-            String file=parts[0].substring(topic.length()+1);long size=Long.parseLong(parts[1]);
+            String[] parts=line.split(" ");String prefix="/var/lib/kafka/data/"+topic+"-";if(parts.length!=2||!parts[0].startsWith(prefix))continue;
+            String file=parts[0].substring(prefix.length());long size=Long.parseLong(parts[1]);
             if(file.endsWith(".log"))logBytes+=size;else if(file.endsWith(".log.deleted"))deletedBytes+=size;
             files.add(Map.of("partitionFile",file,"bytes",size));
         }

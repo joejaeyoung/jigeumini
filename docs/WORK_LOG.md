@@ -537,3 +537,12 @@ Compose config 대조에서 `extends`의 `secrets: []`가 시험용 runtime secr
 8dd13ce의 두 회귀를 완료했다. DIRECT 정본 smoke는 STOP 20.539초 뒤 고정 end 회복2.263초·readiness 표본5.093초, 고유1,200/물리1,212건 대조·24개 lag0으로 통과했다. 분리한 원천의 WebSocket 20채널·100건/s·API10/s·1KiB·60초는 고유6,000/물리6,060건 대조, 측정30초 순위 p95227ms·API47ms·SLO 통과였다. 원천 secret mount·PIPELINE 환경0을 실제 inspect로 확인했고, 두 시험 모두 소유 자원을 정리했다. 기존8개 container ID/이름/실행과 미리보기HTTP200을 보존했다. [정제 근거](poc/evidence/capacity-2026-10-26/review-regression.json)에 시각·명령·revision·이미지/JAR·원본hash를 연결한다. fixture Sync 변경 후의 새 빌드 식별자/JAR를 기존23회 측정과 구분한다.
 
 Standards 재검토에서 가시성이 10초 뒤 처음 확인되면 histogram overflow로 포함될 수 있다는 문구를 보완했다. Spec 차단 지적은0건이다. 보존 창 계산과 반복/계측 비용/단일 CPU 대조는 #63/#65에 추가했다. 최종 문서·근거 commit의 Claude 승인과 push/PR CI는 PR66 댓글에서 확인한 뒤 병합한다.
+
+
+## 2026-10-26 · 샤딩 검토의 기존 근거 정정 #67
+
+사용자 요청으로 origin/develop 6e0e8b2에서 별도 technicaltest/sharding-architecture 브랜치를 만들었다. 다른 develop worktree는 변경하지 않았다. F01/F05/F06/F08/F10/F15/F16 → T02/T04/T06/T07/T08/T15/T16.
+
+기존 matrix-1-sharded-3의 hot 방송 partition 집합은 [2]이고 전체 분포는1,790/1,999/26,511이었다. Kafka의 기본 hash에서 세 suffix가 같은 partition에 충돌하는 사례를 회귀로 고정했다. 이전 p95 차이를 hot 방송 분산의 효과로 설명한 것은 근거가 부족하므로 즉시 사용자에게 정정하고 검증 문서와 T07 상태를 부분 검증으로 고쳤다. 과거 원본은 바꾸지 않았다.
+
+실험 라우팅을 CHANNEL_KEY/SUFFIX_HASH/EXPLICIT_EVENT_ID로 명시하고 제품의 channelId 키를 보존하는 eventId 기반 실제 partition 배정을 후보로 추가했다. 재발행 순번·producer와 무관한 위치, 실제 hot 분포, 배정 불일치, DB/replay 대조를 확인한다. 기존 suffix 프로필은 과거 재현용으로 유지한다. 같은 broadcast에 대한 quality 단일 partition 조회, 모든 projection의 단일 consumer, category/report 채널 advisory lock을 코드에서 확인했다. 단순 count 실험을 전체 제품에 확대하지 않도록 설계 변경 조건을 정리한다.

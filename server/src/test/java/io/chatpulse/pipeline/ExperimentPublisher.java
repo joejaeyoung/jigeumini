@@ -5,14 +5,13 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 
 /** 실험용 bounded async 후보. 운영 발행기를 대체하지 않는다. */
 final class ExperimentPublisher implements AutoCloseable {
     private final KafkaTemplate<String,byte[]> kafka;
     private final String topic;
-    private final boolean sharded;
+    private final ExperimentRouting routing;
     private final Semaphore slots;
     private final int capacity;
     private final EventCodec codec=new EventCodec();
@@ -20,9 +19,9 @@ final class ExperimentPublisher implements AutoCloseable {
     private final AtomicLong accepted=new AtomicLong(),acknowledged=new AtomicLong(),rejected=new AtomicLong(),failedCallbacks=new AtomicLong();
     private final AtomicInteger highWater=new AtomicInteger();
     private volatile boolean failed,closing;
-    ExperimentPublisher(KafkaTemplate<String,byte[]> kafka,String topic,int capacity,boolean sharded) {
+    ExperimentPublisher(KafkaTemplate<String,byte[]> kafka,String topic,int capacity,ExperimentRouting routing) {
         if(capacity<1||capacity>1000)throw new IllegalArgumentException("EXPERIMENT_CAPACITY");
-        this.kafka=kafka;this.topic=topic;this.capacity=capacity;this.sharded=sharded;slots=new Semaphore(capacity);
+        this.kafka=kafka;this.topic=topic;this.capacity=capacity;this.routing=Objects.requireNonNull(routing);slots=new Semaphore(capacity);
     }
     synchronized void accept(List<ChatEvent> events,long sequence) {
         if(closing||failed||!slots.tryAcquire(events.size())) {rejected.addAndGet(events.size());failed=true;throw new IllegalStateException("EXPERIMENT_REJECTED");}
@@ -32,9 +31,9 @@ final class ExperimentPublisher implements AutoCloseable {
         long first=accepted.getAndAdd(events.size());for(int i=0;i<events.size();i++)unacked.put(first+i,events.get(i));
         highWater.accumulateAndGet(capacity-slots.availablePermits(),Math::max);
         for(int i=0;i<events.size();i++) {
-            var event=events.get(i);long token=first+i;String key=event.channelId()+(sharded?"/"+((sequence+i)%3):"");
+            var event=events.get(i);long token=first+i;
             try {
-                kafka.send(new ProducerRecord<>(topic,null,event.receivedAt().toEpochMilli(),key,payloads.get(i))).whenComplete((result,error)->{
+                kafka.send(routing.record(topic,event,payloads.get(i),sequence+i)).whenComplete((result,error)->{
                     if(error==null) {acknowledged.incrementAndGet();unacked.remove(token);slots.release();}
                     else {failedCallbacks.incrementAndGet();failed=true;}
                 });

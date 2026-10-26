@@ -73,7 +73,7 @@ final class PublisherFaultExperiment {
     private static void scenario(String bootstrap,String container,String topic,String publisherKind,boolean disconnect,Map<String,Object> result) throws Exception {
         var factory=KafkaSupport.producerFactory(bootstrap);var kafka=new KafkaTemplate<>(factory);var codec=new EventCodec();
         var serial=publisherKind.equals("LEGACY_SERIAL_CF4049E")?ExperimentBufferedPublisher.legacy(kafka,topic,30):publisherKind.equals("PRODUCT_BOUNDED_ASYNC")?ExperimentBufferedPublisher.product(kafka,topic,30):null;
-        var async=serial==null?new ExperimentPublisher(kafka,topic,30,false):null;
+        var async=serial==null?new ExperimentPublisher(kafka,topic,30,ExperimentRouting.CHANNEL_KEY):null;
         result.put("publisher",publisherKind);result.put("fault",disconnect?"BROKER_STOP":"BROKER_PAUSE");
         boolean paused=false,stopped=false;long start=System.nanoTime();
         try {

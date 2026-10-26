@@ -255,6 +255,8 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 `uniform-1`~`uniform-4`, `hot-1`~`hot-4`, `recovery`(분석 group60초중단), `db-delay`, `db-failure`, `membership`, `poll-stall`, `hot-duplicates`, `sharded-3`를 비교한다. 동일 seed와 optional UTC eventTime 기준을 입력 manifest에 기록한다. 동시 실험은 자원 간섭을 만들므로 순서대로 실행한다.
 
+샤딩 재검증 #67은 `shard-control-1`/`shard-control-3`와 `shard-explicit-1`/`shard-explicit-3`를 비교한다. 모두 3 partitions·2,000건/s·15초·80% 편향·두 producer·1% 재발행이며 끝 숫자는 consumer 수다. 명시 분할은 `channelId` 키를 유지하고 내부 eventId의 고정 해시로 실제 partition을 지정한다. `shard-smoke`는 100건/s·2초의 정합성 회귀다. `routingAudit`의 실제 hot 분포를 확인해야 하며, 과거 `sharded-3`은 세 suffix가 같은 partition에 충돌해 인기 방송 분산 효과의 근거로 사용할 수 없다. [공식 자료·설계 조건](docs/research/KAFKA_SHARDING_SOURCES.md).
+
 기본 로컬 Kafka19092/DB15432의 UUID 전용 topic/group/schema만 만들고 종료 시 정리한다. host·Kafka/DB 파일시스템 각각2GiB 여유를 확인하고 실험 토픽+DB2GiB 상한을5초마다 관측한다. 생성 최대600초/400,000개·drain180초·replay300초, client heap768MiB이다. 삭제는 이 실행의 자원만 대상이며 다른 worktree나 live ledger를 수정하지 않는다. 강제종료로 cleanupComplete가false이면 결과의 정확한 UUID 자원만 확인해 정리한다.
 
 합성 실험의 전체 프로필·자원 상한·계수/지연 정의는 [실험 계약](docs/pipeline/EXPERIMENTS.md), 실제 수치와 한계는 [검증 기록](docs/pipeline/EXPERIMENTS_VERIFICATION.md)을 따른다. `python3 scripts/summarize-experiments.py work/report <완료 결과.json>...`으로 표·정제 JSON·독립 HTML을 만든다.

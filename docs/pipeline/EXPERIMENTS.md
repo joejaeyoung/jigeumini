@@ -28,6 +28,9 @@ python3 scripts/summarize-experiments.py work/report work/steady.json work/burst
 | poll-stall | 500/s·30초, A2명, max.poll.interval6초에 DB commit 뒤8초 정지·heartbeat 스레드는 유지 |
 | heartbeat | 500/s·35초, A 부모1명+별도JVM1명, 자식만SIGSTOP·재할당 확인 뒤SIGCONT·재가입 확인, B 계속 처리 |
 | hot-duplicates / sharded-3 | 2,000/s·15초, 80% 편향·A3명·두 producer·1% 재발행, channelId / channelId+shard 후보 비교 |
+| shard-control-1 / shard-control-3 | 2,000/s·15초, 80% 편향·두 producer·1% 재발행, 기존 channelId 키·소비자1/3명 |
+| shard-explicit-1 / shard-explicit-3 | 위 입력과 같은 조건, channelId 키 유지·eventId 고정 해시로 실제3partition 명시 배정·소비자1/3명 |
+| shard-smoke | 명시 분할의100/s·2초·A3명·두 producer·1% 재발행 회귀 |
 | broker-fault | 별도512MiB Docker broker만 pause/stop, 직렬/async 각각30개 상한·20/10채널 입력·초과1건·종료 중 실패 |
 
 목표 수치는 입력 계획이며 결과의 달성 주장과 별개다. frame 전체 거절/발행 실패/자원 경계에서 생성을 멈추고 실제 시도·수락·ACK·거절·미확인을 보존한다. `correct=true`는 계수·bucket 대조이며 `TARGET_INPUT_COMPLETED`를 함께 확인해야 목표 입력 완료다. 실패 결과도 보고서에 포함한다.
@@ -53,6 +56,10 @@ seed20261025, eventId=`UUID(seed/index)`, eventTime=`base+index/rate`이며 매1
 동일 채널/partition의 append 순서에서 eventTime이 앞선 최대 시각보다 작은 횟수와 채널별 실제 partition 집합을 기록한다. 늦은 시각/다중 producer가 있어도 eventTime bucket 합계는 재처리와 같아야 한다. `PartitionExpansionIntegrationTest`는 실제3→6증설에서 한 키 이동·기존 manifest 거부·새 범위 중복 집계2건 유지를 검증한다. 운영3partition 설정은 바꾸지 않는다.
 
 ## 관측과 해석
+
+샤딩 재검증 #67은 `ExperimentRouting`의 CHANNEL_KEY/SUFFIX_HASH/EXPLICIT_EVENT_ID를 결과 plan에 기록한다. 과거 SUFFIX_HASH는 hot 방송의 세 키가 모두 partition2로 충돌했다. 명시 분할은 `(murmur2(channelId)%3 + murmur2(eventId의 정규 UUID 문자열)%3)%3`이며 각 hash는 Kafka의 toPositive로 부호를 처리한다. 동일 eventId는 producer·발행 순번이 달라도 같은 partition으로 간다. 키를 변경하지 않아 decoder/replay에 정규화 우회를 넣지 않는다. 제품 라우팅은 변경하지 않는다.
+
+`routingAudit`는 고정 범위의 실제 broker 기록에서 hot 방송의 partition별 물리 건수와 배정 불일치를 센다. 명시 분할 프로필은 세 partition 모두 입력이 있고 최대 비중40% 이하, 배정 불일치0이어야 정합성 통과가 가능하다. 40%는 이 합성 seed/분포의 오류 검출 기준이며 운영 SLO가 아니다. 다른 프로필의 `splitVerified=false`는 데이터 유실을 뜻하지 않는다. 동일 자원에서 순서를 바꾼 반복과 consumer1/3명을 대조하고, 단순 bucket 실험을 전체 제품/HA/지속 수용량으로 확장하지 않는다.
 
 표본마다 partition별 source end/commit/lag·DB progress/계수·할당·버퍼 나이·JVM CPU/heap/RSS·Docker CPU/memory/IO·topic/schema 크기를 기록한다. 기본 간격5초에 명령 비용이 더해지며 각 표본 시작/종료 시각을 남긴다. Kafka와 DB의 원자적 snapshot이 아니므로 단일 표본의 end/DB 진행 시각은 어긋날 수 있다. 입력률/처리율은 표본 차분, 회복 시간은 재개 뒤 최초0lag 관측까지의 상한이다.
 

@@ -43,7 +43,7 @@ def summarize(path):
                metricsAScope=data.get('metricsAScope', 'ALL_GROUP_MEMBERS'), postInputDrainSeconds=data.get('postInputDrainSeconds'),
                expectedBucketsMatch=data.get('expectedBucketsMatch'), replayManifest=data.get('replayManifest'),
                replayBucketDifferences=data.get('replayBucketDifferences'), replaySeconds=data.get('replaySeconds'),
-               appendOrderAudit=data.get('appendOrderAudit'), events=data.get('events'), failureCode=data.get('failureCode'))
+               appendOrderAudit=data.get('appendOrderAudit'), routingAudit=data.get('routingAudit'), events=data.get('events'), failureCode=data.get('failureCode'))
     row['countConservation'] = (data.get('attemptedRecords') == producer.get('accepted', 0) + producer.get('rejected', 0)
                                and producer.get('accepted') == producer.get('acknowledged', 0) + producer.get('unconfirmed', 0))
     row['resourcePeaks'] = {k: maximum(samples, k) for k in ['clientHeapUsedBytes', 'clientRssBytes', 'clientCpuLoad',

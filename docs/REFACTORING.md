@@ -146,3 +146,5 @@ F01/F08/F10/F16 → T02/T04/T08/T16. `RetentionWindow`가 하한·잠금 순서�
 F01/F05/F06/F08/F10 → T02/T04/T06/T07/T08. [현재 도입 보류 결정](pipeline/SHARDING_DECISION.md)에 제품 경계와 재개 조건을 기록했다. 현재 S1을 유지하므로 라우팅 추상화·병렬 consumer 수명 관리·부분 bucket을 미리 제품 코드에 추가하지 않는다. #67의 ExperimentRouting은 실제 분산 실험의 책임을 유지한다. 도입 재개 시 ChatRouting이 배정과 품질 기대 집합을 함께 소유하고, consumer 실행 수명과 category/report 시각 결합은 별도로 유지하도록 결정했다.
 
 리팩토링 점검은 현행 hash·품질·잠금·복원 계약과 후보의 영향 범위를 확인하는 것으로 마쳤다. 실행하지 않은 제품 샤딩 구현·장애 회귀를 완료로 기록하지 않는다. 문서의 목표 ID·링크와 Standards/Spec 검토를 확인한 뒤 최종 Claude·CI 게이트를 적용한다.
+
+현행 품질의 hash(channelId)%3은 KafkaTopicPolicy의 정확한 P3 검사와 고정 S1 계약 아래 있다. 현재는 제품 routing 추상화를 추출하지 않고, P/S를 바꾸는 도입 재개 때 배정과 기대 집합을 함께 이동한다.

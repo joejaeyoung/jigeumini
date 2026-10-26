@@ -123,23 +123,30 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         for(int p=0;p<3;p++){starts.put(new TopicPartition(topic,p),OffsetSpec.earliest());ends.put(new TopicPartition(topic,p),OffsetSpec.latest());}
         var earliest=admin.listOffsets(starts).all().get(5,TimeUnit.SECONDS);var latest=admin.listOffsets(ends).all().get(5,TimeUnit.SECONDS);
         var bounds=new ArrayList<Map<String,Object>>();for(var tp:starts.keySet())bounds.add(Map.of("partition",tp.partition(),"earliest",earliest.get(tp).offset(),"end",latest.get(tp).offset()));
-        String listing=command("docker","exec",name,"find","/var/lib/kafka/data","-maxdepth","2","-type","f","-exec","stat","-c","%n %s","{}","+");
-        var files=new ArrayList<Map<String,Object>>();long logBytes=0,deletedBytes=0;
+        // 삭제 중에는 find 이후 stat 전에 파일이 사라질 수 있다. 사라진 파일만 별도 계수한다.
+        String listing=command("docker","exec",name,"find","/var/lib/kafka/data","-maxdepth","2","-type","f","-exec","sh","-c",
+                "for file do if stat -c '%n %s' \"$file\" 2>/dev/null; then :; elif [ ! -e \"$file\" ]; then printf 'MISSING 1\\n'; else exit 1; fi; done","sh","{}","+");
+        var files=new ArrayList<Map<String,Object>>();long logBytes=0,deletedBytes=0,disappearedFiles=0;
         for(String line:listing.lines().toList()) {
+            if(line.equals("MISSING 1")){disappearedFiles++;continue;}
             String[] parts=line.split(" ");String prefix="/var/lib/kafka/data/"+topic+"-";if(parts.length!=2||!parts[0].startsWith(prefix))continue;
             String file=parts[0].substring(prefix.length());long size=Long.parseLong(parts[1]);
             if(file.endsWith(".log"))logBytes+=size;else if(file.endsWith(".log.deleted"))deletedBytes+=size;
             files.add(Map.of("partitionFile",file,"bytes",size));
         }
         boolean filesMatch=true;
-        for(var bound:bounds)for(var file:files) {
-            String path=(String)file.get("partitionFile");
-            if(path.startsWith(bound.get("partition")+"/")&&path.endsWith(".log")) {
-                long base=Long.parseLong(path.substring(path.indexOf('/')+1,path.length()-4));
-                if(base<((Number)bound.get("earliest")).longValue())filesMatch=false;
+        for(var bound:bounds) {
+            boolean hasLog=false;
+            for(var file:files) {
+                String path=(String)file.get("partitionFile");
+                if(path.startsWith(bound.get("partition")+"/")&&path.endsWith(".log")) {
+                    hasLog=true;long base=Long.parseLong(path.substring(path.indexOf('/')+1,path.length()-4));
+                    if(base<((Number)bound.get("earliest")).longValue())filesMatch=false;
+                }
             }
+            if(!hasLog)filesMatch=false;
         }
-        return Map.of("at",Instant.now().toString(),"bounds",bounds,"logBytes",logBytes,"deletedLogBytes",deletedBytes,"files",files,"filesMatchEarliest",filesMatch);
+        return Map.of("at",Instant.now().toString(),"bounds",bounds,"logBytes",logBytes,"deletedLogBytes",deletedBytes,"files",files,"filesMatchEarliest",filesMatch,"disappearedFilesDuringStat",disappearedFiles);
     }
     private void save() throws Exception {Files.writeString(output,JSON.writerWithDefaultPrettyPrinter().writeValueAsString(result)+"\n");}
     private static String command(String... args) throws Exception {return LocalKafkaCluster.command(List.of(args),Map.of(),Duration.ofSeconds(30));}

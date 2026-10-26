@@ -4,11 +4,15 @@
 
 ## 실행 범위와 입력
 
-실제 배포 이미지의 Spring 분석기와 PostgreSQL·Kafka·웹을 소유한 단일 호스트 Compose에 띄웠다. ranking/trend/관측/category/report/알림의 consumer group6개, topic/partition24개 위치를 조회하고 API8경로를 함께 호출한다. 공개 채팅·인증·외부 배포는 사용하지 않는다.
+실제 배포 이미지의 Spring 분석기와 PostgreSQL·Kafka·웹을 소유한 단일 호스트 Compose에 띄웠다. ranking/trend/관측/category/report/알림의 consumer group6개, topic/partition24개 위치를 조회하고 API8경로를 함께 호출한다. 공개 채팅·인증·외부 배포는 사용하지 않는다. collector 역할은 실행하지 않았다.
 
-seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 event UUID/payload를 새 Kafka offset으로1회 추가한다. 생성기는 예상 ledger UUID/hash와 bucket별 count, 관측/분류/보고서 귀속, outbox/feed ID를 독립 누적한다. final drain 후 제품 DB와 전부 대조한다. accepted/ACK는 물리 발행 수, ledger는 고유 업무 수다.
+API 계측은 단일 클라이언트가 5초 고정 지연마다 8경로를 순차 호출하는 가벼운 probe다(명목 약1.6요청/s, 실제 주기는 질의 소요만큼 길다). `http://api:8080`을 직접 조회해 nginx/web proxy를 거치지 않는다. status·ranking·spike·category는 전역 경로, timeline·report·notification은 한 고정 채널 대상이며 readyz는 준비 상태 경로다. 동시 사용자 조회 부하나 API 최대 처리량 시험이 아니다.
 
-채널별 관측은30초마다 갱신하고 TTL120초를 사용한다. 수집 품질 telemetry도 합성 connected/alive/flush 입력이다. outbox는30초마다 합성 SQL로 생성하므로 실제 급증 탐지 정확도 검증이 아니다. 실제 Outbox 발행·알림 소비·중복 처리와 최종 건수는 대조한다.
+분석기에는 실험용 JMX 원격 옵션(인증/TLS 없음, 소유 내부망·호스트 미공개)과 별도 healthcheck를 overlay했다. 운영 이미지 기본 설정과 다른 계측 조건을 기록한다.
+
+seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 event UUID/payload를 새 Kafka offset으로1회 추가한다. 생성기는 예상 ledger UUID와 bucket별 count, 관측/분류/보고서 귀속, outbox/feed ID를 소비 구현과 별도로 누적한다. 기대 hash는 제품 EventCodec.hash를 재사용하므로 해시 알고리즘 자체의 독립 검증은 아니다. final drain 후 제품 DB와 전부 대조한다. accepted/ACK는 물리 발행 수, ledger는 고유 업무 수다.
+
+채널별 관측은30초마다 갱신하고 TTL120초를 사용한다. 수집 품질 telemetry도 합성 connected/alive/flush 입력이다. outbox는30초마다 합성 SQL로 생성하므로 실제 급증 탐지 정확도 검증이 아니다. 실제 Outbox 발행·알림 소비와 최종 건수는 대조한다. 중복 입력 주입은 chat ledger에 한정하며 알림 중복은 주입하지 않았다.
 
 | profile | 실행 revision | 입력 | 고유/물리 건수 | 결과 |
 |---|---|---|---|---|
@@ -23,10 +27,10 @@ seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 even
 ## 계측 의미
 
 - 독립1초 offset 계측은 각 group의 commit을 먼저, topic end를 나중에 읽는다. 동시에 읽은 snapshot이 아니므로 lag는 관측 구간의 상한 성격이다. 각 partition의 실제 표본 시간 차로 입력/commit 처리량을 계산한다.
-- API/DB count query·JMX heap·생성기 RSS는5초 지연 주기, 컨테이너 CPU/RSS와 host 여유 디스크는 별도 표본이다. 누락/실패 표본도 보존한다. API latency는8경로별로 정상/STOP/복구 구간을 구분한다.
+- API/DB count query·JMX heap·생성기 RSS는5초 지연 주기, 컨테이너 CPU·docker stats 메모리 사용량과 host 여유 디스크는 별도 표본이다. 분석기 RSS는 별도로 /proc/1/status의 VmRSS를 읽는다. 누락/실패 표본도 보존한다. API latency는8경로별로 정상/STOP/복구 구간을 구분한다.
 - `receivedToTransactionTimestampMillis`는 receivedAt부터 PostgreSQL transaction 시작 timestamp까지다. DB commit 완료 시각이나 네트워크 전체 지연이 아니다. 전체 실행의 분포이며 정상/장애별로 분해하지 않았다.
 - JVM heap used는 GC 이후 생존 객체량이 아니다. RSS와 heap의 유한30분 표본은 메모리 누수 부재나 장기 SLA를 증명하지 않는다.
-- API는 응답 status/지연을 측정한다. 응답 본문 전체 정합성·UI 사용자 흐름은 이 부하 실험의 범위가 아니다. 최종 업무 대조는 DB의 ledger/hash/bucket/귀속/알림으로 수행한다.
+- API는 응답 status/지연을 측정한다. 응답 본문 전체 정합성·UI 사용자 흐름은 이 부하 실험의 범위가 아니다. 최종 업무 대조는 DB의 ledger/hash/bucket/귀속/알림으로 수행한다. 순위 순서와 증가율 산출값을 독립 기대값과 대조한 시험은 아니다.
 
 계측 통과 조건은 offset 완전 표본90% 이상과 입력초수의80% 이상 표본, 정상 DB/JMX/RSS/API 기록90% 이상, 정상10초 window의90% 이상에서 전체 계측, 정상 구간 양 끝을 포함한 최대 공백15초 이하다. 정상 API는 모두200이어야 한다. HTTP 오류를 결과에서 제외하지 않는다.
 
@@ -50,13 +54,13 @@ uniform/hot의 동일 입력률 단회에서 hot의 tail 지연이 더 컸다. �
 
 03eb75f의 실제 입력은1800.007582초, 고유90,000·물리90,900건이다. 최종 accepted=ACK=90,900, rejected/unconfirmed/queued/inflight=0이다. ranking/trend/category/report의 ledger는각90,000건, bucket은각3,615행이며 독립 예상값의 ID/hash/count·귀속 대조가 일치했다. 관측1,200건, spike/outbox/feed60건도 일치하고 최종24개 위치의 lag는0이다.
 
-분석기 STOP은20.303초였다. STOP 중 양수 lag20표본을 관측했다. CONT 이후 고정 end까지 commit은2.245초, 첫 ready200 표본은5.091초였다. 정상 API2,784회는모두200, STOP 중8회는HttpTimeoutException, 복구 구간8회는200이다. 장애 오류를 정상 통계에서 별도로 표시하며 전체 기록에서 삭제하지 않았다.
+분석기 STOP은20.303초였다. STOP 중 양수 lag20표본을 관측했다. CONT 이후 고정 end까지 commit 관측은2.245초, 첫 ready200 표본은5.091초였다. 전자는약1초 offset 주기, 후자는약5초 API 주기에 따른 관측 상한으로 정밀도가 다르다. 정상 API2,784회는모두200, STOP 중8회는HttpTimeoutException, 복구 구간8회는200이다. 장애 오류를 정상 통계에서 별도로 표시하며 전체 기록에서 삭제하지 않았다.
 
-전체 실행의 ranking 지연은p50/p95/p99=7.938/64.850/3507.609ms, 최대21403.527ms, trend는7.931/64.913/3574.918ms, 최대21564.276ms다. STOP이 포함된 전체 분포이며 정상 지연으로 해석하지 않는다. 정상 DB count query는348표본, p50/p95/p99=18.523/36.647/42.836ms다.
+전체 실행의 ranking 지연은p50/p95/p99=7.938/64.850/3507.609ms, 최대21403.527ms, trend는7.931/64.913/3574.918ms, 최대21564.276ms다. 모두 전체 실행의 quantile이다. STOP 중 입력은 약1.1%로 p99·최댓값에 큰 영향을 줄 수 있지만, 시간별 지연을 분해하지 않았으므로 정상 구간 p50/p95 값으로 따로 표시하지 않는다. 낮은 입력률50/s인 soak의 p95가 uniform100/s의26.757ms보다 높았던 원인은 미규명이다. 테이블 증가·DB 유지 작업·계측 count query 등이 가설일 수 있으나 이를 구별하는 자료가 없고 실행 DB를 정리해 사후 분해할 수 없다. 정합성과 장애 회복·유한 자원 관측의 PASS이며 지연 안정성이나 원인별 비용을 입증한 결과가 아니다. 정상 DB count query는348표본, p50/p95/p99=18.523/36.647/42.836ms다. 이는7개 관측용 count(*) 질의 묶음의 시간으로 제품 DB 트랜잭션 지연이 아니며, 이 계측도 공유 DB에 부하를 더한다.
 
 독립 offset1,780표본은모두완전했고 정상 느린 계측348표본과 정상10초window176/176이 충족됐다. 정상 최대 계측 공백5.780초, 최대 offset 표본 간격1.078초다. 분석기 heap used 최대52,227,464byte·RSS303,341,568byte, 입력기 heap59,588,976byte·RSS229,638,144byte, 표본상 버퍼 나이 최대64ms를 기록했다. heap은350표본, 분석기 RSS는138표본이다.
 
-시계 차이 범위는 START[-10,396]ms(불확실성406ms), RESUME[-9,165]ms(174ms)다. 입력 종료 후 모든 대조·정상 종료·이번 실행 container/volume/비밀 제거가 통과했다. 원본hash와 각group/partition의 실제분포, API경로별지연, 분단위메모리는 [정제근거](poc/evidence/product-load-2026-10-26/summary.json)에 연결한다.
+시계 차이 범위는 START[-10,396]ms(불확실성406ms), RESUME[-9,165]ms(174ms)다. 입력 종료 후 모든 대조·정상 종료·이번 실행 container/volume/비밀 제거가 통과했다. 원본 hash·표본 수·분포는 [정제 근거 색인](poc/evidence/product-load-2026-10-26/summary.json)에 연결한다. [soak 상세](poc/evidence/product-load-2026-10-26/soak.json)의 files는 result/load/offsets/samples 원본 hash, partitions는 group별 분포, apiLatencyMillis는 경로·구간별 응답, minuteSamples는 분단위 heap/RSS 표본, memoryBytes는 전체 메모리 분포다. [정제 스크립트](../scripts/product-load-summary.py)가 해당 원본에서 계산하며 quantile은 (N-1)·p 위치를 선형 보간한다.
 
 ## 환경·재현·남은 범위
 

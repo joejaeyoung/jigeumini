@@ -45,7 +45,14 @@
       "unique": 12000,
       "physical": 12120,
       "correct": true,
-      "cleanupComplete": true
+      "cleanupComplete": true,
+      "details": {
+        "sourceHashes": "uniform.json#/files",
+        "partitions": "uniform.json#/partitions",
+        "apiLatency": "uniform.json#/apiLatencyMillis",
+        "memory": "uniform.json#/memoryBytes",
+        "minuteSamples": "uniform.json#/minuteSamples"
+      }
     },
     {
       "profile": "hot",
@@ -56,7 +63,14 @@
       "unique": 12000,
       "physical": 12120,
       "correct": true,
-      "cleanupComplete": true
+      "cleanupComplete": true,
+      "details": {
+        "sourceHashes": "hot.json#/files",
+        "partitions": "hot.json#/partitions",
+        "apiLatency": "hot.json#/apiLatencyMillis",
+        "memory": "hot.json#/memoryBytes",
+        "minuteSamples": "hot.json#/minuteSamples"
+      }
     },
     {
       "profile": "steps",
@@ -67,7 +81,14 @@
       "unique": 21000,
       "physical": 21210,
       "correct": true,
-      "cleanupComplete": true
+      "cleanupComplete": true,
+      "details": {
+        "sourceHashes": "steps.json#/files",
+        "partitions": "steps.json#/partitions",
+        "apiLatency": "steps.json#/apiLatencyMillis",
+        "memory": "steps.json#/memoryBytes",
+        "minuteSamples": "steps.json#/minuteSamples"
+      }
     },
     {
       "profile": "soak",
@@ -78,7 +99,14 @@
       "unique": 90000,
       "physical": 90900,
       "correct": true,
-      "cleanupComplete": true
+      "cleanupComplete": true,
+      "details": {
+        "sourceHashes": "soak.json#/files",
+        "partitions": "soak.json#/partitions",
+        "apiLatency": "soak.json#/apiLatencyMillis",
+        "memory": "soak.json#/memoryBytes",
+        "minuteSamples": "soak.json#/minuteSamples"
+      }
     },
     {
       "profile": "smoke",
@@ -89,7 +117,14 @@
       "unique": 1200,
       "physical": 1212,
       "correct": true,
-      "cleanupComplete": true
+      "cleanupComplete": true,
+      "details": {
+        "sourceHashes": "smoke.json#/files",
+        "partitions": "smoke.json#/partitions",
+        "apiLatency": "smoke.json#/apiLatencyMillis",
+        "memory": "smoke.json#/memoryBytes",
+        "minuteSamples": "smoke.json#/minuteSamples"
+      }
     }
   ],
   "localChecks": {
@@ -115,6 +150,26 @@
     "RECEIVED_TO_TRANSACTION_START_NOT_COMMIT; FULL_RUN_DISTRIBUTION_INCLUDES_STOP",
     "HEAP_NOT_POST_GC; FINITE_DURATION_NOT_LEAK_ABSENCE",
     "CLOCK_BRACKET_IS_INTERVAL_AND_ROUND_TRIP_UNCERTAINTY_NOT_EXACT_SKEW",
-    "SHARED_HOST_EXISTING_SERVICES_UNMODIFIED"
-  ]
+    "SHARED_HOST_EXISTING_SERVICES_UNMODIFIED",
+    "API_LOAD_IS_SINGLE_SEQUENTIAL_PROBE_NOMINAL_1.6_RPS; WEB_PROXY_NOT_MEASURED; COLLECTOR_ROLE_NOT_RUN",
+    "JMX_TEST_OVERLAY_ON_INTERNAL_NETWORK_WITH_REPLACED_HEALTHCHECK",
+    "DATABASE_COUNT_QUERY_IS_SEVEN_OBSERVATION_QUERIES_NOT_PRODUCT_TRANSACTION_LATENCY",
+    "HASH_EXPECTATION_REUSES_PRODUCT_CODEC; RANKING_ORDER_AND_GROWTH_RATE_NOT_INDEPENDENTLY_COMPARED",
+    "NOTIFICATION_DUPLICATES_NOT_INJECTED; CHAT_DUPLICATES_ONLY",
+    "WHOLE_RUN_LATENCY_QUANTILES_NOT_NORMAL_INTERVAL_QUANTILES; HIGHER_SOAK_P95_CAUSE_UNRESOLVED",
+    "DOCKER_STATS_MEMORY_IS_NOT_RSS; ANALYZER_RSS_FROM_PROC_VM_RSS"
+  ],
+  "curation": {
+    "script": "scripts/product-load-summary.py",
+    "quantile": "linear interpolation at (N-1)*p; summaries rounded to 3 decimals",
+    "sourceFilesField": "files in each profile evidence",
+    "detailsFields": [
+      "partitions",
+      "apiLatencyMillis",
+      "normalDatabaseCountQueryMillis",
+      "memoryBytes",
+      "minuteSamples"
+    ],
+    "dataLocation": "profile evidence paths are relative to this index"
+  }
 }

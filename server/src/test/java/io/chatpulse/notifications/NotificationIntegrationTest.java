@@ -21,10 +21,17 @@ class NotificationIntegrationTest {
     private String schema,topic;
     private JdbcTemplate jdbc;
     private Instant at;
-    @BeforeEach void setup(){
+    @BeforeEach void setup(TestInfo testInfo) throws Exception {
         schema="it_"+UUID.randomUUID().toString().replace("-","");topic="it.notifications."+UUID.randomUUID();
         new JdbcTemplate(ds("public")).execute("CREATE SCHEMA "+schema);
         var data=ds(schema);org.flywaydb.core.Flyway.configure().dataSource(data).defaultSchema(schema).load().migrate();jdbc=new JdbcTemplate(data);
+        if(testInfo.getTags().contains("broker-rejection")) {
+            var settings=new HashMap<>(KafkaTopicPolicy.local().configurations());settings.put("max.message.bytes","64");
+            try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP))) {
+                admin.createTopics(List.of(new org.apache.kafka.clients.admin.NewTopic(topic,3,(short)1).configs(settings)))
+                        .all().get(10,TimeUnit.SECONDS);
+            }
+        }
         KafkaSupport.ensureTopic(BOOTSTRAP,topic);at=Instant.ofEpochSecond(Math.floorDiv(Instant.now().minusSeconds(10).getEpochSecond(),10)*10);
     }
     @AfterEach void cleanup() throws Exception {
@@ -60,16 +67,48 @@ class NotificationIntegrationTest {
         }
         try(var restarted=consumer()){restarted.start();await().atMost(Duration.ofSeconds(15)).until(()->(int)restarted.status().get("assignedPartitions")==3);assertThat(count("notification_event")).isEqualTo(1);}
     }
-    @Test void brokerRejectionKeepsOutboxPendingUntilRecovery() throws Exception {
-        insert(UUID.randomUUID(),at);
+    @RepeatedTest(20) @Tag("broker-rejection")
+    void brokerRejectionKeepsOutboxPendingUntilRecovery() throws Exception {
+        var id=UUID.randomUUID();insert(id,at);
+        var event=new SpikeDetected(1,id,RUN,CHANNEL,at,"chat-spike-v1",100,new java.math.BigDecimal(50),new java.math.BigDecimal(2),"HEALTHY_AT_DETECTION");
         var resource=new org.apache.kafka.common.config.ConfigResource(org.apache.kafka.common.config.ConfigResource.Type.TOPIC,topic);
         try(var admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP));var outbox=outbox()){
-            admin.incrementalAlterConfigs(Map.of(resource,List.of(new org.apache.kafka.clients.admin.AlterConfigOp(new org.apache.kafka.clients.admin.ConfigEntry("max.message.bytes","64"),org.apache.kafka.clients.admin.AlterConfigOp.OpType.SET)))).all().get(10,TimeUnit.SECONDS);
-            assertThatThrownBy(outbox::publishOne).hasMessage("OUTBOX_DELIVERY_UNAVAILABLE");
-            assertThat(end()).isZero();assertThat(jdbc.queryForObject("SELECT published_at IS NULL FROM spike_outbox",Boolean.class)).isTrue();
+            int limit=Integer.parseInt(admin.describeConfigs(List.of(resource)).all().get(10,TimeUnit.SECONDS).get(resource).get("max.message.bytes").value());
+            assertThat(limit).isEqualTo(64);assertThat(event.encode().length).isGreaterThan(limit);
+            assertThat(count("spike_outbox")).isEqualTo(1);assertThat(end()).isZero();
+            assertBrokerRejects(event);assertThat(end()).isZero();
+            // 생성 시 제한을 고정한다. 동적 변경 응답을 실제 broker 적용 완료로 간주하지 않는다.
+            var returned=new java.util.concurrent.atomic.AtomicReference<Boolean>();
+            Throwable failure=catchThrowable(()->returned.set(outbox.publishOne()));
+            long rejectedEnd=end();boolean pending=jdbc.queryForObject("SELECT published_at IS NULL FROM spike_outbox",Boolean.class);
+            var observed=new LinkedHashMap<String,Object>();observed.put("phase","OUTBOX_REJECTION");
+            observed.put("limitBytes",limit);observed.put("payloadBytes",event.encode().length);observed.put("publishResult",returned.get());
+            observed.put("failureType",failure==null?"NONE":failure.getClass().getSimpleName());observed.put("brokerEnd",rejectedEnd);observed.put("pending",pending);
+            System.out.println(tools.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(observed));
+            assertThat(failure).isInstanceOf(IllegalStateException.class).hasMessage("OUTBOX_DELIVERY_UNAVAILABLE");
+            assertThat(rejectedEnd).isZero();assertThat(pending).isTrue();
             admin.incrementalAlterConfigs(Map.of(resource,List.of(new org.apache.kafka.clients.admin.AlterConfigOp(new org.apache.kafka.clients.admin.ConfigEntry("max.message.bytes","1048588"),org.apache.kafka.clients.admin.AlterConfigOp.OpType.SET)))).all().get(10,TimeUnit.SECONDS);
-            assertThat(outbox.publishOne()).isTrue();assertThat(end()).isEqualTo(1);
+            var retries=new java.util.concurrent.atomic.AtomicInteger();
+            await().atMost(Duration.ofSeconds(15)).pollInterval(Duration.ofMillis(100)).until(()->{
+                try {boolean sent=outbox.publishOne();assertThat(sent).as("미전달 outbox가 존재해야 한다").isTrue();return true;}
+                catch(IllegalStateException unavailable) {
+                    if(!"OUTBOX_DELIVERY_UNAVAILABLE".equals(unavailable.getMessage()))throw unavailable;
+                    retries.incrementAndGet();return false;
+                }
+            });
+            assertThat(outbox.publishOne()).isFalse();assertThat(end()).isEqualTo(1);
+            assertThat(jdbc.queryForObject("SELECT published_at IS NOT NULL FROM spike_outbox",Boolean.class)).isTrue();
+            System.out.println(tools.jackson.databind.json.JsonMapper.builder().build().writeValueAsString(Map.of("phase","OUTBOX_RECOVERY","brokerEnd",end(),"pending",false,"retryCount",retries.get())));
         }
+    }
+    private void assertBrokerRejects(SpikeDetected event) {
+        var factory=KafkaSupport.producerFactory(BOOTSTRAP);
+        try {
+            var kafka=new KafkaTemplate<>(factory);kafka.setProducerListener(null);
+            Throwable failure=catchThrowable(()->kafka.send(topic,CHANNEL,event.encode()).get(10,TimeUnit.SECONDS));
+            assertThat(failure).hasRootCauseInstanceOf(org.apache.kafka.common.errors.RecordTooLargeException.class);
+            System.out.println("{\"phase\":\"BROKER_REJECTION_READY\",\"failureType\":\"RecordTooLargeException\"}");
+        } finally {factory.destroy();}
     }
     @Test void feedRollbackDuplicatesConflictsQualityCorrectionsDelayAndCursor() {
         var first=UUID.randomUUID();insert(first,at);

@@ -52,6 +52,24 @@ class ChannelProbeTest {
         return stats.snapshot(!reconnect.isZero());
     }
 
+    @Test void suppliedClockReachesReceiptAndObservationWithoutChangingElapsedDeadline() throws Exception {
+        server=new FixtureServer(true,false);
+        var clock=java.time.Clock.offset(java.time.Clock.systemUTC(),Duration.ofSeconds(300));
+        var events=new CopyOnWriteArrayList<ChatEvent>();var observed=new CopyOnWriteArrayList<java.time.Instant>();
+        CollectionObserver tracking=new CollectionObserver(){
+            public void connected(String channel,java.util.UUID session,java.time.Instant at){observed.add(at);}
+            public void alive(java.util.UUID session,java.time.Instant at){observed.add(at);}
+            public void ended(java.util.UUID session,java.time.Instant at,String reason){observed.add(at);}
+        };
+        var stats=new ProbeStats("fixture-channel",clock);var began=java.time.Instant.now();
+        new ChannelProbe(source(false),events::addAll,tracking,clock).run("fixture-channel",Duration.ofSeconds(1),Duration.ZERO,stats,new AtomicBoolean());
+        var ended=java.time.Instant.now();
+        assertThat(events).isNotEmpty();assertThat(observed).isNotEmpty();
+        assertThat(events).allSatisfy(event->assertThat(event.receivedAt()).isBetween(began.plusSeconds(300),ended.plusSeconds(300)));
+        assertThat(observed).allSatisfy(at->assertThat(at).isBetween(began.plusSeconds(300),ended.plusSeconds(300)));
+        assertThat(((Number)stats.snapshot(false).get("elapsedSeconds")).doubleValue()).isBetween(0.8,10.0);
+    }
+
     @Test void leaseLossBeforeResolutionPreventsHttpAndWebSocketWork() {
         ChatSource never=org.mockito.Mockito.mock(ChatSource.class);
         EventSink guarded=new EventSink(){public void accept(List<ChatEvent> events){}public void checkHealthy(){throw new SourceFailure("COLLECTION_LEASE_LOST",true);}};

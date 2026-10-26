@@ -3,6 +3,7 @@ package io.chatpulse.poc;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,7 +23,8 @@ final class ChatConnection implements AutoCloseable {
     private final CollectionObserver observer;
     private final String channel;
     private final UUID sessionId = UUID.randomUUID();
-    private volatile Instant lastAlive = Instant.now();
+    private final Clock clock;
+    private volatile Instant lastAlive;
     private final CompletableFuture<Void> ready = new CompletableFuture<>();
     private final CompletableFuture<SourceFailure> ended = new CompletableFuture<>();
     private final AtomicBoolean active = new AtomicBoolean(true);
@@ -36,7 +38,8 @@ final class ChatConnection implements AutoCloseable {
 
     ChatConnection(StandardWebSocketClient client, ScheduledExecutorService scheduler,
             URI uri, String channel, String room, String token, ProbeStats stats,
-            Duration pingInterval, Duration pongTimeout, EventSink sink, CollectionObserver observer) throws Exception {
+            Duration pingInterval, Duration pongTimeout, EventSink sink, CollectionObserver observer, Clock clock) throws Exception {
+        this.clock=clock;this.lastAlive=clock.instant();
         this.stats = stats; this.observer = observer; this.channel = channel;
         this.pingInterval = pingInterval;
         this.pongTimeout = pongTimeout;
@@ -54,10 +57,10 @@ final class ChatConnection implements AutoCloseable {
                 try {
                     int byteCount = message.getPayload().getBytes(StandardCharsets.UTF_8).length;
                     if (byteCount > ChatProtocol.MAX_FRAME_BYTES) throw new SourceFailure("FRAME_TOO_LARGE", false);
-                    var frame = protocol.decode(message.getPayload(), channel, room, sessionId, Instant.now());
+                    var frame = protocol.decode(message.getPayload(), channel, room, sessionId, clock.instant());
                     if (frame.command() == 10100 && !ready.isDone()) {
                         stats.connected();
-                        observer.connected(channel, sessionId, Instant.now());
+                        observer.connected(channel, sessionId, clock.instant());
                         ready.complete(null);
                     }
                     if (frame.command() == 0) send(ChatProtocol.pong());
@@ -68,7 +71,7 @@ final class ChatConnection implements AutoCloseable {
                     if (!frame.events().isEmpty() && !ready.isDone()) {
                         throw new SourceFailure("CHAT_BEFORE_HANDSHAKE", false);
                     }
-                    lastAlive = Instant.now();
+                    lastAlive = clock.instant();
                     observer.alive(sessionId, lastAlive);
                     if (frame.skipped().keySet().stream().anyMatch(key -> key.startsWith("INVALID_"))) {
                         observer.loss(channel, lastAlive.minusMillis(1), lastAlive, "INVALID_MESSAGE");
@@ -128,9 +131,9 @@ final class ChatConnection implements AutoCloseable {
 
     private void fail(SourceFailure failure) {
         if (ended.complete(failure)) {
-            observer.ended(sessionId, Instant.now(), failure.getMessage());
+            observer.ended(sessionId, clock.instant(), failure.getMessage());
             if (failure.getMessage().contains("FRAME") || failure.getMessage().startsWith("INVALID_") || failure.getMessage().contains("PUBLISH") || failure.getMessage().contains("KAFKA")) {
-                observer.loss(channel, lastAlive, Instant.now(), failure.getMessage());
+                observer.loss(channel, lastAlive, clock.instant(), failure.getMessage());
             }
         }
         ready.completeExceptionally(failure);
@@ -142,7 +145,7 @@ final class ChatConnection implements AutoCloseable {
     public void close() {
         active.set(false);
         stats.disconnected();
-        observer.ended(sessionId, Instant.now(), "CLOSED");
+        observer.ended(sessionId, clock.instant(), "CLOSED");
         heartbeat.cancel(false);
         closeSocket();
     }

@@ -23,7 +23,9 @@
     "resultSha256": "71f1d208918423d3db131c034ccb1d8406140063953caa7a9762ed2466fea551",
     "failureType": "AssertionError",
     "actualTrace": "preflight-diagnosis.json",
-    "resolution": "개발용 Kafka/PostgreSQL을 볼륨 보존하여 종료한 뒤 같은 HEAD로 재실행; 다른 서비스 유지"
+    "resolution": "개발용 Kafka/PostgreSQL을 볼륨 보존하여 종료한 뒤 같은 HEAD로 재실행; 다른 서비스 유지",
+    "result": "preflight-failure.json",
+    "developmentServices": "Stopped after soak/disk tests with volumes retained; restarted for #44 regression; volume checksums not measured"
   },
   "localCheck": {
     "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
@@ -38,13 +40,18 @@
     "finalBusinessSnapshotDifferences": [],
     "pendingOutboxAtTarget": 1,
     "notificationsAfterReplay": 2,
-    "arbitraryWallClockRpoSeconds": null
+    "arbitraryWallClockRpoSeconds": null,
+    "notificationPhysicalAfterReplay": 3,
+    "originalNotificationGroupAfterReplay": "SAFE_OVERLAP_COMMIT_2_DB_NEXT_3"
   },
   "limits": [
     "지정 named restore point 검증이며 arbitrary timestamp target은 실행하지 않음",
     "로컬단회·동일host volume archive, 외부archive내구성/RTO/RPO/SLA 미검증",
     "archiver failed_count4를 관측; required segment3개는 모두 확보되고 hash 검증, 실패원인 로그는 수집하지 않아 미확정",
     "restore pause시간은PGDATA복사/설정준비 이후 시작; 전체재해복구시간이 아님",
-    "Kafka retention gap은 이번ownedcluster의deleteRecords로주입; 자연retention시간경과와구분"
+    "Kafka retention gap은 이번ownedcluster의deleteRecords로주입; 자연retention시간경과와구분",
+    "RECOVERY_ENDED_BEFORE_TARGET is a harness classification of PostgreSQL log text, not a SQLSTATE",
+    "Selected business snapshot items only; not all database columns",
+    "Cluster ID mismatch and cleanup failure paths not separately executed"
   ]
 }

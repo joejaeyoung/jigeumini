@@ -1,6 +1,7 @@
 package io.chatpulse.poc;
 
 import java.time.Duration;
+import java.time.Clock;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import jakarta.websocket.ContainerProvider;
@@ -11,34 +12,28 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 public final class ChannelProbe {
     private static final Logger log = LoggerFactory.getLogger(ChannelProbe.class);
     private final ChatSource source;
-    private EventSink sink = EventSink.DISCARD;
-    private CollectionObserver observer = CollectionObserver.NONE;
+    private final EventSink sink;
+    private final CollectionObserver observer;
+    private final Clock clock;
     private final Duration pingInterval;
     private final Duration pongTimeout;
     private final Duration roomPollInterval;
 
-    public ChannelProbe(ChatSource source) {
-        this(source, Duration.ofSeconds(20), Duration.ofSeconds(10), Duration.ofSeconds(30));
+    public ChannelProbe(ChatSource source) {this(source,EventSink.DISCARD,CollectionObserver.NONE);}
+    public ChannelProbe(ChatSource source,EventSink sink) {this(source,sink,CollectionObserver.NONE);}
+    public ChannelProbe(ChatSource source,EventSink sink,CollectionObserver observer) {this(source,sink,observer,Clock.systemUTC());}
+    public ChannelProbe(ChatSource source,EventSink sink,CollectionObserver observer,Clock clock) {
+        this(source,Duration.ofSeconds(20),Duration.ofSeconds(10),Duration.ofSeconds(30),sink,observer,clock);
     }
-
-    public ChannelProbe(ChatSource source, EventSink sink) {
-        this(source);
-        this.sink = sink;
+    ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval) {
+        this(source,pingInterval,pongTimeout,roomPollInterval,EventSink.DISCARD,CollectionObserver.NONE,Clock.systemUTC());
     }
-
-    public ChannelProbe(ChatSource source, EventSink sink, CollectionObserver observer) {
-        this(source, sink); this.observer = observer;
+    ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval,CollectionObserver observer) {
+        this(source,pingInterval,pongTimeout,roomPollInterval,EventSink.DISCARD,observer,Clock.systemUTC());
     }
-
-    ChannelProbe(ChatSource source, Duration pingInterval, Duration pongTimeout, Duration roomPollInterval) {
-        this.source = source;
-        this.pingInterval = pingInterval;
-        this.pongTimeout = pongTimeout;
-        this.roomPollInterval = roomPollInterval;
-    }
-
-    ChannelProbe(ChatSource source, Duration pingInterval, Duration pongTimeout, Duration roomPollInterval, CollectionObserver observer) {
-        this(source, pingInterval, pongTimeout, roomPollInterval); this.observer = observer;
+    private ChannelProbe(ChatSource source,Duration pingInterval,Duration pongTimeout,Duration roomPollInterval,EventSink sink,CollectionObserver observer,Clock clock) {
+        this.source=source;this.pingInterval=pingInterval;this.pongTimeout=pongTimeout;this.roomPollInterval=roomPollInterval;
+        this.sink=sink;this.observer=observer;this.clock=java.util.Objects.requireNonNull(clock);
     }
 
     public void run(String channel, Duration duration, Duration reconnectAfter, ProbeStats stats, AtomicBoolean stop) {
@@ -67,7 +62,7 @@ public final class ChannelProbe {
                     String token = source.readToken(room);
                     sink.checkHealthy();
                     try (var connection = new ChatConnection(client, scheduler, source.socketUri(room), channel,
-                            room, token, stats, pingInterval, pongTimeout, sink, observer)) {
+                            room, token, stats, pingInterval, pongTimeout, sink, observer, clock)) {
                         log.info("channel={} connected attempt={}", channel, attempt);
                         long nextRoomPoll = System.nanoTime() + roomPollInterval.toNanos();
                         while (!stop.get() && System.nanoTime() < deadline) {

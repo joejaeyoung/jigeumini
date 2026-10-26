@@ -1,13 +1,14 @@
 package io.chatpulse.poc;
 
 import java.time.Instant;
+import java.time.Clock;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** 수신량에 비례해 늘어나지 않는 집계만 보관한다. */
 public final class ProbeStats {
     private final String channel;
-    private final Instant startedAt = Instant.now();
+    private final Instant startedAt;
     private final Map<String, Long> commands = new LinkedHashMap<>();
     private final Map<String, Long> skipped = new LinkedHashMap<>();
     private final Map<String, Long> idFields = new LinkedHashMap<>();
@@ -19,7 +20,8 @@ public final class ProbeStats {
     private final long startNano = System.nanoTime();
     private long connectedSinceNano, connectedNanos;
 
-    public ProbeStats(String channel) { this.channel = channel; }
+    public ProbeStats(String channel) {this(channel,Clock.systemUTC());}
+    public ProbeStats(String channel,Clock clock) {this.channel=channel;this.startedAt=clock.instant();}
     public synchronized void attempt() { attempts++; state = "CONNECTING"; }
     public synchronized void connected() { connections++; state = "CONNECTED"; connectedSinceNano = System.nanoTime(); }
     public synchronized void disconnected() {

@@ -270,3 +270,4 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 제품 분석기와 부하 생성기를 별도 JVM·소유 Compose로 분리한다. 생성 입력의 UUID/내용/10초 합계를 DB 결과와 대조하고, 그룹6개·24개 group/topic/partition의 offset·lag·처리량과 API/DB 지연을 기록한다. 원천 세션/heartbeat와 outbox는 합성 입력이며 실제 원천·급상승 감지 정확도 부하 검증으로 확대하지 않는다.
 - JMX는 시험 overlay의 내부망에서만 열고 분석기 heap을 읽는다. 분석기 RSS·컨테이너 CPU/메모리와 생성기 heap/RSS는 별도 표본이다. 기존 운영 compose를 바꾸지 않는다. 실행 클래스는 결과 디렉터리에 고정 복사하고 hash를 남겨 뒤의 빌드가 실행을 바꾸지 않게 한다.
 - 균등/80% 편향 각120초100건/s, 단계50/100/200건/s 각60초, soak50건/s1800초를 고정한다. 100건마다 동일 UUID를 새 offset으로 중복 발행한다. smoke/soak은 분석기만20초 SIGSTOP/CONT하며 입력은 계속한다. 실행 전 설계이며 아직 통과 근거는 아니다.
+- 최초 b91b8e7 smoke는 격리 인프라/분석기 시작 후 `OWNED_CONTAINER_MISSING`으로 중단했다. 생성기 one-off가 `api` service label을 공유해 API 소유권 조회에 컨테이너2개가 반환된 것이 원인이다. 생성기를 별도 `load-probe` service로 분리한다. 최초 결과와 정리 성공을 보존하며 완료로 세지 않는다.

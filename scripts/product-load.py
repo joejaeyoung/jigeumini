@@ -14,7 +14,10 @@ class ProductLoad(module.Rehearsal):
         super().__init__(manifest,manifest,directory)
         self.deadline=time.monotonic()+self.duration+900
         self.overlay=self.directory/'load-compose.json'
-        self.overlay.write_text(json.dumps({'services':{'api':{'environment':{'JAVA_TOOL_OPTIONS':'-Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=api -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'},'healthcheck':{'test':['CMD-SHELL',"JAVA_TOOL_OPTIONS= java -Xmx32m -cp '/app/classes:/app/lib/*' io.chatpulse.poc.PocApplication ops probe"]}}}}))
+        self.overlay.write_text(json.dumps({'services':{
+            'api':{'environment':{'JAVA_TOOL_OPTIONS':'-Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=api -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'},'healthcheck':{'test':['CMD-SHELL',"JAVA_TOOL_OPTIONS= java -Xmx32m -cp '/app/classes:/app/lib/*' io.chatpulse.poc.PocApplication ops probe"]}},
+            'load-probe':{'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True}}
+        }}))
         self.output=self.directory/'probe-output';self.output.mkdir();self.output.chmod(0o777)
         self.classes=self.directory/'probe-classes';target=self.classes/'io/chatpulse/operations';target.mkdir(parents=True)
         files=list((ROOT/'server/build/classes/java/test/io/chatpulse/operations').glob('ProductLoad*.class'))
@@ -44,7 +47,7 @@ class ProductLoad(module.Rehearsal):
     def load(self):
         name=self.project+'-probe'
         self.compose('run','-d','--no-deps','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
-            '-v',str(self.classes)+':/probe:ro','-v',str(self.output)+':/output','api','-Xms64m','-Xmx384m',
+            '-v',str(self.classes)+':/probe:ro','-v',str(self.output)+':/output','load-probe','-Xms64m','-Xmx384m',
             '-Dsun.rmi.transport.tcp.responseTimeout=2000','-Dsun.rmi.transport.tcp.handshakeTimeout=2000',
             '-cp','/app/classes:/app/lib/*:/probe','io.chatpulse.operations.ProductLoadProbe',self.profile,'/output/load.json')
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]

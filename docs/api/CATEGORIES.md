@@ -16,6 +16,10 @@ V8의 category 전용 source identity·관측 이력·event ledger·bucket·revi
 
 `categories.offset-reset`을 우선하고 생략하면 `pipeline.offset-reset`을 상속한다. 기본none, 최초 새 그룹에만earliest를 명시한다. 채팅/관측 모두3 partitions이며 합계6개다. topic ID를 DB에 고정하고 시작·배치·관측 때 확인한다. 재생성·partition 수 변경은 차단하며 기존 offset을 되감거나 새 토픽에 자동 결합하지 않는다.
 
+#65는 새 채팅의 시각 결합과 ledger 삽입을 하나의 SQL 왕복으로 합친다. 반환된 새 행만 bucket에 더한다.
+DB 진행 위치는 같은 배치의 topic/partition별 최대 offset을 한 번 저장하며 재전달로 후퇴하지 않는다.
+내용 충돌·관측 선처리·늦은 보정·transaction rollback 계약은 유지한다. 용량 효과는 별도 고정 자원 대조로 검증한다.
+
 영구 계약 오류·내용 충돌은 카테고리 소비를 계속 차단할 수 있다. RETRYING/고정 코드로 표시하고1초 간격으로 재시도한다. 이 버전에는 카테고리용 DLQ나 자동 skip이 없다. 생산자/소비 계약을 수정한 뒤 같은 group에서 재시도하며, 해소할 수 없는 충돌은 별도 격리 절차가 필요하다. ranking/trend의 #10 DLQ 성공이 category group의 성공을 뜻하지 않는다. 시작 때 topic 확인에 실패하거나 source ID가 바뀌면 analyzer 구성 전체가 기동하지 못한다. 원천 연결/토픽 정합성을 복구한 뒤 같은 설정으로 재시작한다. 토픽을 재생성했다면 이전 namespace에 자동 연결하지 말고 새 run/group으로 분리해 재구축 범위를 판단한다. 실행 중에는 group 소비가 분리되지만 기동 장애까지 독립적인 것은 아니다.
 
 종료 요청과 이미 실행 중인 sampler SQL이 겹치면 다른 reader에서 READY가 마지막 표본의 freshness 기한까지 남을 수 있다. freshness 기한이 지나면 보류하며 즉시 상태 전파를 보장하지 않는다.

@@ -1,0 +1,42 @@
+{
+  "scope": "LOCAL_LOOPBACK_APPROVAL_ONLY_NO_KAFKA_DB_OR_INPUT; NOT_CONTAINER_CAPACITY",
+  "startedAt": "2026-10-26T19:14:18.910191Z",
+  "finishedAt": "2026-10-26T19:15:23.170764Z",
+  "correct": true,
+  "rounds": 100,
+  "connectionsApproved": 2000,
+  "frames": 4000,
+  "maximumRoundSeconds": 0.563386958,
+  "maxBufferedConnectionsObserved": 0,
+  "failedRounds": 0,
+  "handshakeFailures": [],
+  "unexpectedReasons": [],
+  "limitations": [
+    "HOST JVM loopback, not Docker quota/capacity",
+    "Sampling after all connection starts; no failure reproduced",
+    "Original startup failure cause remains unconfirmed",
+    "Approval helper used existing compiled classes after check; no separate runtime class/JAR hash captured for this host-only probe."
+  ],
+  "artifacts": {
+    "diagnostics/startup-reproduction-1/result.json": "b4efb10b848338d159fc77c9b94751aa50e33453cc5af31b0ab8fbea1a0fdcbf",
+    "StartupProbe.java": "d5f76eb2fb810ca654cc05d8bd148b72c7c4e4b3e2b75c637a3bbacd14c69fb5",
+    "run-startup-probe.py": "0dfdcfc566bb83230eb8ec9e23abf5394c8dc83bebfe21f5ed9172970ead3d5e",
+    "diagnostics/startup-reproduction-1/execution.json": "9e6587d0aff28c2634e66f5461cbd4492b823bfc04145c570d7045cb75ed89c4"
+  },
+  "relocation": "Approval-only output moved under diagnostics after completion so product capacity curator does not treat it as a load run.",
+  "codeCommit": "e4319e9bfb567bc9db42814bb13c827fcf39d632",
+  "probeExitCode": 0,
+  "sourceStopped": true,
+  "technicalIds": [
+    "T02",
+    "T07",
+    "T08",
+    "T11"
+  ],
+  "runtimeScope": "Java21 on host, ActiveProcessorCount1 for source and client; Xmx128m/384m; no cgroup CPU quota",
+  "maximumSourceCounters": {
+    "sourceprotocolErrors": 0,
+    "sourcesocketErrors": 0,
+    "sourceduplicateConnections": 0
+  }
+}

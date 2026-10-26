@@ -1,0 +1,93 @@
+{
+  "executedAt": "2026-10-26T17:44:49.135810+00:00",
+  "rows": 20160,
+  "scope": "SYNTHETIC_TEMP_TABLE_ONE_SESSION_SEVEN_DAYS_AT_30_SECONDS; NOT_PRODUCT_CAPACITY",
+  "before": {
+    "planningMillis": 0.145,
+    "executionMillis": 2.313,
+    "plan": {
+      "Node Type": "Limit",
+      "Actual Startup Time": 2.298,
+      "Actual Total Time": 2.299,
+      "Actual Rows": 1,
+      "Actual Loops": 1,
+      "Shared Hit Blocks": 0,
+      "Shared Read Blocks": 0,
+      "Local Hit Blocks": 311,
+      "Local Read Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Sort",
+          "Actual Startup Time": 2.297,
+          "Actual Total Time": 2.297,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Sort Method": "top-N heapsort",
+          "Sort Space Used": 25,
+          "Sort Space Type": "Memory",
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Local Hit Blocks": 311,
+          "Local Read Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Seq Scan",
+              "Actual Startup Time": 0.003,
+              "Actual Total Time": 1.389,
+              "Actual Rows": 20160,
+              "Actual Loops": 1,
+              "Rows Removed by Filter": 0,
+              "Shared Hit Blocks": 0,
+              "Shared Read Blocks": 0,
+              "Local Hit Blocks": 311,
+              "Local Read Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Plans": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "after": {
+    "planningMillis": 0.113,
+    "executionMillis": 0.022,
+    "plan": {
+      "Node Type": "Limit",
+      "Actual Startup Time": 0.015,
+      "Actual Total Time": 0.015,
+      "Actual Rows": 1,
+      "Actual Loops": 1,
+      "Shared Hit Blocks": 0,
+      "Shared Read Blocks": 0,
+      "Local Hit Blocks": 1,
+      "Local Read Blocks": 3,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Index Scan",
+          "Index Name": "report_observation_report_time",
+          "Actual Startup Time": 0.014,
+          "Actual Total Time": 0.014,
+          "Actual Rows": 1,
+          "Actual Loops": 1,
+          "Shared Hit Blocks": 0,
+          "Shared Read Blocks": 0,
+          "Local Hit Blocks": 1,
+          "Local Read Blocks": 3,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": []
+        }
+      ]
+    }
+  },
+  "rollbackCompleted": true,
+  "scriptSha256": "c064dfff218857ffc1c048bb77bfc0657019b81deae744aeed9b35c9f7a14fc4"
+}

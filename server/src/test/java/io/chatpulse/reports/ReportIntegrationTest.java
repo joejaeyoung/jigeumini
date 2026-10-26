@@ -11,6 +11,8 @@ import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -56,6 +58,55 @@ class ReportIntegrationTest {
     private ConsumerRecord<String,byte[]> record(ChatEvent event,long offset) { return new ConsumerRecord<>(chat,0,offset,CHANNEL,codec.encode(event)); }
     private long total(UUID report) { return store.detail(report).minutes().stream().mapToLong(ReportStore.Minute::count).sum(); }
     private UUID source(String source) { return store.list(CHANNEL).reports().stream().filter(s->Objects.equals(source,s.session().sourceBroadcastId())).findFirst().orElseThrow().session().id(); }
+    @Test void chatOnlyBatchesPreserveStoredTtlStateRevisionAndUnknownObservations() {
+        Instant at=Instant.parse("2026-10-27T09:00:00Z");store=store(Clock.fixed(at.plusSeconds(30),ZoneOffset.UTC));
+        store.apply(List.of(record(live(at,"123"),0),record(event(at.plusSeconds(10),at.plusSeconds(11)),0)));
+        UUID id=source("123");var initial=store.detail(id).stored();assertEquals("LIVE",initial.session().state());
+        store=store(Clock.fixed(at.plusSeconds(121),ZoneOffset.UTC));var late=event(at.plusSeconds(20),at.plusSeconds(21));
+        store.apply(List.of(record(late,1)));var expired=store.detail(id).stored();
+        assertEquals("UNKNOWN",expired.session().state());assertEquals(initial.revision()+2,expired.revision());
+        assertEquals(at.plusSeconds(121),expired.updatedAt());assertEquals(2,total(id));
+        store.apply(List.of(record(late,2)));assertEquals(expired,store.detail(id).stored());
+        // 벽시계가 되돌아가도 이전 derive와 같은 저장 상태를 유지한다.
+        store=store(Clock.fixed(at.plusSeconds(60),ZoneOffset.UTC));
+        store.apply(List.of(record(event(at.plusSeconds(30),at.plusSeconds(31)),3)));
+        var live=store.detail(id).stored();assertEquals("LIVE",live.session().state());assertEquals(expired.revision()+2,live.revision());
+        store.apply(List.of(record(sample(at.plusSeconds(40),null,BroadcastMetadata.LiveStatus.UNKNOWN,null),1)));
+        var unknown=store.detail(id).stored();assertEquals("UNKNOWN",unknown.session().state());
+        store.apply(List.of(record(event(at.plusSeconds(45),at.plusSeconds(46)),4)));
+        assertEquals(unknown,store.detail(id).stored());assertEquals(3,total(id));assertEquals(1,store.list(CHANNEL).unassigned());
+    }
+    @ParameterizedTest @ValueSource(ints={60,120,300})
+    void chatOnlyStateExpiresExactlyAtClampedObservationTtl(int ttl) {
+        Instant at=Instant.parse("2026-10-27T09:00:00Z");int effective=Math.min(120,ttl);
+        store=store(Clock.fixed(at.plusSeconds(1),ZoneOffset.UTC));
+        var observation=BroadcastObserved.observed("test-v1",CHANNEL,at,ttl,
+                new PublicBroadcastObservation(BroadcastMetadata.LiveStatus.LIVE,0L,"123",null,null,PublicBroadcastObservation.Quality.OBSERVED));
+        store.apply(List.of(record(observation,0)));UUID id=source("123");
+        store=store(Clock.fixed(at.plusSeconds(effective).minusNanos(1000),ZoneOffset.UTC));
+        store.apply(List.of(record(event(at.plusSeconds(1),at.plusSeconds(2)),0)));
+        var before=store.detail(id).stored();assertEquals("LIVE",before.session().state());assertEquals(effective,before.session().lastTtlSeconds());
+        store=store(Clock.fixed(at.plusSeconds(effective),ZoneOffset.UTC));
+        store.apply(List.of(record(event(at.plusSeconds(2),at.plusSeconds(3)),1)));
+        var expired=store.detail(id).stored();assertEquals("UNKNOWN",expired.session().state());
+        assertEquals(before.revision()+2,expired.revision());assertEquals(at.plusSeconds(effective),expired.updatedAt());assertEquals(2,total(id));
+        store.apply(List.of(record(event(at.plusSeconds(effective),at.plusSeconds(effective)),2)));
+        assertEquals(expired,store.detail(id).stored());assertEquals(1,store.list(CHANNEL).unassigned());
+    }
+    @Test void chatOnlyBatchesKeepEndedSessionsAndResolveAliasTargets() {
+        Instant at=Instant.parse("2026-10-27T09:00:00Z");store=store(Clock.fixed(at.plusSeconds(80),ZoneOffset.UTC));
+        store.apply(List.of(record(live(at.plusSeconds(60),null),0),record(event(at.plusSeconds(65),at.plusSeconds(66)),0)));
+        UUID alias=source(null);store.apply(List.of(record(live(at.plusSeconds(30),"123"),1)));UUID first=source("123");
+        var canonical=store.detail(first).stored();store.apply(List.of(record(event(at.plusSeconds(70),at.plusSeconds(71)),1)));
+        assertEquals(first,store.detail(alias).stored().session().id());assertEquals(canonical.revision()+1,store.detail(first).stored().revision());assertEquals(2,total(first));
+        store=store(Clock.fixed(at.plusSeconds(110),ZoneOffset.UTC));
+        store.apply(List.of(record(live(at.plusSeconds(90),"456"),2),record(sample(at.plusSeconds(100),null,BroadcastMetadata.LiveStatus.OFFLINE,null),3)));
+        UUID second=source("456");var changed=store.detail(first).stored();var ended=store.detail(second).stored();
+        assertEquals("SOURCE_CHANGED",changed.session().endReason());assertEquals("OFFLINE_OBSERVED",ended.session().endReason());
+        store.apply(List.of(record(event(at.plusSeconds(105),at.plusSeconds(106)),2)));
+        assertEquals(changed,store.detail(first).stored());assertEquals(ended,store.detail(second).stored());
+        assertEquals("OFFLINE",changed.session().state());assertEquals("OFFLINE",ended.session().state());assertEquals(1,store.list(CHANNEL).unassigned());
+    }
     @Test void knownBroadcastsKeepMidnightHistoryAndLateMetadataReassignsWithoutDuplicateCounts() {
         Instant at=Instant.parse("2026-10-25T23:58:00Z");store=store(Clock.fixed(at.plusSeconds(600),ZoneOffset.UTC));
         var initial=live(at,"123");var first=event(at.plusSeconds(10),at.plusSeconds(11));var second=event(at.plusSeconds(150),at.plusSeconds(400));
@@ -126,6 +177,9 @@ class ReportIntegrationTest {
         // 정리 도중 bucket만 먼저 지워진 상태를 명시적으로 재현한다.
         jdbc.update("DELETE FROM report_bucket WHERE report_id=?",old);
         var incoming=List.of(record(live(now.minusSeconds(30),"123"),2),record(event(now.minusSeconds(20),now.minusSeconds(19)),1));
+        var permanent=List.of(incoming.getFirst(),record(event(now,now.plusSeconds(6)),1));
+        assertEquals("REPORT_FUTURE_TIME",assertThrows(IllegalArgumentException.class,()->store.apply(permanent)).getMessage());
+        assertEquals(2L,jdbc.queryForObject("SELECT count(*) FROM report_observation",Long.class));
         assertEquals("REPORT_EXPIRED_ID_REUSE",assertThrows(IllegalStateException.class,()->store.apply(incoming)).getMessage());
         assertEquals(1L,jdbc.queryForObject("SELECT count(*) FROM report_event",Long.class));
         store.cleanup();store.apply(incoming);assertEquals(old,source("123"));assertEquals(1,total(old));assertEquals(now.minusSeconds(30),store.detail(old).stored().session().observedFrom());

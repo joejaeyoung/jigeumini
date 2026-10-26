@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "technicalIds": [
+    "T16"
+  ],
+  "scope": "LOCAL_SYNTHETIC_NEXT_VERSION_MIGRATION_AND_RESTORE; NOT_PRODUCTION_UPGRADE_OR_RTO",
+  "sourceArtifact": {
+    "bytes": 53315,
+    "sha256": "ce9d69ab2473efbafe78575109bd96302e18fa26e111a88c847806285b90dc6c"
+  },
+  "executionArtifact": {
+    "bytes": 1281,
+    "sha256": "458f417293189088fd304b290aa880c5b5ff6f6781235269626ce593074db41d"
+  },
+  "curatorArtifact": {
+    "bytes": 3283,
+    "sha256": "a49ef5ac01e2cc850ebefc834c88fd7895080684153dafb95cd6ca1e7f6f0f8f"
+  },
+  "execution": {
+    "codeCommit": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+    "mainTree": "62897e160008fe89e3651f8b5c129fbac4c2fc7b",
+    "testTree": "d2617fe5c4031081fbfcb3849322e2818b35c2d4",
+    "command": [
+      "./scripts/migration-rehearsal",
+      "work/projection-performance-65/migration-images-reviewed",
+      "work/projection-migration-65"
+    ],
+    "startedAt": "2026-10-26T17:51:34.710985+00:00",
+    "finishedAt": "2026-10-26T17:53:51.643286+00:00",
+    "exitCode": 0,
+    "logSha256": "de2a4f82330078377d1a7723a1986ee25faa32fdfdce5dfe1b23249100c94270",
+    "preexistingContainersPreserved": true
+  },
+  "preexistingContainerCount": 8,
+  "result": {
+    "correct": true,
+    "cleanupComplete": true,
+    "sensitiveArtifactsRemoved": true,
+    "startedAt": "2026-10-26T17:51:35.770216+00:00",
+    "finishedAt": "2026-10-26T17:53:51.632881+00:00"
+  },
+  "images": {
+    "baseline": {
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "workingTreeDirty": false,
+      "jarSha256": "9960ac4dc4a2e7f7ccbb1bd517914f421df70ce2a0f3ef179f061bb4b68bbc2b",
+      "buildId": "5d297c319ac0c1423d34393855262f321e72d1785773af761baad769929bd39d",
+      "images": {
+        "server": {
+          "tag": "jigeumini/server:7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:76caf989b3b3c3b08779eaacccd4109d67486857becae81268147fdf902e2851",
+          "sizeBytes": 140755150,
+          "user": "10001:10001"
+        },
+        "web": {
+          "tag": "jigeumini/web:7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:fbdd3c6e58ce4df7070fc5c160843c5836dfb4b15bb3fd5ae42f7b5d52f0d53b",
+          "sizeBytes": 26068440,
+          "user": "101:101"
+        }
+      }
+    },
+    "candidate": {
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "workingTreeDirty": false,
+      "jarSha256": "9960ac4dc4a2e7f7ccbb1bd517914f421df70ce2a0f3ef179f061bb4b68bbc2b",
+      "buildId": "0a73efc095ce21decbb5c7564b29079e49e506806432ac03bbb9cd1809659382",
+      "images": {
+        "server": {
+          "tag": "jigeumini/migration-fixture:candidate-7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:1cabb1b91f24c06a80e3195be8fbd77bdf7217da62d3ac5e84f320167e654e66",
+          "sizeBytes": 140756956,
+          "user": "10001:10001"
+        },
+        "web": {
+          "tag": "jigeumini/web:7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:fbdd3c6e58ce4df7070fc5c160843c5836dfb4b15bb3fd5ae42f7b5d52f0d53b",
+          "sizeBytes": 26068440,
+          "user": "101:101"
+        }
+      },
+      "fixture": {
+        "kind": "candidate",
+        "version": "14",
+        "baselineVersions": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "sqlSha256": "35e1396e075a660748a51c4cb6f2ccdeff4ff7fb35856c7a5adc2deab4c89a10",
+        "baselineImageId": "sha256:76caf989b3b3c3b08779eaacccd4109d67486857becae81268147fdf902e2851",
+        "baselineBuildId": "5d297c319ac0c1423d34393855262f321e72d1785773af761baad769929bd39d",
+        "buildIdAlgorithm": "sha256(migration-fixture-v2 NUL baselineBuildId NUL version NUL sqlSha256)",
+        "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+      }
+    },
+    "failedCandidate": {
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "workingTreeDirty": false,
+      "jarSha256": "9960ac4dc4a2e7f7ccbb1bd517914f421df70ce2a0f3ef179f061bb4b68bbc2b",
+      "buildId": "28d258ddfc1ac7c440e3d8b8d3e3c30ff0c541235f9b57149aee172610b375e1",
+      "images": {
+        "server": {
+          "tag": "jigeumini/migration-fixture:failed-7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:ee71e20664c16e79a9003a82f44a2069ec8cf3868676c1fa48d97f375e2da69d",
+          "sizeBytes": 140757158,
+          "user": "10001:10001"
+        },
+        "web": {
+          "tag": "jigeumini/web:7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:fbdd3c6e58ce4df7070fc5c160843c5836dfb4b15bb3fd5ae42f7b5d52f0d53b",
+          "sizeBytes": 26068440,
+          "user": "101:101"
+        }
+      },
+      "fixture": {
+        "kind": "failed",
+        "version": "14",
+        "baselineVersions": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "sqlSha256": "44ab378388f06fe429f24200d9b24c282e1ced262bf43816ca6c83c6e7210058",
+        "baselineImageId": "sha256:76caf989b3b3c3b08779eaacccd4109d67486857becae81268147fdf902e2851",
+        "baselineBuildId": "5d297c319ac0c1423d34393855262f321e72d1785773af761baad769929bd39d",
+        "buildIdAlgorithm": "sha256(migration-fixture-v2 NUL baselineBuildId NUL version NUL sqlSha256)",
+        "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+      }
+    },
+    "interruptedCandidate": {
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "workingTreeDirty": false,
+      "jarSha256": "9960ac4dc4a2e7f7ccbb1bd517914f421df70ce2a0f3ef179f061bb4b68bbc2b",
+      "buildId": "ce015f81cf5f9bf1080dbc66485148994096b911b7e443837e1893c4db5ffbe4",
+      "images": {
+        "server": {
+          "tag": "jigeumini/migration-fixture:interrupted-7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:0dddcdc913993f1ac3ee220bedbdfd101d14f5e7927e9d0c739dbb6e4a2b3e86",
+          "sizeBytes": 140757219,
+          "user": "10001:10001"
+        },
+        "web": {
+          "tag": "jigeumini/web:7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+          "id": "sha256:fbdd3c6e58ce4df7070fc5c160843c5836dfb4b15bb3fd5ae42f7b5d52f0d53b",
+          "sizeBytes": 26068440,
+          "user": "101:101"
+        }
+      },
+      "fixture": {
+        "kind": "interrupted",
+        "version": "14",
+        "baselineVersions": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "sqlSha256": "78296c316b06d9a01b3e1f378eedf0ab3107df414d3cd0fb17dbbf774c5cc9ed",
+        "baselineImageId": "sha256:76caf989b3b3c3b08779eaacccd4109d67486857becae81268147fdf902e2851",
+        "baselineBuildId": "5d297c319ac0c1423d34393855262f321e72d1785773af761baad769929bd39d",
+        "buildIdAlgorithm": "sha256(migration-fixture-v2 NUL baselineBuildId NUL version NUL sqlSha256)",
+        "jarSha256Scope": "변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다."
+      }
+    }
+  },
+  "phases": [
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-26T17:51:35.770838+00:00",
+      "passed": true,
+      "seconds": 3.193008334026672
+    },
+    {
+      "name": "INITIALIZE_BASELINE_SCHEMA",
+      "startedAt": "2026-10-26T17:51:38.964300+00:00",
+      "passed": true,
+      "seconds": 11.483505541982595
+    },
+    {
+      "name": "BASELINE_SCHEMA",
+      "startedAt": "2026-10-26T17:51:50.448278+00:00",
+      "passed": true,
+      "seconds": 11.434399917023256
+    },
+    {
+      "name": "RUNTIME_BOUNDARIES",
+      "startedAt": "2026-10-26T17:52:01.883084+00:00",
+      "passed": true,
+      "seconds": 0.4198188749724068
+    },
+    {
+      "name": "SEED_BEFORE_BACKUP",
+      "startedAt": "2026-10-26T17:52:02.303416+00:00",
+      "passed": true,
+      "seconds": 1.5992590839741752
+    },
+    {
+      "name": "BASELINE_DATA",
+      "startedAt": "2026-10-26T17:52:03.903186+00:00",
+      "passed": true,
+      "seconds": 1.1640497920452617
+    },
+    {
+      "name": "BACKUP_BASELINE_SCHEMA",
+      "startedAt": "2026-10-26T17:52:05.067915+00:00",
+      "passed": true,
+      "seconds": 3.874231207999401
+    },
+    {
+      "name": "INTERRUPTED_CANDIDATE_ROLLBACK",
+      "startedAt": "2026-10-26T17:52:08.942822+00:00",
+      "passed": true,
+      "seconds": 5.689277832978405
+    },
+    {
+      "name": "FAILED_CANDIDATE_ROLLBACK",
+      "startedAt": "2026-10-26T17:52:14.632703+00:00",
+      "passed": true,
+      "seconds": 18.504726250015665
+    },
+    {
+      "name": "MIGRATE_CANDIDATE",
+      "startedAt": "2026-10-26T17:52:33.138075+00:00",
+      "passed": true,
+      "seconds": 2.1160445419955067
+    },
+    {
+      "name": "CANDIDATE_SCHEMA",
+      "startedAt": "2026-10-26T17:52:35.254732+00:00",
+      "passed": true,
+      "seconds": 11.749375624989625
+    },
+    {
+      "name": "SEED_AFTER_MIGRATION",
+      "startedAt": "2026-10-26T17:52:47.005319+00:00",
+      "passed": true,
+      "seconds": 1.7406044580275193
+    },
+    {
+      "name": "BASELINE_REJECTS_CANDIDATE_SCHEMA",
+      "startedAt": "2026-10-26T17:52:49.848265+00:00",
+      "passed": true,
+      "seconds": 19.692738875048235
+    },
+    {
+      "name": "RESTORE_BASELINE_NEW_DATABASE",
+      "startedAt": "2026-10-26T17:53:09.542598+00:00",
+      "passed": true,
+      "seconds": 27.4496017920319
+    },
+    {
+      "name": "RESTORED_BROWSER",
+      "startedAt": "2026-10-26T17:53:36.992995+00:00",
+      "passed": true,
+      "seconds": 11.360075249976944
+    },
+    {
+      "name": "FINAL_GRACEFUL_STOP",
+      "startedAt": "2026-10-26T17:53:48.353867+00:00",
+      "passed": true,
+      "seconds": 1.4420562089653686
+    }
+  ],
+  "rollback": {
+    "INTERRUPTED_CANDIDATE_ROLLBACK": {
+      "exitCode": 137,
+      "ddlAndBackfillReached": true,
+      "backendEnded": true,
+      "businessSnapshotUnchanged": true,
+      "schemaBeforeVersions": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "schemaAfterVersions": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ]
+    },
+    "FAILED_CANDIDATE_ROLLBACK": {
+      "ddlAndBackfillReached": true,
+      "migrationRejected": {
+        "failed": true,
+        "code": 2
+      },
+      "schemaBeforeVersions": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "schemaAfterVersions": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ]
+    }
+  },
+  "oldImageRejection": {
+    "baselineRejected": {
+      "exitCode": 2,
+      "oomKilled": false,
+      "diagnosticCode": "SCHEMA_NOT_READY"
+    },
+    "schemaUnchanged": true,
+    "candidateRestartReady": true
+  },
+  "recovery": {
+    "secondsToVerifiedCatchup": 25.210276333033107,
+    "backupChatGap": 10,
+    "chatGapAfterRecovery": 0,
+    "businessSnapshotDifferences": [],
+    "newGroups": 6,
+    "oldGroupsModified": false,
+    "restoredIntoNewDatabase": true,
+    "alignmentStartRejected": {
+      "exitCode": 2,
+      "oomKilled": false,
+      "diagnosticCode": "RECOVERY_ALIGNMENT_REQUIRED"
+    },
+    "runtimeBuildId": "5d297c319ac0c1423d34393855262f321e72d1785773af761baad769929bd39d",
+    "restoredSchemaVersions": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13"
+    ],
+    "originalSchemaVersions": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14"
+    ]
+  },
+  "browser": {
+    "failedApiRequests": 0,
+    "mobileOverflow": false,
+    "pageErrors": 0,
+    "apiErrorUi": true,
+    "apiRetryRecovered": true,
+    "staticHeadersVerified": true,
+    "pageCount": 8,
+    "pageAll200": true,
+    "pageAllRefreshed": true,
+    "pageAllTitlesVisible": true,
+    "pageAnyOverflow": false,
+    "apiResponseCount": 26,
+    "apiAll200": true,
+    "reportDetail": {
+      "referenceCount": 20,
+      "rendered": true
+    }
+  },
+  "gracefulStop": {
+    "seconds": 1.4420479590189643,
+    "exitCode": 143,
+    "oomKilled": false
+  }
+}

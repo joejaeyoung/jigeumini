@@ -1,0 +1,53 @@
+{
+  "beforeProductCommit": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+  "red": {
+    "tests": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "expected": "HANDSHAKE_TIMEOUT_OR_CONNECT",
+    "actual": "WS_CLOSED"
+  },
+  "green": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "fixtureCorrection": "Added observer assertions initially used a non-overriding method signature. Corrected the signature with @Override; preserved both failed targeted and full-check logs.",
+  "scope": "Deterministic mocked handshake failure and synchronous close callback; NOT proof of the earlier startup close cause. Numeric diagnostics and observer consistency assertions were added after the red reproduction.",
+  "artifacts": {
+    "handshake-red.log": {
+      "bytes": 1364,
+      "sha256": "2a854b9cbc01c750dfc6e2b454d1a8fd6ce9b5ae51de28219e10099ab2f85bbc"
+    },
+    "handshake-red.xml": {
+      "bytes": 26373,
+      "sha256": "48804fe1cf549ad1b445c24bacfa06d6d306092b60a97e07dd5d1abd68d46294"
+    },
+    "handshake-green.log": {
+      "bytes": 834,
+      "sha256": "c40985455f78c08b62c467c14387050ec2978d584e1dfb8c515c869b7b158cfc"
+    },
+    "handshake-green-final.log": {
+      "bytes": 1384,
+      "sha256": "7ae558e7c0376ea01d04924989c1f7f0a8e5e768956dcde22ce69c304e2a579a"
+    },
+    "handshake-observer-fixture-failed.xml": {
+      "bytes": 2979,
+      "sha256": "f34d19812f1355c26fe01ee74f0c5a7e2d2e2bb9e0cc49326f8d527ada62cf69"
+    },
+    "diagnostic-check.log": {
+      "bytes": 1563,
+      "sha256": "876ba9d3d7b5470410cb36a298d1980730b7b29ce204707f8973f3389aa50a83"
+    },
+    "handshake-observer-fixed.log": {
+      "bytes": 970,
+      "sha256": "1ed7eb7bc5c46d041fa5af955222f97253e934773409f659eacc3ff2b773098c"
+    },
+    "handshake-green.xml": {
+      "bytes": 1444,
+      "sha256": "11080fa647c3697f18d8126e53879f68a3577cec2cf138b9a6b6cd86ab35459a"
+    }
+  }
+}

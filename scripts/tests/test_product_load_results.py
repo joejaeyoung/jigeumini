@@ -49,5 +49,13 @@ class ProductLoadResultsTest(unittest.TestCase):
         for sample in self.resources:sample.pop('containers')
         result=self.analyze();self.assertEqual(0,result['measurementCoverage']['containerStatsSuccessRatio'])
         self.assertIn('LOAD_EVIDENCE_INCOMPLETE',result['failures'])
+    def test_disabled_counts_require_an_explicit_plan_and_sample_marker(self):
+        for sample in self.load['samples']:
+            sample.pop('database');sample['databaseSampling']='INTENTIONALLY_DISABLED'
+        self.assertIn('LOAD_EVIDENCE_INCOMPLETE',self.analyze()['failures'])
+        self.load['plan']={'measurementProfile':'NO_COUNTS'}
+        self.assertEqual([],self.analyze()['failures'])
+        for sample in self.load['samples']:sample.pop('databaseSampling')
+        self.assertIn('LOAD_EVIDENCE_INCOMPLETE',self.analyze()['failures'])
 
 if __name__=='__main__':unittest.main()

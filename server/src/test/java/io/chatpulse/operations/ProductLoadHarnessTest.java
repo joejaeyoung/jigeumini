@@ -26,7 +26,7 @@ class ProductLoadHarnessTest {
         var server=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);var workers=Executors.newCachedThreadPool();
         var entered=new CountDownLatch(1);var release=new CountDownLatch(1);server.setExecutor(workers);
         server.createContext("/",exchange->{try(exchange){entered.countDown();try{release.await(3,TimeUnit.SECONDS);}catch(InterruptedException e){Thread.currentThread().interrupt();}exchange.sendResponseHeaders(503,-1);}});server.start();
-        var plan=new ProductLoadPlan("test",2,List.of(new ProductLoadPlan.Stage("steady",30,10,false)),-1,0,"DIRECT",50,1,"BASELINE","MINIMAL");
+        var plan=new ProductLoadPlan("test",2,List.of(new ProductLoadPlan.Stage("steady",30,10,false)),-1,0,"DIRECT",50,1,"BASELINE","MINIMAL","FULL",false,2);
         try(var api=new ProductLoadApiTraffic(plan,List.of("synthetic"),()->"steady","http://127.0.0.1:"+server.getAddress().getPort())) {
             api.start();assertTrue(entered.await(2,TimeUnit.SECONDS));
             long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(2);Map<String,Object> phase;
@@ -41,9 +41,9 @@ class ProductLoadHarnessTest {
         assertThrows(IllegalArgumentException.class,()->io.chatpulse.poc.ProductLoadHttpSource.local(URI.create("http://127.0.0.1"),URI.create("ws://remote.example")));
     }
     @Test void eventAndConnectionBudgetsRemainFinite() {
-        assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",1001,List.of(new ProductLoadPlan.Stage("steady",30,10,false)),-1,0,"DIRECT",10,32,"BASELINE","MINIMAL"));
-        assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("steady",1800,10000,false)),-1,0,"DIRECT",10,32,"BASELINE","MINIMAL"));
-        var plan=new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("warmup",30,100,false),new ProductLoadPlan.Stage("steady",60,100,false)),-1,0,"WEBSOCKET",10,32,"BASELINE","MINIMAL");
+        assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",1001,List.of(new ProductLoadPlan.Stage("steady",30,10,false)),-1,0,"DIRECT",10,32,"BASELINE","MINIMAL","FULL",false,2));
+        assertThrows(IllegalArgumentException.class,()->new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("steady",1800,10000,false)),-1,0,"DIRECT",10,32,"BASELINE","MINIMAL","FULL",false,2));
+        var plan=new ProductLoadPlan("test",20,List.of(new ProductLoadPlan.Stage("warmup",30,100,false),new ProductLoadPlan.Stage("steady",60,100,false)),-1,0,"WEBSOCKET",10,32,"BASELINE","MINIMAL","FULL",false,2);
         assertEquals("warmup",plan.phaseAtMillis(29999));assertEquals("steady",plan.phaseAtMillis(30000));assertEquals("DRAIN",plan.phaseAtMillis(90000));
     }
     @Test void repeatedInputOrderDoesNotAlwaysSampleTheFirstChannel() {

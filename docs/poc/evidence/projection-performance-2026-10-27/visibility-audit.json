@@ -1,0 +1,1284 @@
+{
+  "scope": "RECALCULATION_ONLY; ORIGINALS_UNCHANGED",
+  "runs": [
+    {
+      "run": "work/capacity-limits/direct-smoke",
+      "originalSha256": "a48ff3774fef77c80f4d958b349688583d1d79b0a20ab5c218e25504906b1b59",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "steady",
+          "selected": 202,
+          "visible": 202,
+          "unobserved": 0,
+          "conditionalP95": 227,
+          "allSelectedP95": 227
+        }
+      ],
+      "problems": [
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED"
+      ],
+      "violations": [],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/capacity-limits/socket-api100",
+      "originalSha256": "9d1a8b9d17e2ee6f64aa1137016060f7a0f2ad898801ec3e33dfdacd499544f0",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 584,
+          "allSelectedP95": 584
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 230,
+          "allSelectedP95": 230
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-api200",
+      "originalSha256": "879690fad9ae47876f4ca376f894774df0b164cc413e309247972afc576f4fb9",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 837,
+          "allSelectedP95": 837
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 274,
+          "allSelectedP95": 274
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-api200-wide",
+      "originalSha256": "db74e123a6bd74937161a146c7c626199713dc9070e261e2bd65a31abf8dfc87",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 1141,
+          "allSelectedP95": 1141
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 2020,
+          "allSelectedP95": 2020
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:VISIBILITY_SLO",
+        "steady:VISIBILITY_PARTITION_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels100",
+      "originalSha256": "fe3491e08f0fdc22bd7248ea2fc5b5efe5941632e0d3b3d9710be5eed1fd7f9b",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 243,
+          "allSelectedP95": 243
+        },
+        {
+          "stage": "steady",
+          "selected": 599,
+          "visible": 599,
+          "unobserved": 0,
+          "conditionalP95": 227,
+          "allSelectedP95": 227
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels150",
+      "originalSha256": "9b7501d35d1f71c7177e97590578a267c4b5409b0e265ec4675136fd6e61492a",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 276,
+          "allSelectedP95": 276
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 272,
+          "allSelectedP95": 272
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels150-repeat",
+      "originalSha256": "fb90e1cfd87f0f1b217be792adb065de22a01a062af1f767360a8f93dbe2df7a",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 297,
+          "visible": 297,
+          "unobserved": 0,
+          "conditionalP95": 262,
+          "allSelectedP95": 262
+        },
+        {
+          "stage": "steady",
+          "selected": 599,
+          "visible": 599,
+          "unobserved": 0,
+          "conditionalP95": 223,
+          "allSelectedP95": 223
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels180",
+      "originalSha256": "0fb555fa39cb8c6640a8a5e4ce7aa5376c42b7c935ecb42c8f41f2b7398b93bd",
+      "recorded": "GENERATOR_LIMITED",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        },
+        {
+          "stage": "steady",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "OFFSET_FILE_MISSING",
+        "SOURCE_NOT_FINISHED",
+        "steady:VISIBILITY_SAMPLE_ACCOUNTING",
+        "steady:VISIBILITY_SAMPLES",
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:API_SCHEDULE_UNRECORDED",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "COLLECTOR_EARLY_EXIT",
+        "COLLECTOR_CONNECTIONS",
+        "COLLECTOR_UNEXPECTED_STOP",
+        "steady:VISIBILITY_SLO",
+        "steady:SOURCE_TO_RECEIVED_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels180-repeat",
+      "originalSha256": "52b94c016394dbf4e431e890f5ee92583df3d1c71ce60b14a57abdd9036d1719",
+      "recorded": "GENERATOR_LIMITED",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        },
+        {
+          "stage": "steady",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "OFFSET_FILE_MISSING",
+        "SOURCE_NOT_FINISHED",
+        "steady:VISIBILITY_SAMPLE_ACCOUNTING",
+        "steady:VISIBILITY_SAMPLES",
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:API_SCHEDULE_UNRECORDED",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "RUN_DID_NOT_RECONCILE",
+        "COLLECTOR_CONNECTIONS",
+        "steady:VISIBILITY_SLO",
+        "steady:SOURCE_TO_RECEIVED_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/capacity-limits/socket-channels300",
+      "originalSha256": "0568fd2a9b8fbe1207d0bb1f49a116eabfc160bf7638f03e187568066935871a",
+      "recorded": "GENERATOR_LIMITED",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        },
+        {
+          "stage": "steady",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "OFFSET_FILE_MISSING",
+        "SOURCE_NOT_FINISHED",
+        "steady:VISIBILITY_SAMPLE_ACCOUNTING",
+        "steady:VISIBILITY_SAMPLES",
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:API_SCHEDULE_UNRECORDED",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "RUN_DID_NOT_RECONCILE",
+        "COLLECTOR_CONNECTIONS",
+        "COLLECTOR_UNEXPECTED_STOP",
+        "steady:VISIBILITY_SLO",
+        "steady:SOURCE_TO_RECEIVED_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/capacity-limits/socket-operating100",
+      "originalSha256": "0c714606b7d1cbb1b255a4556b868d07821008dee329ea5a773d3fec724b0643",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 1288,
+          "allSelectedP95": 1288
+        },
+        {
+          "stage": "steady",
+          "selected": 2693,
+          "visible": 2397,
+          "unobserved": 296,
+          "conditionalP95": 4101,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:VISIBILITY_SLO",
+        "steady:VISIBILITY_PARTITION_SLO",
+        "steady:API_SLO",
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-operating100-safe",
+      "originalSha256": "43954ef4d04c54f9c78257fbfdc2c1a0ccee7aae8b3869dcc989e81f2713e801",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 495,
+          "allSelectedP95": 495
+        },
+        {
+          "stage": "steady",
+          "selected": 2698,
+          "visible": 2698,
+          "unobserved": 0,
+          "conditionalP95": 279,
+          "allSelectedP95": 279
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate-ramp",
+      "originalSha256": "1bb9998719057d529bd6784ace241cef3977c8deaa596a4e49d14e4e71b2fdc6",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 280,
+          "allSelectedP95": 280
+        },
+        {
+          "stage": "rate300",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 278,
+          "allSelectedP95": 278
+        },
+        {
+          "stage": "rate1000",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 277,
+          "allSelectedP95": 277
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate2000",
+      "originalSha256": "109be68531f9b581a4f25255ba62817fea4b72790d7d544675dfa771b3ec604c",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 751,
+          "allSelectedP95": 751
+        },
+        {
+          "stage": "steady",
+          "selected": 599,
+          "visible": 599,
+          "unobserved": 0,
+          "conditionalP95": 547,
+          "allSelectedP95": 547
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate2000-hot",
+      "originalSha256": "98cf7d7ded2f3c8bea1815319813c3491da1e94165bbaeb77efc14899759dd83",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 894,
+          "allSelectedP95": 894
+        },
+        {
+          "stage": "steady",
+          "selected": 1200,
+          "visible": 1200,
+          "unobserved": 0,
+          "conditionalP95": 1455,
+          "allSelectedP95": 1455
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate2000-repeat",
+      "originalSha256": "9897e8893f0240bbbce2c0c700d692075a76a1734b97e24132ddb65f545421c1",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 884,
+          "allSelectedP95": 884
+        },
+        {
+          "stage": "steady",
+          "selected": 1200,
+          "visible": 1200,
+          "unobserved": 0,
+          "conditionalP95": 360,
+          "allSelectedP95": 360
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate2500",
+      "originalSha256": "e415407820967aba2544c7e7efc31708107f09137e84edd950dcfd01074576b3",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 715,
+          "allSelectedP95": 715
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 385,
+          "allSelectedP95": 385
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate2500-repeat",
+      "originalSha256": "c0f95a0e229b86ca59b612aa48de99057aa5caaefb0c77d6838f76f962256964",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 478,
+          "allSelectedP95": 478
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 851,
+          "allSelectedP95": 851
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate3000",
+      "originalSha256": "e2f73cc78f8f08d7689bb29393ad32a4499705b45120c2cb0bf4cf53c59e2c66",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 673,
+          "allSelectedP95": 673
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 465,
+          "allSelectedP95": 465
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate3000-both2",
+      "originalSha256": "5968386a4476e1e80f2038f0442f6971cfc7c319fc7e0fab92de41fb29299b9b",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 281,
+          "allSelectedP95": 281
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 311,
+          "allSelectedP95": 311
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-rate3000-db2",
+      "originalSha256": "16c4e42ea95af2cd6434c4cb3658bf57689bc201aa34dbaa08ad224718caf6e4",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 707,
+          "allSelectedP95": 707
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 2142,
+          "allSelectedP95": 2142
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:VISIBILITY_SLO",
+        "steady:VISIBILITY_PARTITION_SLO",
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/capacity-limits/socket-smoke",
+      "originalSha256": "e2d825c4b7acf8bde51d7aa78e95ca7d72a0b13459f9173096ad5906c98468f3",
+      "recorded": "GENERATOR_LIMITED",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        },
+        {
+          "stage": "steady",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "OFFSET_FILE_MISSING",
+        "SOURCE_NOT_FINISHED",
+        "steady:VISIBILITY_SAMPLE_ACCOUNTING",
+        "steady:VISIBILITY_SAMPLES",
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:API_SCHEDULE_UNRECORDED",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "RUN_DID_NOT_RECONCILE",
+        "COLLECTOR_CONNECTIONS",
+        "steady:VISIBILITY_SLO",
+        "steady:SOURCE_TO_RECEIVED_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/capacity-limits/socket-smoke-v2",
+      "originalSha256": "a585509b52aa49f8874ad2e660d5dde59805483cde479bd0455aa64c1bf53931",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 293,
+          "allSelectedP95": 293
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 287,
+          "allSelectedP95": 287
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/baseline180",
+      "originalSha256": "16081fa2032f0a7ba6aebe7fd7fd9a312906441b2b37f16d56225afff4a23c27",
+      "recorded": "MEASUREMENT_INCOMPLETE",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        },
+        {
+          "stage": "steady",
+          "selected": null,
+          "visible": null,
+          "unobserved": null,
+          "conditionalP95": null,
+          "allSelectedP95": null
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "OFFSET_FILE_MISSING",
+        "SOURCE_NOT_FINISHED",
+        "steady:VISIBILITY_SAMPLE_ACCOUNTING",
+        "steady:VISIBILITY_SAMPLES",
+        "steady:VISIBILITY_PARTITIONS_UNRECORDED",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:API_SCHEDULE_UNRECORDED",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "RUN_DID_NOT_RECONCILE",
+        "COLLECTOR_CONNECTIONS",
+        "steady:VISIBILITY_SLO",
+        "steady:SOURCE_TO_RECEIVED_SLO",
+        "steady:API_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/collector-memory-64/candidate-operating100",
+      "originalSha256": "1ac112e82134451adc2c4ebfb157024c8dd8c027a3947d7e2c019b94ca9b6a5c",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 279,
+          "allSelectedP95": 279
+        },
+        {
+          "stage": "steady",
+          "selected": 2700,
+          "visible": 2700,
+          "unobserved": 0,
+          "conditionalP95": 263,
+          "allSelectedP95": 263
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate180",
+      "originalSha256": "b843a90c67a8f9e342715690b041c096526ecaa6c280255082415e7e2a05630d",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 430,
+          "allSelectedP95": 430
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 275,
+          "allSelectedP95": 275
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate300",
+      "originalSha256": "99265b6aef0628d6c04e7850a94176503e9a6a674dfac404291e0fffda601427",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 286,
+          "allSelectedP95": 286
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 277,
+          "allSelectedP95": 277
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate450",
+      "originalSha256": "23028773e7e6133a0ce3379f2de02c3151a8ebc55fb3ffae0059813c44de5703",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 263,
+          "allSelectedP95": 263
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 254,
+          "allSelectedP95": 254
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate450-soak",
+      "originalSha256": "7c92052c89b60f9976247e3edce589b1fd9157ab5025ad61a19d303654448885",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 613,
+          "allSelectedP95": 613
+        },
+        {
+          "stage": "steady",
+          "selected": 2700,
+          "visible": 2700,
+          "unobserved": 0,
+          "conditionalP95": 240,
+          "allSelectedP95": 240
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate600",
+      "originalSha256": "e0b810d8682dcbd93526f7ce27017cc36f036928fce9f7882466cdaa72341b22",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 247,
+          "allSelectedP95": 247
+        },
+        {
+          "stage": "steady",
+          "selected": 598,
+          "visible": 598,
+          "unobserved": 0,
+          "conditionalP95": 229,
+          "allSelectedP95": 229
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/collector-memory-64/candidate600-repeat",
+      "originalSha256": "c522b4e507481c595234c689ceeb96487c7e73229f307e4f481c8ef2356b65fc",
+      "recorded": "MEASUREMENT_INCOMPLETE",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 500,
+          "allSelectedP95": 500
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 271,
+          "allSelectedP95": 271
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "SOURCE_CLOCK_REFERENCE"
+      ],
+      "violations": [],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/projection-performance-65/after-diagnostic",
+      "originalSha256": "acd9210c2b9513c05e06812a1e8bfeae1b7c75890597b8287ef1cd564e95569c",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 777,
+          "allSelectedP95": 777
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 310,
+          "allSelectedP95": 310
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/after-full",
+      "originalSha256": "5c14b8f7d9def19f7870bdfe96d75c8b3c30a2a4d1825a57d66eb58f832acb59",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 916,
+          "allSelectedP95": 916
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 964,
+          "allSelectedP95": 964
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/after-full-repeat",
+      "originalSha256": "f5f4b1323280824c68abcdcc7cf713ffb20d99e67940de185bab11d2fe887dcd",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 861,
+          "allSelectedP95": 861
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 347,
+          "allSelectedP95": 347
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/after-hot",
+      "originalSha256": "d15de7d84f945901a148863c2136036454d41f3976f260ae94b0801c0bae30c6",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 795,
+          "allSelectedP95": 795
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 268,
+          "allSelectedP95": 268
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/after-rate3000",
+      "originalSha256": "30659b6da8f8d732f7c9177255c0fa96c35a326e41495bb2a3e52f67222779db",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 1009,
+          "allSelectedP95": 1009
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 1989,
+          "allSelectedP95": 1989
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:VISIBILITY_PARTITION_SLO",
+        "steady:API_SLO",
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/baseline-rate2500",
+      "originalSha256": "8fcd5f8f0b7af6ba42d6e682b80fbe69e210c84a2caaa06f760ffecdeb4aed5d",
+      "recorded": "MEASUREMENT_INCOMPLETE",
+      "recalculated": "MEASUREMENT_INCOMPLETE",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 758,
+          "allSelectedP95": 758
+        },
+        {
+          "stage": "steady",
+          "selected": 101,
+          "visible": 101,
+          "unobserved": 0,
+          "conditionalP95": 400,
+          "allSelectedP95": 400
+        }
+      ],
+      "problems": [
+        "PROBE_CLOCK_REFERENCE",
+        "steady:SOURCE_STAGE_COUNT",
+        "steady:API_ARRIVAL_COUNT",
+        "steady:OFFSET_COVERAGE"
+      ],
+      "violations": [
+        "PUBLISH_BUFFER_REJECTED",
+        "COLLECTOR_UNEXPECTED_STOP",
+        "steady:SOURCE_TO_RECEIVED_SLO"
+      ],
+      "beforeVisibilityChange": "MEASUREMENT_INCOMPLETE"
+    },
+    {
+      "run": "work/projection-performance-65/before-diagnostic",
+      "originalSha256": "61bc7b896f8b3b2546d05a74316d33b7bd5c7413acc5bd81f745e843770ded24",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 584,
+          "allSelectedP95": 584
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 286,
+          "allSelectedP95": 286
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/before-full",
+      "originalSha256": "ef0e406d2d276eed3522d307846fd47055c3576d2d956f59049e0f6e3454613d",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 299,
+          "visible": 299,
+          "unobserved": 0,
+          "conditionalP95": 808,
+          "allSelectedP95": 808
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 324,
+          "allSelectedP95": 324
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/before-hot-serial",
+      "originalSha256": "0965c1bce555bcf5e043930caf3195cbeddeec0b8daa21ce722e411571ca69d4",
+      "recorded": "WITHIN_SLO",
+      "recalculated": "WITHIN_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 732,
+          "allSelectedP95": 732
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 256,
+          "allSelectedP95": 256
+        }
+      ],
+      "problems": [],
+      "violations": [],
+      "beforeVisibilityChange": "WITHIN_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/before-no-counts",
+      "originalSha256": "e8551884f2fca1bcf5785858752b116f9e6fa2fd26231a44899a1d84af0bc6af",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 756,
+          "allSelectedP95": 756
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 777,
+          "allSelectedP95": 777
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    },
+    {
+      "run": "work/projection-performance-65/before-no-counts-or-du-serial",
+      "originalSha256": "f0ed9e7d648bf065e4ae2604de1e656de6c7f55e9c0c5e40bfc0a87dfa4429c8",
+      "recorded": "EXCEEDS_SLO",
+      "recalculated": "EXCEEDS_SLO",
+      "visibility": [
+        {
+          "stage": "warmup",
+          "selected": 300,
+          "visible": 300,
+          "unobserved": 0,
+          "conditionalP95": 714,
+          "allSelectedP95": 714
+        },
+        {
+          "stage": "steady",
+          "selected": 600,
+          "visible": 600,
+          "unobserved": 0,
+          "conditionalP95": 315,
+          "allSelectedP95": 315
+        }
+      ],
+      "problems": [],
+      "violations": [
+        "steady:SUSTAINED_LAG_GROWTH"
+      ],
+      "beforeVisibilityChange": "EXCEEDS_SLO"
+    }
+  ],
+  "beforeAnalyzerCommit": "4f48aee1004773ad40678035167587bcd942b433",
+  "beforeAnalyzerSha256": "90c26bbf0a99ea18c07b5983536450de19ec81f48c7d4f0c1287240e4528a692",
+  "currentAnalyzerSha256": "3d469111a0819baaf3b419789da1617520b133c96d226b5b294bc48cebe2a826"
+}

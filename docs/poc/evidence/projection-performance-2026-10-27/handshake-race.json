@@ -1,0 +1,48 @@
+{
+  "technicalIds": [
+    "T02",
+    "T08",
+    "T11"
+  ],
+  "scope": "SYNTHETIC_DETERMINISTIC_CALLBACK_RACE; NOT_THE_ROOT_CAUSE_OF_THE_7998BED_SOCKET_CLOSE",
+  "baseCommit": "0cfa701d976156ec9c6bb2756dac9f95849ac32f",
+  "symptom": {
+    "expected": "WS_TRANSPORT",
+    "actualBeforeFix": "HANDSHAKE_TIMEOUT_OR_CONNECT",
+    "callbackTiming": "OTHER_THREAD_DURING_HANDSHAKE_FAILURE_REPORT_BEFORE_CLEANUP"
+  },
+  "red": {
+    "tests": 1,
+    "failures": 1,
+    "artifacts": [
+      {
+        "file": "work/projection-performance-65/handshake-race-red.log",
+        "bytes": 1372,
+        "sha256": "3b9a34642fc9da5a3720b12487dcbefc871eade3be118b44f6cc9dec5cf0f6a7"
+      },
+      {
+        "file": "work/projection-performance-65/handshake-race-red.xml",
+        "bytes": 24024,
+        "sha256": "7debf51f4ed5e3bb7d900fb701f421b613c241eb17f7c24fa51bfbbaf668aa27"
+      }
+    ]
+  },
+  "green": {
+    "tests": 12,
+    "failures": 0,
+    "errors": 0,
+    "artifacts": [
+      {
+        "file": "work/projection-performance-65/handshake-race-green.log",
+        "bytes": 600,
+        "sha256": "23335e9810cdb9d65f76613c83917ef9e2076db9f386d8bcc6068d283be76038"
+      },
+      {
+        "file": "work/projection-performance-65/handshake-race-green.xml",
+        "bytes": 9550,
+        "sha256": "11814f9d1d096d12c15511d01ff0d982b1229748dd87884418704f3b7850cc1d"
+      }
+    ]
+  },
+  "decision": "The atomic first ended completion supplies the same exception to the constructor, readiness future, and observer."
+}

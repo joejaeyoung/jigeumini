@@ -86,3 +86,5 @@ python3 scripts/collector-memory-summary.py work/collector-memory-64 work/collec
 ### 최종 리뷰 보완
 
 `afc1548`의 Claude APPROVE 이후 비차단 의견을 반영했다. Gradle `tasks`가 필수 실험 속성의 즉시 평가로 종료1을 내는 것을 재현해, 속성이 있을 때만 실험 인자를 설정하도록 수정했다. baseline Gradle 종료값은 별도 artifact에 캡처하지 않았으므로 정제 필드를 null로 바꾸고 기대값과 출처를 분리했다. 자식 exit3/2는 Gradle 실패 로그에서 추출한다. 정적 Tomcat IO 계수 회귀는 현재 순차 테스트 조건이며 병렬 테스트로 확장하면 격리가 필요하다.
+
+최종129a46d의 명시적 `tasks`와 lifecycle 실행도 종료0이며8연결3회 매 종료 연결/IO등록/IO스레드0을 확인했다. [최종 게이트](poc/evidence/collector-memory-2026-10-27/final-gates.json)에 전후 명령·코드·종료·hash를 보존한다. buildId 계산은 build.gradle을 포함하므로 태스크 guard를 바꾼 최종 JAR/이미지 hash는876bb68 실측 산출물과 다르다. main/test source 동일성을 산출물 hash 동일성으로 해석하지 않는다.

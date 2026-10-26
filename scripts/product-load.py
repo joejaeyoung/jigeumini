@@ -5,6 +5,7 @@ sys.dont_write_bytecode=True
 from product_load_results import analyze
 from product_load_plan import read as read_plan,RESOURCE_PROFILES
 from product_load_capacity import analyze_capacity,include_runtime_diagnostics
+from product_load_sql import statements as sql_statements,ACTIVITY
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('deployment_rehearsal',ROOT/'scripts/deploy-rehearsal.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -31,6 +32,8 @@ class ProductLoad(module.Rehearsal):
             'tmpfs':['/tmp:size=64m'],'networks':['data'],'labels':{'io.jigeumini.deployment.owner':'${DEPLOYMENT_OWNER:?}'},
             'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True},'mem_limit':'256m','cpus':1.0,'stop_grace_period':'60s'}
         for service,cpus in RESOURCE_PROFILES[self.plan['resourceProfile']].items():services.setdefault(service,{})['cpus']=cpus
+        if self.plan['diagnostics']:services.setdefault('postgres',{})['command']=['postgres','-c','shared_preload_libraries=pg_stat_statements',
+            '-c','pg_stat_statements.track_utility=off','-c','pg_stat_statements.save=off']
         self.overlay.write_text(json.dumps({'services':services}))
         self.frozen_plan.write_text(json.dumps(self.plan))
         self.output.mkdir();self.output.chmod(0o777)
@@ -77,7 +80,8 @@ class ProductLoad(module.Rehearsal):
             try:sample['cpuStat'][role]={k:int(v) for k,v in (line.split() for line in self.command(['docker','exec',cid,'cat','/sys/fs/cgroup/cpu.stat'],timeout=5).stdout.splitlines())}
             except Exception as error:sample['cpuStat'][role]={'error':type(error).__name__}
         sample['dataDirectoryKiB']={}
-        for role,path in [('kafka','/var/lib/kafka/data'),('postgres','/var/lib/postgresql/data')]:
+        directories=[] if self.plan['measurementProfile']=='NO_COUNTS_OR_DU' else [('kafka','/var/lib/kafka/data'),('postgres','/var/lib/postgresql/data')]
+        for role,path in directories:
             try:sample['dataDirectoryKiB'][role]=int(self.command(['docker','exec',roles[role],'du','-sk',path],timeout=5).stdout.split()[0])
             except Exception as error:sample['dataDirectoryKiB'][role]={'error':type(error).__name__}
         try:
@@ -85,6 +89,13 @@ class ProductLoad(module.Rehearsal):
             sample['containers']=[json.loads(line) for line in values.splitlines()]
         except Exception as error:sample['containerStatsError']=type(error).__name__
         sample['hostFreeDiskBytes']=shutil.disk_usage(ROOT).free
+        if self.plan['diagnostics']:
+            start=time.monotonic();sample['sqlStartedAt']=self.now()
+            try:
+                sample['sqlActivity']=json.loads(self.sql(ACTIVITY).stdout)
+                sample['sqlStatements']=json.loads(self.sql(sql_statements()).stdout)
+            except Exception as error:sample['sqlDiagnosticError']=type(error).__name__
+            sample['sqlSeconds']=time.monotonic()-start
         self.result['resourceSamples'].append(sample);self.checkpoint()
         if sample['hostFreeDiskBytes']<2*1024**3:raise RuntimeError('LOAD_DISK_LIMIT')
     def clock_bracket(self,phase):
@@ -116,6 +127,10 @@ class ProductLoad(module.Rehearsal):
         return info['Id']
     def load(self):
         self.result['storageBefore']=self.storage()
+        if self.plan['diagnostics']:
+            self.sql('CREATE EXTENSION pg_stat_statements')
+            self.sql('SELECT pg_stat_statements_reset()')
+            self.result['sqlDiagnostics']={'resetAt':self.now(),'scope':'RUNTIME_ROLE_SINCE_RESET_INCLUDING_PROBE; EXECUTION_NOT_JDBC_OR_POOL_TIME; NO_SQL_TEXT_OR_VALUES'}
         if self.plan['sourceMode']=='WEBSOCKET':self.source_id=self.start_fixture('synthetic-source','io.chatpulse.operations.ProductLoadSocketServer',['/load-plan.json','/output/source.json'],self.source_output,'128m')
         self.probe_id=self.start_fixture('load-probe','io.chatpulse.operations.ProductLoadProbe',['/load-plan.json','/output/load.json'],self.output,'384m')
         if not self.capacity_mode or self.fault_at>=0:self.clock_bracket('START')
@@ -177,6 +192,9 @@ class ProductLoad(module.Rehearsal):
         self.checkpoint()
         try:self.result['storageAfter']=self.storage()
         except Exception:errors.append('STORAGE_AFTER_UNAVAILABLE')
+        if self.plan['diagnostics']:
+            try:self.result['finalSqlStatements']=json.loads(self.sql(sql_statements()).stdout)
+            except Exception:errors.append('SQL_STATEMENTS_UNAVAILABLE')
         if self.capacity_mode:include_runtime_diagnostics(self.result['capacityAnalysis'],errors,self.result['productProcesses'])
         self.checkpoint()
     def scenarios(self):

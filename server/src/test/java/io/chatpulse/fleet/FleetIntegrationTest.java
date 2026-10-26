@@ -137,6 +137,19 @@ class FleetIntegrationTest {
             assertTrue(JSON.readTree(Files.readString(reports.getFirst())).path("complete").asBoolean());assertReconciled();
         }
     }
+    @Test void unavailableKafkaStartupExitsAfterBoundedMetadataAttemptsWithoutClaimingLease() throws Exception {
+        plan(List.of(CHANNEL));
+        try(var bootstrap=new ControlledTcpProxy(19092)) {
+            bootstrap.mode(ControlledTcpProxy.Mode.BLACKHOLE);
+            var child=start(15432,1,"BOOTSTRAP_GATE","localhost:"+bootstrap.port());
+            assertTrue(child.waitFor(20,TimeUnit.SECONDS));assertNotEquals(0,child.exitValue());
+            Path path=reports.getFirst();assertFalse(Files.exists(path));
+            var diagnostic=JSON.readTree(Files.readString(Path.of(path+".diagnostic.json")));
+            assertEquals(5,diagnostic.path("phases").valueStream().filter(p->p.path("phase").asText().equals("METADATA_TIMEOUT")).count());
+            assertEquals("FLEET_KAFKA_NOT_READY",diagnostic.path("codes").get(0).asText());
+            assertTrue(bootstrap.discardedBytes()>0);assertEquals(0,((Number)leases.status().get("assigned")).intValue());assertTrue(source.accepted.isEmpty());
+        }
+    }
     private Process start(int dbPort,int capacity) throws Exception {return start(dbPort,capacity,false);}
     private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {return start(dbPort,capacity,delayedReport?"DELAY_REPORT":null);}
     private Process start(int dbPort,int capacity,String fixtureMode) throws Exception {

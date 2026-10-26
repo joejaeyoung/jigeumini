@@ -191,6 +191,19 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 
 ## 코드와 문서
 
+전체 제품 합성 부하(#43, F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12)는 깨끗한 commit의 이미지로 실행한다. 분석기·Kafka·DB·생성기를 새 Compose에 만들고 종료 시 해당 자원과 생성 비밀만 정리한다. 공개 원천은 호출하지 않는다.
+
+```bash
+./scripts/deploy-images work/product-load-images.json
+./scripts/product-load work/product-load-images.json smoke work/product-load-smoke
+./scripts/product-load work/product-load-images.json uniform work/product-load-uniform
+./scripts/product-load work/product-load-images.json hot work/product-load-hot
+./scripts/product-load work/product-load-images.json steps work/product-load-steps
+./scripts/product-load work/product-load-images.json soak work/product-load-soak
+```
+
+각 출력 경로는 새 디렉터리여야 한다. soak은50건/s·20채널·30분과 분석기20초 정지/재개를 포함한다. 관측/세션/heartbeat와 outbox는 합성 입력이다. 결과는 `result.json`과 `probe-output/load.json`, 독립1초 offset 표본은 `probe-output/offsets.jsonl`, 느린 계측 원본은 `probe-output/samples.jsonl`에 바로 남는다. API/DB 지연·별도 JVM 메모리는5초 주기로 따로 읽고, 종료 후 모든 집계를 대조한다. 복구 시간은 재개 뒤 첫 Kafka end를 고정해 해당 위치까지 따라잡은 표본 시각이다. 입력 종료 뒤 전체0lag도 확인한다. API 준비 회복 시각은 고정 offset 복구와 별도로 기록하며 둘 다 회복한 뒤2초까지를 장애/회복 구간으로 분류한다(시험 예산60초). 호스트와 VM의 시계 차이는 시작·재개 시 호출 전후 구간으로 남긴다. 정상 구간 계측 성공률90%·최소 표본 수·API200을 완료 조건으로 검사한다. API/DB/heap/RSS/버퍼는 정상10초 창의90% 이상을 함께 관측하고 정상 구간의 완전한 표본 간격이15초를 넘으면 실패한다. heap용 JMX는 시험 내부망에만 열고 자동 정리한다. 표본 시간은 실제 간격으로 해석하며 운영 용량/SLA를 뜻하지 않는다. 이미지·고정 복사한 시험 클래스는 로컬에 남는다.
+
 | 위치 | 내용 |
 |---|---|
 | `server/src/main/java/io/chatpulse/poc` | HTTP 어댑터, 프로토콜, 연결 감독, 통계·실행기 |
@@ -269,3 +282,11 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 ```
 
 각 출력 경로는 새 경로를 사용한다. 리허설은 자체 Compose/DB/Kafka만 만들고 기존 개발 인프라를 변경하지 않는다. V12 백업→실패/중단 rollback→V13 적용/새 입력→구 이미지 거부→새 DB V12 복원/새 group 재생→실제 웹 대조 후 소유 자원·secret·dump를 정리한다. 같은 코드 commit의 다른 migration 이미지이며, build ID·SQL hash·실제 image ID로 구분한다. 실행 결과와 미검증 범위는 [진행 상태](docs/STATUS.md)에 기록한다. 생성한 Docker 이미지는 manifest와 함께 로컬에 남고 자동 정리 대상에 포함되지 않는다.
+
+### 전체 제품 부하 정제 근거
+
+[부하 검증](docs/PRODUCT_LOAD_VERIFICATION.md)은 단일 순차 API probe·transaction 시작 시각 지연·단회 관측의 한계를 구분한다. 실행 원본에서 경로별 지연·partition별 입력/처리율·분단위 메모리·원본 hash를 다시 계산하려면 다음 명령을 사용한다. 공개 원천 데이터에는 사용하지 않는다.
+
+```sh
+python3 scripts/product-load-summary.py work/product-load-soak work/product-load-summary.json work/product-load-images.json
+```

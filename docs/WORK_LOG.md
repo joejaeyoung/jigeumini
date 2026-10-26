@@ -264,6 +264,36 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 
 - #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.
 
+## 2026-10-26 전체 제품 부하·지속 실행 #43
+
+- F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12. fetch한 origin/develop에서 `technicaltest/product-soak`를 만들고 최종 CI 중인 #42를 fast-forward로 포함했다. #42 병합 뒤 develop 기준을 통합한다.
+- 제품 분석기와 부하 생성기를 별도 JVM·소유 Compose로 분리한다. 생성 입력의 UUID/내용/10초 합계를 DB 결과와 대조하고, 그룹6개·24개 group/topic/partition의 offset·lag·처리량과 API/DB 지연을 기록한다. 원천 세션/heartbeat와 outbox는 합성 입력이며 실제 원천·급상승 감지 정확도 부하 검증으로 확대하지 않는다.
+- JMX는 시험 overlay의 내부망에서만 열고 분석기 heap을 읽는다. 분석기 RSS·컨테이너 CPU/메모리와 생성기 heap/RSS는 별도 표본이다. 기존 운영 compose를 바꾸지 않는다. 실행 클래스는 결과 디렉터리에 고정 복사하고 hash를 남겨 뒤의 빌드가 실행을 바꾸지 않게 한다.
+- 균등/80% 편향 각120초100건/s, 단계50/100/200건/s 각60초, soak50건/s1800초를 고정한다. 100건마다 동일 UUID를 새 offset으로 중복 발행한다. smoke/soak은 분석기만20초 SIGSTOP/CONT하며 입력은 계속한다. 실행 전 설계이며 아직 통과 근거는 아니다.
+- 최초 b91b8e7 smoke는 격리 인프라/분석기 시작 후 `OWNED_CONTAINER_MISSING`으로 중단했다. 생성기 one-off가 `api` service label을 공유해 API 소유권 조회에 컨테이너2개가 반환된 것이 원인이다. 생성기를 별도 `load-probe` service로 분리한다. 최초 결과와 정리 성공을 보존하며 완료로 세지 않는다.
+- f71423a의60초 smoke는 고유1200·물리1212·모든 집계 대조·STOP/CONT·자원 정리를 통과했다. 다만 리뷰에서 입력 중 offset 조회 순서의 음수 lag 가능성과 정지 구간에 한정하지 않은 lag 단언을 지적해, 최종 근거로 쓰기 전에 commit→end 조회 순서/관측 시각과 STOP 구간 표본을 보강한다. 비밀 생성 뒤 파일 준비는 정리가 보장되는 phase로 옮기고 Python/Java 계획 일치를 장애 주입 전에 대조한다.
+- 0904368 smoke도 고유1200·물리1212·정지중 양수lag1표본·재개5.023초 뒤 첫0lag·정리 통과다. Claude는 장시간 입력 중0lag에 의존한 복구 판정, API timeout과 묶인 offset 계측, 계측 커버리지 미검사로 REQUEST_CHANGES를 냈다. offset은 독립1초 JSONL로 기록하고 재개 뒤 첫 end를 고정해 그 위치까지의 복구를 잰다. API/DB/JMX는 별도5초 표본이며 정상 구간90% 계측 성공·최소 표본 수와 정상구간 API200을 완료 조건에 넣는다.
+- 첫 uniform03은 계측 보강을 위해 소유 Python에 SIGINT로 중단했다. 앞부분에는 별도 로컬 통합 시험/원인 조사도 겹쳤으므로 최종 성능 비교로 사용하지 않는다. 이후 matrix는 다른 실험이 없는 상태에서 실행한다. 진행 파일을 작은 JSON으로 분리해1초 폴링의 전체 결과 재직렬화를 없앴다. 이전 실패/중단과 보강 전 결과를 보존한다.
+
+### #43 장기 계측의 시간 공백 검사
+
+`6799d11` smoke에서 offset59/59, 정상API64/64, 정지20.238초·고정offset복구1.948초와 모든 집계 대조·정리를 통과했다. Standards0/Spec1: 수집된 표본만으로 성공률을 계산하면 장기 실행에서 느린 계측이2개만 남아도 통과할 수 있었다. 입력 시작 epoch를 명시하고 정상10초 창의 완전한 API/DB/메모리/버퍼 표본 비율90%·정상 구간 최대15초 간격을 추가한다. 실제 실행값과 의도적으로 누락한 표본의 거부를 구분해 재검증한다.
+
+### #43 정지 이후 준비 회복과 실패 시 계측 보존
+
+Claude의 `6799d11` 후속 리뷰는 독립 offset/고정 복구/계측 누락 보완을 확인했으나, CONT 직후503을 정상구간 오류로 처리하는 조건을 지적했다. 고정 offset 도달과 첫 readyz200을 각각 기록하고 둘 다 완료한 뒤2초까지를 회복으로 분류한다. 회복 예산60초와 이후 readyz200을 별도로 요구하며, 구간 안 오류도 숨기지 않는다. 기존 smoke05 원본을 재분석해 Kafka1.067초·readyz5.049초를 구분했다.
+
+느린 표본도 JSONL에 즉시 남기고, Docker 계측 실패는 표본의 고정 오류형과 커버리지로 판정한다. 정지 시간/표본 부족도 분석 결과에 실패 코드로 남긴다. 정상 시간 공백·재개 직후503·계측 누락·Docker 통계 누락의 하네스 회귀4개를 추가한다. 소유 probe JVM과 호스트의 시각을 호출 전후로 재고 불확실성을 기록한다. fault 해제 직전에는 최대10초짜리 자원 조회를 시작하지 않는다.
+
+실행 중인 `f9a91f6` matrix는 이미 복사한 클래스/이미지와 로드한 분석 코드를 계속 사용한다. 균등/80%편향120초는 각각12000고유·12120ACK, 정상API192/192, 정리 통과; 생성기 최대RSS는 각각187342848/187015168bytes다. 마지막 단계 부하는 실행 중이며 완료 여부는 결과 파일로 판단한다. 새로운 하네스는 별도 smoke와30분 실행에서 검증한다.
+
+
+### #43 30분 전체 제품 부하 완료
+
+2026-10-26 · F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12. `03eb75f` 입력1800.007582초·고유90,000/물리90,900, accepted=ACK90,900, 거절/미확인0, ranking/trend/category/report 각90,000 ledger와3,615 bucket·관측1,200·알림60을 독립 기대값과 대조했다. 24개 최종 lag0, 정상API2,784회200·STOP8회timeout·복구8회200, 정상10초window176/176이다. STOP20.303초 뒤 고정 end 도달2.245초·첫ready200표본5.091초를 기록하고 소유 container/volume/비밀을 정리했다.
+
+`f9a91f6` uniform/hot/steps와03eb75f smoke/soak revision을 분리했다. 정상 profile 단회와 전체 실행 transaction timestamp 지연, GC 후 생존량이 아닌 heap used를 [검증](PRODUCT_LOAD_VERIFICATION.md)에 명시했다. 측정/입력/오케스트레이션/판정 모듈을 분리한 기존 리팩토링을 유지하며 의미 없는 공통 wrapper를 추가하지 않았다. 단위147·하네스24는03eb75f, 실제 Kafka/DB100개는0904368의 회귀다. 최종 통합 Claude·CI는 별도 게이트다.
+
 ### 2026-10-26 Outbox 거부 시험 준비 보완 #52
 
 F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외를 기대했으나 반환했다. 동일 HEAD push40254939425는 성공했다. 로컬 최소 하네스는 동적 변경20/생성 시 제한20 모두277byte 입력을64byte 한도에서 거부하여 원래 CI 실패를 재현하지 못했다. 실패 시 반환값/실제 producer 오류를 수집하지 않아 원인을 확정하지 않는다.
@@ -298,3 +328,14 @@ F13 → T08/T14. PR51 push40254127191과 PR53 push40258124001의 기존 두 수�
 PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI 단위151·실제125(Fleet13) 확인 후07f2444로 develop 병합했다. PR53도 포함된commit으로 GitHub에서병합상태가되었다. #54는완료·보드Done, #52는PR51최종CI조건을계속확인한다.
 
 #42에07f2444를통합했다. STATUS/WORK_LOG의충돌은각실행의revision/근거를보존하고현재상태로합쳤다. migration코드·fixture는불변이다. 기존44615d0 승인과실제리허설결과를유지하되새HEAD의check·Claude·push/PR CI를다시확인한다.
+
+
+### #43 최종 근거 리뷰 보완·선행 통합
+
+164f66a의Claude REQUEST_CHANGES는문서/근거범위3건이었다. API는단일순차probe(명목1.6요청/s)이며webproxy·collector를실행하지않고 JMX/healthcheck실험overlay를사용함을명시했다. 실제경로는전역4개·고정채널3개·readyz이며모두단일채널이라는리뷰전제는코드와다르다. soak p95가uniform보다높은원인은미규명으로남기고, 전체quantile을정상구간quantile로바꾸지않는다. 정상/장애분해자료가없어지연안정성주장을하지않는다.
+
+개별근거의files/partitions/apiLatencyMillis/memoryBytes/minuteSamples를색인에명시했다. 해당데이터와원본hash는기존파일에있었으나이전리뷰에첨부되지않았다. 사용한정제스크립트를scripts로보존하고원본5개실행에서공유JSON과동일한지대조한다. 순위/증가율·해시알고리즘자체·알림중복은독립검증에서제외한다. DB count7개는계측부하이며docker stats메모리와VmRSS도구분했다. #42 c34dc2b에포함된#52/#54를통합했으며문서충돌은양쪽이력을보존했다.
+
+### #43 환경 한계·통계 범위 재검토
+
+최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.

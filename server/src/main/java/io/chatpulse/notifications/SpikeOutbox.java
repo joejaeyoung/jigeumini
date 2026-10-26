@@ -12,6 +12,7 @@ import org.springframework.transaction.support.*;
 public final class SpikeOutbox implements AutoCloseable {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
+    private final TransactionTemplate cleanupTx;
     private final String run, topic;
     private final DefaultKafkaProducerFactory<String,byte[]> factory;
     private final KafkaTemplate<String,byte[]> kafka;
@@ -19,7 +20,7 @@ public final class SpikeOutbox implements AutoCloseable {
     private volatile String state = "STARTING";
     private volatile Instant lastAck;
     public SpikeOutbox(JdbcTemplate jdbc,TransactionTemplate tx,String bootstrap,String topic,String run) {
-        this.jdbc=jdbc;this.tx=tx;this.topic=topic;this.run=run;
+        this.jdbc=jdbc;this.tx=tx;cleanupTx=new TransactionTemplate(tx.getTransactionManager());cleanupTx.setTimeout(8);this.topic=topic;this.run=run;
         this.factory=KafkaSupport.producerFactory(bootstrap);this.kafka=new KafkaTemplate<>(factory);
     }
     public static void enqueue(JdbcTemplate jdbc,UUID spikeId,String run) {
@@ -32,7 +33,6 @@ public final class SpikeOutbox implements AutoCloseable {
             try { publishOne();state="READY"; }
             catch (RuntimeException ignored) { state="RETRYING"; }
         },0,1000,TimeUnit.MILLISECONDS);
-        worker.scheduleWithFixedDelay(() -> {try {cleanup();}catch(RuntimeException ignored){state="RETRYING";}},60,3600,TimeUnit.SECONDS);
     }
     public boolean publishOne() { return publishOne(() -> { }); }
     // ACK와 전달 완료 기록 사이의 실제 JVM 종료 시험 경계.
@@ -57,12 +57,18 @@ public final class SpikeOutbox implements AutoCloseable {
         }));
     }
     public int cleanup() {
-        // feed 반영이 확인된 7일 경과 항목만 지운다. 미전달/미소비 및 feed ledger는 유지한다.
-        return jdbc.update("""
-                DELETE FROM spike_outbox o WHERE o.run_id=? AND o.published_at<now()-interval '7 days'
-                AND EXISTS(SELECT 1 FROM notification_event n WHERE n.run_id=o.run_id AND n.spike_id=o.spike_id)
-                """,run);
+        // feed 확인 이력은 이 행이 사라질 때까지 notification 정리가 보호한다.
+        return cleanupTx.execute(status->{
+            jdbc.execute("SET LOCAL lock_timeout='100ms'");jdbc.execute("SET LOCAL statement_timeout='1s'");
+            return jdbc.update("""
+                    DELETE FROM spike_outbox WHERE spike_id IN (
+                      SELECT o.spike_id FROM spike_outbox o WHERE o.run_id=? AND o.published_at<now()-interval '7 days'
+                      AND EXISTS(SELECT 1 FROM notification_event n WHERE n.run_id=o.run_id AND n.spike_id=o.spike_id)
+                      ORDER BY o.published_at,o.spike_id LIMIT 10000)
+                    """,run);
+        });
     }
+
     public Map<String,Object> status() {
         var result=new LinkedHashMap<String,Object>();result.put("state",state);result.put("lastAckAt",lastAck);
         result.put("pending",jdbc.queryForObject("SELECT count(*) FROM spike_outbox WHERE run_id=? AND published_at IS NULL",Long.class,run));

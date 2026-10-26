@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 case "${1:-help}" in
-  migrate|capture|retention|create|status|cancel|worker|reap|compare) ;;
-  *) echo './scripts/replay migrate | capture <새 manifest.json> [eventFrom eventTo] | retention <manifest.json> | create <manifest.json> | status <runId> | cancel <runId> | worker | reap | compare <runId> <runId>'; exit 1 ;;
+  migrate|capture|retention|create|status|cancel|worker|reap|compare|cleanup) ;;
+  *) echo './scripts/replay migrate | capture <새 manifest.json> [eventFrom eventTo] | retention <manifest.json> | create <manifest.json> | status <runId> | cancel <runId> | worker | reap | cleanup | compare <runId> <runId>'; exit 1 ;;
 esac
 exec ./scripts/lib/run-cli replay "$@"

@@ -139,3 +139,7 @@ curl --fail http://127.0.0.1:18080/api/status > work/before.json
 - [Spring Kafka 배치 오류 처리](https://docs.spring.io/spring-kafka/reference/4.0/kafka/annotation-error-handling.html)
 - [PostgreSQL INSERT / ON CONFLICT](https://www.postgresql.org/docs/16/sql-insert.html)
 - [Apache Kafka Docker 배포](https://kafka.apache.org/41/getting-started/docker/)
+
+## 후속 보존 계약
+
+이 문서의 M1 당시 자동 정리 미구현 항목은 #63의 [보존 계약](RETENTION.md)으로 갱신한다. ledger72시간·bucket8일의 단조 하한을 적용하며 원천 identity/offset은 유지한다. 현재 완료 여부와 검증 근거는 STATUS를 따른다.

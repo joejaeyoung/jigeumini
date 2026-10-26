@@ -2,6 +2,7 @@ package io.chatpulse.observations;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import io.chatpulse.retention.RetentionWindow;
 import java.time.*;
 import java.util.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -13,14 +14,17 @@ public final class ObservationStore {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
     private final String run;
+    private final TransactionTemplate cleanupTx;
     private final Clock clock;
+    private final RetentionWindow retention;
     public ObservationStore(JdbcTemplate jdbc, TransactionTemplate tx, String run, Clock clock) {
-        this.jdbc = jdbc; this.tx = tx; this.run = run; this.clock = clock;
+        this.jdbc = jdbc; this.tx = tx;cleanupTx=new TransactionTemplate(tx.getTransactionManager());cleanupTx.setTimeout(8); this.run = run; this.clock = clock;
+        retention=new RetentionWindow(jdbc,"observation","global");
     }
     public void apply(List<ConsumerRecord<String, byte[]>> records) {
         tx.executeWithoutResult(status -> {
             jdbc.execute("SET LOCAL statement_timeout='5s'");
-            Instant now = clock.instant(), oldest = now.minusSeconds(7 * 86400);
+            Instant now = clock.instant(), oldest = retention.lock().eventFrom(now.minusSeconds(7 * 86400));
             for (var record : records) {
                 var event = BroadcastObserved.decode(record.key(), record.value());
                 if (event.observedAt().isAfter(now.plusSeconds(5))) throw new IllegalArgumentException("OBSERVATION_FUTURE_TIME");
@@ -52,10 +56,13 @@ public final class ObservationStore {
         return new History(List.copyOf(samples), rows.size() > 1000);
     }
     public int cleanup() {
-        // 정리된 입력을 재전달해도 apply의 보존 기준이 과거 이력을 다시 만들지 않는다.
-        return jdbc.update("""
-                DELETE FROM broadcast_observation WHERE (run_id,event_id) IN (
-                    SELECT run_id,event_id FROM broadcast_observation WHERE observed_at<? ORDER BY observed_at LIMIT 10000)
-                """, Timestamp.from(clock.instant().minusSeconds(7 * 86400)));
+        return cleanupTx.execute(status->{
+            jdbc.execute("SET LOCAL lock_timeout='100ms'");jdbc.execute("SET LOCAL statement_timeout='1s'");
+            var floor=retention.advance(null,clock.instant().minusSeconds(7*86400).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)).event();
+            return jdbc.update("""
+                    DELETE FROM broadcast_observation WHERE (run_id,event_id) IN (
+                      SELECT run_id,event_id FROM broadcast_observation WHERE observed_at<? ORDER BY observed_at LIMIT 10000)
+                    """,Timestamp.from(floor));
+        });
     }
 }

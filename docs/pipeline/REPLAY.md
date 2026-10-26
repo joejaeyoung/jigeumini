@@ -55,3 +55,7 @@ heartbeat는 루프에서 5초마다 및 DB 배치 commit 때 갱신한다. poll
 토픽이 존재하지 않으면 `TOPIC_NOT_FOUND`, broker 접속/조회 실패는 `SOURCE_UNAVAILABLE`, 날짜 문자열 파싱 실패는 `INVALID_DATE`를 반환한다. 권한 오류를 토픽 삭제로 추정하지 않는다. 원본 예외·원문·토큰은 출력하지 않는다.
 
 #16 검증 근거와 현재 상태는 [후속 검증](REPLAY_DIAGNOSTICS_VERIFICATION.md)·[STATUS](../STATUS.md)에 연결한다.
+
+## 결과 보존과 만료 #63
+
+[보존 계약](RETENTION.md)에 따라 terminal 결과7일·metadata30일을 보존하고 active 작업을 보호한다. `status`의 resultState=EXPIRED는 totals/progress=null이며 compare는 RESULT_EXPIRED로 거부한다. metadata 삭제 후 RUN_NOT_FOUND다. `./scripts/replay cleanup`으로 한정 batch 정리를 실행할 수 있다. 생성 시 활성 작업32개를 넘으면 QUEUE_FULL이다. 원본 Kafka의 RETENTION_EXPIRED와 결과 만료를 구분한다.

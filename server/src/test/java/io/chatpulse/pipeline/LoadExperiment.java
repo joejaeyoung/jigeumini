@@ -240,6 +240,8 @@ public final class LoadExperiment {
             try(var source=new ReplaySource(BOOTSTRAP,topic,id)) {
                 var manifest=source.capture(null,null);result.put("replayManifest",manifest);result.put("replayKeyNormalization",plan.routing()==ExperimentRouting.SUFFIX_HASH?"EXPERIMENT_SHARD_PREFIX_REMOVAL":"NONE");source.assign(manifest);
                 var ranges=new HashMap<Integer,ReplayManifest.Range>();manifest.partitions().forEach(range->ranges.put(range.partition(),range));
+                var jobs=new ReplayStore(ds);id=jobs.create(manifest);var job=jobs.claim(UUID.randomUUID());
+                if(job==null||!job.id().equals(id))throw new IllegalStateException("EXPERIMENT_REPLAY_CLAIM");
                 var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);var replay=new ProjectionStore(jdbc,tx,codec,"replay",id.toString());var next=new HashMap<Integer,Long>();for(var range:manifest.partitions())next.put(range.partition(),range.start());
                 while(manifest.partitions().stream().anyMatch(r->next.get(r.partition())<r.end())) {
                     if((System.nanoTime()-begin)>TimeUnit.SECONDS.toNanos(300))throw new IllegalStateException("EXPERIMENT_REPLAY_TIMEOUT");if(guardResources&&System.nanoTime()>=nextResourceCheck){replayResources.add(ExperimentResources.sample(admin,topic,jdbc,schema,outputDirectory));nextResourceCheck=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);}
@@ -252,9 +254,9 @@ public final class LoadExperiment {
                         maximumEventTimes.merge(sequenceKey,event.eventTime(),(a,b)->a.isAfter(b)?a:b);
                         keyPartitions.computeIfAbsent(event.channelId(),key->new TreeSet<>()).add(record.partition());recordsRead++;
                         batch.add(normalized);next.put(record.partition(),record.offset()+1);}
-                    if(!batch.isEmpty())replay.applyReplay(batch);
+                    if(!batch.isEmpty())jobs.apply(job,batch,next);
                 }
-                source.validate(manifest);result.put("replaySeconds",(System.nanoTime()-begin)/1_000_000_000d);result.put("replayDatabase",replay.totals());result.put("replayResourceSamples",replayResources);result.put("appendOrderAudit",Map.of("records",recordsRead,"eventTimeBelowPriorMaximum",regressions,"channelPartitions",keyPartitions));
+                source.validate(manifest);jobs.complete(job);result.put("replaySeconds",(System.nanoTime()-begin)/1_000_000_000d);result.put("replayDatabase",replay.totals());result.put("replayResourceSamples",replayResources);result.put("appendOrderAudit",Map.of("records",recordsRead,"eventTimeBelowPriorMaximum",regressions,"channelPartitions",keyPartitions));
                 long differences=jdbc.queryForObject("""
                         SELECT count(*) FROM (SELECT channel_id,bucket_start,chat_count FROM chat_bucket_10s WHERE projection='load-a' AND run_id='experiment') a
                         FULL JOIN (SELECT channel_id,bucket_start,chat_count FROM chat_bucket_10s WHERE projection='replay' AND run_id=?) b USING(channel_id,bucket_start)

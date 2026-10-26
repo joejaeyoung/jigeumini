@@ -55,14 +55,4 @@ class ObservationConfiguration {
             @Value("${observations.offset-reset:${pipeline.offset-reset:none}}") String reset) {
         return new ObservationConsumer(pipeline.bootstrapServers(), topic.name(), pipeline.group()+"-observations", reset, store);
     }
-    @Bean(destroyMethod="shutdownNow")
-    @ConditionalOnProperty(name="pipeline.role", havingValue="analyzer")
-    ScheduledExecutorService observationRetention(ObservationStore store) {
-        var worker = Executors.newSingleThreadScheduledExecutor();
-        worker.scheduleWithFixedDelay(() -> {
-            try { store.cleanup(); }
-            catch (RuntimeException ignored) { org.slf4j.LoggerFactory.getLogger(ObservationStore.class).warn("OBSERVATION_CLEANUP_UNAVAILABLE"); }
-        }, 60, 60, TimeUnit.SECONDS);
-        return worker;
-    }
 }

@@ -62,7 +62,6 @@ public class DualTopicConsumer implements AutoCloseable {
     }
     public void start() {
         container.start(); sampler.scheduleWithFixedDelay(this::sample,0,5,TimeUnit.SECONDS);
-        sampler.scheduleWithFixedDelay(()->{try { store.cleanup(); } catch(RuntimeException ignored) { org.slf4j.LoggerFactory.getLogger(DualTopicConsumer.class).warn(prefix+"_CLEANUP_UNAVAILABLE"); }},60,60,TimeUnit.SECONDS);
     }
     public void sample() {
         var snapshot=poll.snapshot(); if(snapshot.partitions().isEmpty())return;

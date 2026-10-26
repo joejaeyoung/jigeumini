@@ -664,3 +664,13 @@ Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.41
 a536259의 Claude 판정은 REQUEST_CHANGES다. 차단1건은 SQL 비용 표가 병합 INSERT와 새 TTL 상태 갱신 CTE를 누락하고 revision UPDATE를 상태 갱신으로 잘못 해석한 문제였다. 같은 원본 두 실행에서 CATEGORY_EVENT/INSERT와 REPORT_OBSERVATION/CTE를 재계산해 추가했다. category SELECT+INSERT5.032→5.136초, 지정 report 네 family23.044→6.867초로 범위를 한정하고 전체 transaction 감소율과 구분한다. 새 부하 실행 없이 원본 hash와 숫자만 정제했다.
 
 비차단 문서 의견도 반영했다. 8a0fb76의3,000/s 실패·API오류1을 표에 추가하고, 이름에diag가 붙은 실행의 실제FULL/진단false, 동기 관측 burst와 watermark 사유 코드의 한계, V13 maintenance·7998bed migration 실행과 후속diff 없음, 진단 overlay의 현 설정을 명시했다. 종료 세션 TTL 조회 축소·observer 시작 실패 회귀·최초seed pacing 분리와 계측 접근 규칙 정리는 후속 개선 후보로 기록하며 검증 완료로 세지 않는다. 최종 승인과CI는 보완HEAD에서 새로 확인한다.
+
+## 2026-10-27 보존·용량 상한 #63 구현 시작
+
+origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #65 의존 변경을 로컬 통합했다. 다른 기존 worktree는 변경하지 않았다. RetentionWindow의 단조 하한과 live/replay 부모 잠금, 유한 정리·보호 참조·진단을 구현했다. 72h ledger/8d bucket, terminal replay7d/metadata30d와 유한 UUID 충돌 보장 범위를 문서화했다. active report가 품질 snapshot/loss를 참조하고 outbox가 feed 수신 이력에 의존함을 확인해 먼저 보호한다.
+
+초기 단위179·하네스38/JAR 확인 뒤 실제 Kafka/PostgreSQL 새 경계8개가 통과했다. 이후 보호 이력·batch 상한·진단 회귀를 추가 중이며 전체 통합/저장량/잠금·Kafka segment 근거는 아직 미완료다. 자동 경보·클라우드 차단기나 절대 byte cap을 구현했다고 주장하지 않는다.
+
+### #65 완료 게이트
+
+최종2f5f64d Claude APPROVE(이전 전체 코드 검토와 문서 보완 delta), Standards/Spec0건, push40389325212/PR40389332785 SUCCESS를 확인했다. 두 XML은179/142 실패·오류·skip0, job log는하네스38/웹29/Chromium31이다. PR71을cca9877로develop 병합하고 #65와보드를완료처리했다. 미실행개별계측/VM전체는#49에명시이관했다. 최종게이트파일은다음작업#63에기록해승인HEAD를뒤에서수정하지않았다.

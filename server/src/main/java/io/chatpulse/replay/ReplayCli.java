@@ -51,6 +51,11 @@ public final class ReplayCli {
                         if(id==null) print(Map.of("state","IDLE"));
                         else {print(store.status(id));if(!store.get(id).state().equals("COMPLETED")) return 2;}
                     }
+                    case "cleanup" -> {
+                        require(args,1);var jdbc=new org.springframework.jdbc.core.JdbcTemplate(ds);
+                        var tx=new org.springframework.transaction.support.TransactionTemplate(new org.springframework.jdbc.datasource.DataSourceTransactionManager(ds));
+                        print(new ReplayRetention(jdbc,tx,java.time.Clock.systemUTC()).cleanup());
+                    }
                     case "reap" -> {require(args,1);print(Map.of("reapedRuns",store.reap()));}
                     case "compare" -> {require(args,3);var result=store.compare(UUID.fromString(args[1]),UUID.fromString(args[2]));print(result);if(!Boolean.TRUE.equals(result.get("equal"))) return 2;}
                     default -> throw new ReplayFailure(INVALID_COMMAND);

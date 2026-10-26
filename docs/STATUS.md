@@ -1,12 +1,16 @@
 # 진행 상태
 
+## 진행 중: 보존·용량 상한 #63
+
+`feat/retention-bounds`, F01/F08/F10/F16 → T02/T04/T08/T16. origin/develop 기반의 새 작업 복사본에 #65 의존 변경을 로컬 병합했다. #65는 최종2f5f64d 승인·CI를 거쳐 PR71/cca9877로 develop에 병합됐다. live 처리 이력의 단조 입력 하한, replay 결과 만료와 유한 정리, 보호 자료·공간 진단을 구현 중이다. 보존 기간 후보와 [공식 자료 조사](research/DATA_RETENTION.md)를 실제 Kafka/PostgreSQL 경계·rollback·재시작 검증으로 확정한다. 아직 완료 근거는 아니다.
+
 2026-10-27 · 카테고리·리포트 병목 진단 #65
 
 ## 카테고리·리포트 비용 개선 #65
 
 `technicaltest/projection-bottlenecks` · [이슈 #65](https://github.com/joejaeyoung/jigeumini/issues/65) · [PR #71](https://github.com/joejaeyoung/jigeumini/pull/71). F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14, F16 → T16.
 
-구현과 로컬 비교를 마쳤고 최종 HEAD의 Claude·push/PR CI를 병합 게이트로 확인한다. [검증 문서](PROJECTION_PERFORMANCE_VERIFICATION.md)·[전체 실행 근거](poc/evidence/projection-performance-2026-10-27/summary.json)·[공식 조사](research/PROJECTION_PERFORMANCE.md)·[리팩토링](REFACTORING.md)에 범위와 실패 실행을 보존한다.
+완료: 최종 `2f5f64d` Claude APPROVE·push40389325212/PR40389332785 SUCCESS 후 PR71을 `cca9877`로 develop에 병합했다. 단위179·실제Kafka/DB142·하네스38·웹29·Chromium31, 실패/오류/skip0을 양쪽 CI에서 확인했다. [최종 게이트](poc/evidence/projection-performance-2026-10-27/final-gates.json). [검증 문서](PROJECTION_PERFORMANCE_VERIFICATION.md)·[전체 실행 근거](poc/evidence/projection-performance-2026-10-27/summary.json)·[공식 조사](research/PROJECTION_PERFORMANCE.md)·[리팩토링](REFACTORING.md)에 범위와 실패 실행을 보존한다.
 
 - 카테고리 진행 UPSERT는 같은 입력에서 181,860→6,653회, 리포트 매 채팅 재귀속 CTE는 20,216→0회다. 새 관측 보정은 유지한다. 제품 V13의 최신 관측 정렬 색인, 멱등성·늦은 관측·품질·offset 원자 저장·별칭/만료 계약을 실제 DB로 확인했다.
 - 총 100건/s·API 10요청/s에서 **600채널 단기 2회와 5분**, 450채널 5분을 통과했다. **1,000채널은 입력 완료·전체 대조·최종 24개 lag 0에도 readiness 503 3회와 watermark 초과로 실패**했다. category 채팅 30.425초, report 채팅 28.410초/관측 29.418초다. 확인한 저부하 하한은 600이며 정확한 최대·600개 인기 방송 수용량은 미확정이다. 중간 구간 반복과 실제 원천/fleet·장기 DB 검증을 재개 조건으로 둔다.

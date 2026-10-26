@@ -22,7 +22,6 @@ class PartitionExpansionIntegrationTest {
         var root=new JdbcTemplate(IntegrationSupport.ds("public"));root.execute("CREATE SCHEMA "+schema);
         var ds=IntegrationSupport.ds(schema);org.flywaydb.core.Flyway.configure().dataSource(ds).defaultSchema(schema).load().migrate();
         var codec=new EventCodec();var tx=new org.springframework.transaction.support.TransactionTemplate(new org.springframework.jdbc.datasource.DataSourceTransactionManager(ds));tx.setTimeout(20);
-        var store=new ProjectionStore(new JdbcTemplate(ds),tx,codec,"replay",UUID.randomUUID().toString());
         String channel=null;for(int i=0;channel==null;i++){String candidate=String.format("%032x",i);int hash=Utils.toPositive(Utils.murmur2(candidate.getBytes(StandardCharsets.UTF_8)));if(hash%3!=hash%6)channel=candidate;}
         final String key=channel;Instant at=Instant.now().minusSeconds(5);
         try(var admin=Admin.create(Map.of("bootstrap.servers",IntegrationSupport.BOOTSTRAP));var source=new ReplaySource(IntegrationSupport.BOOTSTRAP,topic,UUID.randomUUID())) {
@@ -34,6 +33,8 @@ class PartitionExpansionIntegrationTest {
             assertThatThrownBy(()->source.validate(original)).isInstanceOf(ReplayFailure.class).hasMessage("PARTITIONS_CHANGED");
             assertThatThrownBy(()->KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP,topic)).isInstanceOf(IllegalStateException.class);
             var expanded=source.capture(null,null);assertThat(expanded.partitions()).hasSize(6);source.assign(expanded);
+            var jobs=new io.chatpulse.replay.ReplayStore(ds);var id=jobs.create(expanded);jobs.claim(UUID.randomUUID());
+            var store=new ProjectionStore(new JdbcTemplate(ds),tx,codec,"replay",id.toString());
             var records=new ArrayList<ConsumerRecord<String,byte[]>>();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(15);
             while(records.size()<2&&System.nanoTime()<deadline)source.poll().forEach(records::add);
             assertThat(records).hasSize(2);store.applyReplay(records);store.applyReplay(records);

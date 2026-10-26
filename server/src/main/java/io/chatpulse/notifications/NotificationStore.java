@@ -2,6 +2,7 @@ package io.chatpulse.notifications;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import io.chatpulse.retention.RetentionWindow;
 import java.time.*;
 import java.util.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -15,14 +16,17 @@ public final class NotificationStore {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx;
     private final String run;
+    private final TransactionTemplate cleanupTx;
     private final Clock clock;
-    public NotificationStore(JdbcTemplate jdbc,TransactionTemplate tx,String run,Clock clock){this.jdbc=jdbc;this.tx=tx;this.run=run;this.clock=clock;}
+    private final RetentionWindow retention;
+    public NotificationStore(JdbcTemplate jdbc,TransactionTemplate tx,String run,Clock clock){this.jdbc=jdbc;this.tx=tx;cleanupTx=new TransactionTemplate(tx.getTransactionManager());cleanupTx.setTimeout(8);this.run=run;this.clock=clock;retention=new RetentionWindow(jdbc,"notification",run);}
     public void apply(List<ConsumerRecord<String,byte[]>> records) {
         tx.executeWithoutResult(status -> {
             jdbc.execute("SET LOCAL statement_timeout='5s'");
+            Instant oldest=retention.lock().eventFrom(clock.instant().minusSeconds(7*86400));
             for(var record:records) {
                 var e=SpikeDetected.decode(record.key(),record.value());
-                if(e.runId().equals(run)) {
+                if(e.runId().equals(run)&&!e.evaluatedAt().isBefore(oldest)) {
                     String canonical=new String(e.encode(),java.nio.charset.StandardCharsets.UTF_8);
                     int inserted=jdbc.update("""
                             INSERT INTO notification_event(run_id,spike_id,channel_id,evaluated_at,received_at,payload)
@@ -57,4 +61,12 @@ public final class NotificationStore {
         var events=rows.stream().limit(limit).toList();var last=events.isEmpty()?null:events.getLast();
         return new Page(now.toString(),events,rows.size()>limit?last.evaluatedAt()+"|"+last.spikeId():null);
     }
+    public int cleanup() {
+        return cleanupTx.execute(status->{
+            jdbc.execute("SET LOCAL lock_timeout='100ms'");jdbc.execute("SET LOCAL statement_timeout='1s'");
+            var floor=retention.advance(null,clock.instant().minusSeconds(7*86400).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)).event();
+            return jdbc.update("DELETE FROM notification_event WHERE ctid IN (SELECT ctid FROM notification_event WHERE run_id=? AND evaluated_at<? AND NOT EXISTS(SELECT 1 FROM spike_outbox o WHERE o.run_id=notification_event.run_id AND o.spike_id=notification_event.spike_id) ORDER BY evaluated_at,spike_id LIMIT 10000)",run,Timestamp.from(floor));
+        });
+    }
+
 }

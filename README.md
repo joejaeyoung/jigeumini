@@ -346,3 +346,7 @@ F15/F11 → T04/T10/T15. 각 실행은 신규 소유6노드·합성 입력으로
 ```sh
 python3 scripts/product-load-summary.py work/product-load-soak work/product-load-summary.json work/product-load-images.json
 ```
+
+## 보존과 저장 용량 진단
+
+분석기의 자동 정리·입력 하한·replay 결과 만료·보호 자료와 경보/입력 제한 절차는 [보존 계약](docs/pipeline/RETENTION.md)을 따른다. `./scripts/replay cleanup`은 종료 replay의 한정 batch를 수동 정리한다. `./scripts/ops retention-status`는 관계/색인 크기·WAL 생성 누계·정리 실패·protected 자료를 읽는다. live ledger72시간과 bucket8일의 합계는 보존 창이 달라 누적 동등성 검사에 사용할 수 없다.

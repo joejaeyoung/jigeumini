@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+case "${1:-help}" in
+  migrate|bind-sources|initialize-groups|recovery-plan|recover-groups|retention-status) ;;
+  *) echo './scripts/ops migrate | bind-sources | initialize-groups | recovery-plan | recover-groups <새-prefix> | retention-status'; exit 1 ;;
+esac
+exec ./scripts/lib/run-cli ops "$@"

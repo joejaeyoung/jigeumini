@@ -85,6 +85,10 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.assertEqual('MEASUREMENT_INCOMPLETE',self.analyze()['classification'])
         source={'finished':True,'maximumPacingDelayMillis':3}
         self.assertEqual('WITHIN_SLO',self.analyze(source)['classification'])
+        self.plan['measurementSchemaVersion']=2
+        self.assertIn('SOURCE_MONOTONIC_CLOCK_UNRECORDED',self.analyze(source)['measurementProblems'])
+        source['clockReference']={'samples':100,'minimumResidualMillis':-.5,'maximumResidualMillis':.5}
+        self.assertEqual('WITHIN_SLO',self.analyze(source)['classification'])
         self.load['collector']['reasons']['HEARTBEAT_TIMEOUT']=1
         self.assertEqual('EXCEEDS_SLO',self.analyze(source)['classification'])
     def test_stopped_low_rate_observation_consumer_is_not_hidden_by_chat_rate(self):
@@ -117,12 +121,13 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.assertEqual([],result['generatorProblems'])
     def test_plan_budgets_and_original_profiles(self):
         self.assertEqual(90000,sum(s['seconds']*s['eventsPerSecond'] for s in plans.read('soak')[0]['stages']))
-        for key,value in [('channels',1001),('channels',True),('apiRequestsPerSecond',201),('sourceMode','PUBLIC'),('resourceProfile','UNKNOWN'),('payloadProfile','UNKNOWN'),('payloadProfile','KOREAN_1K'),('measurementProfile','UNKNOWN'),('diagnostics','true')]:
+        for key,value in [('channels',1001),('channels',True),('apiRequestsPerSecond',201),('sourceMode','PUBLIC'),('resourceProfile','UNKNOWN'),('payloadProfile','UNKNOWN'),('payloadProfile','KOREAN_1K'),('measurementProfile','UNKNOWN'),('measurementSchemaVersion',0),('measurementSchemaVersion',True),('measurementSchemaVersion',3),('diagnostics','true')]:
             with self.subTest(key=key,value=value):
                 plan=copy.deepcopy(self.plan);plan[key]=value
                 with self.assertRaises(ValueError):plans.validate(plan)
         self.assertEqual('MINIMAL',plans.validate(self.plan)['payloadProfile'])
         self.assertEqual('FULL',plans.validate(self.plan)['measurementProfile'])
+        self.assertEqual(2,plans.validate(self.plan)['measurementSchemaVersion'])
         self.assertFalse(plans.validate(self.plan)['diagnostics'])
         socket=copy.deepcopy(self.plan);socket.update(sourceMode='WEBSOCKET',payloadProfile='KOREAN_1K')
         self.assertEqual('KOREAN_1K',plans.validate(socket)['payloadProfile'])

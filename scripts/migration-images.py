@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""제품 V12 이미지에 시험 전용 migration을 얹고 별도 이미지·빌드 식별을 남긴다."""
+"""현재 제품 schema 다음 번호의 시험 migration과 별도 이미지·빌드 식별을 만든다."""
 import hashlib, json, pathlib, subprocess, sys, tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -18,7 +18,9 @@ def build(baseline_path, directory):
         raise RuntimeError('BASELINE_REVISION_MISMATCH')
     assert not baseline['workingTreeDirty'] and baseline['scope'] == 'LOCAL_IMAGES_NO_REGISTRY_PUSH'
     migrations = ROOT / 'server/src/main/resources/db/migration'
-    assert max(int(p.name.split('__')[0][1:]) for p in migrations.glob('V*__*.sql')) == 12
+    versions = sorted(int(p.name.split('__')[0][1:]) for p in migrations.glob('V*__*.sql'))
+    version = str(max(versions) + 1)
+    migration_name = 'V' + version + '__release_probe.sql'
     for entry in baseline['images'].values():
         assert json.loads(run('docker', 'image', 'inspect', entry['id']))[0]['Id'] == entry['id']
         assert json.loads(run('docker', 'image', 'inspect', entry['tag']))[0]['Id'] == entry['id']
@@ -26,17 +28,17 @@ def build(baseline_path, directory):
     directory.mkdir(parents=True, exist_ok=False)
     (directory / 'baseline.json').write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + '\n')
     for kind in ['candidate', 'failed', 'interrupted']:
-        fixture = ROOT / 'deploy/fixtures/migrations' / kind / 'V13__release_probe.sql'
+        fixture = ROOT / 'deploy/fixtures/migrations' / kind / 'release_probe.sql'
         sql_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
-        build_id = hashlib.sha256(('migration-fixture-v1\0' + baseline['buildId'] + '\0' + sql_hash).encode()).hexdigest()
+        build_id = hashlib.sha256(('migration-fixture-v2\0' + baseline['buildId'] + '\0' + version + '\0' + sql_hash).encode()).hexdigest()
         with tempfile.TemporaryDirectory(prefix='migration-image-', dir=ROOT / 'work') as temporary:
             context = pathlib.Path(temporary)
-            (context / fixture.name).write_bytes(fixture.read_bytes())
+            (context / migration_name).write_bytes(fixture.read_bytes())
             (context / 'replay-build-id.txt').write_text(build_id + '\n')
             (context / 'Dockerfile').write_text('ARG BASE_IMAGE=jigeumini/server:fixture-baseline\nFROM ${BASE_IMAGE}\n'
-                'COPY --chown=10001:10001 V13__release_probe.sql /app/classes/db/migration/\n'
+                f'COPY --chown=10001:10001 {migration_name} /app/classes/db/migration/\n'
                 'COPY --chown=10001:10001 replay-build-id.txt /app/classes/replay-build-id.txt\n'
-                'LABEL io.jigeumini.test.fixture="migration-v13"\n')
+                f'LABEL io.jigeumini.test.fixture="migration-v{version}"\n')
             tag = f'jigeumini/migration-fixture:{kind}-{revision}'
             subprocess.run(['docker', 'build', '--build-arg', 'BASE_IMAGE=' + baseline['images']['server']['tag'],
                             '-t', tag, str(context)], check=True, cwd=ROOT, stdout=sys.stderr)
@@ -44,9 +46,9 @@ def build(baseline_path, directory):
         image = json.loads(run('docker', 'image', 'inspect', tag))[0]
         manifest = {**baseline, 'buildId': build_id, 'scope': 'LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH',
                     'images': {**baseline['images'], 'server': {'tag': tag, 'id': image['Id'], 'sizeBytes': image['Size'], 'user': image['Config']['User']}},
-                    'fixture': {'kind': kind, 'version': '13', 'sqlSha256': sql_hash,
+                    'fixture': {'kind': kind, 'version': version, 'baselineVersions': [str(v) for v in versions], 'sqlSha256': sql_hash,
                                 'baselineImageId': baseline['images']['server']['id'], 'baselineBuildId': baseline['buildId'],
-                                'buildIdAlgorithm': 'sha256(migration-fixture-v1 NUL baselineBuildId NUL sqlSha256)',
+                                'buildIdAlgorithm': 'sha256(migration-fixture-v2 NUL baselineBuildId NUL version NUL sqlSha256)',
                                 'jarSha256Scope': '변경 전 제품 JAR. 시험 migration과 buildId는 이미지의 classes에만 추가한다.'}}
         (directory / (kind + '.json')).write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'scope': 'LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH', 'revision': revision, 'manifests': 4}))

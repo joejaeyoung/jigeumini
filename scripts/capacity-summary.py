@@ -27,6 +27,7 @@ def summarize(directory):
             'publisher':{k:v for k,v in load.get('publisherFinal',{}).items() if k!='channels'},'collector':load.get('collector'),'stages':analysis.get('stages',[])}
     if 'payloadProfile' in plan:result['plan']['payloadProfile']=plan['payloadProfile']
     result['plan'].update(measurementProfile=plan.get('measurementProfile','FULL'),diagnostics=plan.get('diagnostics',False))
+    result['plan']['measurementSchemaVersion']=analysis.get('measurementSchemaVersion')
     result['clockReference']=analysis.get('clockReference')
     result['effectivePayloadProfile']=plan.get('payloadProfile','MINIMAL')
     result['payloadProfileDefaulted']='payloadProfile' not in plan

@@ -43,7 +43,7 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 
 ## migration이 포함된 릴리스와 비밀 수명
 
-이번 이미지 교체/복귀는 동일 V12 migration 집합만 검증했다. checksum 손상 시험은 실패한 DDL migration을 재현한 것이 아니다. strict VALIDATE는 새 migration이 적용된 DB에서 이전 이미지를 거부한다. 따라서 migration 포함 릴리스의 복귀는 같은 DB의 이미지 교체로 처리할 수 없으며, 이전 schema 백업을 새DB에 복원하고 보존 입력/진행 위치를 검사해 재생하는 절차가 필요하다. 이 경로의 시험 전용 V13 리허설은 루트 README의 `migration-images`/`migration-rehearsal` 명령으로 실행한다. V13은 기존 집계의 합계를 별도 점검 테이블에 backfill하며 제품 동작은 바꾸지 않는다. 실제 실행 결과는 STATUS를 따른다. 파괴적 변경은 별도 forward fix/복구 계획이 필요하다.
+이번 이미지 교체/복귀는 동일 V12 migration 집합만 검증했다. checksum 손상 시험은 실패한 DDL migration을 재현한 것이 아니다. strict VALIDATE는 새 migration이 적용된 DB에서 이전 이미지를 거부한다. 따라서 migration 포함 릴리스의 복귀는 같은 DB의 이미지 교체로 처리할 수 없으며, 이전 schema 백업을 새DB에 복원하고 보존 입력/진행 위치를 검사해 재생하는 절차가 필요하다. 이 경로에서 현재 제품 schema 다음 번호를 사용하는 시험 전용 migration 리허설은 루트 README의 `migration-images`/`migration-rehearsal` 명령으로 실행한다. 시험 migration은 기존 집계의 합계를 별도 점검 테이블에 backfill하며 제품 동작은 바꾸지 않는다. 실제 실행 결과는 STATUS를 따른다. 파괴적 변경은 별도 forward fix/복구 계획이 필요하다.
 
 배포 또는 VALIDATE 모드에서 비밀 파일이 없으면 `SECRET_FILE_REQUIRED`로 거부한다. 로컬 리허설은 생성한 secret 파일을0700 디렉터리 안에0444로 두어 UID10001/컨테이너DB가 읽게 한다. 실제 운영은 비밀 관리자의 서비스별 UID/GID·접근 권한으로 주입한다. init-db.sh는 새 PG 데이터 디렉터리에서만 실행되며 기존 볼륨 역할 생성이나 비밀 회전을 수행하지 않는다. 비밀은 psql argv에 전달하지 않는다. 성공적인 소유 자원 정리 뒤 생성 secret과 dump도 삭제하고 hash/숫자만 남긴다. 정리 실패 시 로컬 work를0700 경계 안에서 보관하고 소유 자원 확인 후 수동 정리한다.
 
@@ -56,3 +56,5 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 init SQL은로컬세션의statement/error statement로깅을끄지만CREATE ROLE의실제SQL에는비밀이포함된다. 실제관리형DB의감사로그정책과비밀회전은별도설정이필요하다. healthcheck15초간격은이번로컬합성기동범위이며고부하시probeRSS/CPU/플래핑은미검증이다. UI의503은브라우저요청모의,실제프록시503은DB중단HTTP검증으로구분한다.
 
 관측 로컬 생략은 `SourceFailure`(예산/임대)만 처리하며 worker 최종 결과의 `observations.skippedRequests`에 누적한다. 예상하지 못한 hook 오류는 기존 오류 관측 경로로 드러난다. `CollectorWorker.Limits.defaults`는 총500회를 지정하고 생성자가30분 초과 실행을 거부하므로 예산 식의 실행시간 상한을 강제한다. 관측 활성 FleetCli의 실제 원천 연결·종료 조립은 이번 리허설에서 실행하지 않았으며 활성화 전 해당 환경에서 확인한다.
+
+2026-10-27 #65의 제품 V13은 리포트 세션별 최신 관측용 정렬 색인이다. V12까지의 실제 검증 기록은 당시 근거이며, 현재 `migration-images`는 제품 migration 다음 번호와 이전 version 목록을 manifest에 기록한다. migration 적용 DB에서 이전 이미지로 단순 복귀할 수 없다는 계약은 같다.

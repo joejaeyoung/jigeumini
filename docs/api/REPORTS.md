@@ -71,3 +71,7 @@ group은 `${pipeline.group}-reports`, 시작 위치는 `reports.offset-reset` �
 정리 중인 만료 세션의 잔여 관측은 채팅 배정과 구분 coverage에서도 제외한다. 만료한 동일 원천 ID가 새 LIVE로 재등장하면 `REPORT_EXPIRED_ID_REUSE`로 배치를 rollback하고 주기 정리가 옛 자식을 모두 제거한 뒤 재시도한다. 남은 옛 bucket을 새 기록과 합산하지 않는다. 정리 완료까지 report group이 지연될 수 있으며 삭제 이력 복원을 주장하지 않는다.
 
 이 예외의 운영 API 표시는 공통 허용 코드 정책에 따라 `REPORT_PROCESSING_UNAVAILABLE`이다. 정리는 테이블별 1만 행·60초 주기이며 잠금 경합 시 해당 주기를 건너뛴다. 잔여 자식이 많으면 여러 주기 동안 소비가 지연될 수 있고, 이 숫자로 정확한 복구 완료 시간을 보장하지 않는다.
+
+### 최신 관측 조회 색인
+
+V13은 세션별 `(run_id, report_id, observed_at DESC, event_id DESC)` 색인을 만들고 기존 두 열 prefix 색인을 대체한다. 채팅만 있는 배치의 TTL 상태 조회가 해당 세션의 모든 관측을 정렬하지 않도록 한다. 제품 schema 변경이므로 이전 이미지는 strict VALIDATE에서 거부되며 복귀는 이전 schema 복원 절차를 따른다.

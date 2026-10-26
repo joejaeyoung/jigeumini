@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""V12 백업·시험 V13·구 이미지 거부·이전 schema 복원을 대조한다."""
+"""현재 schema 백업·다음 시험 migration·구 이미지 거부·이전 schema 복원을 대조한다."""
 import datetime, importlib.util, json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -14,6 +14,11 @@ class MigrationRehearsal(module.Rehearsal):
         images = pathlib.Path(images)
         self.failed_candidate = json.loads((images / 'failed.json').read_text())
         self.interrupted_candidate = json.loads((images / 'interrupted.json').read_text())
+        candidate = json.loads((images / 'candidate.json').read_text())
+        self.fixture_version = candidate['fixture']['version']
+        self.baseline_versions = candidate['fixture']['baselineVersions']
+        assert self.baseline_versions and all(re.fullmatch(r'[1-9][0-9]*', v) for v in self.baseline_versions)
+        assert self.fixture_version == str(max(int(v) for v in self.baseline_versions) + 1)
         super().__init__(images / 'baseline.json', images / 'candidate.json', directory)
         self.result.update(scope='SINGLE_HOST_RF1_SYNTHETIC_MIGRATION_FIXTURE', failedCandidate=self.failed_candidate,
                            interruptedCandidate=self.interrupted_candidate)
@@ -30,11 +35,13 @@ class MigrationRehearsal(module.Rehearsal):
         for manifest in [self.candidate, self.failed_candidate, self.interrupted_candidate]:
             assert manifest['revision'] == self.baseline['revision']
             assert manifest['fixture']['baselineImageId'] == self.baseline['images']['server']['id']
-            assert manifest['fixture']['version'] == '13'
+            assert manifest['fixture']['version'] == self.fixture_version
+            assert manifest['fixture']['baselineVersions'] == self.baseline_versions
             assert manifest['scope'] == 'LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH'
             for image in manifest['images'].values():
                 assert json.loads(self.command(['docker', 'image', 'inspect', image['id']]).stdout)[0]['Id'] == image['id']
         assert len({m['buildId'] for m in [self.baseline, self.candidate, self.failed_candidate, self.interrupted_candidate]}) == 4
+        assert self.fixture_version == str(max(int(v) for v in self.baseline_versions) + 1)
         return result
 
     def interruption(self):
@@ -67,7 +74,7 @@ class MigrationRehearsal(module.Rehearsal):
 
     def failed_migration(self):
         before = self.schema()
-        assert before['versions'][-1] == '12' and not before['migrationProbeExists']
+        assert before['versions'] == self.baseline_versions and not before['migrationProbeExists']
         data = self.probe('snapshot')
         self.sql('CREATE SEQUENCE release_failure_attempts')
         self.image(self.failed_candidate)
@@ -90,7 +97,8 @@ class MigrationRehearsal(module.Rehearsal):
         self.image(self.candidate)
         migrated = self.ops('migrate')
         state = self.schema()
-        assert state['versions'] == [str(i) for i in range(1, 14)]
+        assert before['versions'] == self.baseline_versions
+        assert state['versions'] == self.baseline_versions + [self.fixture_version]
         assert state['history'][:-1] == before['history']
         assert state['backfill'] == ['ranking|deploy-v1|10', 'ranking-trend|deploy-v1|10']
         return {'migration': migrated, 'schema': state}
@@ -110,9 +118,10 @@ class MigrationRehearsal(module.Rehearsal):
         restored = self.restore(target=self.baseline)
         schema = self.schema()
         original = self.schema(database='chatpulse')
-        assert schema['versions'] == [str(i) for i in range(1, 13)] and not schema['migrationProbeExists']
+        assert schema['versions'] == self.baseline_versions and not schema['migrationProbeExists']
         assert schema == self.result['backupSchema']
-        assert original['versions'][-1] == '13' and original['backfill'] == ['ranking|deploy-v1|10', 'ranking-trend|deploy-v1|10']
+        assert original['versions'] == self.baseline_versions + [self.fixture_version]
+        assert original['backfill'] == ['ranking|deploy-v1|10', 'ranking-trend|deploy-v1|10']
         return {**restored, 'restoredSchema': schema, 'originalSchema': original, 'runtimeBuildId': self.baseline['buildId']}
 
     def backup_previous_schema(self):
@@ -122,23 +131,23 @@ class MigrationRehearsal(module.Rehearsal):
 
     def scenarios(self):
         self.phase('PREFLIGHT', self.fixture_preflight)
-        self.phase('INITIALIZE_V12', self.initialize)
-        self.phase('BASELINE_V12', lambda: self.up_apps(self.baseline))
+        self.phase('INITIALIZE_BASELINE_SCHEMA', self.initialize)
+        self.phase('BASELINE_SCHEMA', lambda: self.up_apps(self.baseline))
         self.phase('RUNTIME_BOUNDARIES', self.audit)
         self.event_base = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=120)).replace(microsecond=0).isoformat()
         self.result['syntheticEventBase'] = self.event_base
         self.phase('SEED_BEFORE_BACKUP', lambda: self.probe('seed', '0', self.event_base))
         self.phase('BASELINE_DATA', lambda: self.snapshot(10, 1))
-        self.phase('BACKUP_V12', self.backup_previous_schema)
-        self.phase('INTERRUPTED_V13_ROLLBACK', self.interruption)
-        self.phase('FAILED_V13_ROLLBACK', self.failed_migration)
-        self.phase('MIGRATE_V13', self.migrate_candidate)
-        self.phase('CANDIDATE_V13', lambda: self.up_apps(self.candidate))
+        self.phase('BACKUP_BASELINE_SCHEMA', self.backup_previous_schema)
+        self.phase('INTERRUPTED_CANDIDATE_ROLLBACK', self.interruption)
+        self.phase('FAILED_CANDIDATE_ROLLBACK', self.failed_migration)
+        self.phase('MIGRATE_CANDIDATE', self.migrate_candidate)
+        self.phase('CANDIDATE_SCHEMA', lambda: self.up_apps(self.candidate))
         self.phase('SEED_AFTER_MIGRATION', lambda: self.probe('seed', '1', self.event_base))
         self.expected = self.snapshot(20, 2)
         self.result['expectedSnapshot'] = self.expected
-        self.phase('BASELINE_V12_REJECTS_V13', self.reject_baseline)
-        self.phase('RESTORE_V12_NEW_DATABASE', self.restore_previous_schema)
+        self.phase('BASELINE_REJECTS_CANDIDATE_SCHEMA', self.reject_baseline)
+        self.phase('RESTORE_BASELINE_NEW_DATABASE', self.restore_previous_schema)
         self.phase('RESTORED_BROWSER', self.browser)
         self.phase('FINAL_GRACEFUL_STOP', self.stop_api)
 

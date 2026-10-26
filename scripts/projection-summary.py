@@ -46,7 +46,7 @@ def summarize(directory):
     return result
 
 def main(root,output):
-    runs=[]
+    runs=[];unfinished=[]
     exclusions=root/'aborted-overlap.json'
     interrupted=json.loads(exclusions.read_text()) if exclusions.exists() else None
     excluded={run['name'] for run in interrupted['runs']} if interrupted else set()
@@ -54,14 +54,17 @@ def main(root,output):
         path=directory/'result.json'
         if not directory.is_dir() or not path.is_file():continue
         if directory.name in excluded:continue
-        if json.loads(path.read_text()).get('finishedAt'):runs.append(summarize(directory))
+        raw=json.loads(path.read_text())
+        if raw.get('finishedAt'):runs.append(summarize(directory))
+        else:unfinished.append({'name':directory.name,'startedAt':raw.get('startedAt'),'reason':'RUN_NOT_FINISHED','sourceArtifact':digest(path)})
     helpers=['scripts/projection-summary.py','scripts/capacity-summary.py','scripts/product_load_capacity.py']
     output.parent.mkdir(parents=True,exist_ok=True)
-    value={'schemaVersion':1,'technicalIds':['T02','T07','T08','T11','T12','T14'],
+    value={'schemaVersion':1,'technicalIds':['T02','T07','T08','T11','T12','T14','T16'],
         'scope':'LOCAL_RF1_FRESH_DB_SYNTHETIC_PROJECTION_COST; NOT_OPERATIONAL_MAXIMUM',
         'curatorFiles':{name:digest(ROOT/name) for name in helpers},
         'analysisProvenance':'CURRENT_ANALYZER_RECALCULATED; ORIGINAL_RECORDED_CLASSIFICATION_RETAINED',
         'interruptedExperiments':interrupted,'interruptedExperimentsArtifact':digest(exclusions) if interrupted else None,
+        'unfinishedExperiments':unfinished,
         'runs':runs,'limitations':['SQL server execution excludes JDBC/pool time; counts include probe and final oracle.',
             'JMX and SQL activity are instant samples, not durations or causal proof.',
             'Host resource timestamps are not atomic with VM probe samples.',

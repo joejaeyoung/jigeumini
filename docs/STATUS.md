@@ -12,6 +12,8 @@
 
 [진단 조사](research/PROJECTION_PERFORMANCE.md)에 가설·공식 자료·계측 계약을 기록했다. probe의 양방향 시계 이동과 누락을 용량 통과에서 제외하고, 합성 원천도 단조 경과 대비 잔차를 기록한다. 전체 COUNT만 끄는 대조와 COUNT/du를 끄는 대조, SQL·JVM 숫자 진단을 추가했다. 기준선 3회는 정상 시계·고유 180,000건 대조를 마쳤으나 카테고리 적체로 SLO를 넘었다. COUNT 생략만으로 해결되지 않았다. [원본 6회 정제](poc/evidence/projection-performance-2026-10-27/baseline.json)·[시계 감사](poc/evidence/projection-performance-2026-10-27/clock-audit.json). 카테고리 진행 저장을 partition별로 묶고, 리포트 새 채팅의 직접 귀속과 관측에 따른 기존 기록 보정을 분리했다. 카테고리·리포트 실제 통합 20개에 이어 전체 138개·단위 176개가 통과했다. COUNT/du를 모두 끈 대조에서도 적체가 남았고, 편향 2,000/s는 이번에 통과했다. 미관측 비율·조건부 p95와 전체 p95를 구분하는 보완 후 하네스 38개 통과. 수정 버전 부하 재측정은 진행 중이다.
 
+Claude 구현 리뷰 8a0fb76은 APPROVE·차단 0건이다. 추가 의견으로 TTL 60/120/300초의 정확한 경계·별칭·종료 세션 회귀와 영구 미래 입력 오류의 선판정을 보완했다. 20,160개 합성 관측의 최신 한 건 조회가 전체 scan/sort에서 한 행 index scan으로 바뀌는 근거에 따라 제품 V13 색인을 추가한다. F16 → T16도 연결하며 다음 번호 migration 리허설을 갱신한다. 이 보완 후 부하·복구·최종 게이트는 진행 중이다.
+
 ## 수집 연결 메모리·종료 자원 #64
 
 `fix/collector-text-buffer` · [이슈 #64](https://github.com/joejaeyoung/jigeumini/issues/64) · F01/F13/F14 → T02/T08/T11/T12/T14. 기준은 #67 병합 `5048d88`이다.

@@ -70,6 +70,9 @@ def lag_summary(samples,stage,begin):
 
 def analyze_capacity(plan,load,offset_file,source=None):
     invalid=[];generator=[];failures=[];stages=[]
+    # 기존 원본은 변경하지 않는다. 초기 profile 포함 계측은 v1, 그 이전은 v0로 읽는다.
+    schema=plan.get('measurementSchemaVersion',1 if 'measurementProfile' in plan else 0)
+    if type(schema) is not int or schema not in (0,1,2):invalid.append('MEASUREMENT_SCHEMA_VERSION');schema=2
     clock=clock_reference(load)
     if not clock['valid']:invalid.append('PROBE_CLOCK_REFERENCE')
     if not load.get('correct'):failures.append(load.get('failureCode','RUN_DID_NOT_RECONCILE'))
@@ -87,7 +90,7 @@ def analyze_capacity(plan,load,offset_file,source=None):
         if any(count for reason,count in collector.get('reasons',{}).items() if reason!='CANCELLED'):failures.append('COLLECTOR_UNEXPECTED_STOP')
         if collector.get('sourceClockErrors',0):invalid.append('SOURCE_CLOCK_REFERENCE')
         source_clock=(source or {}).get('clockReference')
-        if 'measurementProfile' in plan and source_clock is None:invalid.append('SOURCE_MONOTONIC_CLOCK_UNRECORDED')
+        if schema>=1 and source_clock is None:invalid.append('SOURCE_MONOTONIC_CLOCK_UNRECORDED')
         if source_clock is not None:
             bounds=[source_clock.get(k) for k in ('minimumResidualMillis','maximumResidualMillis')]
             if not source_clock.get('samples') or any(type(v) not in (int,float) or not math.isfinite(v) or abs(v)>LIMITS['maximumClockResidualMillis'] for v in bounds):invalid.append('SOURCE_MONOTONIC_CLOCK_REFERENCE')
@@ -136,7 +139,7 @@ def analyze_capacity(plan,load,offset_file,source=None):
     classification='GENERATOR_LIMITED' if generator else 'MEASUREMENT_INCOMPLETE' if invalid else 'EXCEEDS_SLO' if failures else 'WITHIN_SLO'
     return {'classification':classification,'withinSlo':classification=='WITHIN_SLO','provisionalLimits':LIMITS,
             'scope':'THIS_FIXED_RESOURCE_PLAN_ONLY; RANKING_COMMIT_VISIBILITY; ALL_SIX_GROUP_LAG; NOT_CLOUD_OR_PUBLIC_SOURCE_CAPACITY',
-            'clockReference':clock,'generatorProblems':generator,'measurementProblems':invalid,'sloViolations':failures,'stages':stages}
+            'measurementSchemaVersion':schema,'clockReference':clock,'generatorProblems':generator,'measurementProblems':invalid,'sloViolations':failures,'stages':stages}
 
 def include_runtime_diagnostics(analysis,errors,processes):
     """입력 계측 뒤에 확인한 프로세스/저장량 실패를 통과 판정에 반영한다."""

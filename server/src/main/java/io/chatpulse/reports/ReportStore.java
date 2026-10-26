@@ -69,6 +69,9 @@ public final class ReportStore implements DualTopicProjection {
                     if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_observation WHERE run_id=? AND event_id=?",String.class,run,sample.eventId())))throw new IllegalArgumentException("REPORT_OBSERVATION_CONFLICT");
                 } else affect(affected,sample.channelId(),sample.observedAt(),sample.observedAt().plusSeconds(120));
             }
+            // 영구 입력 오류를 세션 재구성의 일시적 만료 ID 대기보다 먼저 판정한다.
+            for(var input:inputs)if(input.chat()!=null && !input.chat().eventTime().isBefore(oldest)
+                    && input.chat().receivedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
             var changes=new TreeMap<Delta,Long>();
             for(var channel:affected.entrySet()) {
                 var changedObservations=rebuildSessions(channel.getKey(),now,oldest);
@@ -77,7 +80,6 @@ public final class ReportStore implements DualTopicProjection {
             var chatChannels=new TreeSet<String>();
             for(var input:inputs) if(input.chat()!=null) {
                 var event=input.chat();if(event.eventTime().isBefore(oldest))continue;
-                if(event.receivedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
                 Instant at=event.eventTime().truncatedTo(java.time.temporal.ChronoUnit.MICROS);String digest=codec.hash(event);
                 var assigned=insertChat(event,at,oldest,digest);
                 if(assigned.isEmpty()) {

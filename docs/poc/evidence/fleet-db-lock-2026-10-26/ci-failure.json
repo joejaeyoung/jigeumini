@@ -1,0 +1,176 @@
+{
+  "run": 40263104263,
+  "head": "e90dc3288cf112c4ebdaebd43fb4a00c0705a18b",
+  "failedCase": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+  "expectedEpoch": 2,
+  "observedEpoch": 1,
+  "backendSampleCount": 80,
+  "backendRows": 392,
+  "observationsSha256": "62093965eed68e8b841658be7a965946d0e19238460fb4546cb85f05d934e2ff",
+  "backendStateCounts": [
+    {
+      "workerIndex": "0",
+      "state": "idle in transaction",
+      "transactionOpen": true,
+      "waitType": "Client",
+      "waitEvent": "ClientRead",
+      "blockingPids": "{}",
+      "samples": 80
+    },
+    {
+      "workerIndex": "0",
+      "state": "idle",
+      "transactionOpen": false,
+      "waitType": "Client",
+      "waitEvent": "ClientRead",
+      "blockingPids": "{}",
+      "samples": 240
+    },
+    {
+      "workerIndex": "1",
+      "state": "idle in transaction",
+      "transactionOpen": true,
+      "waitType": "Client",
+      "waitEvent": "ClientRead",
+      "blockingPids": "{}",
+      "samples": 1
+    },
+    {
+      "workerIndex": "1",
+      "state": "idle",
+      "transactionOpen": false,
+      "waitType": "Client",
+      "waitEvent": "ClientRead",
+      "blockingPids": "{}",
+      "samples": 54
+    },
+    {
+      "workerIndex": "1",
+      "state": "active",
+      "transactionOpen": true,
+      "waitType": "Lock",
+      "waitEvent": "transactionid",
+      "blockingPids": "{527}",
+      "samples": 17
+    }
+  ],
+  "children": [
+    {
+      "rejected": 0,
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "deliveryCode": "NONE",
+      "failureCode": "COLLECTION_LEASE_LOST",
+      "accepted": 2,
+      "complete": false,
+      "acknowledged": 2,
+      "worker": "652e7a0f-94f1-4278-9c08-e9276c113d4f"
+    },
+    {
+      "rejected": 0,
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "deliveryCode": "NONE",
+      "failureCode": "COLLECTION_LEASE_OR_DELIVERY_LOST",
+      "accepted": 0,
+      "complete": false,
+      "acknowledged": 0,
+      "worker": "7c2ce74c-1125-49eb-af78-781f324a8263"
+    },
+    {
+      "reportPresent": true,
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "exitCode": 143,
+      "child": 0,
+      "startup": {
+        "exceptionTypes": [],
+        "codes": [],
+        "phases": [
+          {
+            "elapsedMs": 0,
+            "phase": "STARTING"
+          },
+          {
+            "elapsedMs": 460,
+            "phase": "DATABASE_OPEN"
+          },
+          {
+            "elapsedMs": 487,
+            "phase": "KAFKA_TEMPLATE_READY"
+          },
+          {
+            "elapsedMs": 491,
+            "phase": "WORKER_CONSTRUCTING"
+          },
+          {
+            "elapsedMs": 817,
+            "phase": "METADATA_REQUEST"
+          },
+          {
+            "elapsedMs": 1180,
+            "phase": "METADATA_READY"
+          },
+          {
+            "elapsedMs": 1196,
+            "phase": "WORKER_READY"
+          },
+          {
+            "elapsedMs": 19005,
+            "phase": "PERSISTING"
+          },
+          {
+            "elapsedMs": 19018,
+            "phase": "REPORT_COMPLETE"
+          }
+        ]
+      }
+    },
+    {
+      "reportPresent": true,
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "exitCode": 0,
+      "child": 1,
+      "startup": {
+        "codes": [],
+        "exceptionTypes": [],
+        "phases": [
+          {
+            "phase": "STARTING",
+            "elapsedMs": 0
+          },
+          {
+            "phase": "DATABASE_OPEN",
+            "elapsedMs": 812
+          },
+          {
+            "phase": "KAFKA_TEMPLATE_READY",
+            "elapsedMs": 906
+          },
+          {
+            "phase": "WORKER_CONSTRUCTING",
+            "elapsedMs": 925
+          },
+          {
+            "phase": "METADATA_REQUEST",
+            "elapsedMs": 1540
+          },
+          {
+            "phase": "METADATA_READY",
+            "elapsedMs": 2230
+          },
+          {
+            "phase": "WORKER_READY",
+            "elapsedMs": 2258
+          },
+          {
+            "phase": "PERSISTING",
+            "elapsedMs": 4382
+          },
+          {
+            "phase": "REPORT_COMPLETE",
+            "elapsedMs": 4407
+          }
+        ]
+      }
+    }
+  ],
+  "scope": "PR58 최초 실패의 진단 표본이다. SQLSTATE 미기록으로 최종 예외까지 확정하지 않는다."
+}

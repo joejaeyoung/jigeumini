@@ -29,6 +29,7 @@ public final class CollectorWorker implements AutoCloseable {
     private final Map<String,Active> active=new LinkedHashMap<>();private final Object lock=new Object();
     private final ExecutorService connections=Executors.newVirtualThreadPerTaskExecutor();
     private final ScheduledExecutorService heartbeat=Executors.newSingleThreadScheduledExecutor();
+    private int consecutiveContentions,leaseContentionRetries;
     private boolean closing,closed,persisted;private volatile String failureCode="NONE";private Map<String,Object> finalReport;private Instant startedAt;
     public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
                            CollectionObserver observer) {
@@ -97,7 +98,14 @@ public final class CollectorWorker implements AutoCloseable {
     private void tick() {
         synchronized(lock) {
             if(closed)return;authority.checkAll();long began=System.nanoTime();
-            var held=held();var grant=leases.tick(owner,limits.capacity(),limits.leaseTtl(),mode,held,Set.copyOf(connected),!closing);
+            var held=held();CollectorLeases.Grant grant;
+            try {grant=leases.tick(owner,limits.capacity(),limits.leaseTtl(),mode,held,Set.copyOf(connected),!closing);}
+            catch(CollectorLeases.PlanContended contention) {
+                // 이미 보유한 epoch의 실패는 재획득하지 않는다. 미배정 상태만 다음 1초 tick을 기다린다.
+                if(!held.isEmpty()||closing||stop.get()||++consecutiveContentions>5)throw contention;
+                leaseContentionRetries++;return;
+            }
+            consecutiveContentions=0;
             authority.update(grant,began);
             if(closing)return;
             for(var lease:grant.leases())if(!active.containsKey(lease.channelId())) {
@@ -133,6 +141,7 @@ public final class CollectorWorker implements AutoCloseable {
             boolean released=false;Map<String,Long> held;synchronized(lock){held=held();closed=true;}
             authority.revoke();try{leases.release(owner,held,!failureCode.equals("NONE"));released=true;}catch(Exception failure){if(failureCode.equals("NONE"))failureCode="LEASE_RELEASE_FAILED";}
             var result=new LinkedHashMap<String,Object>();result.put("workerId",owner);result.put("sourceMode",mode);result.put("failureCode",failureCode);
+            result.put("leaseContentionRetries",leaseContentionRetries);
             result.put("delivery",delivery);result.put("released",released);result.put("httpRequests",source.requests());result.put("completedAt",clock.instant());result.put("startedAt",startedAt==null?clock.instant():startedAt);
             result.put("leases",active.values().stream().map(a->Map.of("channelId",a.lease().channelId(),"epoch",a.lease().epoch(),"policyVersion",a.lease().policyVersion(),"stats",a.stats().snapshot(false))).toList());
             result.put("complete",failureCode.equals("NONE")&&Boolean.TRUE.equals(delivery.get("complete"))&&released);finalReport=Map.copyOf(result);

@@ -22,7 +22,7 @@
 - PostgreSQL의단일plan행 `FOR UPDATE` 안에서 선정·등록용량·획득/갱신/해제를직렬화한다. 채널PK당소유자UUID·증가epoch·DB만료시각을하나만저장한다.
 - 프로세스는시작마다새UUID를쓴다. 갱신은동일owner/epoch·미만료·현재선정조건을모두통과해야한다. 만료한기존소유자는같은tick에서부활하지않는다. 해제도owner/epoch를검사해새소유권을지우지않는다.
 - worker최대20개·worker당1~20채널·전체합성20/공개3개의유효배정상한이다. 현재제외된채널도기존임대가유효하면전역용량에포함한다. 등록채널20,000개를넘으면실패하며epoch이력을임의삭제하지않는다.
-- 기본TTL10초(허용6~60초),1초간격갱신이다. 로컬권한기한은DB요청시작의단조시각+DB남은TTL−2초다. 늦은응답은기한을연장하지않고기한이이미지났거나DB호출이실패하면전체worker를중단한다.
+- 기본TTL10초(허용6~60초),1초간격갱신이다. 로컬권한기한은DB요청시작의단조시각+DB남은TTL−2초다. 늦은응답은기한을연장하지않고기한이이미지났거나보유임대의DB호출이실패하면전체worker를중단한다. 미배정 상태의 확인된 잠금 충돌은 아래 제한 재시도만 허용한다.
 - 원천HTTP호출은worker당기본500회·시작간격500ms,동시연결은배정용량이내다. 기존HTTP/WS본문·timeout·재시도상한은유지한다. 이예산은플랫폼공식quota가아니다. 발행전체1000·채널500·inflight64의[제품한도](../pipeline/PUBLISHER.md)를worker마다적용한다.
 
 ## 오래된 worker 차단의 정확한 범위
@@ -52,3 +52,10 @@ status의discovered/eligible/selected와유효assigned/connected를분리한다.
 worker는 producer 생성과 `partitionsFor` 성공을 먼저 확인한 뒤 임대 획득·원천 연결을 시작한다. 준비 실패는 `FLEET_KAFKA_NOT_READY`로 거부하며 HTTP/소켓/임대를 만들지 않는다. metadata 대기는 producer의 `max.block.ms=2000` 설정을 따른다. 이 값이 JVM의 producer 생성 전체 시간을 제한한다는 뜻은 아니다. 실행 중 장애에는 기존 유한 큐·미확인 계수·실패 종료 계약을 적용하며 큐 크기를 늘려 감추지 않는다.
 
 CLI는 결과 경로를 배타 생성하므로 준비 실패 때 빈 파일이 남을 수 있다. 진단 코드는 stdout에서 확인하고 다음 실행에는 새 결과 경로를 사용한다. 기존 결과 파일을 자동 덮어쓰지 않는다. 배포 통합의 FailureDiagnostics는 `FLEET_KAFKA_NOT_READY`와 예외 타입명을 허용하며 원인 메시지는 남기지 않는다.
+
+
+## 유휴 transaction과 미배정 잠금 충돌
+
+#60 / F13 → T02/T08/T11/T14. 임대 apply/tick/release는 transaction에만 유휴2초·잠금1초·SQL3초 제한을 적용한다. 클라이언트 transaction4초와 별개로, 다음 요청이 오지 않는 유휴 transaction은 PostgreSQL이 종료해 plan 잠금을 해제한다. 서버 전체나 연결 풀의 기본 설정을 변경하지 않는다.
+
+미배정 worker의 tick이 SQLSTATE55P03으로 실패하고 rollback이 끝났을 때만 기존1초 간격으로 최대5회 연속 재시도한다. 정상 tick 뒤 연속 횟수를 초기화하며6번째 충돌, 보유 임대, 종료 중, 연결 오류·SQL 취소·commit/rollback 실패는 종료한다. 결과의 `leaseContentionRetries`는 해당 프로세스가 허용한 누적 재시도 수다. 실행 기간과 권한 기한은 그대로 적용한다. [원인 조사](../research/FLEET_DB_LOCK.md)를 참고한다.

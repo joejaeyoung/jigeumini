@@ -370,3 +370,5 @@ F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실�
 잠금 분류는 CollectorLeases의 transaction 완료 경계, 미배정 재시도 횟수와 기한은 CollectorWorker에 둔다. 보유 임대·연결/SQL취소·불확정 transaction을 동일하게 재시도하는 범용 도구를 만들지 않았다. 실제2JVM blackhole, 실제 대기/영구잠금/보유임대와 JDBC rollback 실패·불확정 commit의 합성 경계를 추가한다.
 
 수정 후 집중 검증은 JDBC/worker 단위7개와 실제 Kafka/DB4개가 모두 통과했다. blackhole의 유휴 잠금 해제·epoch2 인계, 미배정 잠금 해제 후 수집, 영구 충돌5회 제한, 보유 임대 충돌의 재시도0을 확인했다. 이후 깨끗한 revision에서 check와 Fleet 전체 회귀를 실행해 통합 영향을 확인한다.
+
+고정 ea7da9b의 check(단위159·하네스24·JAR)와 실제 Fleet23개가 385.072초에 실패0으로 통과했다. 기존 시계/분리 장애·발행 경합·인계5회·초기 metadata와 새 잠금 회귀를 함께 실행했다. Standards 하드/heuristic/차단0, Spec 지적/차단0이다. 원래 CI와 대조·전제 실패를 [검증 기록](fleet/DB_LOCK_VERIFICATION.md)에 보존했다. 이후 docs만 추가하며 최종 정확한 HEAD의 Claude·push/PR CI를 확인한다.

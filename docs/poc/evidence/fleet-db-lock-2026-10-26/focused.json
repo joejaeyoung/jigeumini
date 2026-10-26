@@ -1,0 +1,341 @@
+{
+  "recordedAt": "2026-10-26T04:21:47.565320+00:00",
+  "revision": "d1ee36dd47a67f13142bf48d4e9069cf491478f5",
+  "timestamp": "2026-10-26T04:20:01.114Z",
+  "tests": 4,
+  "failures": 0,
+  "errors": 0,
+  "durationSeconds": 81.474,
+  "cases": [
+    {
+      "case": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver()",
+      "durationSeconds": 20.836,
+      "passed": true,
+      "fleet-evidence": {
+        "planLockBackendPid": 2533,
+        "beforeBlackhole": {
+          "expiresAt": "2026-10-26T04:20:11.033659Z",
+          "owner": "535caef7-80b4-409f-b62b-65494f65b75f",
+          "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "databaseNow": "2026-10-26T04:20:05.219380Z",
+          "epoch": 1
+        },
+        "takeoverSeconds": 6.227702916,
+        "previousProcessAliveAtTakeover": true,
+        "planLockBackendEndedBeforeTakeover": true,
+        "sourceForwardedBytesDuringBlackhole": 100,
+        "oldSessionPostTakeoverMarker": 0,
+        "databaseDiscardedBytes": 123,
+        "backendSampleCount": 46,
+        "idleTransactionSamples": 17,
+        "blockedSamples": 7
+      },
+      "counts": {
+        "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+        "recordedAt": "2026-10-26T04:20:21.638169Z",
+        "accepted": 3,
+        "acknowledged": 3,
+        "unconfirmed": 0,
+        "brokerPhysical": 3,
+        "brokerUnique": 3,
+        "databaseUnique": 3,
+        "quarantinedSourceRecords": 0,
+        "brokerDatabaseResolvedDifference": 0,
+        "producerSentUnique": 3,
+        "producerAcknowledgedUnique": 3,
+        "acknowledgedMissingFromBroker": 0
+      },
+      "children": [
+        {
+          "complete": false,
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "leaseContentionRetries": 0,
+          "released": true,
+          "delivery": {
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 2,
+            "accepted": 2,
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 2,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "channels": {
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+                "accepted": 2,
+                "acknowledged": 2,
+                "rejected": 0,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "peakInFlight": 1
+          }
+        },
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "leaseContentionRetries": 1,
+          "released": true,
+          "delivery": {
+            "accepted": 1,
+            "acknowledged": 1,
+            "peakPending": 1,
+            "rejected": 0,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 1,
+            "channels": {
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+                "accepted": 1,
+                "acknowledged": 1,
+                "rejected": 0,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 1,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "queued": 0,
+            "failureCode": "NONE",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 0,
+            "complete": true
+          }
+        }
+      ],
+      "fleet-observed": {
+        "planLockBackendPid": 2533,
+        "beforeBlackhole": {
+          "expiresAt": "2026-10-26T04:20:11.033659Z",
+          "owner": "535caef7-80b4-409f-b62b-65494f65b75f",
+          "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "databaseNow": "2026-10-26T04:20:05.219380Z",
+          "epoch": 1
+        },
+        "takeoverSeconds": 6.227702916,
+        "previousProcessAliveAtTakeover": true,
+        "planLockBackendEndedBeforeTakeover": true,
+        "sourceForwardedBytesDuringBlackhole": 100,
+        "oldSessionPostTakeoverMarker": 0,
+        "databaseDiscardedBytes": 123,
+        "backendSampleCount": 46,
+        "idleTransactionSamples": 17,
+        "blockedSamples": 7
+      }
+    },
+    {
+      "case": "ownedLeasePlanLockFailureDoesNotRetryOrReacquireInSameProcess()",
+      "durationSeconds": 21.472,
+      "passed": true,
+      "fleet-evidence": {},
+      "counts": {
+        "scenario": "ownedLeasePlanLockFailureDoesNotRetryOrReacquireInSameProcess",
+        "recordedAt": "2026-10-26T04:20:43.239953Z",
+        "accepted": 1,
+        "acknowledged": 1,
+        "unconfirmed": 0,
+        "brokerPhysical": 1,
+        "brokerUnique": 1,
+        "databaseUnique": 1,
+        "quarantinedSourceRecords": 0,
+        "brokerDatabaseResolvedDifference": 0,
+        "producerSentUnique": 1,
+        "producerAcknowledgedUnique": 1,
+        "acknowledgedMissingFromBroker": 0
+      },
+      "children": [
+        {
+          "complete": false,
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "leaseContentionRetries": 0,
+          "released": false,
+          "delivery": {
+            "channels": {
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+                "accepted": 1,
+                "acknowledged": 1,
+                "rejected": 0,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 1,
+            "accepted": 1,
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN"
+          }
+        }
+      ]
+    },
+    {
+      "case": "persistentPlanLockExhaustsUnassignedRetriesWithoutSourceAdmission()",
+      "durationSeconds": 18.25,
+      "passed": true,
+      "fleet-observed": {
+        "workerResult": {
+          "released": false,
+          "startedAt": "2026-10-26T04:20:48.075647Z",
+          "leases": [],
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "sourceMode": "SYNTHETIC",
+          "workerId": "a45f3beb-b30c-40e8-8bee-d3d5b85085c8",
+          "delivery": {
+            "complete": true,
+            "accepted": 0,
+            "acknowledged": 0,
+            "peakPending": 0,
+            "rejected": 0,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 0,
+            "channels": {},
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "queued": 0,
+            "failureCode": "NONE",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 0
+          },
+          "completedAt": "2026-10-26T04:21:01.037550Z",
+          "complete": false,
+          "httpRequests": 0,
+          "leaseContentionRetries": 5,
+          "fixtureClockOffsetSeconds": 0,
+          "producerProbe": {
+            "brokerAcknowledgedEventIds": [],
+            "sentEventIds": []
+          }
+        }
+      }
+    },
+    {
+      "case": "unassignedWorkerRetriesRolledBackPlanLockAndCollectsAfterUnlock()",
+      "durationSeconds": 20.852,
+      "passed": true,
+      "fleet-evidence": {
+        "observedLockHoldSeconds": 2.329902458
+      },
+      "counts": {
+        "scenario": "unassignedWorkerRetriesRolledBackPlanLockAndCollectsAfterUnlock",
+        "recordedAt": "2026-10-26T04:21:22.180695Z",
+        "accepted": 1,
+        "acknowledged": 1,
+        "unconfirmed": 0,
+        "brokerPhysical": 1,
+        "brokerUnique": 1,
+        "databaseUnique": 1,
+        "quarantinedSourceRecords": 0,
+        "brokerDatabaseResolvedDifference": 0,
+        "producerSentUnique": 1,
+        "producerAcknowledgedUnique": 1,
+        "acknowledgedMissingFromBroker": 0
+      },
+      "children": [
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "leaseContentionRetries": 1,
+          "released": true,
+          "delivery": {
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "channels": {
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+                "accepted": 1,
+                "acknowledged": 1,
+                "rejected": 0,
+                "pending": 0,
+                "oldest": null,
+                "stopped": false,
+                "reason": "NONE"
+              }
+            },
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 1,
+            "accepted": 1
+          }
+        }
+      ],
+      "fleet-observed": {
+        "observedLockHoldSeconds": 2.329902458
+      }
+    }
+  ],
+  "files": {
+    "TEST-io.chatpulse.fleet.FleetIntegrationTest.xml": "d34d7d37f9a10cd57031ffe75107e0e4e834250e0f3e813c6e6991b37ff16c33",
+    "fleet-evidence-databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver.json": "dde4cb50d5c912c8cc63a165be31168aba1ef20f1615c53d8ab4a36227aecdef",
+    "fleet-observed-databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver.json": "e77049bc927a4976d171fff78914c3f817a999e5e64caab58998f380c33b4b45",
+    "fleet-evidence-ownedLeasePlanLockFailureDoesNotRetryOrReacquireInSameProcess.json": "dd2d2c701c1dfe9f56d028fca3a78464c9955c75efd4ce8d28b8b82cefe43c1f",
+    "fleet-observed-persistentPlanLockExhaustsUnassignedRetriesWithoutSourceAdmission.json": "543d0d4aa3736f035ffc9f559c9335f3c3703607b2ea4dd592c88816b5cb88ae",
+    "fleet-evidence-unassignedWorkerRetriesRolledBackPlanLockAndCollectsAfterUnlock.json": "5cdaa91fa2b1108b38b2bda586d18723745a7436b79c8683bb6bcd92a55687db",
+    "fleet-observed-unassignedWorkerRetriesRolledBackPlanLockAndCollectsAfterUnlock.json": "70bb436486d31d249890f02350203b6959f8daa62875000a4c37358a0b4cdaec"
+  },
+  "codeEquivalentRevision": "ea7da9b326a1cbf7160cb661df289509b2283175",
+  "scope": "단위7개와 실제Kafka/DB4개 집중 검증 중 실제4개 정제 근거. 당시 제품/시험 코드는 미커밋 상태였으며 동일 내용이 ea7da9b에 저장됐다."
+}

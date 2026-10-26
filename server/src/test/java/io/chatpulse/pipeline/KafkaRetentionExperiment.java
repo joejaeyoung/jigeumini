@@ -100,8 +100,8 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
             producer.flush();row.put("input",Map.of("additionalRecords",target,"initialRecords",30,"payloadBytes",700,"keyBytes",32,"compression","none","durationMillis",(System.nanoTime()-began)/1e6,"firstTimestamp",Instant.ofEpochMilli(firstTimestamp).toString()));
             row.put("acknowledged",List.of(acknowledged.get(0),acknowledged.get(1),acknowledged.get(2)));row.put("deliveryFailures",failures.get());
             require(failures.get()==0&&acknowledged.get(0)+acknowledged.get(1)+acknowledged.get(2)==target+30L,"RETENTION_ACK_MISMATCH");
-            row.put("afterInput",snapshot(topic));var samples=new ArrayList<Map<String,Object>>();row.put("samples",samples);save();
-            boolean expired=false,filesSettled=false;int stable=0;List<?> previousBounds=List.of();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(30);
+            row.put("observationBudgetSeconds",45);row.put("afterInput",snapshot(topic));var samples=new ArrayList<Map<String,Object>>();row.put("samples",samples);save();
+            boolean expired=false,filesSettled=false;int stable=0;List<?> previousBounds=List.of();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(45);
             while(System.nanoTime()<deadline) {
                 var sample=snapshot(topic);samples.add(sample);var bounds=(List<?>)sample.get("bounds");
                 long earliest=((Number)((Map<?,?>)bounds.getFirst()).get("earliest")).longValue();

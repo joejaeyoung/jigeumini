@@ -128,3 +128,9 @@ PostgreSQL **16** 공식 문서와 Kafka **4.1 문서·4.1.2 소스**를 조회�
 - 기존 데이터 migration, 만료 결과 API 표현, PITR·고정 replay와의 상호작용.
 
 이번 조사에서는 보존 기간·DB partition 도입·새 admission floor를 확정하지 않았다. 구현 선택과 실제 Kafka/PostgreSQL 검증 결과가 있어야 #63 완료를 판정할 수 있다.
+
+## 8. 실제 실험 준비에서 확인한 지연
+
+Kafka4.1의 segment.bytes 최소값은1MiB다. 16KiB 설정은 실제4.1.2 broker에서 InvalidConfigurationException으로 거부됐다. [공식 설정](https://kafka.apache.org/41/configuration/topic-configs/#segment.bytes).
+
+새 broker의 retention scheduler는 검사 주기 외에 initialTaskDelayMs 이후 시작한다. [4.1.2 LogManager 소스](https://github.com/apache/kafka/blob/4.1.2/core/src/main/scala/kafka/log/LogManager.scala#L550). #63의 최초30초 파일 관측은 끝 무렵에 log→log.deleted와 earliest0→40을 보았지만1초 파일 삭제와 연속 안정 표본을 기다리지 못했다. 삭제 미동작으로 단정하지 않고, 시작 지연·파일 삭제·안정 표본을 포함하는45초 유한 관측 예산으로 보완했다. 제품 retention값은 변경하지 않았다.

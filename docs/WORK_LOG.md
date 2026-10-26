@@ -684,3 +684,5 @@ origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #6
 보존 하네스93cf16f의 DB 측정은 정합/cleanup 통과다. 각 집계60,000행×3회·동시10,000건을 대조했고 shared floor 대기는119ms였다. 500/s 목표 입력은 최대pacing1.783초로 밀려 처리율 보장으로 세지 않는다. Kafka 첫 실행은 topic 생성 단계에서 종료했고 소유 자원을 정리했다. 원인은 최초 결과에서 cause를 누락해 확정하지 않았으며, 16KiB segment가 공식4.1 최소1MiB 미만인 설정을 찾아 최소값으로 수정하고 동일broker의 InvalidConfigurationException 대조를 추가했다.
 
 Kafka 대조에서16KiB segment의 InvalidConfigurationException을 실제broker로 확인했다. 다음 실행은 초기30건 ACK/manifest 확보 후 BusyBox find가 GNU -printf를 지원하지 않아 파일 관측에서 실패했다. 소유 자원 정리를 확인하고 stat 조합으로 교체했다. Standards의 생성 직후 조회 지적도 반영해 사용자 지정 실험 설정을 기존 KafkaSupport의 공통기한·한정 재시도 경로로 검사하도록 정리했다. 제품 설정의 최소보존 제한을 완화하지 않았다.
+
+세 번째 Kafka 실행은 ACK120건·전partition 최초offset0→40과.deleted 파일89,295bytes를 관측했으나30초 예산 마지막에 도달해 파일 제거 확인까지 완료하지 못했다. 4.1.2 LogManager의 초기작업지연과1초 파일삭제·연속표본을 대조해 관측 예산을45초로 설정했다. 실패자료를 보존하며 삭제실패/성공을 혼동하지 않는다.

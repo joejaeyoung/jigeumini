@@ -269,3 +269,119 @@ Claude43b3474 진입 리뷰는 REQUEST_CHANGES였다. 불충분 ISR은 직접 Ka
 리팩토링은 소유 cluster 수명·readonly record probe·실험판정 경계를 유지한다. 실제디스크삭제와원천조회오류를구분하고 임의의일반예외로PASS하지않는다. 빈partitioncommit은기존공통소비계약을재사용했다. 진입Claude지적3개보완후APPROVE FOR EXPERIMENT를받았고 최종근거HEAD는다시리뷰/CI한다.
 
 f992ef1의 `./scripts/check` 단위147·하네스20·JAR도 통과했다. 실제 디스크 실험13단계와 일반 integration CI는 서로 다른 검증으로 기록한다.
+
+### 2026-10-26 수집기 장애 경계 #44 구현
+
+F13 → T02/T11/T14. `origin/develop` c2aeffc에서 `technicaltest/collector-boundaries`를 분기했다. #43 soak의 이미지·probe class를 고정한 뒤 로컬 부하 시험을 겹치지 않고 구현한다. 공식 시간 API·PostgreSQL 시각과 기존 임대 경계를 [조사](research/COLLECTOR_FAILURE_BOUNDARIES.md)에 기록했다.
+
+수신/관측/보고 Clock을 연결하고 기본 systemUTC를 유지한다. 임대 DB clock_timestamp와 System.nanoTime 기한은 그대로다. 합성 source marker로 부모와 skew된 child의 receivedAt을 직접 비교하던 인과 판정을 보완한다. 시계가 앞선 입력의 live 격리도 broker→정상 ledger/격리 offset 집합으로 구분할 계획이다. 독립 loopback DB/WS proxy와 실제 producer ID 관측은 테스트 내부에 둔다. 최종 permit 이전, permit 이후 send 이전, broker ACK 이후 callback 이전을 별도 실제 broker/DB 사례로 구현한다. 실행·리뷰 전 초안이며 결과로 주장하지 않는다.
+
+사전 Standards/Spec 정적 검토에서 차단0을 확인했다. Spec의 시계 인과 장벽2건은 음수 Clock worker의 실제 INVALID_MESSAGE 관측 파일과 양쪽 Clock 적용 뒤 새 lease 기준값으로 보완했다. DB blackhole이 열린 transaction의 plan 행 잠금을 남길 가능성은 실제 backend state/transaction/차단 PID와 child 고정 진단을 기록해 판별한다. 새 장애 시험 실행 전이며 간헐 통과로 원인 해소를 주장하지 않는다.
+
+## 2026-10-26 새 migration 복구 시험 #42
+
+- F16/F08 → T04/T16. fetch한 origin/develop에서 새 `technicaltest/migration-recovery`를 만들고, 최종 CI 중인 #41의 검증 commit을 fast-forward로 포함했다. #41 게이트를 확인해 develop 병합 후 기준을 통합한다. 다른 worktree는 변경하지 않았다.
+- 제품 V12 이미지 위에 시험 SQL만 얹은 V13 후보·SQL 실패·프로세스 중단 이미지를 분리한다. 같은 Git 코드 revision임을 명시하고 원래 JAR hash·SQL hash·시험 build ID·실제 image ID를 함께 기록한다.
+- DDL/backfill 후 sequence 표시를 확인해 실제 실패/종료 지점을 입증한다. V13을 적용한 DB에서 V12 시작은 strict schema 검증으로 거부해야 한다. 복귀는 V12 백업을 새 DB에 복원하고 새 group6개를 정렬해 보존 입력을 재생하는 경로다.
+- 리팩토링 점검: 기존 배포 리허설의 시나리오 순서를 `scenarios`로 분리해 자원 소유권·오류/정리 정책을 공유한다. 두 실제 사용처의 복원 대상 이미지를 인자로 받고, readiness 후 buildId도 manifest와 대조한다. 시험 SQL은 제품 migration과 분리한다. 실행 결과는 완료 후 기록한다.
+
+- 첫 `47d5659` 실행은 제품 이미지 빌드 뒤 fixture FROM에 로컬 image ID를 전달해 실패했다. BuildKit이 이를 docker.io/library/sha256 태그로 해석했다. DB/Compose 시험은 시작하지 않았다. 로컬 manifest의 tag가 기록한 image ID와 같은지 빌드 전후 검사하고 그 tag를 base로 사용하도록 보완한다. 최초 출력은 ignored work에 보존한다.
+
+- 두 번째 `0227330`은 기준 이미지와 fixture 이미지3개/manifest4개를 만들었으나 dynamic import가 scripts/__pycache__를 만들어 clean-tree 사전 검사에서 거부됐다. Compose를 시작하지 않았고 생성 secret 정리가 완료됐다. bytecode 생성을 끄고 소유한 pyc만 정리했다.
+- Spec 리뷰의 차단1건: 별도 연결에는 미커밋 DDL도 보이지 않으므로 schema만 같다고 중단 transaction 종료를 단정할 수 없다. interrupted fixture에 연결 검사1초와 고정 application_name을 지정하고, kill137 뒤 해당 PostgreSQL backend가 사라진 것을 확인한 후 snapshot/history를 대조하도록 보완했다. [PostgreSQL16 연결 검사](https://www.postgresql.org/docs/16/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL)는 기본0에서 다음 socket 상호작용까지 단절 감지가 지연될 수 있다고 설명한다. 시험 설정의 범위이며 운영 기본값의 즉시 종료 보장을 주장하지 않는다.
+- Standards의 자원 생성 순서 지적에 따라 실패/중단 manifest를 비밀 생성 전에 읽도록 옮겼다. Flyway history의 version·checksum·success도 snapshot에 포함해 기존 history와 복원 결과를 비교한다.
+
+- clean `bc2ff5b`의 V13 리허설16단계가 통과했다. 중단137/backend 종료/marker1, SQL 실패 뒤DDL/history복원, V13 backfill10/10, 구 V12 시작거부, 새DB V12복원·새group6개·집계20/알림2·기존group불변·선택snapshot차이0이다. 복원 관측25.163초, 실제웹8경로+리포트상세/26API200/JS오류0, 종료1.243초·OOM없음·소유Compose자원/secret/dump정리를 확인했다.
+- 공유 리허설의 복원 대상 선택을 앞당긴 영향은 기존 V12 17단계로 별도 확인했다(기준0227330→후보bc2ff5b). 하네스20개·문서/ID검사 통과. 두 최초실패의 commit·원인·로그 hash와 성공 두 실행의 시각·manifest·hash를 정제근거에 보존했다. 최초 실패 시각은 별도 계측하지 않았다. 생성 이미지는 로컬 manifest로 남기며 Compose 자원정리와 구분한다.
+- Standards의 초기heuristic1건과 Spec의 초기차단1건을 해소했고 bc2ff5b는 둘 다 남은지적0이다. Claude 정적리뷰도 APPROVE다. 비차단의10초JDBC timeout/느린호스트 kill창, 코드에서 파생된설정값/결과, 실제SQLSTATE미수집·marker판정범위를 검증문서에 명시한다. 최종문서HEAD Claude/push/PR CI는 PR51게이트에서 확인한다. T16은 WAL PITR·외부운영 등이남아 부분검증을 유지한다.
+
+- #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.
+
+## 2026-10-26 전체 제품 부하·지속 실행 #43
+
+- F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12. fetch한 origin/develop에서 `technicaltest/product-soak`를 만들고 최종 CI 중인 #42를 fast-forward로 포함했다. #42 병합 뒤 develop 기준을 통합한다.
+- 제품 분석기와 부하 생성기를 별도 JVM·소유 Compose로 분리한다. 생성 입력의 UUID/내용/10초 합계를 DB 결과와 대조하고, 그룹6개·24개 group/topic/partition의 offset·lag·처리량과 API/DB 지연을 기록한다. 원천 세션/heartbeat와 outbox는 합성 입력이며 실제 원천·급상승 감지 정확도 부하 검증으로 확대하지 않는다.
+- JMX는 시험 overlay의 내부망에서만 열고 분석기 heap을 읽는다. 분석기 RSS·컨테이너 CPU/메모리와 생성기 heap/RSS는 별도 표본이다. 기존 운영 compose를 바꾸지 않는다. 실행 클래스는 결과 디렉터리에 고정 복사하고 hash를 남겨 뒤의 빌드가 실행을 바꾸지 않게 한다.
+- 균등/80% 편향 각120초100건/s, 단계50/100/200건/s 각60초, soak50건/s1800초를 고정한다. 100건마다 동일 UUID를 새 offset으로 중복 발행한다. smoke/soak은 분석기만20초 SIGSTOP/CONT하며 입력은 계속한다. 실행 전 설계이며 아직 통과 근거는 아니다.
+- 최초 b91b8e7 smoke는 격리 인프라/분석기 시작 후 `OWNED_CONTAINER_MISSING`으로 중단했다. 생성기 one-off가 `api` service label을 공유해 API 소유권 조회에 컨테이너2개가 반환된 것이 원인이다. 생성기를 별도 `load-probe` service로 분리한다. 최초 결과와 정리 성공을 보존하며 완료로 세지 않는다.
+- f71423a의60초 smoke는 고유1200·물리1212·모든 집계 대조·STOP/CONT·자원 정리를 통과했다. 다만 리뷰에서 입력 중 offset 조회 순서의 음수 lag 가능성과 정지 구간에 한정하지 않은 lag 단언을 지적해, 최종 근거로 쓰기 전에 commit→end 조회 순서/관측 시각과 STOP 구간 표본을 보강한다. 비밀 생성 뒤 파일 준비는 정리가 보장되는 phase로 옮기고 Python/Java 계획 일치를 장애 주입 전에 대조한다.
+- 0904368 smoke도 고유1200·물리1212·정지중 양수lag1표본·재개5.023초 뒤 첫0lag·정리 통과다. Claude는 장시간 입력 중0lag에 의존한 복구 판정, API timeout과 묶인 offset 계측, 계측 커버리지 미검사로 REQUEST_CHANGES를 냈다. offset은 독립1초 JSONL로 기록하고 재개 뒤 첫 end를 고정해 그 위치까지의 복구를 잰다. API/DB/JMX는 별도5초 표본이며 정상 구간90% 계측 성공·최소 표본 수와 정상구간 API200을 완료 조건에 넣는다.
+- 첫 uniform03은 계측 보강을 위해 소유 Python에 SIGINT로 중단했다. 앞부분에는 별도 로컬 통합 시험/원인 조사도 겹쳤으므로 최종 성능 비교로 사용하지 않는다. 이후 matrix는 다른 실험이 없는 상태에서 실행한다. 진행 파일을 작은 JSON으로 분리해1초 폴링의 전체 결과 재직렬화를 없앴다. 이전 실패/중단과 보강 전 결과를 보존한다.
+
+### #43 장기 계측의 시간 공백 검사
+
+`6799d11` smoke에서 offset59/59, 정상API64/64, 정지20.238초·고정offset복구1.948초와 모든 집계 대조·정리를 통과했다. Standards0/Spec1: 수집된 표본만으로 성공률을 계산하면 장기 실행에서 느린 계측이2개만 남아도 통과할 수 있었다. 입력 시작 epoch를 명시하고 정상10초 창의 완전한 API/DB/메모리/버퍼 표본 비율90%·정상 구간 최대15초 간격을 추가한다. 실제 실행값과 의도적으로 누락한 표본의 거부를 구분해 재검증한다.
+
+### #43 정지 이후 준비 회복과 실패 시 계측 보존
+
+Claude의 `6799d11` 후속 리뷰는 독립 offset/고정 복구/계측 누락 보완을 확인했으나, CONT 직후503을 정상구간 오류로 처리하는 조건을 지적했다. 고정 offset 도달과 첫 readyz200을 각각 기록하고 둘 다 완료한 뒤2초까지를 회복으로 분류한다. 회복 예산60초와 이후 readyz200을 별도로 요구하며, 구간 안 오류도 숨기지 않는다. 기존 smoke05 원본을 재분석해 Kafka1.067초·readyz5.049초를 구분했다.
+
+느린 표본도 JSONL에 즉시 남기고, Docker 계측 실패는 표본의 고정 오류형과 커버리지로 판정한다. 정지 시간/표본 부족도 분석 결과에 실패 코드로 남긴다. 정상 시간 공백·재개 직후503·계측 누락·Docker 통계 누락의 하네스 회귀4개를 추가한다. 소유 probe JVM과 호스트의 시각을 호출 전후로 재고 불확실성을 기록한다. fault 해제 직전에는 최대10초짜리 자원 조회를 시작하지 않는다.
+
+실행 중인 `f9a91f6` matrix는 이미 복사한 클래스/이미지와 로드한 분석 코드를 계속 사용한다. 균등/80%편향120초는 각각12000고유·12120ACK, 정상API192/192, 정리 통과; 생성기 최대RSS는 각각187342848/187015168bytes다. 마지막 단계 부하는 실행 중이며 완료 여부는 결과 파일로 판단한다. 새로운 하네스는 별도 smoke와30분 실행에서 검증한다.
+
+
+### #43 30분 전체 제품 부하 완료
+
+2026-10-26 · F03/F04/F05/F06/F07/F10/F14 → T02/T07/T08/T11/T12. `03eb75f` 입력1800.007582초·고유90,000/물리90,900, accepted=ACK90,900, 거절/미확인0, ranking/trend/category/report 각90,000 ledger와3,615 bucket·관측1,200·알림60을 독립 기대값과 대조했다. 24개 최종 lag0, 정상API2,784회200·STOP8회timeout·복구8회200, 정상10초window176/176이다. STOP20.303초 뒤 고정 end 도달2.245초·첫ready200표본5.091초를 기록하고 소유 container/volume/비밀을 정리했다.
+
+`f9a91f6` uniform/hot/steps와03eb75f smoke/soak revision을 분리했다. 정상 profile 단회와 전체 실행 transaction timestamp 지연, GC 후 생존량이 아닌 heap used를 [검증](PRODUCT_LOAD_VERIFICATION.md)에 명시했다. 측정/입력/오케스트레이션/판정 모듈을 분리한 기존 리팩토링을 유지하며 의미 없는 공통 wrapper를 추가하지 않았다. 단위147·하네스24는03eb75f, 실제 Kafka/DB100개는0904368의 회귀다. 최종 통합 Claude·CI는 별도 게이트다.
+
+### 2026-10-26 Outbox 거부 시험 준비 보완 #52
+
+F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외를 기대했으나 반환했다. 동일 HEAD push40254939425는 성공했다. 로컬 최소 하네스는 동적 변경20/생성 시 제한20 모두277byte 입력을64byte 한도에서 거부하여 원래 CI 실패를 재현하지 못했다. 실패 시 반환값/실제 producer 오류를 수집하지 않아 원인을 확정하지 않는다.
+
+시험 topic 생성 시64byte 제한을 함께 지정하고, 동일 topic·같은 필드 구성의 payload를 사용한 별도 실제 producer 제어 발행에서 RecordTooLargeException·offset0을 확인한 뒤 outbox를 호출한다. Outbox 자체는 하위 원인을 숨기는 기존 일반 오류 계약으로 확인하며, pending/offset/반환값을 정제 진단에 남긴다. 기본 크기 복구 뒤에는 OUTBOX_DELIVERY_UNAVAILABLE만15초 한도에서 재시도하며 성공/잘못된 pending/다른 오류를 구분한다. 독립 schema/topic20회 반복으로 거부→복구→추가 발행 없음까지 대조한다. 제품 코드는 바꾸지 않는다.
+
+사전 리팩토링 검토 Standards0/Spec1: 일반 Outbox 오류만으로 실제 broker의 크기 거부를 구별하지 못하는 근거 공백을 제어 발행으로 보완했다. [조사](research/OUTBOX_READINESS.md)에 공식4.1.2 소스와 추론/미재현 범위를 기록했다.
+
+`cb098c0`에서 `./scripts/check` 단위147·하네스20·JAR와 실제 Kafka/PostgreSQL 집중20회가 통과했다(2026-10-26 02:09:52 UTC 시작, 12.692초). 매회 독립 topic/schema로 실제 크기 거부, pending 유지·end0, 복구 뒤 end1·pending 해제·추가 발행 없음을 확인했다. 이번 fixture payload는276byte이며 사전 최소 probe의277byte와 구분한다. 복구 재시도는20회 모두0회였다. [정제 근거](poc/evidence/outbox-readiness-2026-10-26.json)에 원본 hash를 남겼다. 보완 후 Standards/Spec은 각각 지적0·차단0이다. 최종 Claude와 push/PR CI는 병합 게이트로 별도 확인한다.
+
+최종 리뷰 `b654ea4`는 Claude APPROVE였다. 비차단 의견의 근거 시각 중복 Z·숫자 타입을 정정하고, 제어 payload가 Outbox DB row를 직접 읽은 값은 아니라는 표현을 명확히 했다. 최종 commit은 다시 리뷰와 CI를 확인한다.
+
+
+### 2026-10-26 수집기 자식 JVM 시작 진단 #54
+
+F13 → T08/T14. PR51 push40254127191과 PR53 push40258124001의 기존 두 수집기 인계 시험이 연결2/실제1로 실패했다. PR53 최종65ff2d7은 Claude APPROVE와 PR CI 성공(실제119개)이지만 push 실패로 병합하지 않았다. 실패 시 한 자식의 정상 보고서만 있어 생성자 예외인지 실행 중 상실인지 아직 확정하지 않는다.
+
+수집기 fixture에 시작 단계·단조 경과 시간·예외 타입 체인·허용 코드만 쓰는 진단을 추가하고, 부모는 종료코드와 보고서 유무를 함께 남긴다. 기존 인계 시험을 독립 topic/schema5회로 관측한다. 이 초기 단계에서는 producer 최초 metadata 조회2초 제한을 가설로 두고 정책을 유지했다. 이후 별도 실제 bootstrap 차단에서 관측한 timeout 경계에 근거해 시작 견고성을 보완했으며, 과거 CI 내부 원인 규명으로 취급하지 않는다. #43의 30분 부하 측정 중에는 로컬 중량 빌드를 겹치지 않고 원격 CI로 관측한다.
+
+
+### #54 실제 초기 bootstrap 차단과 제한 재시도
+
+2026-10-26 · F13 → T08/T14. `ae01064`에서 실제 Kafka bootstrap TCP 응답을 버려 metadata2,008ms timeout·자식 종료1·보고서 누락을 재현했다. `ea3eb34`는 임대 전 TimeoutException만 최대5회 시도한다. 경로 복구 후 ACK10/ledger 일치와 영구 차단 후 timeout5회·임대/원천0을 확인했다. 과거 CI의 내부 원인은 계속 미확정이며 동일 원인으로 단정하지 않는다.
+
+`./scripts/check` 단위151·하네스20·JAR와 실제 Fleet13개(독립 인계5회)가 통과했다. 시작02:45:55.384 UTC·85.412초다. [조사](research/FLEET_STARTUP.md)와 [근거](poc/evidence/fleet-startup-2026-10-26.json)에 실패/성공 revision을 분리했다. Spec 지적0, Standards P2의 진단 오류로 cleanup 누락 가능성은 `f0b2fcf`에서 진단 오류 격리와 process/report 등록 순서로 수정했다. 제품 metadata 경계만 작게 추출하며 실행 중 발행 한도를 변경하지 않았다.
+
+후속 `f0b2fcf`도 단위151·하네스20·JAR 통과, Standards 재검토 차단0이다. 실제 Fleet13 실행 revision은 ea3eb34로 유지한다. 최종 Claude·push/PR CI 확인 뒤 PR55에 포함된 #52까지 통합한다.
+
+
+### #42 선행 시험 보완 통합
+
+PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI 단위151·실제125(Fleet13) 확인 후07f2444로 develop 병합했다. PR53도 포함된commit으로 GitHub에서병합상태가되었다. #54는완료·보드Done, #52는PR51최종CI조건을계속확인한다.
+
+#42에07f2444를통합했다. STATUS/WORK_LOG의충돌은각실행의revision/근거를보존하고현재상태로합쳤다. migration코드·fixture는불변이다. 기존44615d0 승인과실제리허설결과를유지하되새HEAD의check·Claude·push/PR CI를다시확인한다.
+
+
+### #43 최종 근거 리뷰 보완·선행 통합
+
+164f66a의Claude REQUEST_CHANGES는문서/근거범위3건이었다. API는단일순차probe(명목1.6요청/s)이며webproxy·collector를실행하지않고 JMX/healthcheck실험overlay를사용함을명시했다. 실제경로는전역4개·고정채널3개·readyz이며모두단일채널이라는리뷰전제는코드와다르다. soak p95가uniform보다높은원인은미규명으로남기고, 전체quantile을정상구간quantile로바꾸지않는다. 정상/장애분해자료가없어지연안정성주장을하지않는다.
+
+개별근거의files/partitions/apiLatencyMillis/memoryBytes/minuteSamples를색인에명시했다. 해당데이터와원본hash는기존파일에있었으나이전리뷰에첨부되지않았다. 사용한정제스크립트를scripts로보존하고원본5개실행에서공유JSON과동일한지대조한다. 순위/증가율·해시알고리즘자체·알림중복은독립검증에서제외한다. DB count7개는계측부하이며docker stats메모리와VmRSS도구분했다. #42 c34dc2b에포함된#52/#54를통합했으며문서충돌은양쪽이력을보존했다.
+
+
+### #44 실제 경계 근거와 시작 진단 통합
+
+94da3ad의push40260027568·PR40260031297에서실제Fleet14개(새경계7개)가모두통과했다. 전자는전체성공, 후자는기존Outbox1개실패였다. [검증](fleet/FAILURE_BOUNDARIES_VERIFICATION.md)·[근거](poc/evidence/collector-boundaries-2026-10-26/summary.json)에실제2JVM시계/분리장애와별도같은JVM의permit/send/ACK경합을구분했다. DBblackhole인계6.082초·이전프로세스생존·이전sessionmarker0, WS공백1/복원0, 검사후send는ACK가능을기록했다.
+
+#43의420efa3(선행#42/#52/#54포함)을통합했다. Clockargs와bootstrapargs충돌은 mode/clock/bootstrap 위치를통일하고, 2종시작진단을#54의phase/예외타입/허용코드진단으로합쳤다. 실제producer관측과clock제어는보존한다. 진단쓰기실패가cleanup을막지않게했고 성공한process/report만함께등록한다. 제품Clock전달과임대전metadata재시도경계를모두유지하고기존한도는바꾸지않았다. 새통합HEAD의20개Fleet회귀와최종리뷰/CI를확인한다.
+
+통합 `34e824e`에서 단위152·하네스24·JAR, 실제 Kafka/DB Fleet20개가 143.251초에 실패0으로 통과했다. XML·각 진단 hash와 permit 경계3개 결과를 보존했다. Standards/Spec은 각각 지적0·차단0이다. 원래 CI14개 수치와 로컬 통합20개 수치를 혼합하지 않는다.
+
+### #43 환경 한계·통계 범위 재검토
+
+최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.
+
+### #45 선행 검증 통합과 최종 리뷰 재요청
+
+#42/#43/#44/#52/#54가 포함된 e90dc32를 통합했다. 코드 충돌은 없으며 README/STATUS/WORK_LOG의 양쪽 근거를 보존하고 오래된 실행 대기 문구를 실제 결과로 고쳤다. f992ef1에서 실행한 KafkaDiskLossExperiment/KafkaDiskProbe/LocalKafkaCluster와 replay/producer 제품 경로는 통합으로 변경되지 않았다. 단위·하네스·컴파일과 최종 CI를 확인하며 동일 디스크 실험은 반복하지 않는다. 초기 최종 Claude57f3024 요청은 14분 이상 출력이 없는 상태에서 소유 CLI만 종료했고 승인으로 취급하지 않는다. 통합 최종 HEAD는 전체 변경/실제 근거로 새 리뷰를 요청한다.

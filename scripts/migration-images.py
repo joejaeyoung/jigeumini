@@ -21,6 +21,7 @@ def build(baseline_path, directory):
     assert max(int(p.name.split('__')[0][1:]) for p in migrations.glob('V*__*.sql')) == 12
     for entry in baseline['images'].values():
         assert json.loads(run('docker', 'image', 'inspect', entry['id']))[0]['Id'] == entry['id']
+        assert json.loads(run('docker', 'image', 'inspect', entry['tag']))[0]['Id'] == entry['id']
     directory = pathlib.Path(directory).resolve()
     directory.mkdir(parents=True, exist_ok=False)
     (directory / 'baseline.json').write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + '\n')
@@ -32,13 +33,14 @@ def build(baseline_path, directory):
             context = pathlib.Path(temporary)
             (context / fixture.name).write_bytes(fixture.read_bytes())
             (context / 'replay-build-id.txt').write_text(build_id + '\n')
-            (context / 'Dockerfile').write_text('ARG BASE_IMAGE\nFROM ${BASE_IMAGE}\n'
+            (context / 'Dockerfile').write_text('ARG BASE_IMAGE=jigeumini/server:fixture-baseline\nFROM ${BASE_IMAGE}\n'
                 'COPY --chown=10001:10001 V13__release_probe.sql /app/classes/db/migration/\n'
                 'COPY --chown=10001:10001 replay-build-id.txt /app/classes/replay-build-id.txt\n'
                 'LABEL io.jigeumini.test.fixture="migration-v13"\n')
             tag = f'jigeumini/migration-fixture:{kind}-{revision}'
-            subprocess.run(['docker', 'build', '--build-arg', 'BASE_IMAGE=' + baseline['images']['server']['id'],
+            subprocess.run(['docker', 'build', '--build-arg', 'BASE_IMAGE=' + baseline['images']['server']['tag'],
                             '-t', tag, str(context)], check=True, cwd=ROOT, stdout=sys.stderr)
+            assert json.loads(run('docker', 'image', 'inspect', baseline['images']['server']['tag']))[0]['Id'] == baseline['images']['server']['id']
         image = json.loads(run('docker', 'image', 'inspect', tag))[0]
         manifest = {**baseline, 'buildId': build_id, 'scope': 'LOCAL_MIGRATION_FIXTURE_NO_REGISTRY_PUSH',
                     'images': {**baseline['images'], 'server': {'tag': tag, 'id': image['Id'], 'sizeBytes': image['Size'], 'user': image['Config']['User']}},

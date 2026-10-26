@@ -251,3 +251,5 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 제품 V12 이미지 위에 시험 SQL만 얹은 V13 후보·SQL 실패·프로세스 중단 이미지를 분리한다. 같은 Git 코드 revision임을 명시하고 원래 JAR hash·SQL hash·시험 build ID·실제 image ID를 함께 기록한다.
 - DDL/backfill 후 sequence 표시를 확인해 실제 실패/종료 지점을 입증한다. V13을 적용한 DB에서 V12 시작은 strict schema 검증으로 거부해야 한다. 복귀는 V12 백업을 새 DB에 복원하고 새 group6개를 정렬해 보존 입력을 재생하는 경로다.
 - 리팩토링 점검: 기존 배포 리허설의 시나리오 순서를 `scenarios`로 분리해 자원 소유권·오류/정리 정책을 공유한다. 두 실제 사용처의 복원 대상 이미지를 인자로 받고, readiness 후 buildId도 manifest와 대조한다. 시험 SQL은 제품 migration과 분리한다. 실행 결과는 완료 후 기록한다.
+
+- 첫 `47d5659` 실행은 제품 이미지 빌드 뒤 fixture FROM에 로컬 image ID를 전달해 실패했다. BuildKit이 이를 docker.io/library/sha256 태그로 해석했다. DB/Compose 시험은 시작하지 않았다. 로컬 manifest의 tag가 기록한 image ID와 같은지 빌드 전후 검사하고 그 tag를 base로 사용하도록 보완한다. 최초 출력은 ignored work에 보존한다.

@@ -571,3 +571,11 @@ origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으
 ### #64 수정과 작은 재현 대조
 
 8,192문자 partial 수신과 UTF-8 전체1MiB 조립을 분리했다. Chunk/whole 단계를 구분해 완성 frame만 decode·계수하며 초과/잘못된 surrogate/연결 종료에서 상태를 버린다. 소유 Tomcat container destroy와 late handshake 정리를 추가했다. 실제 socket fixture에서1MiB 혼합 Unicode·UTF-8 중간 분할·초과·부분 JSON 종료/재접속·양방향 heartbeat를 확인했고 다른 owner를 유지한 늦은 연결 정리도 통과했다. 초안 Xmx64MiB 실험은32연결2회·8연결3회 모두 correct=true, 매 종료 IO 등록/스레드0이다. 이 초안 수치는 고정 commit 재측정 전이며 운영 용량으로 쓰지 않는다.
+
+### #64 고정 코드 전후 검증과 한계
+
+2026-10-27 KST · F01/F13/F14 → T02/T08/T11/T12/T14.876bb68의 독립32연결2회·8연결3회가 정상 종료했고 매 회차 IO 등록/IO 스레드0이었다. clean f9b7713 baseline과 같은 하네스 source를 사용했다.8연결의 관측 heap 차이는 연결당 약3.09MiB→0.116~0.120MiB이며 순수 배열/RSS 비용과 구분했다. FD99→101·JVM 공유 live thread 잔류를 숨기지 않았다.
+
+전체 제품8회(전180실패 포함)의 정제·계획·명령·hash·소유 자원 정리를 [검증](COLLECTOR_MEMORY_VERIFICATION.md)에 보관했다. 180계획·fixture bytecode/library hash가 전후 동일하다. 후180/300/450채널90초·450채널5분 통과,600최초 리포트 지연/readiness503,600반복은 기능 대조 통과이나 시계 기준 오류1,700건으로 용량 판정 제외다. 후자의 벽/단조 잔차가 약2.045초 바뀐 표본을 보존하고 원인 미확정을 명시했다. 기존100채널500/s·API10/s·1KiB·80%편향5분도 고유150,000/물리151,500·전부 대조·최종lag0으로 통과했다.450을 정확한 최대치로 확정하지 않는다.
+
+구현 Standards/Spec 각각 차단0·비차단0. clean876bb68의 단위176·하네스34·JAR와 실제Kafka/DB136개가 통과했고 소유 시험 자원만 정리했다. 최종 문서 HEAD의 Claude/CI·병합은 별도 PR 게이트다. 시계/리포트 병목은 #65, 보존은 #63, 전체 제품 샤딩은 #68에서 이어간다.

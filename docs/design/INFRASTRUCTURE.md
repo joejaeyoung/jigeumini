@@ -75,7 +75,7 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 | 근거 | 확인 범위 | 운영 산정 의미 |
 |---|---|---|
-| 연결150 통과·180 실패 반복 | collector/probe Xmx384MiB·container640MiB·저부하 합성 WS | 연결 메모리 경계. 150개 인기 방송 처리량을 뜻하지 않음 |
+| 변경 전150 통과·180 실패; #64 후450 저부하5분 통과 | collector/probe Xmx384MiB·container640MiB·총100건/s/API10/s 합성 WS | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md).600은 지연/시계 계측 제외. 정확한 최대·인기 방송 수용량 미확정 |
 | 100채널·총500건/s·API10요청/s | 1KiB 합성 WS·80% 편향·fresh DB·5분·P3/RF1 | 다음 전체 제품 비교의 출발점. 운영 SLA/실원천/HA 용량 미검증 |
 | 균등2,000건/s 단기 통과 | 20채널·60/120초, category lag 증가 | 지속 처리량으로 채택하지 않음 |
 | 약1.45~1.55KB/고유 채팅 증가 | 짧은 혼합 입력·fresh DB | 기간을 곱한 값은 추정. WAL/replica/백업/정리 포함 실측 필요 |
@@ -90,7 +90,7 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 |---|---|---|
 | hot 방송 샤딩 | #67 단순 bucket 실제 분산 대조 완료. 전체 제품 품질·관측·replay·전환과 지속 부하 검증 | [도입 검토](../pipeline/SHARDING_REVIEW.md), [#68](https://github.com/joejaeyoung/jigeumini/issues/68), [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
 | 저장·보존/복구 창 | dedup/replay 하한을 지키는 유한 정리, 장기 DB·Kafka 증가/삭제량 | [#63](https://github.com/joejaeyoung/jigeumini/issues/63) |
-| 수집 worker 수 | 연결 버퍼 비용 개선·재측정, 채널 수와 입력률 동시 제한 | [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
+| 수집 worker 수 | #64 버퍼·종료 개선 검증.450 저부하와100 복합을 구분하고 fleet/실원천 비용 뒤 worker 수 결정 | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md), [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
 | 처리 자원 | 전체 projection/API 동시 부하, SQL/잠금·pool·계측 비용 분리, 반복·지속 실행 | [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
 | 실제 장애 영역 | 계정/리전/AZ/예산/정리 조건 뒤 정상·영역 장애·복귀 대조 | [#48](https://github.com/joejaeyoung/jigeumini/issues/48) |
 | 외부 운영 | 목표 부하/SLO/RPO/RTO, 공급자/SKU/월견적, 도메인/TLS, Kafka 인증·비밀 회전·중앙 경보·외부 백업 복원, PG 전환·앱 가용성 | [#49](https://github.com/joejaeyoung/jigeumini/issues/49) |

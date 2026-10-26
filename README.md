@@ -155,7 +155,13 @@ F01/F13/F14 → T02/T08/T11/T12/T14, 이슈 #64. 별도 Xmx64MiB JVM에서 합�
 ./scripts/collector-memory lifecycle work/collector-lifecycle.json
 ```
 
-connections는32개 연결2회, lifecycle은8개 연결3회다. 고정 Tomcat 버전의 시험용 내부 계수, GC 관측 heap·스레드·FD 숫자만 기록한다. JVM heap 종료로 완성하지 못한 JSON은 성공 근거가 아니다. 전체 제품 용량은 `scripts/product-load`의 고정 자원 계획으로 별도 확인한다.
+connections는32개 연결2회, lifecycle은8개 연결3회다. 고정 Tomcat 버전의 시험용 내부 계수, GC 관측 heap·스레드·FD 숫자만 기록한다. JVM heap 종료로 완성하지 못한 JSON은 성공 근거가 아니다. 전체 제품 용량은 `scripts/product-load`의 고정 자원 계획으로 별도 확인한다. [전후 검증](docs/COLLECTOR_MEMORY_VERIFICATION.md)에 실제180채널 실패 해소·450채널 저부하 지속·600채널 제외 근거를 기록했다.
+
+실험 원본과 해당 Git history를 보유한 경우 #64 정제 결과를 다시 만들 수 있다. 새 출력 디렉터리를 지정하며 원본은 변경하지 않는다.
+
+```bash
+python3 scripts/collector-memory-summary.py work/collector-memory-64 work/collector-memory-summary
+```
 
 ## Kafka 없이 수신만 검사
 

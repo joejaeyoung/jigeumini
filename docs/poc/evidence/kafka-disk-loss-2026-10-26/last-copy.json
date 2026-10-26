@@ -1,0 +1,906 @@
+{
+  "scenario" : "last-copy",
+  "startedAt" : "2026-10-26T02:54:35.985606Z",
+  "revision" : "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+  "workingTreeDirty" : false,
+  "scope" : "LOCAL_OWNED_VOLUME_REMOVAL_NO_AZ_POWER_LOSS_OR_BIT_CORRUPTION_CLAIM",
+  "cluster" : {
+    "maximumContainerMemoryBytes" : 2818572288,
+    "brokers" : 3,
+    "controllers" : 3,
+    "scope" : "ONE_HOST_SYNTHETIC_NO_AZ_GUARANTEE",
+    "project" : "jigeumini-ha-4f1832fea42a4ca294184f2992124b0f",
+    "image" : "apache/kafka:4.1.2",
+    "bootstrap" : "localhost:50951,localhost:50952,localhost:50953",
+    "clusterId" : "7fU2_3bATBKSDMYmHMFRog",
+    "owner" : "4f1832fea42a4ca294184f2992124b0f"
+  },
+  "phases" : [ {
+    "name" : "BASELINE_ON_THREE_DISKS",
+    "startedAt" : "2026-10-26T02:54:45.035104Z",
+    "result" : {
+      "partitions" : [ {
+        "partition" : 0,
+        "leader" : 1,
+        "replicas" : [ 1, 2, 3 ],
+        "isr" : [ 1, 2, 3 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 1,
+        "leader" : 2,
+        "replicas" : [ 2, 3, 1 ],
+        "isr" : [ 2, 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 2,
+        "leader" : 3,
+        "replicas" : [ 3, 1, 2 ],
+        "isr" : [ 3, 1, 2 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      } ],
+      "database" : {
+        "projection" : "disk",
+        "processedEvents" : 10,
+        "bucketTotal" : 10,
+        "runId" : "1393c218265a46179db7b7521a0ecced"
+      },
+      "consumableEnd" : [ {
+        "partition" : 0,
+        "end" : 10
+      }, {
+        "partition" : 1,
+        "end" : 0
+      }, {
+        "partition" : 2,
+        "end" : 0
+      } ],
+      "endAvailable" : true,
+      "quorumLeader" : 1003
+    },
+    "passed" : true,
+    "seconds" : 0.507996709
+  }, {
+    "name" : "KEEP_STALE_BASELINE_DISK_OFFLINE",
+    "startedAt" : "2026-10-26T02:54:45.547360Z",
+    "result" : {
+      "metadata" : {
+        "cluster.id" : "7fU2_3bATBKSDMYmHMFRog",
+        "node.id" : "2",
+        "directory.id" : "5MrzSe1WCuRaxHFgLmHICg"
+      },
+      "crcValid" : true,
+      "records" : [ {
+        "partition" : 0,
+        "offset" : 0,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450"
+      }, {
+        "partition" : 0,
+        "offset" : 1,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2"
+      }, {
+        "partition" : 0,
+        "offset" : 2,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7"
+      }, {
+        "partition" : 0,
+        "offset" : 3,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016"
+      }, {
+        "partition" : 0,
+        "offset" : 4,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a"
+      }, {
+        "partition" : 0,
+        "offset" : 5,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8"
+      }, {
+        "partition" : 0,
+        "offset" : 6,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627"
+      }, {
+        "partition" : 0,
+        "offset" : 7,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148"
+      }, {
+        "partition" : 0,
+        "offset" : 8,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b"
+      }, {
+        "partition" : 0,
+        "offset" : 9,
+        "leaderEpoch" : 0,
+        "control" : false,
+        "sha256" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d"
+      } ],
+      "directoryEntries" : 14
+    },
+    "passed" : true,
+    "seconds" : 6.554351625
+  }, {
+    "name" : "ACK_TAIL_ON_TWO_COPIES",
+    "startedAt" : "2026-10-26T02:54:52.103036Z",
+    "result" : {
+      "partitions" : [ {
+        "partition" : 0,
+        "leader" : 1,
+        "replicas" : [ 1, 2, 3 ],
+        "isr" : [ 1, 3 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 1,
+        "leader" : 3,
+        "replicas" : [ 2, 3, 1 ],
+        "isr" : [ 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 2,
+        "leader" : 3,
+        "replicas" : [ 3, 1, 2 ],
+        "isr" : [ 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      } ],
+      "database" : {
+        "projection" : "disk",
+        "processedEvents" : 20,
+        "bucketTotal" : 20,
+        "runId" : "1393c218265a46179db7b7521a0ecced"
+      },
+      "consumableEnd" : [ {
+        "partition" : 0,
+        "end" : 20
+      }, {
+        "partition" : 1,
+        "end" : 0
+      }, {
+        "partition" : 2,
+        "end" : 0
+      } ],
+      "endAvailable" : true,
+      "quorumLeader" : 1003
+    },
+    "passed" : true,
+    "seconds" : 8.491247834
+  }, {
+    "name" : "REMOVE_FIRST_LATEST_COPY",
+    "startedAt" : "2026-10-26T02:55:00.625240Z",
+    "result" : {
+      "disk" : {
+        "directoryEntries" : 14,
+        "metadata" : {
+          "cluster.id" : "7fU2_3bATBKSDMYmHMFRog",
+          "node.id" : "3",
+          "directory.id" : "oovfCRl5UkrSs4KsHpuVmg"
+        },
+        "records" : [ {
+          "partition" : 0,
+          "offset" : 0,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450"
+        }, {
+          "partition" : 0,
+          "offset" : 1,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2"
+        }, {
+          "partition" : 0,
+          "offset" : 2,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7"
+        }, {
+          "partition" : 0,
+          "offset" : 3,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016"
+        }, {
+          "partition" : 0,
+          "offset" : 4,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a"
+        }, {
+          "partition" : 0,
+          "offset" : 5,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8"
+        }, {
+          "partition" : 0,
+          "offset" : 6,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627"
+        }, {
+          "partition" : 0,
+          "offset" : 7,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148"
+        }, {
+          "partition" : 0,
+          "offset" : 8,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b"
+        }, {
+          "partition" : 0,
+          "offset" : 9,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d"
+        }, {
+          "partition" : 0,
+          "offset" : 10,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "c943a98f84331f5ca7100011b150003511f9084a0e801c50c20ad505faa94243"
+        }, {
+          "partition" : 0,
+          "offset" : 11,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1690d845717df5694a0e93260bb6b452e7e3e2fd949f63028b0d87cc01d8a223"
+        }, {
+          "partition" : 0,
+          "offset" : 12,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "88d4ab61bbb8c8fe6123c2dd7ec859bd0dc1b4f7aa6ada0aefc7e516159cca50"
+        }, {
+          "partition" : 0,
+          "offset" : 13,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "04db030f479eacd13e647817dc1b30e03df3e8615cb6f09b1b71071eb7d7fb1b"
+        }, {
+          "partition" : 0,
+          "offset" : 14,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "b6ab87c4aedcf1bbea57974e9b963699a67c31c2e4f45092d965115ba96ce06c"
+        }, {
+          "partition" : 0,
+          "offset" : 15,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "ea9ceed3f38d9bb902ad642dd8e0ecd0c79267f6e1637cd939e3990467281f65"
+        }, {
+          "partition" : 0,
+          "offset" : 16,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8a7960a0657789aafa20969c77dccfcc8220485b0c5340e85556e3fb8533963b"
+        }, {
+          "partition" : 0,
+          "offset" : 17,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d4999f791aa51dded33151ff288b6f739c3fa3a7f4cb4923ad1b0478ce85b327"
+        }, {
+          "partition" : 0,
+          "offset" : 18,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "e11b5cb57f73bc864ca64c6f66f37468d4d6266fa1a998850fd7c2fe3f432755"
+        }, {
+          "partition" : 0,
+          "offset" : 19,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d976ae2f1193c8e7b6ac7696d8749e80ce94ffdfba17c667733c174cea911520"
+        } ],
+        "crcValid" : true
+      },
+      "erasure" : {
+        "broker" : 3,
+        "volume" : "jigeumini-ha-4f1832fea42a4ca294184f2992124b0f_broker3-data",
+        "deletionConfirmed" : true,
+        "emptyBeforeFormat" : {
+          "directoryEntries" : 0,
+          "metadata" : { },
+          "records" : [ ],
+          "crcValid" : true
+        }
+      }
+    },
+    "passed" : true,
+    "seconds" : 7.286231375
+  }, {
+    "name" : "REMOVE_LAST_LATEST_COPY",
+    "startedAt" : "2026-10-26T02:55:07.913490Z",
+    "result" : {
+      "tailCopiesRemaining" : 0,
+      "remainingStaleDisk" : {
+        "directoryEntries" : 14,
+        "metadata" : {
+          "cluster.id" : "7fU2_3bATBKSDMYmHMFRog",
+          "node.id" : "2",
+          "directory.id" : "5MrzSe1WCuRaxHFgLmHICg"
+        },
+        "records" : [ {
+          "partition" : 0,
+          "offset" : 0,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450"
+        }, {
+          "partition" : 0,
+          "offset" : 1,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2"
+        }, {
+          "partition" : 0,
+          "offset" : 2,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7"
+        }, {
+          "partition" : 0,
+          "offset" : 3,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016"
+        }, {
+          "partition" : 0,
+          "offset" : 4,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a"
+        }, {
+          "partition" : 0,
+          "offset" : 5,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8"
+        }, {
+          "partition" : 0,
+          "offset" : 6,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627"
+        }, {
+          "partition" : 0,
+          "offset" : 7,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148"
+        }, {
+          "partition" : 0,
+          "offset" : 8,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b"
+        }, {
+          "partition" : 0,
+          "offset" : 9,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d"
+        } ],
+        "crcValid" : true
+      },
+      "tailRecordsPermanentlyRemoved" : 10,
+      "erasure" : {
+        "broker" : 1,
+        "volume" : "jigeumini-ha-4f1832fea42a4ca294184f2992124b0f_broker1-data",
+        "deletionConfirmed" : true,
+        "emptyBeforeFormat" : {
+          "directoryEntries" : 0,
+          "metadata" : { },
+          "records" : [ ],
+          "crcValid" : true
+        }
+      },
+      "lastLatestDisk" : {
+        "directoryEntries" : 14,
+        "metadata" : {
+          "cluster.id" : "7fU2_3bATBKSDMYmHMFRog",
+          "node.id" : "1",
+          "directory.id" : "4uufJeQFrVWedCVTnvuCfA"
+        },
+        "records" : [ {
+          "partition" : 0,
+          "offset" : 0,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450"
+        }, {
+          "partition" : 0,
+          "offset" : 1,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2"
+        }, {
+          "partition" : 0,
+          "offset" : 2,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7"
+        }, {
+          "partition" : 0,
+          "offset" : 3,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016"
+        }, {
+          "partition" : 0,
+          "offset" : 4,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a"
+        }, {
+          "partition" : 0,
+          "offset" : 5,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8"
+        }, {
+          "partition" : 0,
+          "offset" : 6,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627"
+        }, {
+          "partition" : 0,
+          "offset" : 7,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148"
+        }, {
+          "partition" : 0,
+          "offset" : 8,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b"
+        }, {
+          "partition" : 0,
+          "offset" : 9,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d"
+        }, {
+          "partition" : 0,
+          "offset" : 10,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "c943a98f84331f5ca7100011b150003511f9084a0e801c50c20ad505faa94243"
+        }, {
+          "partition" : 0,
+          "offset" : 11,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1690d845717df5694a0e93260bb6b452e7e3e2fd949f63028b0d87cc01d8a223"
+        }, {
+          "partition" : 0,
+          "offset" : 12,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "88d4ab61bbb8c8fe6123c2dd7ec859bd0dc1b4f7aa6ada0aefc7e516159cca50"
+        }, {
+          "partition" : 0,
+          "offset" : 13,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "04db030f479eacd13e647817dc1b30e03df3e8615cb6f09b1b71071eb7d7fb1b"
+        }, {
+          "partition" : 0,
+          "offset" : 14,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "b6ab87c4aedcf1bbea57974e9b963699a67c31c2e4f45092d965115ba96ce06c"
+        }, {
+          "partition" : 0,
+          "offset" : 15,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "ea9ceed3f38d9bb902ad642dd8e0ecd0c79267f6e1637cd939e3990467281f65"
+        }, {
+          "partition" : 0,
+          "offset" : 16,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8a7960a0657789aafa20969c77dccfcc8220485b0c5340e85556e3fb8533963b"
+        }, {
+          "partition" : 0,
+          "offset" : 17,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d4999f791aa51dded33151ff288b6f739c3fa3a7f4cb4923ad1b0478ce85b327"
+        }, {
+          "partition" : 0,
+          "offset" : 18,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "e11b5cb57f73bc864ca64c6f66f37468d4d6266fa1a998850fd7c2fe3f432755"
+        }, {
+          "partition" : 0,
+          "offset" : 19,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d976ae2f1193c8e7b6ac7696d8749e80ce94ffdfba17c667733c174cea911520"
+        } ],
+        "crcValid" : true
+      }
+    },
+    "passed" : true,
+    "seconds" : 13.727018708
+  }, {
+    "name" : "RETURN_STALE_AND_EMPTY_DISKS",
+    "startedAt" : "2026-10-26T02:55:21.642413Z",
+    "result" : {
+      "onlyStale" : {
+        "metadataWaitSeconds" : 2.976842292,
+        "metadataFailureTypes" : [ ],
+        "metadataAvailable" : true,
+        "metadataTopicId" : "fyqhD6f-T7SEjUrVX6I55Q",
+        "partitions" : [ {
+          "partition" : 0,
+          "leader" : null,
+          "replicas" : [ 1, 2, 3 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 1,
+          "leader" : null,
+          "replicas" : [ 2, 3, 1 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 2,
+          "leader" : null,
+          "replicas" : [ 3, 1, 2 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        } ],
+        "available" : false,
+        "captureCode" : "SOURCE_UNAVAILABLE",
+        "oldManifestAccepted" : false,
+        "validationCode" : "SOURCE_UNAVAILABLE"
+      },
+      "afterFirstEmptyDisk" : {
+        "metadataWaitSeconds" : 0.002992333,
+        "metadataFailureTypes" : [ ],
+        "metadataAvailable" : true,
+        "metadataTopicId" : "fyqhD6f-T7SEjUrVX6I55Q",
+        "partitions" : [ {
+          "partition" : 0,
+          "leader" : null,
+          "replicas" : [ 1, 2, 3 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 1,
+          "leader" : null,
+          "replicas" : [ 2, 3, 1 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 2,
+          "leader" : null,
+          "replicas" : [ 3, 1, 2 ],
+          "isr" : [ ],
+          "elr" : [ 1, 3 ],
+          "lastKnownElr" : [ 1 ]
+        } ],
+        "available" : false,
+        "captureCode" : "SOURCE_UNAVAILABLE",
+        "oldManifestAccepted" : false,
+        "validationCode" : "SOURCE_UNAVAILABLE"
+      },
+      "allNodesReturned" : true,
+      "returnedBrokerStates" : [ {
+        "running" : true,
+        "broker" : 1,
+        "oomKilled" : false,
+        "exitCode" : 0
+      }, {
+        "running" : true,
+        "broker" : 2,
+        "oomKilled" : false,
+        "exitCode" : 0
+      }, {
+        "running" : true,
+        "broker" : 3,
+        "oomKilled" : false,
+        "exitCode" : 0
+      } ],
+      "registeredBrokerIds" : [ 1, 2, 3 ],
+      "fullIsrObserved" : false,
+      "source" : {
+        "metadataWaitSeconds" : 0.002933458,
+        "metadataFailureTypes" : [ ],
+        "metadataAvailable" : true,
+        "metadataTopicId" : "fyqhD6f-T7SEjUrVX6I55Q",
+        "partitions" : [ {
+          "partition" : 0,
+          "leader" : null,
+          "replicas" : [ 1, 2, 3 ],
+          "isr" : [ ],
+          "elr" : [ ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 1,
+          "leader" : null,
+          "replicas" : [ 2, 3, 1 ],
+          "isr" : [ ],
+          "elr" : [ ],
+          "lastKnownElr" : [ 1 ]
+        }, {
+          "partition" : 2,
+          "leader" : null,
+          "replicas" : [ 3, 1, 2 ],
+          "isr" : [ ],
+          "elr" : [ ],
+          "lastKnownElr" : [ 1 ]
+        } ],
+        "available" : false,
+        "captureCode" : "SOURCE_UNAVAILABLE",
+        "oldManifestAccepted" : false,
+        "validationCode" : "SOURCE_UNAVAILABLE"
+      },
+      "topicIdVerified" : true,
+      "databaseUniqueRetained" : 20,
+      "brokerPhysical" : null,
+      "oldAcknowledgedTailMissing" : null,
+      "lossBoundaryVerified" : true,
+      "sourceRecoverySucceeded" : false,
+      "physicalTailCopiesRemaining" : 0
+    },
+    "passed" : true,
+    "seconds" : 97.407716959
+  } ],
+  "deliveries" : [ {
+    "eventId" : "124cc151-912a-44e7-b621-ce4434d9ea69",
+    "startedAt" : "2026-10-26T02:54:45.035625Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 0,
+    "sha256" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450",
+    "finishedAt" : "2026-10-26T02:54:45.198521Z"
+  }, {
+    "eventId" : "cb21f28b-423e-4a93-a114-61959ef01aaa",
+    "startedAt" : "2026-10-26T02:54:45.199243Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 1,
+    "sha256" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2",
+    "finishedAt" : "2026-10-26T02:54:45.212134Z"
+  }, {
+    "eventId" : "e99bf637-7b49-4dbb-8e47-3f5407b548b0",
+    "startedAt" : "2026-10-26T02:54:45.212580Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 2,
+    "sha256" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7",
+    "finishedAt" : "2026-10-26T02:54:45.223761Z"
+  }, {
+    "eventId" : "24e74bf7-ab85-4a6c-9631-8020a59af648",
+    "startedAt" : "2026-10-26T02:54:45.224255Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 3,
+    "sha256" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016",
+    "finishedAt" : "2026-10-26T02:54:45.235337Z"
+  }, {
+    "eventId" : "9baaa0fe-349e-401f-b310-76ffe406c743",
+    "startedAt" : "2026-10-26T02:54:45.235850Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 4,
+    "sha256" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a",
+    "finishedAt" : "2026-10-26T02:54:45.245743Z"
+  }, {
+    "eventId" : "a52e557a-93f1-4a42-8a8d-4da1ea28bcf2",
+    "startedAt" : "2026-10-26T02:54:45.246298Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 5,
+    "sha256" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8",
+    "finishedAt" : "2026-10-26T02:54:45.256637Z"
+  }, {
+    "eventId" : "fd38a176-9f11-461c-a0ab-0fb8aa3e5441",
+    "startedAt" : "2026-10-26T02:54:45.257221Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 6,
+    "sha256" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627",
+    "finishedAt" : "2026-10-26T02:54:45.267841Z"
+  }, {
+    "eventId" : "3b7cb982-70fd-4d0a-a0b5-329acc3fabb4",
+    "startedAt" : "2026-10-26T02:54:45.268331Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 7,
+    "sha256" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148",
+    "finishedAt" : "2026-10-26T02:54:45.279193Z"
+  }, {
+    "eventId" : "2609bc0c-8263-47b0-8464-139dcd57901d",
+    "startedAt" : "2026-10-26T02:54:45.279751Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 8,
+    "sha256" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b",
+    "finishedAt" : "2026-10-26T02:54:45.290049Z"
+  }, {
+    "eventId" : "22b2574d-b2dc-4585-87f1-2da2fe86d24b",
+    "startedAt" : "2026-10-26T02:54:45.290576Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 9,
+    "sha256" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d",
+    "finishedAt" : "2026-10-26T02:54:45.300743Z"
+  }, {
+    "eventId" : "4a0e495a-4280-4ff3-9315-0718cca6801d",
+    "startedAt" : "2026-10-26T02:54:52.103406Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 10,
+    "sha256" : "c943a98f84331f5ca7100011b150003511f9084a0e801c50c20ad505faa94243",
+    "finishedAt" : "2026-10-26T02:54:52.113166Z"
+  }, {
+    "eventId" : "4c982fe3-b683-464a-8586-3f21fc354df3",
+    "startedAt" : "2026-10-26T02:54:52.113865Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 11,
+    "sha256" : "1690d845717df5694a0e93260bb6b452e7e3e2fd949f63028b0d87cc01d8a223",
+    "finishedAt" : "2026-10-26T02:54:52.123248Z"
+  }, {
+    "eventId" : "32fa5f91-f980-48bb-bb33-d2432983dd2d",
+    "startedAt" : "2026-10-26T02:54:52.123815Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 12,
+    "sha256" : "88d4ab61bbb8c8fe6123c2dd7ec859bd0dc1b4f7aa6ada0aefc7e516159cca50",
+    "finishedAt" : "2026-10-26T02:54:52.131262Z"
+  }, {
+    "eventId" : "274506eb-d495-4f8c-9a60-8390f85e0a6b",
+    "startedAt" : "2026-10-26T02:54:52.131860Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 13,
+    "sha256" : "04db030f479eacd13e647817dc1b30e03df3e8615cb6f09b1b71071eb7d7fb1b",
+    "finishedAt" : "2026-10-26T02:54:52.142638Z"
+  }, {
+    "eventId" : "3fc729ca-9611-425e-877a-5546541413ed",
+    "startedAt" : "2026-10-26T02:54:52.143329Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 14,
+    "sha256" : "b6ab87c4aedcf1bbea57974e9b963699a67c31c2e4f45092d965115ba96ce06c",
+    "finishedAt" : "2026-10-26T02:54:52.153233Z"
+  }, {
+    "eventId" : "f103472a-7924-4691-9044-4ed5ad8332a8",
+    "startedAt" : "2026-10-26T02:54:52.153785Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 15,
+    "sha256" : "ea9ceed3f38d9bb902ad642dd8e0ecd0c79267f6e1637cd939e3990467281f65",
+    "finishedAt" : "2026-10-26T02:54:52.162185Z"
+  }, {
+    "eventId" : "489efef8-4132-484e-871b-22b0e12d4a03",
+    "startedAt" : "2026-10-26T02:54:52.162696Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 16,
+    "sha256" : "8a7960a0657789aafa20969c77dccfcc8220485b0c5340e85556e3fb8533963b",
+    "finishedAt" : "2026-10-26T02:54:52.172117Z"
+  }, {
+    "eventId" : "c9b49d3d-c45d-415b-b7ea-d60be561b63c",
+    "startedAt" : "2026-10-26T02:54:52.172763Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 17,
+    "sha256" : "d4999f791aa51dded33151ff288b6f739c3fa3a7f4cb4923ad1b0478ce85b327",
+    "finishedAt" : "2026-10-26T02:54:52.183855Z"
+  }, {
+    "eventId" : "a475a60d-ea53-4967-983e-2207e57e3cf4",
+    "startedAt" : "2026-10-26T02:54:52.184338Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 18,
+    "sha256" : "e11b5cb57f73bc864ca64c6f66f37468d4d6266fa1a998850fd7c2fe3f432755",
+    "finishedAt" : "2026-10-26T02:54:52.193526Z"
+  }, {
+    "eventId" : "068ce86c-c4ed-476f-adc5-df352dd16a8d",
+    "startedAt" : "2026-10-26T02:54:52.194008Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 19,
+    "sha256" : "d976ae2f1193c8e7b6ac7696d8749e80ce94ffdfba17c667733c174cea911520",
+    "finishedAt" : "2026-10-26T02:54:52.203917Z"
+  } ],
+  "frozenProbe" : {
+    "class" : "io.chatpulse.pipeline.KafkaDiskProbe",
+    "sha256" : "dd4576c6254c216f3953d2b6c159e5318b2f346601659a7c3c6bacc7d912856a",
+    "bytes" : 7593
+  },
+  "runtime" : {
+    "kafkaClient" : "4.1.2",
+    "java" : "21.0.11",
+    "features" : "{group.version=FinalizedVersionRange[min_version_level:1, max_version_level:1], transaction.version=FinalizedVersionRange[min_version_level:2, max_version_level:2], eligible.leader.replicas.version=FinalizedVersionRange[min_version_level:1, max_version_level:1], metadata.version=FinalizedVersionRange[min_version_level:27, max_version_level:27]}",
+    "imageId" : "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e"
+  },
+  "initialTopicId" : "fyqhD6f-T7SEjUrVX6I55Q",
+  "beforeLossManifest" : {
+    "formatVersion" : 1,
+    "topic" : "disk.1393c218265a46179db7b7521a0ecced",
+    "topicId" : "fyqhD6f-T7SEjUrVX6I55Q",
+    "partitions" : [ {
+      "partition" : 0,
+      "start" : 0,
+      "end" : 20
+    }, {
+      "partition" : 1,
+      "start" : 0,
+      "end" : 0
+    }, {
+      "partition" : 2,
+      "start" : 0,
+      "end" : 0
+    } ],
+    "eventFrom" : null,
+    "eventTo" : null,
+    "schemaVersion" : 1,
+    "algorithmVersion" : "bucket-10s-v1",
+    "capturedAt" : "2026-10-26T02:55:00.610179Z"
+  },
+  "beforeLossAcknowledgedDigests" : {
+    "0:0" : "55b02765c844054c4a947a659c4513d20ed6c75dac0a075ab5a393943b134450",
+    "0:1" : "9f1906d0d2dd927973f1043ff5a49af226b2d6e9f44ef5b6f41edc371af41cd2",
+    "0:10" : "c943a98f84331f5ca7100011b150003511f9084a0e801c50c20ad505faa94243",
+    "0:11" : "1690d845717df5694a0e93260bb6b452e7e3e2fd949f63028b0d87cc01d8a223",
+    "0:12" : "88d4ab61bbb8c8fe6123c2dd7ec859bd0dc1b4f7aa6ada0aefc7e516159cca50",
+    "0:13" : "04db030f479eacd13e647817dc1b30e03df3e8615cb6f09b1b71071eb7d7fb1b",
+    "0:14" : "b6ab87c4aedcf1bbea57974e9b963699a67c31c2e4f45092d965115ba96ce06c",
+    "0:15" : "ea9ceed3f38d9bb902ad642dd8e0ecd0c79267f6e1637cd939e3990467281f65",
+    "0:16" : "8a7960a0657789aafa20969c77dccfcc8220485b0c5340e85556e3fb8533963b",
+    "0:17" : "d4999f791aa51dded33151ff288b6f739c3fa3a7f4cb4923ad1b0478ce85b327",
+    "0:18" : "e11b5cb57f73bc864ca64c6f66f37468d4d6266fa1a998850fd7c2fe3f432755",
+    "0:19" : "d976ae2f1193c8e7b6ac7696d8749e80ce94ffdfba17c667733c174cea911520",
+    "0:2" : "ad476990a6f559d0ff55719eb3b348f105782451c1458fa67fbe1b71390540b7",
+    "0:3" : "862a02254a902b8ab4fc146bca7295048cd06bf89dd327df7728f5248f414016",
+    "0:4" : "8e46d26b4cc4d2f7f9f1c7d7e7caee86da7dde0dda8e4639e5858ef66e048f2a",
+    "0:5" : "c8aba054606d368cbe33dd3cb13c3cd5977d71ff3296c738de52088c8002dcc8",
+    "0:6" : "1cd42c2138ff1c9de73acd6f9e719445b0451ecc4d64ac51f426acb6d8e59627",
+    "0:7" : "59f2b5b01a5e8bbc6d1c19de4949421e2c9127d8801e5c6bd450a51a3f9a0148",
+    "0:8" : "d0d783aa3940617e4a34da084ea9a607f294ef700408164a715eb3e832c2bb1b",
+    "0:9" : "975c3a3c84c0b2b19ef79fe8b2d3995f334306cad4335de8e068538a5715537d"
+  },
+  "correct" : true,
+  "cleanupComplete" : true,
+  "finishedAt" : "2026-10-26T02:57:01.955887Z"
+}

@@ -245,6 +245,31 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 
 - 보강 `43bedc2`의 `./scripts/check` 단위147·하네스20·JAR, `./scripts/integration` 실제100개가 모두 통과했다. 정제 근거에 suite/XML·명령 로그 hash·JAR/build ID와 실제 시각을 연결했다. Standards/Spec 각각 지적0·차단0이며 Claude 보강 재리뷰도 APPROVE다. session timeout6초와 Gradle classpath를 확인하고 partition 범위·이전 문단의 회복 순서를 정정했다. T02는 이 합성/로컬 장애 범위에서 검증됨으로 바꾸며, 원천 중복·전체 Exactly-once와 운영 장애는 확장하지 않는다. 최종 문서 HEAD 승인·push/PR CI·병합은 PR #50 통합 게이트에 남긴다.
 
+
+### 2026-10-26 Kafka 디스크 영구 손실 하네스 #45
+
+F15/F11 → T04/T10/T15. origin/develop에서 technicaltest/kafka-disk-loss를 분기했다. #43의30분 실행 동안 원격 CI 컴파일부터 확인하고 소유6노드 실험은 그 종료 뒤 실행한다. raw source를 사용하지 않는다.
+
+기존 LocalKafkaCluster의 owner/project/service/volume mount/다른 참조 검사를 통과한 정지 broker 데이터 volume만 삭제·빈 volume으로 재생성한다. KafkaDiskProbe는 readonly mount에서 FileRecords CRC·offset·leader epoch·key/value digest와 안전한 metadata ID만 기록한다. 실제 classpath class를 실행별 복사/hash하고 매 probe 앞에 대조한다.
+
+recover와 last-copy는 새 cluster를 각각 사용한다. 전자는 ISR2 지속·새 replica 내용 대조·ISR1의 실제 ACK all 거부·최종 ledger 집합을 확인한다. 후자는 stale BASE 디스크를 보존하며 TAIL을 가진 두 최신 디스크의 실제 내용 확인→각각 삭제→empty 상태를 연결한다. stale/빈 disk 복귀의 metadata·ELR·Replay 결과는 관측대로 보존하고, source 조회 불가를0건 복구로 바꾸지 않는다.
+
+사전 Standards/Spec 리뷰는 serializer 누락과 재기동 중 metadata 조회 오류가 후속 복귀를 중단하는 문제를 찾아 수정했다. helper128MiB 예산·고정class/hash를 포함했다. 재리뷰 차단0이며 컴파일/실제 실험 통과를 뜻하지 않는다. 리팩토링 검토에서 소유 cluster 수명·디스크 읽기·시나리오의 책임을 분리하고 제품 producer/소비 계약은 재사용했다.
+
+
+### #45 진입 리뷰 보완
+
+Claude43b3474 진입 리뷰는 REQUEST_CHANGES였다. 불충분 ISR은 직접 KafkaTopicPolicy.NotReady 확인과 TOPIC_VISIBILITY_DEADLINE 원인을 함께 요구하고, 마지막 복사본 손실은 3개 실제 container Running/OOM 상태와 Admin 등록 broker ID1/2/3을 확인한 뒤 판정한다. SOURCE_UNAVAILABLE/OFFSET_TRUNCATED만 허용하고 다른 실패를 복구 불가 증거로 취급하지 않는다. readonly 디스크 helper도 소유 project/name으로 정리하고 실행 classpath는 고정한다. 빈 partition 초기 commit 지적은 기존 BatchConsumers.initialOffsets가 모두 commit하므로 해당 소스를 추가 제공해 재검토한다. 실제 손실 실험 전 진입 재검토를 수행하며 아직 결과를 PASS로 표시하지 않는다.
+
+
+### #45 실제 디스크 유실 실행
+
+2026-10-26 clean f992ef1에서 recover7단계와last-copy6단계를 각각새소유6노드로 실행했다. 전자는새directory ID와30건offset/hash 재구성·ISR1 실제거부 뒤최종ACK32=broker32=DB32·차이0이다. 후자는 최신tail10건의두물리copy를지우고3broker모두복귀했으나 source/oldmanifest가SOURCE_UNAVAILABLE였다. DB20은유지되고sourceRecoverySucceeded=false이며 읽기불가건수는null로기록했다. 실행종료정리모두true. [검증](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md)·[정제근거](poc/evidence/kafka-disk-loss-2026-10-26/summary.json)에단계/시각/commit/hash를연결했다.
+
+리팩토링은 소유 cluster 수명·readonly record probe·실험판정 경계를 유지한다. 실제디스크삭제와원천조회오류를구분하고 임의의일반예외로PASS하지않는다. 빈partitioncommit은기존공통소비계약을재사용했다. 진입Claude지적3개보완후APPROVE FOR EXPERIMENT를받았고 최종근거HEAD는다시리뷰/CI한다.
+
+f992ef1의 `./scripts/check` 단위147·하네스20·JAR도 통과했다. 실제 디스크 실험13단계와 일반 integration CI는 서로 다른 검증으로 기록한다.
+
 ### 2026-10-26 수집기 장애 경계 #44 구현
 
 F13 → T02/T11/T14. `origin/develop` c2aeffc에서 `technicaltest/collector-boundaries`를 분기했다. #43 soak의 이미지·probe class를 고정한 뒤 로컬 부하 시험을 겹치지 않고 구현한다. 공식 시간 API·PostgreSQL 시각과 기존 임대 경계를 [조사](research/COLLECTOR_FAILURE_BOUNDARIES.md)에 기록했다.
@@ -357,6 +382,12 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 
 최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.
 
+### #45 선행 검증 통합과 최종 리뷰 재요청
+
+#42/#43/#44/#52/#54가 포함된 e90dc32를 통합했다. 코드 충돌은 없으며 README/STATUS/WORK_LOG의 양쪽 근거를 보존하고 오래된 실행 대기 문구를 실제 결과로 고쳤다. f992ef1에서 실행한 KafkaDiskLossExperiment/KafkaDiskProbe/LocalKafkaCluster와 replay/producer 제품 경로는 통합으로 변경되지 않았다. 단위·하네스·컴파일과 최종 CI를 확인하며 동일 디스크 실험은 반복하지 않는다. 초기 최종 Claude57f3024 요청은 14분 이상 출력이 없는 상태에서 소유 CLI만 종료했고 승인으로 취급하지 않는다. 통합 최종 HEAD는 전체 변경/실제 근거로 새 리뷰를 요청한다.
+
+통합 `7e0ca6f`의 `./scripts/check` 단위152·하네스24·JAR가 통과했다. 실행 코드 불변은 f992ef1 대비 실험3종/스크립트/replay/pipeline 경로의 diff0으로 확인했다. 최종 CI와 정확한 HEAD Claude 판정은 PR56에 연결한다.
+
 
 ### #60 유휴 plan 잠금 실패 재현
 
@@ -372,3 +403,8 @@ F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실�
 수정 후 집중 검증은 JDBC/worker 단위7개와 실제 Kafka/DB4개가 모두 통과했다. blackhole의 유휴 잠금 해제·epoch2 인계, 미배정 잠금 해제 후 수집, 영구 충돌5회 제한, 보유 임대 충돌의 재시도0을 확인했다. 이후 깨끗한 revision에서 check와 Fleet 전체 회귀를 실행해 통합 영향을 확인한다.
 
 고정 ea7da9b의 check(단위159·하네스24·JAR)와 실제 Fleet23개가 385.072초에 실패0으로 통과했다. 기존 시계/분리 장애·발행 경합·인계5회·초기 metadata와 새 잠금 회귀를 함께 실행했다. Standards 하드/heuristic/차단0, Spec 지적/차단0이다. 원래 CI와 대조·전제 실패를 [검증 기록](fleet/DB_LOCK_VERIFICATION.md)에 보존했다. 이후 docs만 추가하며 최종 정확한 HEAD의 Claude·push/PR CI를 확인한다.
+
+
+### #45 유휴 임대 잠금 수정 통합
+
+31e0773의 push40263229427은 #44와 같은 blackhole 시험에서 실패했고 PR40263232084는 성공했다. 실패를 이유 없이 재실행하거나 병합하지 않았다. #60의14816f8(Claude APPROVE, 로컬 단위159·실제Fleet23 근거)을 통합한다. 문서 충돌은 #42/#43/#52의 완료와 #45 실제 디스크 근거, #60 실패/수정 이력을 함께 보존했다. 디스크 실험·probe·cluster·replay/pipeline 경로가 f992ef1 대비 불변인지 다시 확인하고 최종 HEAD의 check·Claude·두 CI를 확인한다.

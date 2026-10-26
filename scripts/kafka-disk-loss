@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 2 && ( $1 == recover || $1 == last-copy ) ]] || { echo '사용법: ./scripts/kafka-disk-loss <recover|last-copy> <새 결과.json>'; exit 2; }
+[[ -z "$(git status --porcelain)" ]] || { echo 'DISK_REQUIRES_CLEAN_COMMIT'; exit 2; }
+./scripts/infra up
+exec ./gradlew --console=plain :server:diskLossExperiment "-PdiskScenario=$1" "-PdiskOutput=$2"

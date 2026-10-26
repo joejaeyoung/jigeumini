@@ -1,0 +1,211 @@
+{
+  "issue": 65,
+  "reviewedHead": "a53625981266683f08ffd7b1ccf82b95c6acedd8",
+  "reviewVerdict": "REQUEST_CHANGES",
+  "blocking": "SQL_COST_SCOPE_AND_REVISION_LABEL",
+  "sourceField": "finalSqlStatements",
+  "runs": {
+    "before-diagnostic": {
+      "source": "work/projection-performance-65/before-diagnostic/result.json",
+      "sha256": "61bc7b896f8b3b2546d05a74316d33b7bd5c7413acc5bd81f745e843770ded24",
+      "families": [
+        {
+          "family": "CATEGORY_OBSERVATION",
+          "operation": "SELECT",
+          "calls": 182115,
+          "executionMillis": 1412.605325000039,
+          "statements": [
+            {
+              "template_hash": "03d1868e7f4384cd121ce87bf6faa3c1",
+              "calls": 181800,
+              "execution_millis": 1406.6245300000392
+            },
+            {
+              "template_hash": "179ca45f9e61c899dc7a197166cbdd71",
+              "calls": 157,
+              "execution_millis": 3.067673000000001
+            },
+            {
+              "template_hash": "2c9241656ca7557301c87c995b6d2665",
+              "calls": 157,
+              "execution_millis": 2.8972459999999995
+            },
+            {
+              "template_hash": "3606a4435136bf0d81d18404ab1fa453",
+              "calls": 1,
+              "execution_millis": 0.015875999999999998
+            }
+          ]
+        },
+        {
+          "family": "CATEGORY_EVENT",
+          "operation": "INSERT",
+          "calls": 181800,
+          "executionMillis": 3619.7672220000222,
+          "statements": [
+            {
+              "template_hash": "47e78b5e2270e6633d7f21de6401bebc",
+              "calls": 181800,
+              "execution_millis": 3619.7672220000222
+            }
+          ]
+        },
+        {
+          "family": "REPORT_EVENT",
+          "operation": "CTE",
+          "calls": 20276,
+          "executionMillis": 18855.108686999884,
+          "statements": [
+            {
+              "template_hash": "757294bcc2fc6a6ec8f3b2e1d690d3c7",
+              "calls": 20216,
+              "execution_millis": 18832.301320999883
+            },
+            {
+              "template_hash": "e40afe0056c9e1e0f0d73736e63b6c9d",
+              "calls": 60,
+              "execution_millis": 22.807366
+            }
+          ]
+        },
+        {
+          "family": "REPORT_EVENT",
+          "operation": "INSERT",
+          "calls": 181800,
+          "executionMillis": 4010.9076860000337,
+          "statements": [
+            {
+              "template_hash": "1b2ca31690ce355dfc076b49b74583f0",
+              "calls": 181800,
+              "execution_millis": 4010.9076860000337
+            }
+          ]
+        },
+        {
+          "family": "REPORT_OBSERVATION",
+          "operation": "CTE",
+          "calls": 0,
+          "executionMillis": 0,
+          "statements": []
+        },
+        {
+          "family": "REPORT_SESSION",
+          "operation": "UPDATE",
+          "calls": 20276,
+          "executionMillis": 177.89868999999993,
+          "statements": [
+            {
+              "template_hash": "395b13f2acb01694b66762af0b644249",
+              "calls": 20276,
+              "execution_millis": 177.89868999999993
+            }
+          ]
+        }
+      ]
+    },
+    "reviewed-diagnostic": {
+      "source": "work/projection-performance-65/reviewed-diagnostic/result.json",
+      "sha256": "90eef321de591927e50debfd301549d383be5bf701c6d0f7da8248c05d6f937b",
+      "families": [
+        {
+          "family": "CATEGORY_OBSERVATION",
+          "operation": "SELECT",
+          "calls": 299,
+          "executionMillis": 5.574721,
+          "statements": [
+            {
+              "template_hash": "2c9241656ca7557301c87c995b6d2665",
+              "calls": 149,
+              "execution_millis": 3.0213069999999997
+            },
+            {
+              "template_hash": "179ca45f9e61c899dc7a197166cbdd71",
+              "calls": 149,
+              "execution_millis": 2.536455
+            },
+            {
+              "template_hash": "3606a4435136bf0d81d18404ab1fa453",
+              "calls": 1,
+              "execution_millis": 0.016959000000000002
+            }
+          ]
+        },
+        {
+          "family": "CATEGORY_EVENT",
+          "operation": "INSERT",
+          "calls": 181800,
+          "executionMillis": 5130.554755999987,
+          "statements": [
+            {
+              "template_hash": "27e9bd7807b19b68e0cecbac26117f8b",
+              "calls": 181800,
+              "execution_millis": 5130.554755999987
+            }
+          ]
+        },
+        {
+          "family": "REPORT_EVENT",
+          "operation": "CTE",
+          "calls": 60,
+          "executionMillis": 0.7656250000000002,
+          "statements": [
+            {
+              "template_hash": "e40afe0056c9e1e0f0d73736e63b6c9d",
+              "calls": 60,
+              "execution_millis": 0.7656250000000002
+            }
+          ]
+        },
+        {
+          "family": "REPORT_EVENT",
+          "operation": "INSERT",
+          "calls": 181800,
+          "executionMillis": 5823.447645999916,
+          "statements": [
+            {
+              "template_hash": "88f58f731e30330f83607a1e0ace5700",
+              "calls": 168670,
+              "execution_millis": 5380.4201129999165
+            },
+            {
+              "template_hash": "88f58f731e30330f83607a1e0ace5700",
+              "calls": 13130,
+              "execution_millis": 443.0275329999999
+            }
+          ]
+        },
+        {
+          "family": "REPORT_OBSERVATION",
+          "operation": "CTE",
+          "calls": 34180,
+          "executionMillis": 708.3470830000028,
+          "statements": [
+            {
+              "template_hash": "31297e91278a39398a89fdceea668bed",
+              "calls": 34180,
+              "execution_millis": 708.3470830000028
+            }
+          ]
+        },
+        {
+          "family": "REPORT_SESSION",
+          "operation": "UPDATE",
+          "calls": 34240,
+          "executionMillis": 334.38738599999823,
+          "statements": [
+            {
+              "template_hash": "395b13f2acb01694b66762af0b644249",
+              "calls": 34240,
+              "execution_millis": 334.38738599999823
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "집계에 나열한family/operation만 포함하며 전체TX/JDBC/API비용이 아니다",
+    "공유호스트 단회 대조이며 SQL별시간을 전체처리량배수로 환산하지 않는다",
+    "새부하 실행 없이 같은 원본을 재계산"
+  ]
+}

@@ -25,11 +25,13 @@ final class ProductLoadMeasurements implements AutoCloseable {
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build();
     private final LinkedHashMap<String,List<String>> groups=new LinkedHashMap<>();
     private final List<String> paths;
+    private final ProductLoadPlan plan;
+    private Map<String,Object> analyzerRuntime;
     private final Map<String,Long> previous=new HashMap<>();
     private long previousAt=System.nanoTime();
     private JMXConnector jmx;
-    ProductLoadMeasurements(RuntimeEnvironment config,JdbcTemplate jdbc,BufferedKafkaPublisher publisher,String channel) {
-        this.config=config;this.jdbc=jdbc;this.publisher=publisher;
+    ProductLoadMeasurements(RuntimeEnvironment config,JdbcTemplate jdbc,BufferedKafkaPublisher publisher,String channel,ProductLoadPlan plan) {
+        this.config=config;this.jdbc=jdbc;this.publisher=publisher;this.plan=plan;
         admin=Admin.create(Map.of("bootstrap.servers",config.bootstrap(),"default.api.timeout.ms",3000,"request.timeout.ms",2000));
         groups.put(config.group(),List.of(config.topic()));
         groups.put(config.group()+"-trend",List.of(config.topic()));
@@ -48,7 +50,9 @@ final class ProductLoadMeasurements implements AutoCloseable {
         for(var c:channels) {accepted+=c.accepted();ack+=c.acknowledged();rejected+=c.rejected();pending+=c.pending();if(c.oldest()!=null)oldest=Math.max(oldest,Duration.between(c.oldest(),Instant.now()).toMillis());}
         out.put("publisher",Map.of("attempted",accepted+rejected,"accepted",accepted,"acknowledged",ack,"rejected",rejected,"unconfirmed",accepted-ack,"pending",pending,"oldestAgeMillis",oldest));
         long dbStart=System.nanoTime();
-        try {out.put("database",counts());}catch(RuntimeException error){out.put("databaseError",error.getClass().getSimpleName());}
+        if(plan.measurementProfile().equals("FULL")||phase.equals("VERIFY")) {
+            try {out.put("database",counts());}catch(RuntimeException error){out.put("databaseError",error.getClass().getSimpleName());}
+        } else out.put("databaseSampling","INTENTIONALLY_DISABLED");
         out.put("databaseQueryMillis",(System.nanoTime()-dbStart)/1e6);
         var responses=new ArrayList<Map<String,Object>>();
         for(String path:paths) {
@@ -62,12 +66,17 @@ final class ProductLoadMeasurements implements AutoCloseable {
         out.put("generatorHeapUsedBytes",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
         out.put("probeThreadCount",ManagementFactory.getThreadMXBean().getThreadCount());
         out.put("probeGcMillis",ManagementFactory.getGarbageCollectorMXBeans().stream().mapToLong(java.lang.management.GarbageCollectorMXBean::getCollectionTime).filter(v->v>=0).sum());
+        out.put("probeRuntime",ProductLoadJvm.runtime(ManagementFactory.getPlatformMBeanServer()));
+        if(plan.diagnostics())out.put("probeThreads",ProductLoadJvm.threads(ManagementFactory.getThreadMXBean()));
         if(ManagementFactory.getOperatingSystemMXBean() instanceof com.sun.management.UnixOperatingSystemMXBean unix)out.put("probeOpenFileDescriptors",unix.getOpenFileDescriptorCount());
         try {out.put("generatorRssBytes",rss());}catch(Exception e){out.put("generatorRssError",e.getClass().getSimpleName());}
         try {
             if(jmx==null)jmx=JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://api:9010/jmxrmi"));
             var memory=(CompositeData)jmx.getMBeanServerConnection().getAttribute(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage");
             out.put("analyzerHeapUsedBytes",memory.get("used"));out.put("analyzerHeapMaxBytes",memory.get("max"));
+            if(analyzerRuntime==null)analyzerRuntime=ProductLoadJvm.runtime(jmx.getMBeanServerConnection());
+            out.put("analyzerRuntime",analyzerRuntime);
+            if(plan.diagnostics())out.put("analyzerThreads",ProductLoadJvm.threads(ManagementFactory.newPlatformMXBeanProxy(jmx.getMBeanServerConnection(),ManagementFactory.THREAD_MXBEAN_NAME,java.lang.management.ThreadMXBean.class)));
         }catch(Exception error){out.put("analyzerHeapError",error.getClass().getSimpleName());try{if(jmx!=null)jmx.close();}catch(Exception ignored){}jmx=null;}
         out.put("sampleSeconds",(System.nanoTime()-started)/1e9);out.put("finishedAt",Instant.now());out.put("finishedAtEpochMillis",System.currentTimeMillis());return out;
     }

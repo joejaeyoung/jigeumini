@@ -59,27 +59,34 @@ public final class ReportStore implements DualTopicProjection {
             for(String channel:inputs.stream().map(Input::channel).distinct().sorted().toList())
                 jdbc.queryForObject("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",Object.class,"report/"+run+"/"+channel);
             var affected=new TreeMap<String,Instant[]>();
-            for(var input:inputs) {
-                if(input.observation()!=null) {
-                    var sample=input.observation();if(!sample.runId().equals(run)||sample.observedAt().isBefore(oldest.minusSeconds(120)))continue;
-                    if(sample.observedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
-                    String digest=hash(sample.encode());
-                    int inserted=jdbc.update("INSERT INTO report_observation VALUES (?,?,?,?,?,?,?::jsonb,?,NULL) ON CONFLICT DO NOTHING",run,sample.eventId(),sample.channelId(),ts(sample.observedAt()),Math.min(120,sample.ttlSeconds()),sample.liveStatus()==LiveStatus.LIVE,new String(sample.encode(),java.nio.charset.StandardCharsets.UTF_8),digest);
-                    if(inserted==0) {
-                        if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_observation WHERE run_id=? AND event_id=?",String.class,run,sample.eventId())))throw new IllegalArgumentException("REPORT_OBSERVATION_CONFLICT");
-                    } else affect(affected,sample.channelId(),sample.observedAt(),sample.observedAt().plusSeconds(120));
-                } else {
-                    var event=input.chat();if(event.eventTime().isBefore(oldest))continue;
-                    if(event.receivedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
-                    Instant at=event.eventTime().truncatedTo(java.time.temporal.ChronoUnit.MICROS);String digest=codec.hash(event);
-                    int inserted=jdbc.update("INSERT INTO report_event VALUES (?,?,?,?,?,?,?,NULL,NULL) ON CONFLICT DO NOTHING",run,event.eventId(),event.channelId(),ts(at),ts(event.receivedAt().truncatedTo(java.time.temporal.ChronoUnit.MICROS)),digest,!event.eventTime().isAfter(event.receivedAt().minusSeconds(120)));
-                    if(inserted==0) {
-                        if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_event WHERE run_id=? AND event_id=?",String.class,run,event.eventId())))throw new IllegalArgumentException("REPORT_EVENT_CONFLICT");
-                    } else affect(affected,event.channelId(),at,at.plusNanos(1000));
-                }
+            // 새 관측의 세션/별칭을 먼저 확정한다. 새 채팅은 최종 관측 귀속으로 바로 삽입한다.
+            for(var input:inputs) if(input.observation()!=null) {
+                var sample=input.observation();if(!sample.runId().equals(run)||sample.observedAt().isBefore(oldest.minusSeconds(120)))continue;
+                if(sample.observedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
+                String digest=hash(sample.encode());
+                int inserted=jdbc.update("INSERT INTO report_observation VALUES (?,?,?,?,?,?,?::jsonb,?,NULL) ON CONFLICT DO NOTHING",run,sample.eventId(),sample.channelId(),ts(sample.observedAt()),Math.min(120,sample.ttlSeconds()),sample.liveStatus()==LiveStatus.LIVE,new String(sample.encode(),java.nio.charset.StandardCharsets.UTF_8),digest);
+                if(inserted==0) {
+                    if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_observation WHERE run_id=? AND event_id=?",String.class,run,sample.eventId())))throw new IllegalArgumentException("REPORT_OBSERVATION_CONFLICT");
+                } else affect(affected,sample.channelId(),sample.observedAt(),sample.observedAt().plusSeconds(120));
             }
+            // 영구 입력 오류를 세션 재구성의 일시적 만료 ID 대기보다 먼저 판정한다.
+            for(var input:inputs)if(input.chat()!=null && !input.chat().eventTime().isBefore(oldest)
+                    && input.chat().receivedAt().isAfter(now.plusSeconds(5)))throw new IllegalArgumentException("REPORT_FUTURE_TIME");
             var changes=new TreeMap<Delta,Long>();
-            for(var channel:affected.entrySet())rebuild(channel.getKey(),channel.getValue()[0],channel.getValue()[1],now,oldest,changes);
+            for(var channel:affected.entrySet()) {
+                var changedObservations=rebuildSessions(channel.getKey(),now,oldest);
+                reassign(channel.getKey(),channel.getValue()[0],channel.getValue()[1],oldest,changedObservations,changes);
+            }
+            var chatChannels=new TreeSet<String>();
+            for(var input:inputs) if(input.chat()!=null) {
+                var event=input.chat();if(event.eventTime().isBefore(oldest))continue;
+                Instant at=event.eventTime().truncatedTo(java.time.temporal.ChronoUnit.MICROS);String digest=codec.hash(event);
+                var assigned=insertChat(event,at,oldest,digest);
+                if(assigned.isEmpty()) {
+                    if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM report_event WHERE run_id=? AND event_id=?",String.class,run,event.eventId())))throw new IllegalArgumentException("REPORT_EVENT_CONFLICT");
+                } else {delta(changes,assigned.getFirst(),at,1);chatChannels.add(event.channelId());}
+            }
+            for(String channel:chatChannels)if(!affected.containsKey(channel))refreshStates(channel,now,oldest);
             var changedReports=new HashSet<UUID>();
             for(var entry:changes.entrySet()) {
                 if(entry.getValue()==0)continue;var delta=entry.getKey();changedReports.add(delta.report());
@@ -91,7 +98,7 @@ public final class ReportStore implements DualTopicProjection {
             progress.forEach((partition,offset)->jdbc.update("INSERT INTO report_progress VALUES (?,?,?,?,?) ON CONFLICT(run_id,topic,partition) DO UPDATE SET next_offset=greatest(report_progress.next_offset,excluded.next_offset),updated_at=excluded.updated_at",run,partition.topic(),partition.partition(),offset,ts(now)));
         });
     }
-    private void rebuild(String channel,Instant from,Instant to,Instant now,Instant oldest,Map<Delta,Long> changes) {
+    private List<UUID> rebuildSessions(String channel,Instant now,Instant oldest) {
         var anchors=new HashMap<UUID,UUID>();jdbc.query("SELECT anchor_observation_id,report_id FROM report_session WHERE run_id=? AND channel_id=? AND anchor_observation_id IS NOT NULL",rs->{anchors.put(rs.getObject(1,UUID.class),rs.getObject(2,UUID.class));},run,channel);
         var previous=new HashMap<UUID,UUID>();
         var samples=jdbc.query("""
@@ -119,6 +126,9 @@ public final class ReportStore implements DualTopicProjection {
             }
         }
         derived.aliases().forEach((alias,canonical)->jdbc.update("INSERT INTO report_alias VALUES (?,?,?) ON CONFLICT(run_id,alias_id) DO UPDATE SET canonical_id=excluded.canonical_id",run,alias,canonical));
+        return changedObservations;
+    }
+    private void reassign(String channel,Instant from,Instant to,Instant oldest,List<UUID> changedObservations,Map<Delta,Long> changes) {
         var affected=new ArrayList<Object>(List.of(ts(oldest),run,channel,ts(from.isBefore(oldest)?oldest:from),ts(to)));
         String identityChanges="";
         if(!changedObservations.isEmpty()) { identityChanges=" OR e.observation_id=ANY(CAST(? AS uuid[]))";affected.add("{"+String.join(",",changedObservations.stream().map(UUID::toString).toList())+"}"); }
@@ -140,6 +150,38 @@ public final class ReportStore implements DualTopicProjection {
                   RETURNING e.event_time,a.old_report,a.new_report
                 ) SELECT event_time,old_report,new_report FROM changed
                 """,rs->{var at=rs.getTimestamp(1).toInstant();delta(changes,rs.getObject(2,UUID.class),at,-1);delta(changes,rs.getObject(3,UUID.class),at,1);},affected.toArray());
+    }
+    private List<UUID> insertChat(ChatEvent event,Instant at,Instant oldest,String digest) {
+        return jdbc.query("""
+                INSERT INTO report_event(run_id,event_id,channel_id,event_time,received_at,payload_hash,late,observation_id,report_id)
+                SELECT ?,?,?,?,?,?,?,
+                  CASE WHEN m.live AND ?<m.observed_at+make_interval(secs=>m.ttl_seconds) THEN m.event_id END,
+                  CASE WHEN m.live AND ?<m.observed_at+make_interval(secs=>m.ttl_seconds) THEN m.report_id END
+                FROM (VALUES(1)) seed(dummy) LEFT JOIN LATERAL (
+                  SELECT m.* FROM report_observation m WHERE m.run_id=? AND m.channel_id=? AND m.observed_at<=?
+                    AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=m.run_id AND s.report_id=m.report_id AND s.ended_at<?)
+                  ORDER BY m.observed_at DESC,m.event_id DESC LIMIT 1
+                ) m ON true
+                ON CONFLICT DO NOTHING RETURNING report_id
+                """,(rs,n)->rs.getObject(1,UUID.class),run,event.eventId(),event.channelId(),ts(at),
+                ts(event.receivedAt().truncatedTo(java.time.temporal.ChronoUnit.MICROS)),digest,!event.eventTime().isAfter(event.receivedAt().minusSeconds(120)),
+                ts(at),ts(at),run,event.channelId(),ts(at),ts(oldest));
+    }
+    private void refreshStates(String channel,Instant now,Instant oldest) {
+        // 관측이 그대로인 배치에서도 TTL에 따른 저장 상태·revision·updatedAt 계약을 유지한다.
+        jdbc.update("""
+                WITH latest AS (
+                  SELECT s.report_id,CASE WHEN s.ended_at IS NOT NULL THEN 'OFFLINE'
+                    WHEN m.live AND ?<m.observed_at+make_interval(secs=>m.ttl_seconds) THEN 'LIVE' ELSE 'UNKNOWN' END state
+                  FROM report_session s JOIN LATERAL (
+                    SELECT observed_at,ttl_seconds,live FROM report_observation o WHERE o.run_id=s.run_id AND o.report_id=s.report_id
+                    ORDER BY observed_at DESC,event_id DESC LIMIT 1
+                  ) m ON true
+                  WHERE s.run_id=? AND s.channel_id=? AND (s.ended_at IS NULL OR s.ended_at>=?)
+                ) UPDATE report_session s SET payload=jsonb_set(s.payload,'{state}',to_jsonb(latest.state)),
+                    revision=s.revision+1,updated_at=? FROM latest
+                  WHERE s.run_id=? AND s.report_id=latest.report_id AND s.payload->>'state'<>latest.state
+                """,ts(now),run,channel,ts(oldest),ts(now),run);
     }
     private static void affect(Map<String,Instant[]> affected,String channel,Instant from,Instant to) {
         affected.compute(channel,(id,range)->range==null?new Instant[]{from,to}:new Instant[]{range[0].isBefore(from)?range[0]:from,range[1].isAfter(to)?range[1]:to});

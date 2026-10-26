@@ -1,14 +1,20 @@
 """저장된 부하 표본의 시간 커버리지와 고정 offset까지의 복구를 판정한다. 실행 자원은 변경하지 않는다."""
 import hashlib,json
 
+def counts_enabled(load):
+    return load.get('plan',{}).get('measurementProfile','FULL') not in ('NO_COUNTS','NO_COUNTS_OR_DU')
+
+def database_observed(load,sample):
+    return 'database' in sample if counts_enabled(load) else sample.get('databaseSampling')=='INTENTIONALLY_DISABLED'
+
 def slow_time_coverage(load,normal,unavailable):
     start=load['inputStartedAtEpochMillis'];end=start+load['inputSeconds']*1000
     intervals=[(start,end)]
     if unavailable:
         intervals=[(start,min(end,unavailable[0])),(max(start,unavailable[1]),end)]
     intervals=[(a,b) for a,b in intervals if a<b]
-    required=('database','analyzerHeapUsedBytes','generatorHeapUsedBytes','generatorRssBytes','publisher')
-    complete=[s for s in normal if all(k in s for k in required) and len(s['api'])==8
+    required=('analyzerHeapUsedBytes','generatorHeapUsedBytes','generatorRssBytes','publisher')
+    complete=[s for s in normal if database_observed(load,s) and all(k in s for k in required) and len(s['api'])==8
               and all('status' in r or 'error' in r for r in s['api'])]
     observed=sorted(s['startedAtEpochMillis'] for s in complete if start<=s['startedAtEpochMillis']<=end)
     windows=[]
@@ -66,7 +72,8 @@ def analyze(load,offset_file,fault,resources,duration):
     coverage={
         'offsetSamples':len(offsets),'offsetCompleteSamples':len(good),'offsetSuccessRatio':ratio(len(good),len(offsets)),
         'normalSlowSamples':len(normal),
-        'databaseSuccessRatio':ratio(sum('database' in s for s in normal),len(normal)),
+        'databaseSamplingMode':'COUNTS' if counts_enabled(load) else 'INTENTIONALLY_DISABLED',
+        'databaseContractRatio':ratio(sum(database_observed(load,s) for s in normal),len(normal)),
         'analyzerHeapSuccessRatio':ratio(sum('analyzerHeapUsedBytes' in s for s in normal),len(normal)),
         'generatorHeapSuccessRatio':ratio(sum('generatorHeapUsedBytes' in s for s in normal),len(normal)),
         'generatorRssSuccessRatio':ratio(sum('generatorRssBytes' in s for s in normal),len(normal)),

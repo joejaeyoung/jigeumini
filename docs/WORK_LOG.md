@@ -585,3 +585,82 @@ origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으
 최초 최종HEAD afc1548은 Claude APPROVE·차단0이었다. 비차단 중 Gradle tasks 속성 누락 실패를 실제 종료1로 재현해 인자 조건부 설정으로 수정한다. 600 최초 SLO 초과/반복 시계 무효를 STATUS·인프라 요약에서도 구분하고 실패 후 close 전 수신 비활성화를 PROTOCOL에 명시한다. baseline Gradle 종료값은 미캡처 null·기대값·출처를 나누고 로그에 있는 자식 exit3/2를 추출한다. 제품 GC 종류 미계측과 스레드956/1257~1259, 전역 조립 예산 부재를 한계로 남긴다. 정확한 최대치/정상 시계450·600 반복 검증은 #65의 명시적 완료 조건으로 이관했으며 Spec 재검토의 남은 지적은0건이다. 최종 보완 HEAD의 Claude/CI는 다시 확인한다.
 
 보완 뒤 `./gradlew --console=plain tasks` 종료0, 문서77개 링크·기술목표16/기능16 검사와 diff 공백 검사를 통과했다. Java main/test source는876bb68과 같으며 추가 변경은 Gradle 태스크 설정·정제 출처·문서다.
+
+## 2026-10-27 · #64 종료와 #65 진단 시작
+
+PR70 최종129a46d는 Claude 후속 APPROVE, push40360372869/PR40360383027 성공과 양쪽 XML176/136·실패/오류/skip0,하네스34·웹29·Chromium31을 확인해5d8e441로 develop에 병합했다. #64는 수집 메모리/수명 개선 범위로 닫고 최대치 조건은 #65에 명시적으로 이관했다. 최종 main/test는876bb68과 같으나 build.gradle 변경으로 buildId/JAR hash는 다르다. tasks 재현과 보완 뒤 lifecycle8연결3회도근거에보존했다. T11 전역조립예산/동시큰프레임 미검증과운영확대전재개조건을STATUS에보완했다.
+
+#65 최초전체제품재현은발행버퍼상한과+2.044초시계잔차로중단됐다. 원본을보존하고27회시계표본을감사했다. 기존8container보존·소유시험자원정리를확인했으며다른worktree는변경하지않았다. origin/develop에서technicaltest/projection-bottlenecks로분기해계측부터진행한다.
+
+## 2026-10-27 · #65 진단 하네스
+
+- T02/T07/T08/T11/T12/T14. 양방향 벽/단조 시계 검증과 누락 회귀, 원천 tick 잔차를 추가했다.
+- 기존 전체 COUNT·COUNT 생략·COUNT/du 생략 계획을 명시하고 종료 대조는 유지한다. SQL 통계와 JVM 설정/스레드 분류는 값·원문 없이 숫자로 기록한다.
+- [조사](research/PROJECTION_PERFORMANCE.md)에 네 가지 가설과 공식 자료를 연결했다. 제품 처리 코드 최적화 전 기준선이다. `./scripts/check` 서버 176개·하네스 37개·JAR 통과. 실제 고정 자원 대조는 다음 실행에서 기록한다.
+
+## 2026-10-27 · #65 기준선과 SQL 개선
+
+- d20a29a의 20채널·warmup 1,000/s 30초 + steady 2,500/s 60초·API 10/s 기준선 3회가 고유 180,000/물리 181,800건 대조와 정리를 마쳤다. FULL/NO_COUNTS/NO_COUNTS+진단 모두 카테고리 적체로 SLO를 넘었고 증가율은 398.6/538.5/315.3건/s다. 시계 잔차는 모두 2ms 이내다. COUNT 제거 효과를 주장하지 않는다.
+- 진단에서 category 진행 저장 주 SQL 181,860회, 리포트 재배정 주 SQL 20,216회·실행 18.832초를 관측했다. 서버 실행 시간은 JDBC/풀 대기가 아니다. JVM 표본에는 풀 획득 위치도 6건 있었지만 지속 시간·단독 원인으로 해석하지 않는다.
+- category 시각 결합+INSERT를 한 왕복으로 합치고 topic/partition별 최대 진행 위치를 저장한다. report는 새 관측·기존 기록 보정 뒤 새 채팅을 바로 귀속시켜, 채팅만 있는 배치의 전체 이력 재계산과 UPDATE를 줄인다. TTL 상태/버전/updatedAt은 별도 갱신으로 유지한다.
+- 새 계약 테스트 2개를 변경 전 코드에서 먼저 통과시켰고, 변경 후 category/report 실제 통합 20개가 통과했다. 고정 자원 개선 수치는 재측정 전이다. [정제 기준선](poc/evidence/projection-performance-2026-10-27/baseline.json).
+
+### #65 추가 대조와 전체 회귀
+
+실제 Kafka/PostgreSQL 전체 138개·단위 176개·JAR가 통과했다. Standards/Spec의 고정 범위 5d8e441…4f48aee 검토는 각각 지적 0건이었다. 성능 결과와 최종 게이트는 아직 진행 중이다.
+
+기준선의 COUNT/du 생략에서도 카테고리 lag +356.0건/s로 실패했다. 편향 2,000/s·NO_COUNTS+진단은 순위 p95 256ms/API 59ms·최종 lag 0으로 통과했으므로 이전 편향 실패를 확정 한계로 재사용하지 않는다. 두 비교의 실제 실행일은 2026-10-27 KST이며 코드/입력/시간/hash는 정제 근거에 있다.
+
+대조 두 개를 잘못 겹쳐 실행한 것을 확인하고 둘 다 중단·비교 제외했다. 중단 시 남은 소유 네트워크/임시 비밀 파일은 정리했고 기존 8개 container는 유지했다. 원본 결과와 중단·정리 보완 기록을 보존하며 실행 wrapper에 배타 잠금을 추가했다. 이후 두 대조는 겹치지 않았다.
+
+가시성 성공 표본만의 quantile을 전체 p95로 오해하지 않도록 모집단·미관측 비율·보수적 전체 p95를 분리했다. 미관측/누락/역전 회귀를 포함한 Python 하네스 38개가 통과했다. 제품 Java source는 4f48aee와 같다.
+
+### #65 Claude 구현 검토 후 보완
+
+8a0fb76의 Claude 구현 판정은 APPROVE·차단0이다. 제공하지 않았던 ReportSessions/색인 정의를 다시 대조했다. 모델과 DB는 TTL을 모두120초로 제한하며 최소 입력 TTL은60초다. 60/120/300의 정확한 경계, 별칭 뒤 채팅만의 변경, SOURCE_CHANGED/OFFLINE_OBSERVED 종료 상태를 실제 통합에 추가했다. 미래 채팅의 영구 오류는 만료 원천 ID 재사용 대기보다 먼저 검사하고 transaction rollback을 확인한다.
+
+7일·30초 간격의20,160개 임시 합성 관측으로 EXPLAIN을 대조했다. 기존 prefix 색인은 scan20,160+sort, 정렬 색인은 index scan1행이었다. 재현2회의 서버 실행2.359/2.313ms→0.020/0.022ms는 작은 단일 질의 결과이며 제품 처리량 배수로 쓰지 않는다. V13에서 prefix 색인을 대체한다. F16→T16 연결과 함께 migration 이미지/리허설이 현재 제품 다음 번호를 사용하게 바꾼다. 이전schema의복구계약은 유지한다.
+
+계측 schemaVersion2를 명시하고 이전 profile 원본은v1·그전은v0으로 읽는다. 미완료 실행도 정제 결과에서 목록/hash로 남긴다. 기존42회 재계산에서 가시성 모집단 변경에 의한 판정 차이는0건이다. 초기DIRECT원본은 과거 저장판정과 현재판정이 다르지만 기존 partition 계측 누락 때문이며 이번 변경 효과가 아니다. 진단 DB는 기본 Compose에 command가 없어 추가 PG 설정을 덮어쓰지 않았다. 스레드40frame 분류는 깊은 역할을 놓칠 수 있는 하한 표본이다.
+
+### #65 유효 시계 경계 재검증과 연결 진단 보완
+
+2026-10-27. 7998bed의 push40372282990/PR40372291574 모두 성공, XML단위176/실제142·실패/오류/skip0과 하네스38·웹29·Chromium31을 확인했다. V13 이후 시험V14의 실패/중단 rollback·구 이미지 거부·새DB V13 복원·6개group 재생·웹8경로/리포트/26API200을16단계로 검증했다. 시험 자원과 생성 비밀을 정리하고 기존8개container를 보존했다.
+
+같은 commit의450/600채널 총100/s·API10 5분과600단기2회가 통과했다.600지속은고유30,000·최종24개lag0·순위p95214ms/API64ms다.100채널500/s·1KiB·80%편향5분도고유150,000·순위229ms/API53ms·최종lag0으로 통과했다. 2,500/s FULL/NO_COUNTS+진단은 단기 기준 통과했으나FULL의적체증가를 지속 처리량으로 채택하지 않았다. SQL전후·동일조건 지속/CPU대조와 최종 문서는 계속 진행한다.
+
+`after-operating100-rate1000`은 준비 기록에WS_CLOSED1회가 있고, 재접속 뒤255,000개를 수신·257,550개를ACK받았으나 마지막COLLECTOR_HEALTH로 종료2였다. 최종DB대조는 없다. 원천오류/중복0·제품process정상/OOMfalse이며 원래 종료 원인은 미확정이다. 직렬실행기는 다음1,000채널 시험을 시작하지 않았다.
+
+독립 회귀에서 연결 실패 후cleanup close callback이 원래HANDSHAKE_TIMEOUT_OR_CONNECT를WS_CLOSED로 바꾸는 결함을 재현했다(2개 중1개 실패). 원래 실패를 먼저 확정해 예외·품질 관측의 이유를 보존하고 숫자close code·연결/승인 대기종류를 제한 집계한다. 준비 단계 오류는 입력 전에 실패시킨다. 강화한 관측 회귀의 초기fixture는 ended override 서명이 잘못돼2개가 실패했고, @Override와 올바른 서명으로 고쳤다. 실패 로그/XML을 지우지 않았다. 이 결함의 재현은 앞선1회의 실제 종료 원인을 증명하지 않는다.
+
+DIRECT 저율 시험의 과거최대지연805.7ms는 발생tick이 없어STOP/GC/side-input과 인과를 구분할 수 없었다. side-input의관측ACK/outbox시간과 최대pacing의예정초/tick을 숫자로 기록하도록 보완한다. wire message나사용자정보는 저장하지 않는다. 현재 검사·이미지·재측정·최종Claude/CI는 별도 게이트다.
+
+#49의 선행#47을 공식 인증 경로를 선택할 때의 조건부 의존으로 정리했다. 익명READ의 공식앱 등록은 필수가 아니며, 공개목록조사 완료를 실제전체수신·장기quota 검증으로 보지 않는다. 외부배포/유료자원은 실행하지 않았다. #63의사전계약 검토는gitignored초안에만 남겼다.
+
+### #65 실패 확정 경합과1,000채널 경계 확인
+
+0cfa701 Spec리뷰에서 ended 조회와 fail 사이에 transport callback이 먼저 완료하면 observer와예외의 코드가 갈리는 P2를 확인했다. 통계 보고 중 다른 thread가 WS_TRANSPORT를 확정하는 회귀가 수정 전 HANDSHAKE_TIMEOUT_OR_CONNECT로 실패했다. fail이 원자적으로 처음 확정된 동일 실패를 반환하고 ready에도 전달하도록 보완했다. 원본 red/green 로그·XML은 보존한다. 이전cleanup가림과이번경합은 별도 재현이며 최초실제WS종료의원인을 확정하지 않는다.
+
+1,000채널은 연결준비오류0·9000수신/9090ACK·최종전체대조/24lag0이지만 readiness503 3회와 채팅 토픽의 category/report watermark30.425/28.410초로 실패했다. report 관측 토픽의 최대는29.418초다. 부하API600개 자체는모두200·p95197ms다. 준비/입력전실패나수신상한으로부르지 않는다. 직렬실행기가후속복합시험을중단했으며 소유자원정리/기존8container보존을 확인했다.
+
+보완 뒤 `./scripts/check`는 단위179·하네스38·실행JAR를 통과했다. 연결 관련12개 회귀도 실패/오류0이다. 최종부하·Claude·CI승인과구분한다.
+
+### #65 최종 비용·용량 대조 정리
+
+2026-10-27 KST. e4319e9의 push40380847007/PR40380852486 양쪽에서 단위179·실제142·하네스38·웹29·Chromium31과 실패/오류/skip0을 XML·job log로 확인했다. 이 구현 게이트와 최종 문서 HEAD의 Claude/CI를 구분한다.
+
+100채널·1KiB·80%편향·API10 고정의1,000/s는30초 준비+240초 측정, 고유255,000/물리257,550·전체대조·최종24lag0으로 통과했다. 균등2,000/s120초는 형식 통과이나 category/report 채팅 lag 기울기+24.991/+38.427건/s가 남아 안정 지속량으로 채택하지 않았다. 3,000/s control/API2/Kafka2/DB2 CPU 대조도 같은e4319e9 이미지로 직렬 실행했다. API2는 전체 분석기 JVM이다. 단회 DB2의 형식 통과를 증설 효과나 운영 최대 확정으로 쓰지 않는다.
+
+final-full2500은 승인20개 중19개·frame38·APPROVAL_TIMEOUT1에서 입력 전에 중단했다. 입력/발행0·원천 READ20·protocol/socket 오류0·OOMfalse다. cleanup을 확인하고 원본을 보존했다. 승인 전용 호스트 loopback20채널×100회는2,000승인/4,000frame·실패0으로 미재현이었다. 공식 Java-WebSocket/Spring/Tomcat 소스 조사를 문서에 남겼으나 실패 당시 queue/interestOps/실제 쓰기 증거가 없어 원인은 확정하지 않았다. timeout을 늘리거나 시작 실패를 통과로 완화하지 않았다.
+
+나머지 FULL/NO_COUNTS·hot/DIRECT 대조의 실제 판정·입력·시각·코드/hash와 실패 실행은 [전체 검증](PROJECTION_PERFORMANCE_VERIFICATION.md)·[정제 근거](poc/evidence/projection-performance-2026-10-27/summary.json)에 연결한다. 소유 실행 자원을 정리하고 원래8개container와 미리보기를 보존했다. 다른worktree와 외부 인프라는 변경하지 않았다.
+
+Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.418초를 구분했다. STATUS 기술 목표7개, 현재 인프라와 과거 용량 문서, 제품V13/시험V14 복구 구분, 리팩토링 결정을 함께 갱신한다. #63의 보존·#68 샤딩 판단, 조건부 공식경로#47과 실제외부#48/#49는 남긴다.
+
+최종a536259의 Standards/Spec은 각각 차단0·비차단1이었다. V13이 새 채팅 귀속이 아니라 세션별 TTL 갱신의 최신 관측 조회를 돕는다고 정정했다. idle/fetch·1초 offset 비용과 VM 전체/동거 workload 관측은 미실행으로 구분하고, #49의 운영 SKU 확정 전 대조·재개 조건으로 명시했다. 과거 원본에 없는 계측을 완료로 처리하지 않았다. 보완 HEAD의 Claude/CI를 다시 확인한다.
+
+### #65 Claude 최종 문서 비용 보완
+
+a536259의 Claude 판정은 REQUEST_CHANGES다. 차단1건은 SQL 비용 표가 병합 INSERT와 새 TTL 상태 갱신 CTE를 누락하고 revision UPDATE를 상태 갱신으로 잘못 해석한 문제였다. 같은 원본 두 실행에서 CATEGORY_EVENT/INSERT와 REPORT_OBSERVATION/CTE를 재계산해 추가했다. category SELECT+INSERT5.032→5.136초, 지정 report 네 family23.044→6.867초로 범위를 한정하고 전체 transaction 감소율과 구분한다. 새 부하 실행 없이 원본 hash와 숫자만 정제했다.
+
+비차단 문서 의견도 반영했다. 8a0fb76의3,000/s 실패·API오류1을 표에 추가하고, 이름에diag가 붙은 실행의 실제FULL/진단false, 동기 관측 burst와 watermark 사유 코드의 한계, V13 maintenance·7998bed migration 실행과 후속diff 없음, 진단 overlay의 현 설정을 명시했다. 종료 세션 TTL 조회 축소·observer 시작 실패 회귀·최초seed pacing 분리와 계측 접근 규칙 정리는 후속 개선 후보로 기록하며 검증 완료로 세지 않는다. 최종 승인과CI는 보완HEAD에서 새로 확인한다.

@@ -57,6 +57,21 @@ class CategoryIntegrationTest {
     private long count(String category) { return jdbc.queryForObject("SELECT coalesce(sum(message_count),0) FROM category_bucket WHERE category_key=?",Long.class,CategoryStore.key(category)); }
     private long rows(String table) { return jdbc.queryForObject("SELECT count(*) FROM "+table,Long.class); }
     private long revision() { return jdbc.queryForObject("SELECT revision FROM category_revision",Long.class); }
+    @Test void mixedPartitionsDuplicatesAndExpiredEventsKeepIndependentMonotonicProgress() {
+        Instant at=Instant.parse("2026-10-27T09:00:00Z");store=store(Clock.fixed(at.plusSeconds(60),ZoneOffset.UTC));
+        var first=event(A,at.plusSeconds(10));var second=event(B,at.plusSeconds(10));
+        store.apply(List.of(record(first,12),record(sample(A,at,"game"),9),
+                new ConsumerRecord<>(chat,1,7,B,codec.encode(second)),record(first,4)));
+        assertEquals(1,count("game"));assertEquals(1,count(null));assertEquals(2,rows("category_event"));
+        assertEquals(13L,jdbc.queryForObject("SELECT next_offset FROM category_progress WHERE topic=? AND partition=0",Long.class,chat));
+        assertEquals(8L,jdbc.queryForObject("SELECT next_offset FROM category_progress WHERE topic=? AND partition=1",Long.class,chat));
+        assertEquals(10L,jdbc.queryForObject("SELECT next_offset FROM category_progress WHERE topic=? AND partition=0",Long.class,observations));
+        long revision=revision();var expired=event(A,at.minusSeconds(8*86400));
+        store.apply(List.of(record(first,3),new ConsumerRecord<>(chat,2,41,A,codec.encode(expired))));
+        assertEquals(revision,revision());assertEquals(2,rows("category_event"));
+        assertEquals(13L,jdbc.queryForObject("SELECT next_offset FROM category_progress WHERE topic=? AND partition=0",Long.class,chat));
+        assertEquals(42L,jdbc.queryForObject("SELECT next_offset FROM category_progress WHERE topic=? AND partition=2",Long.class,chat));
+    }
     @Test void temporalJoinUsesPastSamplesAndRevisesOnlyTheirValidityRangeRegardlessOfArrivalOrder() {
         Instant base=Instant.parse("2026-10-25T12:00:00Z");store=store(Clock.fixed(base.plusSeconds(600),ZoneOffset.UTC));
         var first=sample(A,base,"game");store.apply(List.of(record(first,0)));

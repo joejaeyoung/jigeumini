@@ -4,14 +4,16 @@ import json,pathlib,re
 RESOURCE_PROFILES={'BASELINE':{},'API_2_CPU':{'api':2},'DB_2_CPU':{'postgres':2},'API_DB_2_CPU':{'api':2,'postgres':2},'KAFKA_2_CPU':{'kafka':2},'COLLECTOR_2_CPU':{'load-probe':2}}
 
 def validate(plan):
-    if isinstance(plan,dict):plan={'payloadProfile':'MINIMAL',**plan}
-    required={'payloadProfile','name','channels','stages','faultAtSeconds','faultSeconds','sourceMode','apiRequestsPerSecond','apiMaxInFlight','resourceProfile'}
+    if isinstance(plan,dict):plan={'payloadProfile':'MINIMAL','measurementProfile':'FULL','measurementSchemaVersion':2,'diagnostics':False,**plan}
+    required={'payloadProfile','measurementProfile','measurementSchemaVersion','diagnostics','name','channels','stages','faultAtSeconds','faultSeconds','sourceMode','apiRequestsPerSecond','apiMaxInFlight','resourceProfile'}
     if not isinstance(plan,dict) or set(plan)!=required:raise ValueError('LOAD_PLAN_FIELDS')
     if not isinstance(plan['name'],str) or not re.fullmatch('[a-z][a-z0-9_-]{0,39}',plan['name']):raise ValueError('LOAD_PLAN_NAME')
     def integer(value,low,high):return type(value) is int and low<=value<=high
     if not integer(plan['channels'],2,1000) or not integer(plan['apiRequestsPerSecond'],0,200) or not integer(plan['apiMaxInFlight'],1,100):raise ValueError('LOAD_PLAN_LIMITS')
     if plan['sourceMode'] not in ('DIRECT','WEBSOCKET') or plan['resourceProfile'] not in RESOURCE_PROFILES:raise ValueError('LOAD_PLAN_MODE')
     if plan['payloadProfile'] not in ('MINIMAL','KOREAN_1K') or (plan['sourceMode']=='DIRECT' and plan['payloadProfile']!='MINIMAL'):raise ValueError('LOAD_PAYLOAD_PROFILE')
+    if plan['measurementProfile'] not in ('FULL','NO_COUNTS','NO_COUNTS_OR_DU') or type(plan['diagnostics']) is not bool:raise ValueError('LOAD_MEASUREMENT_PROFILE')
+    if type(plan['measurementSchemaVersion']) is not int or plan['measurementSchemaVersion']!=2:raise ValueError('LOAD_MEASUREMENT_SCHEMA_VERSION')
     stages=plan['stages']
     if not isinstance(stages,list) or not 1<=len(stages)<=10:raise ValueError('LOAD_STAGES')
     names=set();duration=events=0

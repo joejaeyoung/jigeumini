@@ -10,7 +10,7 @@ class ProductLoadDiagnosticsTest(unittest.TestCase):
     def setUp(self):
         directory=tempfile.TemporaryDirectory();self.addCleanup(directory.cleanup)
         self.run=object.__new__(runtime.ProductLoad)
-        self.run.result={};self.run.source_id='owned-synthetic-source';self.run.capacity_mode=True;self.run.plan={}
+        self.run.result={};self.run.source_id='owned-synthetic-source';self.run.capacity_mode=True;self.run.plan={'diagnostics':False}
         self.run.output=self.run.source_output=pathlib.Path(directory.name)
         (self.run.source_output/'source.json').write_text(json.dumps({'finished':True,'sent':1000}))
         self.run.owned=Mock(return_value=('owned',{'State':{'Status':'running','ExitCode':0,'OOMKilled':False},'HostConfig':{'Memory':384*1024**2,'NanoCpus':1000000000,'PidsLimit':None}}))

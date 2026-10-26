@@ -1,0 +1,6574 @@
+{
+  "schemaVersion": 1,
+  "technicalIds": [
+    "T07",
+    "T11",
+    "T12",
+    "T14"
+  ],
+  "curatorArtifact": {
+    "bytes": 3704,
+    "sha256": "cfc4e2dacbd17a52b0e3ba20437615bdede4b0f657f480afe406958e600c10a1"
+  },
+  "scope": "INPUT_EPOCH_ALIGNMENT_OF_INDEPENDENT_HOST_AND_PROBE_SAMPLES; NOT_ATOMIC_OR_CAUSAL; INVALID_CLOCK_RUN_RETAINED",
+  "runs": [
+    {
+      "name": "candidate600",
+      "revision": "876bb68bf1236e8ab52d47db5438998424f44019",
+      "recordedClassification": "EXCEEDS_SLO",
+      "sourceArtifact": {
+        "bytes": 3184652,
+        "sha256": "e0b810d8682dcbd93526f7ce27017cc36f036928fce9f7882466cdaa72341b22"
+      },
+      "offsetArtifact": {
+        "bytes": 543420,
+        "sha256": "4cbde611b28332466a52132de1b1cd76d091300bf3a602c0355aadd770b1056d"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.779870349,
+          "lag": 2547,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.787501308,
+          "lag": 2648,
+          "unreachedWatermarkAgeSeconds": 1.008
+        },
+        {
+          "elapsedSeconds": 32.797518975,
+          "lag": 2759,
+          "unreachedWatermarkAgeSeconds": 2.018
+        },
+        {
+          "elapsedSeconds": 33.861769892,
+          "lag": 2860,
+          "unreachedWatermarkAgeSeconds": 3.082
+        },
+        {
+          "elapsedSeconds": 34.871513976,
+          "lag": 2961,
+          "unreachedWatermarkAgeSeconds": 4.092
+        },
+        {
+          "elapsedSeconds": 35.881541893,
+          "lag": 3062,
+          "unreachedWatermarkAgeSeconds": 5.102
+        },
+        {
+          "elapsedSeconds": 36.89280606,
+          "lag": 3163,
+          "unreachedWatermarkAgeSeconds": 6.113
+        },
+        {
+          "elapsedSeconds": 37.901557269,
+          "lag": 3275,
+          "unreachedWatermarkAgeSeconds": 7.122
+        },
+        {
+          "elapsedSeconds": 38.964813436,
+          "lag": 3376,
+          "unreachedWatermarkAgeSeconds": 8.185
+        },
+        {
+          "elapsedSeconds": 39.97284577,
+          "lag": 3477,
+          "unreachedWatermarkAgeSeconds": 9.193
+        },
+        {
+          "elapsedSeconds": 40.98094977,
+          "lag": 3578,
+          "unreachedWatermarkAgeSeconds": 10.201
+        },
+        {
+          "elapsedSeconds": 41.988495771,
+          "lag": 3679,
+          "unreachedWatermarkAgeSeconds": 11.209
+        },
+        {
+          "elapsedSeconds": 42.999490563,
+          "lag": 3790,
+          "unreachedWatermarkAgeSeconds": 12.22
+        },
+        {
+          "elapsedSeconds": 44.057492022,
+          "lag": 3891,
+          "unreachedWatermarkAgeSeconds": 13.278
+        },
+        {
+          "elapsedSeconds": 45.065928439,
+          "lag": 3992,
+          "unreachedWatermarkAgeSeconds": 14.286
+        },
+        {
+          "elapsedSeconds": 46.073718064,
+          "lag": 4093,
+          "unreachedWatermarkAgeSeconds": 15.294
+        },
+        {
+          "elapsedSeconds": 47.080550731,
+          "lag": 4194,
+          "unreachedWatermarkAgeSeconds": 16.301
+        },
+        {
+          "elapsedSeconds": 48.091508357,
+          "lag": 4295,
+          "unreachedWatermarkAgeSeconds": 17.312
+        },
+        {
+          "elapsedSeconds": 49.101547732,
+          "lag": 4396,
+          "unreachedWatermarkAgeSeconds": 18.322
+        },
+        {
+          "elapsedSeconds": 50.108501316,
+          "lag": 4507,
+          "unreachedWatermarkAgeSeconds": 19.329
+        },
+        {
+          "elapsedSeconds": 51.117501858,
+          "lag": 4608,
+          "unreachedWatermarkAgeSeconds": 20.338
+        },
+        {
+          "elapsedSeconds": 52.13005965,
+          "lag": 4709,
+          "unreachedWatermarkAgeSeconds": 21.35
+        },
+        {
+          "elapsedSeconds": 53.161778026,
+          "lag": 4810,
+          "unreachedWatermarkAgeSeconds": 22.382
+        },
+        {
+          "elapsedSeconds": 54.168703776,
+          "lag": 4911,
+          "unreachedWatermarkAgeSeconds": 23.389
+        },
+        {
+          "elapsedSeconds": 55.174914985,
+          "lag": 5012,
+          "unreachedWatermarkAgeSeconds": 24.395
+        },
+        {
+          "elapsedSeconds": 56.187563819,
+          "lag": 5123,
+          "unreachedWatermarkAgeSeconds": 25.408
+        },
+        {
+          "elapsedSeconds": 57.260486028,
+          "lag": 5224,
+          "unreachedWatermarkAgeSeconds": 26.481
+        },
+        {
+          "elapsedSeconds": 58.274936862,
+          "lag": 5325,
+          "unreachedWatermarkAgeSeconds": 27.495
+        },
+        {
+          "elapsedSeconds": 59.281521612,
+          "lag": 5426,
+          "unreachedWatermarkAgeSeconds": 28.502
+        },
+        {
+          "elapsedSeconds": 60.291511196,
+          "lag": 5527,
+          "unreachedWatermarkAgeSeconds": 29.512
+        },
+        {
+          "elapsedSeconds": 61.299552238,
+          "lag": 5202,
+          "unreachedWatermarkAgeSeconds": 30.52
+        },
+        {
+          "elapsedSeconds": 62.360533572,
+          "lag": 5303,
+          "unreachedWatermarkAgeSeconds": 31.581
+        },
+        {
+          "elapsedSeconds": 63.368537656,
+          "lag": 4604,
+          "unreachedWatermarkAgeSeconds": 32.589
+        },
+        {
+          "elapsedSeconds": 64.377533323,
+          "lag": 3705,
+          "unreachedWatermarkAgeSeconds": 33.598
+        },
+        {
+          "elapsedSeconds": 65.387572532,
+          "lag": 2806,
+          "unreachedWatermarkAgeSeconds": 34.608
+        },
+        {
+          "elapsedSeconds": 66.397559199,
+          "lag": 1917,
+          "unreachedWatermarkAgeSeconds": 35.618
+        },
+        {
+          "elapsedSeconds": 67.459640824,
+          "lag": 818,
+          "unreachedWatermarkAgeSeconds": 11.272
+        },
+        {
+          "elapsedSeconds": 68.465883367,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.47256595,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.479549868,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.486610993,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.497918702,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.505590994,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.516510453,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.524782662,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.559535744,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.56577662,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.572867079,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.588581996,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.600705038,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.660141372,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.666511539,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.678537956,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.685544998,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.694732291,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.700643333,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.718521625,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.72453575,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.746899584,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -16.009,
+          "toElapsedSecondsApprox": -2.56,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.0337,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.149,
+              "throttledPeriodsRatio": 0.0896
+            },
+            "kafka": {
+              "coresApprox": 0.3202,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.4947,
+              "throttledPeriodsRatio": 0.1269
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -2.56,
+          "toElapsedSecondsApprox": 10.851,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.7545,
+              "throttledPeriodsRatio": 0.7131
+            },
+            "api": {
+              "coresApprox": 0.4771,
+              "throttledPeriodsRatio": 0.2164
+            },
+            "kafka": {
+              "coresApprox": 0.4263,
+              "throttledPeriodsRatio": 0.3111
+            },
+            "collector-probe": {
+              "coresApprox": 0.3334,
+              "throttledPeriodsRatio": 0.0896
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 10.851,
+          "toElapsedSecondsApprox": 24.314,
+          "roles": {
+            "postgres": {
+              "coresApprox": 1.0085,
+              "throttledPeriodsRatio": 0.9926
+            },
+            "api": {
+              "coresApprox": 0.3019,
+              "throttledPeriodsRatio": 0.0441
+            },
+            "kafka": {
+              "coresApprox": 0.3969,
+              "throttledPeriodsRatio": 0.3037
+            },
+            "collector-probe": {
+              "coresApprox": 0.2994,
+              "throttledPeriodsRatio": 0.0221
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 24.314,
+          "toElapsedSecondsApprox": 37.853,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.9926,
+              "throttledPeriodsRatio": 0.9776
+            },
+            "api": {
+              "coresApprox": 0.2621,
+              "throttledPeriodsRatio": 0.037
+            },
+            "kafka": {
+              "coresApprox": 0.3585,
+              "throttledPeriodsRatio": 0.2667
+            },
+            "collector-probe": {
+              "coresApprox": 0.2539,
+              "throttledPeriodsRatio": 0.0222
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 37.853,
+          "toElapsedSecondsApprox": 51.339,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.9344,
+              "throttledPeriodsRatio": 0.9185
+            },
+            "api": {
+              "coresApprox": 0.2263,
+              "throttledPeriodsRatio": 0.0373
+            },
+            "kafka": {
+              "coresApprox": 0.3202,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.2299,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 51.339,
+          "toElapsedSecondsApprox": 64.81,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.9055,
+              "throttledPeriodsRatio": 0.7761
+            },
+            "api": {
+              "coresApprox": 0.4036,
+              "throttledPeriodsRatio": 0.0519
+            },
+            "kafka": {
+              "coresApprox": 0.3344,
+              "throttledPeriodsRatio": 0.2612
+            },
+            "collector-probe": {
+              "coresApprox": 0.2427,
+              "throttledPeriodsRatio": 0.0148
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 64.81,
+          "toElapsedSecondsApprox": 78.243,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3521,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.3736,
+              "throttledPeriodsRatio": 0.05
+            },
+            "kafka": {
+              "coresApprox": 0.4067,
+              "throttledPeriodsRatio": 0.2786
+            },
+            "collector-probe": {
+              "coresApprox": 0.2544,
+              "throttledPeriodsRatio": 0.0071
+            }
+          },
+          "unobservedRoles": []
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.00127446,
+          "wallMinusMonotonicMillis": -0.274,
+          "probeGcMillis": 245,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 83.882125,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.307,
+              "status": 200,
+              "millis": 2.168958
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.694790962,
+          "wallMinusMonotonicMillis": 0.209,
+          "probeGcMillis": 258,
+          "probeGcDeltaMillis": 13,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.7565,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 5.748,
+              "status": 200,
+              "millis": 1.689542
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 10.764788465,
+          "wallMinusMonotonicMillis": 0.212,
+          "probeGcMillis": 258,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 16.744583,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 10.825,
+              "status": 200,
+              "millis": 0.9875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 15.838537425,
+          "wallMinusMonotonicMillis": -0.537,
+          "probeGcMillis": 270,
+          "probeGcDeltaMillis": 12,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.231042,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 15.903,
+              "status": 200,
+              "millis": 1.218417
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 20.917941469,
+          "wallMinusMonotonicMillis": 0.059,
+          "probeGcMillis": 277,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 2.703625,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 20.949,
+              "status": 200,
+              "millis": 0.792042
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 25.961946097,
+          "wallMinusMonotonicMillis": 0.054,
+          "probeGcMillis": 283,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.544375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 26.105,
+              "status": 200,
+              "millis": 1.03325
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 31.118530557,
+          "wallMinusMonotonicMillis": -0.531,
+          "probeGcMillis": 283,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 4.571958,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 31.235,
+              "status": 200,
+              "millis": 0.567416
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 36.245532477,
+          "wallMinusMonotonicMillis": -0.532,
+          "probeGcMillis": 290,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.427458,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.338,
+              "status": 200,
+              "millis": 0.761333
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.345958437,
+          "wallMinusMonotonicMillis": 0.042,
+          "probeGcMillis": 290,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.884416,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 41.436,
+              "status": 200,
+              "millis": 0.937583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 46.445592981,
+          "wallMinusMonotonicMillis": -0.593,
+          "probeGcMillis": 298,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 39.558875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 46.69,
+              "status": 200,
+              "millis": 2.496083
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 51.703534025,
+          "wallMinusMonotonicMillis": -0.534,
+          "probeGcMillis": 307,
+          "probeGcDeltaMillis": 9,
+          "probeThreadCount": 1254,
+          "databaseQueryMillis": 6.877334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 51.821,
+              "status": 503,
+              "millis": 1.026917
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 56.830812861,
+          "wallMinusMonotonicMillis": 0.187,
+          "probeGcMillis": 307,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1254,
+          "databaseQueryMillis": 5.687959,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 57.038,
+              "status": 503,
+              "millis": 1.512334
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 62.054552072,
+          "wallMinusMonotonicMillis": -0.552,
+          "probeGcMillis": 313,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 5.393041,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 62.124,
+              "status": 200,
+              "millis": 0.570209
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 67.131905283,
+          "wallMinusMonotonicMillis": 0.095,
+          "probeGcMillis": 321,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.080834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 67.215,
+              "status": 200,
+              "millis": 0.62
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 72.224542118,
+          "wallMinusMonotonicMillis": -0.542,
+          "probeGcMillis": 321,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.214334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 72.293,
+              "status": 200,
+              "millis": 0.37575
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 77.300531912,
+          "wallMinusMonotonicMillis": -0.532,
+          "probeGcMillis": 328,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 5.360792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 77.377,
+              "status": 200,
+              "millis": 0.44875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 82.386822247,
+          "wallMinusMonotonicMillis": -0.822,
+          "probeGcMillis": 328,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.645917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 82.467,
+              "status": 200,
+              "millis": 0.770458
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 87.479886666,
+          "wallMinusMonotonicMillis": 0.113,
+          "probeGcMillis": 338,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 5.260834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 87.561,
+              "status": 200,
+              "millis": 2.368042
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "candidate600-repeat",
+      "revision": "876bb68bf1236e8ab52d47db5438998424f44019",
+      "recordedClassification": "MEASUREMENT_INCOMPLETE",
+      "sourceArtifact": {
+        "bytes": 3184898,
+        "sha256": "c522b4e507481c595234c689ceeb96487c7e73229f307e4f481c8ef2356b65fc"
+      },
+      "offsetArtifact": {
+        "bytes": 545336,
+        "sha256": "dd9ad75537d0f05b0be20d3ca0e4a3052cd37baeb50b899f5471e6480f9b63b8"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.887934473,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.896225891,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 32.903920016,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 33.976255975,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 34.985216517,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 35.992971226,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 37.006273393,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 38.015946227,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 39.079910477,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 40.087925019,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 41.095286103,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 42.101909645,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 43.174721437,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 44.182272063,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 45.189228563,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 46.195346064,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 47.201927314,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 48.211003565,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 49.221194482,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 50.227008816,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 51.234089816,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 52.272207442,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 53.277931817,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 54.285152859,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 55.291935693,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 56.299928069,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 57.368151777,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 58.376398903,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 59.382936278,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 60.393898154,
+          "lag": 30,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 61.409320071,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 62.419956113,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 63.429002114,
+          "lag": 2,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 64.439244614,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 65.47190699,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 66.481905448,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 67.489273532,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 68.497208658,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.505891742,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.570905909,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.577976909,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.587242326,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.594955326,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.604896285,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.613944869,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.622903869,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.629932411,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.636965162,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.673378996,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.683141038,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.696918372,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.704917122,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.766240789,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.772202748,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.77895654,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.788595707,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.796381166,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.867223792,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.872914042,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -15.997,
+          "toElapsedSecondsApprox": -2.543,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.016,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.0767,
+              "throttledPeriodsRatio": 0.0296
+            },
+            "kafka": {
+              "coresApprox": 0.3031,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.4748,
+              "throttledPeriodsRatio": 0.1045
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -2.543,
+          "toElapsedSecondsApprox": 10.851,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.5477,
+              "throttledPeriodsRatio": 0.304
+            },
+            "api": {
+              "coresApprox": 0.5557,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "kafka": {
+              "coresApprox": 0.3961,
+              "throttledPeriodsRatio": 0.2687
+            },
+            "collector-probe": {
+              "coresApprox": 0.3097,
+              "throttledPeriodsRatio": 0.0746
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 10.851,
+          "toElapsedSecondsApprox": 24.249,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.1993,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.3034,
+              "throttledPeriodsRatio": 0.0373
+            },
+            "kafka": {
+              "coresApprox": 0.3657,
+              "throttledPeriodsRatio": 0.2667
+            },
+            "collector-probe": {
+              "coresApprox": 0.287,
+              "throttledPeriodsRatio": 0.0224
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 24.249,
+          "toElapsedSecondsApprox": 37.66,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.223,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2874,
+              "throttledPeriodsRatio": 0.0597
+            },
+            "kafka": {
+              "coresApprox": 0.3304,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.247,
+              "throttledPeriodsRatio": 0.0149
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 37.66,
+          "toElapsedSecondsApprox": 51.088,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2325,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.3116,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "kafka": {
+              "coresApprox": 0.3354,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.2154,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 51.088,
+          "toElapsedSecondsApprox": 62.471,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3048,
+              "throttledPeriodsRatio": 0.0373
+            },
+            "api": {
+              "coresApprox": 0.3141,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "kafka": {
+              "coresApprox": 0.3679,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.2556,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 62.471,
+          "toElapsedSecondsApprox": 75.851,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2549,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2613,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.3391,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.1958,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.001704293,
+          "wallMinusMonotonicMillis": 0.296,
+          "probeGcMillis": 186,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 103.68075,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.33,
+              "status": 200,
+              "millis": 63.276583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.68990467,
+          "wallMinusMonotonicMillis": 0.095,
+          "probeGcMillis": 202,
+          "probeGcDeltaMillis": 16,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 3.275291,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 5.741,
+              "status": 200,
+              "millis": 1.407417
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 10.752934881,
+          "wallMinusMonotonicMillis": 0.065,
+          "probeGcMillis": 202,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 2.537334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 10.793,
+              "status": 200,
+              "millis": 1.1495
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 15.803962591,
+          "wallMinusMonotonicMillis": 0.037,
+          "probeGcMillis": 212,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 2.259875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 15.849,
+              "status": 200,
+              "millis": 1.090041
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 20.86105951,
+          "wallMinusMonotonicMillis": -0.06,
+          "probeGcMillis": 212,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 3.029292,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 20.896,
+              "status": 200,
+              "millis": 1.040708
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 25.903969429,
+          "wallMinusMonotonicMillis": 0.031,
+          "probeGcMillis": 218,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 2.295333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 25.939,
+              "status": 200,
+              "millis": 0.543875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 30.947911098,
+          "wallMinusMonotonicMillis": 0.089,
+          "probeGcMillis": 226,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 2.797458,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 30.98,
+              "status": 200,
+              "millis": 0.589084
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 35.986944684,
+          "wallMinusMonotonicMillis": 0.055,
+          "probeGcMillis": 226,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 3.49675,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.03,
+              "status": 200,
+              "millis": 0.717625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.038170812,
+          "wallMinusMonotonicMillis": -0.171,
+          "probeGcMillis": 232,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1259,
+          "databaseQueryMillis": 2.911916,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 41.067,
+              "status": 200,
+              "millis": 0.445291
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 46.074029897,
+          "wallMinusMonotonicMillis": -0.03,
+          "probeGcMillis": 232,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 3.319083,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 46.106,
+              "status": 200,
+              "millis": 0.567625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 51.115939274,
+          "wallMinusMonotonicMillis": 0.061,
+          "probeGcMillis": 239,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 4.238833,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 51.219,
+              "status": 200,
+              "millis": 0.751709
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 56.228081069,
+          "wallMinusMonotonicMillis": -0.081,
+          "probeGcMillis": 245,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.65675,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 56.31,
+              "status": 200,
+              "millis": 2.054958
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 61.323296238,
+          "wallMinusMonotonicMillis": -0.296,
+          "probeGcMillis": 245,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 3.667084,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 61.391,
+              "status": 200,
+              "millis": 0.745209
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 66.398035073,
+          "wallMinusMonotonicMillis": -0.035,
+          "probeGcMillis": 251,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.233875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 66.476,
+              "status": 200,
+              "millis": 0.436666
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 71.483935701,
+          "wallMinusMonotonicMillis": 0.064,
+          "probeGcMillis": 251,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 6.261417,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 71.585,
+              "status": 200,
+              "millis": 0.803833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 76.593463494,
+          "wallMinusMonotonicMillis": -2044.463,
+          "probeGcMillis": 258,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.114625,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 74.627,
+              "status": 200,
+              "millis": 0.604583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 81.678944038,
+          "wallMinusMonotonicMillis": -2044.944,
+          "probeGcMillis": 265,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 6.571792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 79.737,
+              "status": 200,
+              "millis": 0.490333
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 86.788233541,
+          "wallMinusMonotonicMillis": -2045.234,
+          "probeGcMillis": 265,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 7.34875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 84.825,
+              "status": 200,
+              "millis": 0.422625
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after-channels600",
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "recordedClassification": "WITHIN_SLO",
+      "sourceArtifact": {
+        "bytes": 3211455,
+        "sha256": "fb1dd1b741a17e568b0c57a36ca2586432f4c9d76221027093ad243416f4fcde"
+      },
+      "offsetArtifact": {
+        "bytes": 545513,
+        "sha256": "381e50a5abb8f9684f15861c0c55c3d58dacacf7a8ff19e2e75984caf99c920b"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.755011682,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.761006432,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 32.796779016,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 33.808677683,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 34.820884142,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 35.826686143,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 36.895928143,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 37.904709393,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 38.917090519,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 39.923686519,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 40.93670602,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 41.953010312,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 42.959999604,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 43.966987521,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 44.973965063,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 45.980709355,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 46.989046856,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 47.996007481,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 49.003688107,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 50.015746982,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 51.028692983,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 52.035678525,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 53.044046067,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 54.051157026,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 55.094952401,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 56.106027818,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 57.116107736,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 58.123696653,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 59.135886695,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 60.14318182,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 61.149986488,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 62.156045196,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 63.162697238,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 64.198716114,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 65.207720864,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 66.217022782,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 67.225688282,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 68.238680032,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.247024533,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.25610495,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.2637142,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.295084909,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.30241541,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.315715202,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.322750661,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.330693828,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.337791745,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.343770037,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.351679204,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.359968371,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.398699205,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.405955872,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.414672456,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.421755707,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.42870729,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.491102499,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.497671375,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.507699125,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.515690001,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -15.934,
+          "toElapsedSecondsApprox": -2.495,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.0368,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.144,
+              "throttledPeriodsRatio": 0.0896
+            },
+            "kafka": {
+              "coresApprox": 0.2939,
+              "throttledPeriodsRatio": 0.2222
+            },
+            "collector-probe": {
+              "coresApprox": 0.4705,
+              "throttledPeriodsRatio": 0.097
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -2.495,
+          "toElapsedSecondsApprox": 10.926,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.235,
+              "throttledPeriodsRatio": 0.0157
+            },
+            "api": {
+              "coresApprox": 0.4596,
+              "throttledPeriodsRatio": 0.194
+            },
+            "kafka": {
+              "coresApprox": 0.4018,
+              "throttledPeriodsRatio": 0.2612
+            },
+            "collector-probe": {
+              "coresApprox": 0.3259,
+              "throttledPeriodsRatio": 0.1045
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 10.926,
+          "toElapsedSecondsApprox": 24.322,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2244,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.3241,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.352,
+              "throttledPeriodsRatio": 0.2556
+            },
+            "collector-probe": {
+              "coresApprox": 0.2447,
+              "throttledPeriodsRatio": 0.0149
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 24.322,
+          "toElapsedSecondsApprox": 37.686,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2218,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2774,
+              "throttledPeriodsRatio": 0.0597
+            },
+            "kafka": {
+              "coresApprox": 0.3249,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.2405,
+              "throttledPeriodsRatio": 0.0075
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 37.686,
+          "toElapsedSecondsApprox": 51.047,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.196,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2531,
+              "throttledPeriodsRatio": 0.0522
+            },
+            "kafka": {
+              "coresApprox": 0.3281,
+              "throttledPeriodsRatio": 0.2239
+            },
+            "collector-probe": {
+              "coresApprox": 0.2089,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 51.047,
+          "toElapsedSecondsApprox": 64.386,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2843,
+              "throttledPeriodsRatio": 0.0301
+            },
+            "api": {
+              "coresApprox": 0.31,
+              "throttledPeriodsRatio": 0.0526
+            },
+            "kafka": {
+              "coresApprox": 0.3104,
+              "throttledPeriodsRatio": 0.2406
+            },
+            "collector-probe": {
+              "coresApprox": 0.2204,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 64.386,
+          "toElapsedSecondsApprox": 77.776,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2297,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "api": {
+              "coresApprox": 0.2689,
+              "throttledPeriodsRatio": 0.0522
+            },
+            "kafka": {
+              "coresApprox": 0.354,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.1916,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 77.776,
+          "toElapsedSecondsApprox": 91.125,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2192,
+              "throttledPeriodsRatio": 0.0155
+            },
+            "api": {
+              "coresApprox": 0.206,
+              "throttledPeriodsRatio": 0.0301
+            },
+            "kafka": {
+              "coresApprox": 0.3111,
+              "throttledPeriodsRatio": 0.2313
+            }
+          },
+          "unobservedRoles": [
+            "collector-probe"
+          ]
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.00163871,
+          "wallMinusMonotonicMillis": 0.361,
+          "probeGcMillis": 212,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 75.203666,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.292,
+              "status": 200,
+              "millis": 3.416416
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.804668546,
+          "wallMinusMonotonicMillis": 0.331,
+          "probeGcMillis": 222,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.477167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 5.85,
+              "status": 200,
+              "millis": 1.183584
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 10.859924756,
+          "wallMinusMonotonicMillis": 1.075,
+          "probeGcMillis": 222,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.032833,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 10.891,
+              "status": 200,
+              "millis": 0.655375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 15.898756633,
+          "wallMinusMonotonicMillis": 1.243,
+          "probeGcMillis": 232,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.560791,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 15.982,
+              "status": 200,
+              "millis": 0.866084
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 20.990671136,
+          "wallMinusMonotonicMillis": 1.329,
+          "probeGcMillis": 238,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.427292,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 21.069,
+              "status": 200,
+              "millis": 1.184667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 26.07703043,
+          "wallMinusMonotonicMillis": 0.97,
+          "probeGcMillis": 245,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.08575,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 26.152,
+              "status": 200,
+              "millis": 0.732666
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 31.160001932,
+          "wallMinusMonotonicMillis": 0.998,
+          "probeGcMillis": 245,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 2.4885,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 31.238,
+              "status": 200,
+              "millis": 0.704
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 36.246135185,
+          "wallMinusMonotonicMillis": 0.865,
+          "probeGcMillis": 251,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 3.090167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.329,
+              "status": 200,
+              "millis": 0.8055
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.336956561,
+          "wallMinusMonotonicMillis": 2.043,
+          "probeGcMillis": 251,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1255,
+          "databaseQueryMillis": 3.206667,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 41.406,
+              "status": 200,
+              "millis": 0.487416
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 46.41475723,
+          "wallMinusMonotonicMillis": 2.243,
+          "probeGcMillis": 260,
+          "probeGcDeltaMillis": 9,
+          "probeThreadCount": 1254,
+          "databaseQueryMillis": 3.671542,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 46.48,
+              "status": 200,
+              "millis": 0.796833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 51.490664025,
+          "wallMinusMonotonicMillis": 2.336,
+          "probeGcMillis": 266,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1254,
+          "databaseQueryMillis": 3.326958,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 51.579,
+              "status": 200,
+              "millis": 0.68775
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 56.58593961,
+          "wallMinusMonotonicMillis": 2.06,
+          "probeGcMillis": 266,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1254,
+          "databaseQueryMillis": 3.235542,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 56.649,
+              "status": 200,
+              "millis": 0.536875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 61.654945779,
+          "wallMinusMonotonicMillis": 2.054,
+          "probeGcMillis": 272,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.880167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 61.752,
+              "status": 200,
+              "millis": 0.697084
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 66.757733324,
+          "wallMinusMonotonicMillis": 2.267,
+          "probeGcMillis": 272,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 2.862083,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 66.832,
+              "status": 200,
+              "millis": 0.850792
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 71.840068242,
+          "wallMinusMonotonicMillis": 2.932,
+          "probeGcMillis": 279,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 2.834292,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 71.909,
+              "status": 200,
+              "millis": 0.90075
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 76.917770578,
+          "wallMinusMonotonicMillis": 3.229,
+          "probeGcMillis": 279,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 3.255792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 76.986,
+              "status": 200,
+              "millis": 0.3845
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 81.98999733,
+          "wallMinusMonotonicMillis": 3.003,
+          "probeGcMillis": 287,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.977334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 82.072,
+              "status": 200,
+              "millis": 0.667958
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 87.078903,
+          "wallMinusMonotonicMillis": 3.097,
+          "probeGcMillis": 293,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 4.788416,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 87.177,
+              "status": 200,
+              "millis": 1.080958
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after-channels600-repeat",
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "recordedClassification": "WITHIN_SLO",
+      "sourceArtifact": {
+        "bytes": 3211060,
+        "sha256": "6f0a7ec6519b4a73e7f95b4fd200c2a86a2677dbbc63f8c1323abe10ee0720d4"
+      },
+      "offsetArtifact": {
+        "bytes": 545618,
+        "sha256": "eb3d56942074c486ada35c846570c12ccf6d2b655dd2da71cc239f0d74ac335a"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.786036723,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.793711432,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 32.803819266,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 33.812725433,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 34.822679433,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 35.831773892,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 36.839767434,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 37.867994893,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 38.876997394,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 39.884034186,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 40.891144978,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 41.967081645,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 42.975100312,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 43.981933479,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 44.989036313,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 45.996718189,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 47.007105189,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 48.016096606,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 49.023978607,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 50.030855148,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 51.067743898,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 52.076747232,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 53.085672441,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 54.091964567,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 55.101860275,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 56.109698734,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 57.118748276,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 58.125696777,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 59.132954444,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 60.168788069,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 61.17800607,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 62.185079154,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 63.194690904,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 64.204773405,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 65.263009989,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 66.268683739,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 67.282022865,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 68.287727573,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.363702491,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.372027574,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.378011533,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.383763575,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.391081284,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.397068576,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.407759952,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.416726619,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.423990369,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.466950537,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.473041745,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.478898829,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.486716496,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.494069954,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.49983283,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.51168658,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.520754498,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.528703623,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.567072707,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.574180707,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.582020333,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -15.928,
+          "toElapsedSecondsApprox": -2.512,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.0487,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.1774,
+              "throttledPeriodsRatio": 0.097
+            },
+            "kafka": {
+              "coresApprox": 0.292,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "collector-probe": {
+              "coresApprox": 0.4457,
+              "throttledPeriodsRatio": 0.097
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -2.512,
+          "toElapsedSecondsApprox": 10.897,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2181,
+              "throttledPeriodsRatio": 0.0163
+            },
+            "api": {
+              "coresApprox": 0.449,
+              "throttledPeriodsRatio": 0.1791
+            },
+            "kafka": {
+              "coresApprox": 0.4171,
+              "throttledPeriodsRatio": 0.291
+            },
+            "collector-probe": {
+              "coresApprox": 0.3234,
+              "throttledPeriodsRatio": 0.1128
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 10.897,
+          "toElapsedSecondsApprox": 24.268,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.1759,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2557,
+              "throttledPeriodsRatio": 0.0301
+            },
+            "kafka": {
+              "coresApprox": 0.3469,
+              "throttledPeriodsRatio": 0.2331
+            },
+            "collector-probe": {
+              "coresApprox": 0.2768,
+              "throttledPeriodsRatio": 0.0224
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 24.268,
+          "toElapsedSecondsApprox": 37.637,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.228,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2905,
+              "throttledPeriodsRatio": 0.0672
+            },
+            "kafka": {
+              "coresApprox": 0.3323,
+              "throttledPeriodsRatio": 0.2537
+            },
+            "collector-probe": {
+              "coresApprox": 0.2367,
+              "throttledPeriodsRatio": 0.0075
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 37.637,
+          "toElapsedSecondsApprox": 50.997,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.1707,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2355,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "kafka": {
+              "coresApprox": 0.3343,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.2088,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 50.997,
+          "toElapsedSecondsApprox": 64.421,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2138,
+              "throttledPeriodsRatio": 0.0075
+            },
+            "api": {
+              "coresApprox": 0.2542,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.3134,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.2158,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 64.421,
+          "toElapsedSecondsApprox": 77.772,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2548,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2758,
+              "throttledPeriodsRatio": 0.0376
+            },
+            "kafka": {
+              "coresApprox": 0.3433,
+              "throttledPeriodsRatio": 0.2556
+            },
+            "collector-probe": {
+              "coresApprox": 0.1802,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 77.772,
+          "toElapsedSecondsApprox": 91.11,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2176,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2245,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.3113,
+              "throttledPeriodsRatio": 0.2463
+            }
+          },
+          "unobservedRoles": [
+            "collector-probe"
+          ]
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.001454709,
+          "wallMinusMonotonicMillis": -0.455,
+          "probeGcMillis": 234,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 64.106917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.272,
+              "status": 200,
+              "millis": 1.468667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.871145962,
+          "wallMinusMonotonicMillis": -0.146,
+          "probeGcMillis": 249,
+          "probeGcDeltaMillis": 15,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 4.266916,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 5.921,
+              "status": 200,
+              "millis": 1.163375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 10.934093923,
+          "wallMinusMonotonicMillis": -0.094,
+          "probeGcMillis": 259,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.789125,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 10.974,
+              "status": 200,
+              "millis": 1.0285
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 15.989686759,
+          "wallMinusMonotonicMillis": -0.687,
+          "probeGcMillis": 259,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.232959,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 16.028,
+              "status": 200,
+              "millis": 1.027208
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 21.039066093,
+          "wallMinusMonotonicMillis": 0.934,
+          "probeGcMillis": 267,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.180834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 21.069,
+              "status": 200,
+              "millis": 0.687042
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 26.075713304,
+          "wallMinusMonotonicMillis": 0.287,
+          "probeGcMillis": 275,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.260666,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 26.107,
+              "status": 200,
+              "millis": 0.722041
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 31.115693473,
+          "wallMinusMonotonicMillis": 0.307,
+          "probeGcMillis": 282,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.731291,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 31.148,
+              "status": 200,
+              "millis": 0.512125
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 36.154712684,
+          "wallMinusMonotonicMillis": 0.287,
+          "probeGcMillis": 282,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 3.20675,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.194,
+              "status": 200,
+              "millis": 0.9515
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.21003652,
+          "wallMinusMonotonicMillis": 0.963,
+          "probeGcMillis": 288,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1256,
+          "databaseQueryMillis": 2.853375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 41.24,
+              "status": 200,
+              "millis": 0.533084
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 46.24670698,
+          "wallMinusMonotonicMillis": 0.293,
+          "probeGcMillis": 296,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 4.621958,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 46.282,
+              "status": 200,
+              "millis": 0.82375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 51.291762274,
+          "wallMinusMonotonicMillis": 1.238,
+          "probeGcMillis": 296,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 5.103,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 51.335,
+              "status": 200,
+              "millis": 1.161375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 56.348747484,
+          "wallMinusMonotonicMillis": 1.253,
+          "probeGcMillis": 303,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 3.365917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 56.428,
+              "status": 200,
+              "millis": 0.742167
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 61.435028612,
+          "wallMinusMonotonicMillis": 0.971,
+          "probeGcMillis": 310,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 3.753917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 61.507,
+              "status": 200,
+              "millis": 0.478875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 66.514694489,
+          "wallMinusMonotonicMillis": 1.306,
+          "probeGcMillis": 316,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 3.698917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 66.653,
+              "status": 200,
+              "millis": 0.596375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 71.66077045,
+          "wallMinusMonotonicMillis": 1.23,
+          "probeGcMillis": 316,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 3.334041,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 71.75,
+              "status": 200,
+              "millis": 0.442542
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 76.756790869,
+          "wallMinusMonotonicMillis": 1.209,
+          "probeGcMillis": 324,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 4.99325,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 76.845,
+              "status": 200,
+              "millis": 0.510583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 81.850065579,
+          "wallMinusMonotonicMillis": 1.934,
+          "probeGcMillis": 324,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 4.672334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 81.951,
+              "status": 200,
+              "millis": 0.639834
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 86.963698123,
+          "wallMinusMonotonicMillis": 2.302,
+          "probeGcMillis": 330,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.674375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 87.051,
+              "status": 200,
+              "millis": 3.749125
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after-channels600-soak",
+      "revision": "7998bede9564308a6c91a4f7b14a8e7abf8ebb66",
+      "recordedClassification": "WITHIN_SLO",
+      "sourceArtifact": {
+        "bytes": 9899820,
+        "sha256": "9c9ebaddf94ba3b53553b73826497c16dc2953b695a3f62673ab05e1471e3bc0"
+      },
+      "offsetArtifact": {
+        "bytes": 1825760,
+        "sha256": "661a288971204206452ef3336bb3ab7e97ad0c1554a3bd0aebc288e28b06f8ee"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.860751599,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.868488224,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 32.879481016,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 33.9514701,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 34.960447559,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 35.969786893,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 36.97849056,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 37.989741769,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 38.997790477,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 40.01043906,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 41.019487561,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 42.030465436,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 43.054825812,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 44.062892521,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 45.070792063,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 46.07848923,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 47.151428522,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 48.161521689,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 49.171744731,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 50.177585107,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 51.184468982,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 52.193821441,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 53.201493483,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 54.213453567,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 55.223523943,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 56.247827068,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 57.255788985,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 58.262607361,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 59.271457486,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 60.279837362,
+          "lag": 20,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 61.286717987,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 62.292789238,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 63.298763155,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 64.30544878,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 65.350435447,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 66.36182549,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 67.368621282,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 68.375779281,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.385857407,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.392434324,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.398450199,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.409530617,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.416775325,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.447450493,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.454432035,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.460450577,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.466440036,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.474471744,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.485766203,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.492770912,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.498886204,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.504789913,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.549747622,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.555441956,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.561787331,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.566894748,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.575650499,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.581527041,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.590705041,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 90.596871417,
+          "lag": 50,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 91.610461167,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 92.65381296,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 93.659710543,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 94.665442877,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 95.681470586,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 96.743547378,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 97.751758712,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 98.75777842,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 99.765472713,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 100.772456088,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 101.779738422,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 102.785757714,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 103.792225881,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 104.802454715,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 105.857940757,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 106.864577174,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 107.87374455,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 108.881535009,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 109.945458301,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 110.953689426,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 111.959485635,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 112.968513886,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 113.976494011,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 114.983891637,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 115.990842637,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 116.996532721,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 118.00345318,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 119.050724972,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 120.056492847,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 121.065789973,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 122.071468223,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 123.087506515,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 124.093457766,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 125.101460808,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 126.108469559,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 127.116731559,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 128.147757184,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 129.153824934,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 130.159753018,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 131.165444268,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 132.172680894,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 133.178805436,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 134.184450478,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 135.190488187,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 136.197493437,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 137.247800021,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 138.252954522,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 139.258675022,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 140.263436481,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 141.27146594,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 142.278453899,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 143.285970066,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 144.291455066,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 145.299516317,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 146.350533359,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 147.355778234,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 148.36144886,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 149.371799402,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 150.378461277,
+          "lag": 30,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 151.38477307,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 152.39543682,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 153.402461279,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 154.448444279,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 155.45780153,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 156.463728739,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 157.469502447,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 158.475442947,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 159.485744864,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 160.492781073,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 161.497746824,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 162.503641616,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 163.550462075,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 164.556483867,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 165.562737367,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 166.568537076,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 167.576508493,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 168.582693077,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 169.587709369,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 170.60569487,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 171.612749204,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 172.647895912,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 173.653741121,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 174.659458622,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 175.665489706,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 176.676721706,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 177.682917581,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 178.68778004,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 179.693763624,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 180.69952325,
+          "lag": 50,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 181.708445583,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 182.716429709,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 183.723453334,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 184.730450085,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 185.749509419,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 186.758458336,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 187.764473378,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 188.770454628,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 189.77751542,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 190.783801879,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 191.790173463,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 192.797822505,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 193.803427839,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 194.848486797,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 195.856475215,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 196.864743423,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 197.872503007,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 198.881436383,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 199.893870716,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 200.899822009,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 201.905448176,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 202.915457301,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 203.948521302,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 204.956477594,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 205.963853678,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 206.972467303,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 207.98046947,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 208.987700429,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 210.00366993,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 211.01649318,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 212.024538472,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 213.051444723,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 214.057456015,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 215.063464599,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 216.071501474,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 217.080795725,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 218.0867911,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 219.092450058,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 220.100766309,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 221.149601976,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 222.154455101,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 223.160718727,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 224.166459894,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 225.172449811,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 226.180754603,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 227.18582302,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 228.191508729,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 229.197450521,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 230.249687939,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 231.254502689,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 232.261659106,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 233.267507148,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 234.274436149,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 235.279432774,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 236.285782191,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 237.290481442,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 238.296785692,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 239.346765693,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 240.35149211,
+          "lag": 30,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 241.357839777,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 242.362436444,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 243.369522112,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 244.376441029,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 245.382423404,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 246.389818821,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 247.400665613,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 248.44679503,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 249.465529864,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 250.471749739,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 251.47646924,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 252.483674574,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 253.491643699,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 254.501483408,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 255.507498033,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 256.547763742,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 257.554732576,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 258.559899618,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 259.565765744,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 260.570491286,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 261.576781161,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 262.581462203,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 263.586738412,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 264.591496121,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 265.647444705,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 266.655769789,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 267.660495664,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 268.666459123,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 269.676785665,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 270.682500457,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 271.687843208,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 272.692464708,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 273.698793959,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 274.746426126,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 275.751795543,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 276.756479543,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 277.762519794,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 278.768438085,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 279.773865586,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 280.778811045,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 281.783906795,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 282.788743504,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 283.793439963,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 284.798438672,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 285.806520797,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 286.820507964,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 287.849446506,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 288.856812632,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 289.862728841,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 290.868485883,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 291.8784818,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 292.886475134,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 293.892545218,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 294.898626301,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 295.906727052,
+          "lag": 11,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 296.947503761,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 297.95477122,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 298.959854053,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 299.965446554,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -15.966,
+          "toElapsedSecondsApprox": -2.531,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.0323,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.1335,
+              "throttledPeriodsRatio": 0.0746
+            },
+            "kafka": {
+              "coresApprox": 0.3098,
+              "throttledPeriodsRatio": 0.2537
+            },
+            "collector-probe": {
+              "coresApprox": 0.4471,
+              "throttledPeriodsRatio": 0.1045
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -2.531,
+          "toElapsedSecondsApprox": 10.885,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.23,
+              "throttledPeriodsRatio": 0.0242
+            },
+            "api": {
+              "coresApprox": 0.4555,
+              "throttledPeriodsRatio": 0.194
+            },
+            "kafka": {
+              "coresApprox": 0.3985,
+              "throttledPeriodsRatio": 0.2761
+            },
+            "collector-probe": {
+              "coresApprox": 0.3402,
+              "throttledPeriodsRatio": 0.0963
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 10.885,
+          "toElapsedSecondsApprox": 24.307,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.1905,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2881,
+              "throttledPeriodsRatio": 0.0448
+            },
+            "kafka": {
+              "coresApprox": 0.3645,
+              "throttledPeriodsRatio": 0.2687
+            },
+            "collector-probe": {
+              "coresApprox": 0.2501,
+              "throttledPeriodsRatio": 0.0075
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 24.307,
+          "toElapsedSecondsApprox": 37.741,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.215,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2789,
+              "throttledPeriodsRatio": 0.0597
+            },
+            "kafka": {
+              "coresApprox": 0.3304,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.2372,
+              "throttledPeriodsRatio": 0.0149
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 37.741,
+          "toElapsedSecondsApprox": 51.131,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.1829,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2555,
+              "throttledPeriodsRatio": 0.0448
+            },
+            "kafka": {
+              "coresApprox": 0.3184,
+              "throttledPeriodsRatio": 0.2239
+            },
+            "collector-probe": {
+              "coresApprox": 0.2069,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 51.131,
+          "toElapsedSecondsApprox": 64.491,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2651,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "api": {
+              "coresApprox": 0.293,
+              "throttledPeriodsRatio": 0.0522
+            },
+            "kafka": {
+              "coresApprox": 0.3207,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.2168,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 64.491,
+          "toElapsedSecondsApprox": 77.913,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2279,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2536,
+              "throttledPeriodsRatio": 0.0448
+            },
+            "kafka": {
+              "coresApprox": 0.3476,
+              "throttledPeriodsRatio": 0.2667
+            },
+            "collector-probe": {
+              "coresApprox": 0.186,
+              "throttledPeriodsRatio": 0.0075
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 77.913,
+          "toElapsedSecondsApprox": 91.341,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2319,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "api": {
+              "coresApprox": 0.2539,
+              "throttledPeriodsRatio": 0.0448
+            },
+            "kafka": {
+              "coresApprox": 0.3105,
+              "throttledPeriodsRatio": 0.2406
+            },
+            "collector-probe": {
+              "coresApprox": 0.2164,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 91.341,
+          "toElapsedSecondsApprox": 104.731,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2752,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2258,
+              "throttledPeriodsRatio": 0.0
+            },
+            "kafka": {
+              "coresApprox": 0.3039,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.1852,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 104.731,
+          "toElapsedSecondsApprox": 118.158,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2338,
+              "throttledPeriodsRatio": 0.0075
+            },
+            "api": {
+              "coresApprox": 0.242,
+              "throttledPeriodsRatio": 0.0373
+            },
+            "kafka": {
+              "coresApprox": 0.301,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.2132,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 118.158,
+          "toElapsedSecondsApprox": 131.549,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2732,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "api": {
+              "coresApprox": 0.2354,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "kafka": {
+              "coresApprox": 0.3153,
+              "throttledPeriodsRatio": 0.2406
+            },
+            "collector-probe": {
+              "coresApprox": 0.1829,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 131.549,
+          "toElapsedSecondsApprox": 144.908,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.262,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2544,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.3031,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.2172,
+              "throttledPeriodsRatio": 0.0226
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 144.908,
+          "toElapsedSecondsApprox": 158.294,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2523,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "api": {
+              "coresApprox": 0.2264,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.2914,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "collector-probe": {
+              "coresApprox": 0.1788,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 158.294,
+          "toElapsedSecondsApprox": 171.694,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2169,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.191,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.2917,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.1826,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 171.694,
+          "toElapsedSecondsApprox": 185.133,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3123,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2553,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "kafka": {
+              "coresApprox": 0.3018,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.1894,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 185.133,
+          "toElapsedSecondsApprox": 198.524,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2628,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.2086,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "kafka": {
+              "coresApprox": 0.2951,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "collector-probe": {
+              "coresApprox": 0.1979,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 198.524,
+          "toElapsedSecondsApprox": 211.942,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2693,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "api": {
+              "coresApprox": 0.2069,
+              "throttledPeriodsRatio": 0.0
+            },
+            "kafka": {
+              "coresApprox": 0.3058,
+              "throttledPeriodsRatio": 0.2463
+            },
+            "collector-probe": {
+              "coresApprox": 0.1952,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 211.942,
+          "toElapsedSecondsApprox": 225.318,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2992,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2406,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "kafka": {
+              "coresApprox": 0.2994,
+              "throttledPeriodsRatio": 0.2388
+            },
+            "collector-probe": {
+              "coresApprox": 0.1808,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 225.318,
+          "toElapsedSecondsApprox": 238.716,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2446,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "api": {
+              "coresApprox": 0.2034,
+              "throttledPeriodsRatio": 0.0149
+            },
+            "kafka": {
+              "coresApprox": 0.2816,
+              "throttledPeriodsRatio": 0.2239
+            },
+            "collector-probe": {
+              "coresApprox": 0.2174,
+              "throttledPeriodsRatio": 0.015
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 238.716,
+          "toElapsedSecondsApprox": 252.102,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3212,
+              "throttledPeriodsRatio": 0.0522
+            },
+            "api": {
+              "coresApprox": 0.2277,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.2908,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "collector-probe": {
+              "coresApprox": 0.1715,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 252.102,
+          "toElapsedSecondsApprox": 265.538,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3088,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2339,
+              "throttledPeriodsRatio": 0.0299
+            },
+            "kafka": {
+              "coresApprox": 0.2822,
+              "throttledPeriodsRatio": 0.2239
+            },
+            "collector-probe": {
+              "coresApprox": 0.1931,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 265.538,
+          "toElapsedSecondsApprox": 278.914,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2898,
+              "throttledPeriodsRatio": 0.0224
+            },
+            "api": {
+              "coresApprox": 0.2273,
+              "throttledPeriodsRatio": 0.0373
+            },
+            "kafka": {
+              "coresApprox": 0.2867,
+              "throttledPeriodsRatio": 0.2313
+            },
+            "collector-probe": {
+              "coresApprox": 0.1719,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 278.914,
+          "toElapsedSecondsApprox": 292.309,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2671,
+              "throttledPeriodsRatio": 0.015
+            },
+            "api": {
+              "coresApprox": 0.2146,
+              "throttledPeriodsRatio": 0.0448
+            },
+            "kafka": {
+              "coresApprox": 0.2826,
+              "throttledPeriodsRatio": 0.2239
+            },
+            "collector-probe": {
+              "coresApprox": 0.1907,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.001862168,
+          "wallMinusMonotonicMillis": 0.138,
+          "probeGcMillis": 312,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 1253,
+          "databaseQueryMillis": 95.265166,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.306,
+              "status": 200,
+              "millis": 1.738166
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.723654296,
+          "wallMinusMonotonicMillis": 0.346,
+          "probeGcMillis": 328,
+          "probeGcDeltaMillis": 16,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 2.056792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 5.765,
+              "status": 200,
+              "millis": 1.622333
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 10.779526464,
+          "wallMinusMonotonicMillis": 1.474,
+          "probeGcMillis": 328,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 2.455625,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 10.815,
+              "status": 200,
+              "millis": 0.809958
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 15.822714758,
+          "wallMinusMonotonicMillis": 1.285,
+          "probeGcMillis": 339,
+          "probeGcDeltaMillis": 11,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 1.803459,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 15.854,
+              "status": 200,
+              "millis": 0.944
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 20.863786844,
+          "wallMinusMonotonicMillis": 1.213,
+          "probeGcMillis": 346,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 2.358875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 20.899,
+              "status": 200,
+              "millis": 0.723208
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 25.906555055,
+          "wallMinusMonotonicMillis": 1.445,
+          "probeGcMillis": 352,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 6.458583,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 25.943,
+              "status": 200,
+              "millis": 0.811417
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 30.95054964,
+          "wallMinusMonotonicMillis": 1.45,
+          "probeGcMillis": 352,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 3.285833,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 30.985,
+              "status": 200,
+              "millis": 0.581125
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 35.991488143,
+          "wallMinusMonotonicMillis": 1.512,
+          "probeGcMillis": 358,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 2.784334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.032,
+              "status": 200,
+              "millis": 0.78375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.039481269,
+          "wallMinusMonotonicMillis": 2.519,
+          "probeGcMillis": 358,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1258,
+          "databaseQueryMillis": 4.259083,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 41.083,
+              "status": 200,
+              "millis": 0.896125
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 46.091526855,
+          "wallMinusMonotonicMillis": 2.473,
+          "probeGcMillis": 365,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.263083,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 46.176,
+              "status": 200,
+              "millis": 0.921334
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 51.183476066,
+          "wallMinusMonotonicMillis": 2.524,
+          "probeGcMillis": 370,
+          "probeGcDeltaMillis": 5,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 4.571834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 51.278,
+              "status": 200,
+              "millis": 0.712667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 56.284779276,
+          "wallMinusMonotonicMillis": 2.221,
+          "probeGcMillis": 370,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1257,
+          "databaseQueryMillis": 3.512916,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 56.366,
+              "status": 200,
+              "millis": 0.579375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 61.371751237,
+          "wallMinusMonotonicMillis": 2.249,
+          "probeGcMillis": 376,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 3.770792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 61.451,
+              "status": 200,
+              "millis": 0.668833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 66.456708115,
+          "wallMinusMonotonicMillis": 2.292,
+          "probeGcMillis": 383,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 3.786666,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 66.528,
+              "status": 200,
+              "millis": 0.43925
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 71.532779949,
+          "wallMinusMonotonicMillis": 3.22,
+          "probeGcMillis": 383,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 3.067625,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 71.602,
+              "status": 200,
+              "millis": 0.542292
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 76.605512994,
+          "wallMinusMonotonicMillis": 3.487,
+          "probeGcMillis": 389,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 5.061875,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 76.695,
+              "status": 200,
+              "millis": 0.80575
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 81.699747329,
+          "wallMinusMonotonicMillis": 3.253,
+          "probeGcMillis": 389,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 4.7735,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 81.782,
+              "status": 200,
+              "millis": 0.580583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 86.787442832,
+          "wallMinusMonotonicMillis": 2.557,
+          "probeGcMillis": 397,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 5.072917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 86.872,
+              "status": 200,
+              "millis": 0.759667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 91.878877626,
+          "wallMinusMonotonicMillis": 3.122,
+          "probeGcMillis": 402,
+          "probeGcDeltaMillis": 5,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 7.502,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 91.982,
+              "status": 200,
+              "millis": 0.692
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 96.98577642,
+          "wallMinusMonotonicMillis": 3.224,
+          "probeGcMillis": 402,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.490166,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 97.065,
+              "status": 200,
+              "millis": 0.370542
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 102.067801964,
+          "wallMinusMonotonicMillis": 4.198,
+          "probeGcMillis": 409,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 5.612834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 102.144,
+              "status": 200,
+              "millis": 0.342333
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 107.146779549,
+          "wallMinusMonotonicMillis": 4.22,
+          "probeGcMillis": 409,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 5.75025,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 107.239,
+              "status": 200,
+              "millis": 0.36775
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 112.24150901,
+          "wallMinusMonotonicMillis": 3.491,
+          "probeGcMillis": 416,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.770334,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 112.349,
+              "status": 200,
+              "millis": 0.430042
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 117.351490888,
+          "wallMinusMonotonicMillis": 3.509,
+          "probeGcMillis": 424,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.798333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 117.444,
+              "status": 200,
+              "millis": 0.697208
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 122.447852557,
+          "wallMinusMonotonicMillis": 4.147,
+          "probeGcMillis": 431,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 7.252167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 122.532,
+              "status": 200,
+              "millis": 0.453834
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 127.533771726,
+          "wallMinusMonotonicMillis": 4.228,
+          "probeGcMillis": 431,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 4.310916,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 127.612,
+              "status": 200,
+              "millis": 0.643167
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 132.615447644,
+          "wallMinusMonotonicMillis": 4.552,
+          "probeGcMillis": 431,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 4.035375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 132.692,
+              "status": 200,
+              "millis": 0.315042
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 137.692784355,
+          "wallMinusMonotonicMillis": 5.216,
+          "probeGcMillis": 438,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 4.32775,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 137.776,
+              "status": 200,
+              "millis": 0.367375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 142.777797899,
+          "wallMinusMonotonicMillis": 5.202,
+          "probeGcMillis": 446,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 4.841333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 142.859,
+              "status": 200,
+              "millis": 0.600042
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 147.862608276,
+          "wallMinusMonotonicMillis": 4.392,
+          "probeGcMillis": 453,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 9.68975,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 147.97,
+              "status": 200,
+              "millis": 0.398292
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 152.972866154,
+          "wallMinusMonotonicMillis": 5.134,
+          "probeGcMillis": 453,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 8.805958,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 153.068,
+              "status": 200,
+              "millis": 0.792542
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 158.071463364,
+          "wallMinusMonotonicMillis": 4.537,
+          "probeGcMillis": 460,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 9.104834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 158.157,
+              "status": 200,
+              "millis": 0.663958
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 163.157777491,
+          "wallMinusMonotonicMillis": 5.223,
+          "probeGcMillis": 460,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 9.136958,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 163.249,
+              "status": 200,
+              "millis": 0.596833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 168.249466577,
+          "wallMinusMonotonicMillis": 5.533,
+          "probeGcMillis": 468,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 7.293792,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 168.35,
+              "status": 200,
+              "millis": 0.315208
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 173.350701663,
+          "wallMinusMonotonicMillis": 5.298,
+          "probeGcMillis": 475,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 7.34175,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 173.444,
+              "status": 200,
+              "millis": 0.344625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 178.444757957,
+          "wallMinusMonotonicMillis": 5.242,
+          "probeGcMillis": 475,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 9.052167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 178.539,
+              "status": 200,
+              "millis": 0.380459
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 183.539698126,
+          "wallMinusMonotonicMillis": 5.302,
+          "probeGcMillis": 482,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 8.593917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 183.635,
+              "status": 200,
+              "millis": 0.350625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 188.636498544,
+          "wallMinusMonotonicMillis": 6.501,
+          "probeGcMillis": 482,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 5.188208,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 188.736,
+              "status": 200,
+              "millis": 0.377833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 193.736754047,
+          "wallMinusMonotonicMillis": 6.246,
+          "probeGcMillis": 490,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 6.037167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 193.836,
+              "status": 200,
+              "millis": 0.324667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 198.836537883,
+          "wallMinusMonotonicMillis": 6.462,
+          "probeGcMillis": 500,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 9.212125,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 198.97,
+              "status": 200,
+              "millis": 0.579916
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 203.973429927,
+          "wallMinusMonotonicMillis": 6.57,
+          "probeGcMillis": 500,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1252,
+          "databaseQueryMillis": 6.119167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 204.131,
+              "status": 200,
+              "millis": 0.425875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 209.131736721,
+          "wallMinusMonotonicMillis": 6.263,
+          "probeGcMillis": 507,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 6.029834,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 209.224,
+              "status": 200,
+              "millis": 0.290416
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 214.223445307,
+          "wallMinusMonotonicMillis": 6.555,
+          "probeGcMillis": 515,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 7.102417,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 214.332,
+              "status": 200,
+              "millis": 0.509125
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 219.332437017,
+          "wallMinusMonotonicMillis": 7.563,
+          "probeGcMillis": 515,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 8.868375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 219.453,
+              "status": 200,
+              "millis": 0.483375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 224.452426936,
+          "wallMinusMonotonicMillis": 7.573,
+          "probeGcMillis": 515,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 12.385208,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 224.572,
+              "status": 200,
+              "millis": 0.487041
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 229.581484938,
+          "wallMinusMonotonicMillis": 7.515,
+          "probeGcMillis": 522,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 12.01125,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 229.701,
+              "status": 200,
+              "millis": 0.707792
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 234.701457274,
+          "wallMinusMonotonicMillis": 7.543,
+          "probeGcMillis": 530,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 15.176917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 234.881,
+              "status": 200,
+              "millis": 0.501417
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 239.881810568,
+          "wallMinusMonotonicMillis": 7.189,
+          "probeGcMillis": 536,
+          "probeGcDeltaMillis": 6,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 11.678833,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 239.998,
+              "status": 200,
+              "millis": 0.36075
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 244.996494071,
+          "wallMinusMonotonicMillis": 7.506,
+          "probeGcMillis": 536,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 12.161333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 245.136,
+              "status": 200,
+              "millis": 0.342709
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 250.135473822,
+          "wallMinusMonotonicMillis": 8.526,
+          "probeGcMillis": 543,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 8.585459,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 250.255,
+              "status": 200,
+              "millis": 0.412458
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 255.25274245,
+          "wallMinusMonotonicMillis": 8.258,
+          "probeGcMillis": 543,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 8.494667,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 255.384,
+              "status": 200,
+              "millis": 0.835917
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 260.387475702,
+          "wallMinusMonotonicMillis": 8.524,
+          "probeGcMillis": 550,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 8.336959,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 260.518,
+              "status": 200,
+              "millis": 0.325667
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 265.516452121,
+          "wallMinusMonotonicMillis": 8.548,
+          "probeGcMillis": 557,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1251,
+          "databaseQueryMillis": 10.063208,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 265.671,
+              "status": 200,
+              "millis": 0.740833
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 270.671756374,
+          "wallMinusMonotonicMillis": 8.244,
+          "probeGcMillis": 557,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 8.111583,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 270.781,
+              "status": 200,
+              "millis": 0.2635
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 275.785773085,
+          "wallMinusMonotonicMillis": 8.227,
+          "probeGcMillis": 564,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 8.468333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 275.905,
+              "status": 200,
+              "millis": 0.358541
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 280.904941378,
+          "wallMinusMonotonicMillis": 9.059,
+          "probeGcMillis": 564,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 10.761458,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 281.042,
+              "status": 200,
+              "millis": 0.544583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 286.039515506,
+          "wallMinusMonotonicMillis": 9.484,
+          "probeGcMillis": 571,
+          "probeGcDeltaMillis": 7,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 11.288625,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 286.186,
+              "status": 200,
+              "millis": 0.363542
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 291.184481883,
+          "wallMinusMonotonicMillis": 9.518,
+          "probeGcMillis": 579,
+          "probeGcDeltaMillis": 8,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 15.590375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 291.334,
+              "status": 200,
+              "millis": 0.312417
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 296.330512844,
+          "wallMinusMonotonicMillis": 9.487,
+          "probeGcMillis": 579,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 1250,
+          "databaseQueryMillis": 14.596791,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 296.477,
+              "status": 200,
+              "millis": 0.316875
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after-channels1000",
+      "revision": "0cfa701d976156ec9c6bb2756dac9f95849ac32f",
+      "recordedClassification": "EXCEEDS_SLO",
+      "sourceArtifact": {
+        "bytes": 5108364,
+        "sha256": "abd72ebdd2befed0020dc623ff36badaf78d9b5975209386f4bf2525f3f613c2"
+      },
+      "offsetArtifact": {
+        "bytes": 544148,
+        "sha256": "85b2ebe351c2f28d90424410b50f2f883dcc6457798be29357bbd38ec8bcef6d"
+      },
+      "reportSteadyLag": [
+        {
+          "elapsedSeconds": 30.912002765,
+          "lag": 101,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 31.91968364,
+          "lag": 202,
+          "unreachedWatermarkAgeSeconds": 1.008
+        },
+        {
+          "elapsedSeconds": 32.932937641,
+          "lag": 303,
+          "unreachedWatermarkAgeSeconds": 2.021
+        },
+        {
+          "elapsedSeconds": 33.942068933,
+          "lag": 414,
+          "unreachedWatermarkAgeSeconds": 3.03
+        },
+        {
+          "elapsedSeconds": 35.017941058,
+          "lag": 505,
+          "unreachedWatermarkAgeSeconds": 4.106
+        },
+        {
+          "elapsedSeconds": 36.026654641,
+          "lag": 606,
+          "unreachedWatermarkAgeSeconds": 5.115
+        },
+        {
+          "elapsedSeconds": 37.042694975,
+          "lag": 707,
+          "unreachedWatermarkAgeSeconds": 6.131
+        },
+        {
+          "elapsedSeconds": 38.052649226,
+          "lag": 808,
+          "unreachedWatermarkAgeSeconds": 7.141
+        },
+        {
+          "elapsedSeconds": 39.070067268,
+          "lag": 919,
+          "unreachedWatermarkAgeSeconds": 8.158
+        },
+        {
+          "elapsedSeconds": 40.113750518,
+          "lag": 1020,
+          "unreachedWatermarkAgeSeconds": 9.202
+        },
+        {
+          "elapsedSeconds": 41.121758769,
+          "lag": 1121,
+          "unreachedWatermarkAgeSeconds": 10.21
+        },
+        {
+          "elapsedSeconds": 42.128961353,
+          "lag": 1222,
+          "unreachedWatermarkAgeSeconds": 11.217
+        },
+        {
+          "elapsedSeconds": 43.136714728,
+          "lag": 1323,
+          "unreachedWatermarkAgeSeconds": 12.225
+        },
+        {
+          "elapsedSeconds": 44.147640937,
+          "lag": 1424,
+          "unreachedWatermarkAgeSeconds": 13.236
+        },
+        {
+          "elapsedSeconds": 45.155925562,
+          "lag": 1525,
+          "unreachedWatermarkAgeSeconds": 14.244
+        },
+        {
+          "elapsedSeconds": 46.162948855,
+          "lag": 1626,
+          "unreachedWatermarkAgeSeconds": 15.251
+        },
+        {
+          "elapsedSeconds": 47.169688605,
+          "lag": 1727,
+          "unreachedWatermarkAgeSeconds": 16.258
+        },
+        {
+          "elapsedSeconds": 48.177660147,
+          "lag": 1838,
+          "unreachedWatermarkAgeSeconds": 17.266
+        },
+        {
+          "elapsedSeconds": 49.211656564,
+          "lag": 1939,
+          "unreachedWatermarkAgeSeconds": 18.3
+        },
+        {
+          "elapsedSeconds": 50.21971394,
+          "lag": 2040,
+          "unreachedWatermarkAgeSeconds": 19.308
+        },
+        {
+          "elapsedSeconds": 51.227742649,
+          "lag": 2141,
+          "unreachedWatermarkAgeSeconds": 20.316
+        },
+        {
+          "elapsedSeconds": 52.237692149,
+          "lag": 2242,
+          "unreachedWatermarkAgeSeconds": 21.326
+        },
+        {
+          "elapsedSeconds": 53.246127108,
+          "lag": 2343,
+          "unreachedWatermarkAgeSeconds": 22.334
+        },
+        {
+          "elapsedSeconds": 54.253036025,
+          "lag": 2444,
+          "unreachedWatermarkAgeSeconds": 23.341
+        },
+        {
+          "elapsedSeconds": 55.259980234,
+          "lag": 2545,
+          "unreachedWatermarkAgeSeconds": 24.348
+        },
+        {
+          "elapsedSeconds": 56.268082151,
+          "lag": 2646,
+          "unreachedWatermarkAgeSeconds": 25.356
+        },
+        {
+          "elapsedSeconds": 57.275653402,
+          "lag": 2757,
+          "unreachedWatermarkAgeSeconds": 26.364
+        },
+        {
+          "elapsedSeconds": 58.315070069,
+          "lag": 2858,
+          "unreachedWatermarkAgeSeconds": 27.403
+        },
+        {
+          "elapsedSeconds": 59.321688236,
+          "lag": 2759,
+          "unreachedWatermarkAgeSeconds": 28.41
+        },
+        {
+          "elapsedSeconds": 60.329676111,
+          "lag": 2596,
+          "unreachedWatermarkAgeSeconds": 25.312
+        },
+        {
+          "elapsedSeconds": 61.336664028,
+          "lag": 2297,
+          "unreachedWatermarkAgeSeconds": 26.319
+        },
+        {
+          "elapsedSeconds": 62.408629112,
+          "lag": 808,
+          "unreachedWatermarkAgeSeconds": 20.28
+        },
+        {
+          "elapsedSeconds": 63.418732196,
+          "lag": 263,
+          "unreachedWatermarkAgeSeconds": 2.082
+        },
+        {
+          "elapsedSeconds": 64.430865697,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 65.439684321,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 66.451710197,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 67.460739364,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 68.468979406,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 69.475725323,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 70.48365974,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 71.515726532,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 72.525641491,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 73.533736575,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 74.542621325,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 75.550661243,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 76.605677785,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 77.615022619,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 78.621835286,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 79.63368487,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 80.719709703,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 81.731706079,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 82.740735454,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 83.751001538,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 84.757652164,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 85.810668123,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 86.818721331,
+          "lag": 10,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 87.82861679,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 88.835646707,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        },
+        {
+          "elapsedSeconds": 89.843738083,
+          "lag": 0,
+          "unreachedWatermarkAgeSeconds": 0
+        }
+      ],
+      "resourceIntervals": [
+        {
+          "fromElapsedSecondsApprox": -24.424,
+          "toElapsedSecondsApprox": -10.924,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.0186,
+              "throttledPeriodsRatio": 0.0
+            },
+            "api": {
+              "coresApprox": 0.0788,
+              "throttledPeriodsRatio": 0.0222
+            },
+            "kafka": {
+              "coresApprox": 0.3077,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.4473,
+              "throttledPeriodsRatio": 0.1185
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": -10.924,
+          "toElapsedSecondsApprox": 2.546,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.2023,
+              "throttledPeriodsRatio": 0.1136
+            },
+            "api": {
+              "coresApprox": 0.3637,
+              "throttledPeriodsRatio": 0.2741
+            },
+            "kafka": {
+              "coresApprox": 0.3427,
+              "throttledPeriodsRatio": 0.2537
+            },
+            "collector-probe": {
+              "coresApprox": 0.4476,
+              "throttledPeriodsRatio": 0.1119
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 2.546,
+          "toElapsedSecondsApprox": 16.06,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3972,
+              "throttledPeriodsRatio": 0.1185
+            },
+            "api": {
+              "coresApprox": 0.4859,
+              "throttledPeriodsRatio": 0.163
+            },
+            "kafka": {
+              "coresApprox": 0.4238,
+              "throttledPeriodsRatio": 0.2963
+            },
+            "collector-probe": {
+              "coresApprox": 0.4105,
+              "throttledPeriodsRatio": 0.0519
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 16.06,
+          "toElapsedSecondsApprox": 29.494,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.255,
+              "throttledPeriodsRatio": 0.0074
+            },
+            "api": {
+              "coresApprox": 0.2797,
+              "throttledPeriodsRatio": 0.037
+            },
+            "kafka": {
+              "coresApprox": 0.3504,
+              "throttledPeriodsRatio": 0.2721
+            },
+            "collector-probe": {
+              "coresApprox": 0.3818,
+              "throttledPeriodsRatio": 0.0515
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 29.494,
+          "toElapsedSecondsApprox": 43.096,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.9939,
+              "throttledPeriodsRatio": 1.0
+            },
+            "api": {
+              "coresApprox": 0.2516,
+              "throttledPeriodsRatio": 0.0519
+            },
+            "kafka": {
+              "coresApprox": 0.3148,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.2851,
+              "throttledPeriodsRatio": 0.0074
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 43.096,
+          "toElapsedSecondsApprox": 56.605,
+          "roles": {
+            "postgres": {
+              "coresApprox": 1.0076,
+              "throttledPeriodsRatio": 1.0
+            },
+            "api": {
+              "coresApprox": 0.2219,
+              "throttledPeriodsRatio": 0.0294
+            },
+            "kafka": {
+              "coresApprox": 0.3076,
+              "throttledPeriodsRatio": 0.25
+            },
+            "collector-probe": {
+              "coresApprox": 0.3065,
+              "throttledPeriodsRatio": 0.0
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 56.605,
+          "toElapsedSecondsApprox": 70.17,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.6198,
+              "throttledPeriodsRatio": 0.4815
+            },
+            "api": {
+              "coresApprox": 0.4303,
+              "throttledPeriodsRatio": 0.0662
+            },
+            "kafka": {
+              "coresApprox": 0.3416,
+              "throttledPeriodsRatio": 0.25
+            },
+            "collector-probe": {
+              "coresApprox": 0.2899,
+              "throttledPeriodsRatio": 0.0074
+            }
+          },
+          "unobservedRoles": []
+        },
+        {
+          "fromElapsedSecondsApprox": 70.17,
+          "toElapsedSecondsApprox": 83.774,
+          "roles": {
+            "postgres": {
+              "coresApprox": 0.3387,
+              "throttledPeriodsRatio": 0.0074
+            },
+            "api": {
+              "coresApprox": 0.3496,
+              "throttledPeriodsRatio": 0.0593
+            },
+            "kafka": {
+              "coresApprox": 0.3361,
+              "throttledPeriodsRatio": 0.2444
+            },
+            "collector-probe": {
+              "coresApprox": 0.3004,
+              "throttledPeriodsRatio": 0.0296
+            }
+          },
+          "unobservedRoles": []
+        }
+      ],
+      "probeSamples": [
+        {
+          "elapsedSeconds": 0.002387834,
+          "wallMinusMonotonicMillis": -0.388,
+          "probeGcMillis": 289,
+          "probeGcDeltaMillis": null,
+          "probeThreadCount": 2053,
+          "databaseQueryMillis": 37.573167,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 0.339,
+              "status": 200,
+              "millis": 1.714959
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 5.963068045,
+          "wallMinusMonotonicMillis": 0.932,
+          "probeGcMillis": 289,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2058,
+          "databaseQueryMillis": 2.71225,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 6.006,
+              "status": 200,
+              "millis": 1.316583
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 11.026682797,
+          "wallMinusMonotonicMillis": 0.317,
+          "probeGcMillis": 372,
+          "probeGcDeltaMillis": 83,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 3.110458,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 11.068,
+              "status": 200,
+              "millis": 0.923959
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 16.0786698,
+          "wallMinusMonotonicMillis": 0.33,
+          "probeGcMillis": 390,
+          "probeGcDeltaMillis": 18,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 3.455459,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 16.134,
+              "status": 200,
+              "millis": 1.14375
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 21.149638719,
+          "wallMinusMonotonicMillis": 0.361,
+          "probeGcMillis": 390,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 3.015375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 21.185,
+              "status": 200,
+              "millis": 0.882541
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 26.196773013,
+          "wallMinusMonotonicMillis": 0.227,
+          "probeGcMillis": 402,
+          "probeGcDeltaMillis": 12,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 2.865709,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 26.242,
+              "status": 200,
+              "millis": 0.63475
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 31.25190964,
+          "wallMinusMonotonicMillis": 1.09,
+          "probeGcMillis": 402,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 28.43925,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 31.492,
+              "status": 200,
+              "millis": 1.242459
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 36.5120691,
+          "wallMinusMonotonicMillis": 0.931,
+          "probeGcMillis": 416,
+          "probeGcDeltaMillis": 14,
+          "probeThreadCount": 2059,
+          "databaseQueryMillis": 51.742333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 36.699,
+              "status": 503,
+              "millis": 1.172208
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 41.711788352,
+          "wallMinusMonotonicMillis": 1.212,
+          "probeGcMillis": 416,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2058,
+          "databaseQueryMillis": 68.455375,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 42.403,
+              "status": 200,
+              "millis": 1.290334
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 47.413653272,
+          "wallMinusMonotonicMillis": 1.347,
+          "probeGcMillis": 426,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 2058,
+          "databaseQueryMillis": 6.182125,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 47.698,
+              "status": 200,
+              "millis": 1.042917
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 52.710668691,
+          "wallMinusMonotonicMillis": 1.331,
+          "probeGcMillis": 426,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2058,
+          "databaseQueryMillis": 73.299333,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 53.794,
+              "status": 503,
+              "millis": 1.054625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 58.808376152,
+          "wallMinusMonotonicMillis": 0.624,
+          "probeGcMillis": 439,
+          "probeGcDeltaMillis": 13,
+          "probeThreadCount": 2056,
+          "databaseQueryMillis": 4.100709,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 59.281,
+              "status": 503,
+              "millis": 1.224416
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 64.291696905,
+          "wallMinusMonotonicMillis": 1.303,
+          "probeGcMillis": 439,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2053,
+          "databaseQueryMillis": 4.576083,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 64.372,
+              "status": 200,
+              "millis": 0.755875
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 69.379691073,
+          "wallMinusMonotonicMillis": 2.309,
+          "probeGcMillis": 451,
+          "probeGcDeltaMillis": 12,
+          "probeThreadCount": 2053,
+          "databaseQueryMillis": 5.183208,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 69.5,
+              "status": 200,
+              "millis": 0.482625
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 74.508694825,
+          "wallMinusMonotonicMillis": 2.305,
+          "probeGcMillis": 451,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2054,
+          "databaseQueryMillis": 6.657959,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 74.617,
+              "status": 200,
+              "millis": 0.679209
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 79.626717036,
+          "wallMinusMonotonicMillis": 2.283,
+          "probeGcMillis": 461,
+          "probeGcDeltaMillis": 10,
+          "probeThreadCount": 2054,
+          "databaseQueryMillis": 10.363583,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 79.73,
+              "status": 200,
+              "millis": 0.923083
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 84.746150622,
+          "wallMinusMonotonicMillis": 1.849,
+          "probeGcMillis": 461,
+          "probeGcDeltaMillis": 0,
+          "probeThreadCount": 2054,
+          "databaseQueryMillis": 5.627208,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 84.833,
+              "status": 200,
+              "millis": 0.689
+            }
+          ]
+        },
+        {
+          "elapsedSeconds": 89.841626833,
+          "wallMinusMonotonicMillis": 2.373,
+          "probeGcMillis": 474,
+          "probeGcDeltaMillis": 13,
+          "probeThreadCount": 2054,
+          "databaseQueryMillis": 5.801917,
+          "readiness": [
+            {
+              "elapsedSecondsApprox": 89.924,
+              "status": 200,
+              "millis": 0.512542
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

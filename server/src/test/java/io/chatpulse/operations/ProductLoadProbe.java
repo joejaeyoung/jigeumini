@@ -45,9 +45,10 @@ public final class ProductLoadProbe {
         var finalMetrics=new LinkedHashMap<String,java.util.function.Supplier<Map<String,Object>>>();
         var inputEpoch=new java.util.concurrent.atomic.AtomicLong();
         java.util.function.Supplier<String> measuredPhase=()->startNanos==0?"INITIALIZE":plan.phaseAtMillis((System.nanoTime()-startNanos)/1_000_000L);
-        try(var ds=PostgresSupport.open(config.jdbcUrl(),config.user(),config.password(),false)) {
+        String jdbcUrl=config.jdbcUrl()+(config.jdbcUrl().contains("?")?"&":"?")+"ApplicationName=projection-probe";
+        try(var ds=PostgresSupport.open(jdbcUrl,config.user(),config.password(),false)) {
             var jdbc=new JdbcTemplate(ds);var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);
-            try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0));
+            try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0),plan);
                     var visibility=new ProductLoadVisibility(jdbc,config,event->plan.phaseAtMillis(event.eventTime().toEpochMilli()+2000-inputEpoch.get()));var apiTraffic=new ProductLoadApiTraffic(plan,fixture.channels,measuredPhase);
                     var sockets=plan.websocket()?new ProductLoadWebSockets(plan,fixture,publisher,telemetry,visibility):null) {
                 finalMetrics.put("apiTraffic",apiTraffic::snapshot);finalMetrics.put("commitVisibility",visibility::snapshot);
@@ -73,15 +74,24 @@ public final class ProductLoadProbe {
                 },0,1,TimeUnit.SECONDS);
                 long ordinal=0,physical=0;int elapsedSeconds=0;double maximumPacingDelay=0;
                 var stages=new ArrayList<Map<String,Object>>();result.put("stages",stages);
+                var sideInputTimings=new ArrayList<Map<String,Object>>();result.put("sideInputTimings",sideInputTimings);
                 for(var stage:plan.stages()) {
                     phase=stage.name();long stageStart=System.nanoTime();long first=ordinal;
                     for(int second=0;second<stage.seconds();second++,elapsedSeconds++) {
                         pace(startNanos+elapsedSeconds*1_000_000_000L);
-                        if(elapsedSeconds%30==0)seedSideInputs(kafka,jdbc,tx,config,fixture,base.plusSeconds(elapsedSeconds),elapsedSeconds/30);
+                        if(elapsedSeconds%30==0) {
+                            var timing=seedSideInputs(kafka,jdbc,tx,config,fixture,base.plusSeconds(elapsedSeconds),elapsedSeconds/30);
+                            synchronized(this){sideInputTimings.add(timing);}
+                        }
                         if(sockets==null)for(String channel:fixture.channels)telemetry.alive(id("session/"+channel),Instant.now());
                         for(int tick=0;tick<10;tick++) {
                             long due=startNanos+elapsedSeconds*1_000_000_000L+tick*100_000_000L;pace(due);
-                            maximumPacingDelay=Math.max(maximumPacingDelay,(System.nanoTime()-due)/1e6);
+                            double pacingDelay=(System.nanoTime()-due)/1e6;
+                            if(pacingDelay>maximumPacingDelay) {
+                                maximumPacingDelay=pacingDelay;
+                                result.put("maximumPacingLocation",Map.of("scheduledSecond",elapsedSeconds,"tick",tick,
+                                        "elapsedSeconds",elapsed(),"delayMillis",pacingDelay,"phase",stage.name()));
+                            }
                             check(elapsed()<plan.seconds()+60,"GENERATOR_TOO_SLOW");publisher.checkHealthy();
                             if(sockets==null) {
                                 var frame=new ArrayList<io.chatpulse.poc.ChatEvent>();var unique=new ArrayList<io.chatpulse.poc.ChatEvent>();
@@ -145,8 +155,8 @@ public final class ProductLoadProbe {
         System.out.println(JsonMapper.builder().build().writeValueAsString(Map.of("correct",result.get("correct"))));
         return Boolean.TRUE.equals(result.get("correct"));
     }
-    private void seedSideInputs(KafkaTemplate<String,byte[]> kafka,JdbcTemplate jdbc,TransactionTemplate tx,RuntimeEnvironment c,ProductLoadFixture fixture,Instant at,int index) throws Exception {
-        var futures=new ArrayList<CompletableFuture<?>>();
+    private Map<String,Object> seedSideInputs(KafkaTemplate<String,byte[]> kafka,JdbcTemplate jdbc,TransactionTemplate tx,RuntimeEnvironment c,ProductLoadFixture fixture,Instant at,int index) throws Exception {
+        long started=System.nanoTime();var futures=new ArrayList<CompletableFuture<?>>();
         for(int i=0;i<fixture.channels.size();i++) {
             String channel=fixture.channels.get(i);var event=new BroadcastObserved(1,id("observation/"+index+"/"+channel),c.runId(),channel,at,120,1000L+i,
                     BroadcastMetadata.LiveStatus.LIVE,PublicBroadcastObservation.Quality.OBSERVED,Long.toString(10000+i),BroadcastObserved.BroadcastIdentity.SOURCE_PROVIDED,fixture.categories.get(channel),"합성 분류");
@@ -154,12 +164,15 @@ public final class ProductLoadProbe {
             fixture.observations.put(event.eventId().toString(),channel+"|"+at);
         }
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).get(10,TimeUnit.SECONDS);
-        UUID spike=id("spike/"+index);Instant evaluated=Instant.ofEpochSecond(Math.floorDiv(at.getEpochSecond(),10)*10);
+        long acknowledged=System.nanoTime();UUID spike=id("spike/"+index);Instant evaluated=Instant.ofEpochSecond(Math.floorDiv(at.getEpochSecond(),10)*10);
         tx.executeWithoutResult(status->{
             jdbc.update("INSERT INTO spike_event(spike_id,run_id,channel_id,evaluated_at,algorithm_version,count,baseline,ratio,quality_warning) VALUES (?,?,?,?,?,?,?,?,NULL)",spike,c.runId(),fixture.channels.get(index%fixture.channels.size()),ts(evaluated),"chat-spike-v1",100,50,2);
             jdbc.update("INSERT INTO spike_outbox(spike_id,run_id) VALUES (?,?)",spike,c.runId());
         });
-        fixture.spikes.add(spike.toString());
+        fixture.spikes.add(spike.toString());long finished=System.nanoTime();
+        return Map.of("scheduledSecond",index*30,"startedElapsedSeconds",(started-startNanos)/1e9,
+                "finishedElapsedSeconds",(finished-startNanos)/1e9,"observationAckMillis",(acknowledged-started)/1e6,
+                "outboxMillis",(finished-acknowledged)/1e6);
     }
     private static void pace(long due) {long remaining;while((remaining=due-System.nanoTime())>0){LockSupport.parkNanos(Math.min(remaining,100_000_000));if(Thread.currentThread().isInterrupted())throw new IllegalStateException("GENERATOR_INTERRUPTED");}}
     private double elapsed(){return (System.nanoTime()-startNanos)/1e9;}

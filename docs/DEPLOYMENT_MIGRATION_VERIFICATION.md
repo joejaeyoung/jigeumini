@@ -1,5 +1,7 @@
 # 새 migration 릴리스의 실패·중단·백업 복원 검증
 
+2026-10-27 후속: 아래 #42의 **당시 제품 V12·시험 V13** 결과는 그대로 보존한다. #65에서 실제 제품 V13 색인을 추가한 뒤 **시험 V14·새 DB에 제품 V13 복원** 16단계를 통과했다. [후속 검증](PROJECTION_PERFORMANCE_VERIFICATION.md#처리-계약복구리팩토링-확인)·[정제 근거](poc/evidence/projection-performance-2026-10-27/migration.json). 같은 번호의 시험/제품 migration을 동일한 변경으로 취급하지 않는다.
+
 2026-10-26 KST · [#42](https://github.com/joejaeyoung/jigeumini/issues/42) · F16/F08 → T04/T16.
 [실행 명령](../README.md#새-migration-릴리스-복구-시험) · [공식 자료 조사](research/POSTGRES_RECOVERY.md) · [정제 근거](poc/evidence/migration-recovery-2026-10-26/summary.json).
 진행 상태와 최종 게이트는 [STATUS](STATUS.md)·[PR #51](https://github.com/joejaeyoung/jigeumini/pull/51)에서 확인한다.

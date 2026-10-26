@@ -13,6 +13,8 @@ public final class ProbeStats {
     private final Map<String, Long> skipped = new LinkedHashMap<>();
     private final Map<String, Long> idFields = new LinkedHashMap<>();
     private final Map<String, Long> reasons = new LinkedHashMap<>();
+    private final Map<String, Long> closeCodes = new LinkedHashMap<>();
+    private final Map<String, Long> handshakeFailures = new LinkedHashMap<>();
     private long messages, afterReconnect, frames, bytes, maxFrameBytes, attempts, connections, pings, pongs;
     private long lateMessages, totalDelayMillis, maxDelayMillis;
     private Instant firstEventTime, lastEventTime;
@@ -32,6 +34,15 @@ public final class ProbeStats {
     }
     public synchronized void ping() { pings++; }
     public synchronized void pong() { pongs++; }
+    synchronized void socketClosed(int code) {
+        String key = code >= 1000 && code <= 4999 ? Integer.toString(code) : "OTHER";
+        if (!closeCodes.containsKey(key) && closeCodes.size() >= 32) key = "OTHER";
+        closeCodes.merge(key, 1L, Long::sum);
+    }
+    synchronized void handshakeFailed(boolean waitingForApproval, boolean timeout) {
+        String key = (waitingForApproval ? "APPROVAL_" : "CONNECT_") + (timeout ? "TIMEOUT" : "FAILURE");
+        handshakeFailures.merge(key, 1L, Long::sum);
+    }
     public synchronized void reason(String reason) {
         // 진단 코드는 코드가 소유하며 외부 메시지를 key로 사용하지 않는다.
         reasons.merge(reason, 1L, Long::sum);
@@ -89,6 +100,8 @@ public final class ProbeStats {
         result.put("commands", Map.copyOf(commands));
         result.put("skipped", Map.copyOf(skipped));
         result.put("reasons", Map.copyOf(reasons));
+        result.put("closeCodes", Map.copyOf(closeCodes));
+        result.put("handshakeFailures", Map.copyOf(handshakeFailures));
         result.put("candidateIdFieldPresence", Map.copyOf(idFields));
         result.put("firstEventTime", firstEventTime == null ? null : firstEventTime.toString());
         result.put("lastEventTime", lastEventTime == null ? null : lastEventTime.toString());

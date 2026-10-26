@@ -244,3 +244,11 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 보강 집중5개가 통과했다. 공식 PostgreSQL16 [constraint trigger](https://www.postgresql.org/docs/16/sql-createtrigger.html)와 [sequence](https://www.postgresql.org/docs/16/functions-sequence.html) 문서(2026-10-26 조회)로 commit 시점 검사와 abort 후 sequence 유지의 계측 범위를 확인했다. sequence를 DB 장애 후 영속 증거로 확장하지 않는다. 보강 commit의 전체 회귀·최종 리뷰/CI는 이어 확인한다.
 
 - 보강 `43bedc2`의 `./scripts/check` 단위147·하네스20·JAR, `./scripts/integration` 실제100개가 모두 통과했다. 정제 근거에 suite/XML·명령 로그 hash·JAR/build ID와 실제 시각을 연결했다. Standards/Spec 각각 지적0·차단0이며 Claude 보강 재리뷰도 APPROVE다. session timeout6초와 Gradle classpath를 확인하고 partition 범위·이전 문단의 회복 순서를 정정했다. T02는 이 합성/로컬 장애 범위에서 검증됨으로 바꾸며, 원천 중복·전체 Exactly-once와 운영 장애는 확장하지 않는다. 최종 문서 HEAD 승인·push/PR CI·병합은 PR #50 통합 게이트에 남긴다.
+
+### 2026-10-26 Outbox 거부 시험 준비 보완 #52
+
+F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외를 기대했으나 반환했다. 동일 HEAD push40254939425는 성공했다. 로컬 최소 하네스는 동적 변경20/생성 시 제한20 모두277byte 입력을64byte 한도에서 거부하여 원래 CI 실패를 재현하지 못했다. 실패 시 반환값/실제 producer 오류를 수집하지 않아 원인을 확정하지 않는다.
+
+시험 topic 생성 시64byte 제한을 함께 지정하고, 동일 topic/payload의 별도 실제 producer 제어 발행에서 RecordTooLargeException·offset0을 확인한 뒤 outbox를 호출한다. Outbox 자체는 하위 원인을 숨기는 기존 일반 오류 계약으로 확인하며, pending/offset/반환값을 정제 진단에 남긴다. 기본 크기 복구 뒤에는 OUTBOX_DELIVERY_UNAVAILABLE만15초 한도에서 재시도하며 성공/잘못된 pending/다른 오류를 구분한다. 독립 schema/topic20회 반복으로 거부→복구→추가 발행 없음까지 대조한다. 제품 코드는 바꾸지 않는다.
+
+사전 리팩토링 검토 Standards0/Spec1: 일반 Outbox 오류만으로 실제 broker의 크기 거부를 구별하지 못하는 근거 공백을 제어 발행으로 보완했다. [조사](research/OUTBOX_READINESS.md)에 공식4.1.2 소스와 추론/미재현 범위를 기록했다.

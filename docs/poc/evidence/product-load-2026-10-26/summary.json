@@ -1,0 +1,120 @@
+{
+  "recordedAt": "2026-10-26T02:46:39.834651+00:00",
+  "issue": 43,
+  "featureIds": [
+    "F03",
+    "F04",
+    "F05",
+    "F06",
+    "F07",
+    "F10",
+    "F14"
+  ],
+  "technicalIds": [
+    "T02",
+    "T07",
+    "T08",
+    "T11",
+    "T12"
+  ],
+  "scope": "SINGLE_HOST_RF1_SYNTHETIC_FULL_ANALYZER_WITH_API",
+  "environment": {
+    "recordedAt": "2026-10-26T02:07:30.311512+00:00",
+    "scope": "LOCAL_HOST_WITH_OTHER_EXISTING_SERVICES_NOT_MODIFIED",
+    "hostOs": "Darwin",
+    "hostVersion": "25.6.0",
+    "hostArchitecture": "arm64",
+    "hostCpuCount": 15,
+    "hostMemoryBytes": 51539607552,
+    "docker": {
+      "cpus": 8,
+      "memoryBytes": 8217145344,
+      "serverVersion": "29.5.3",
+      "osType": "linux",
+      "architecture": "aarch64",
+      "kernelVersion": "6.12.76-linuxkit"
+    }
+  },
+  "profiles": [
+    {
+      "profile": "uniform",
+      "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+      "evidence": "uniform.json",
+      "sha256": "a3894fdc4e8009ae938eef804c80a1c2d351a633f4b69c6bac2093fe6a516cfd",
+      "inputSeconds": 120.003576638,
+      "unique": 12000,
+      "physical": 12120,
+      "correct": true,
+      "cleanupComplete": true
+    },
+    {
+      "profile": "hot",
+      "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+      "evidence": "hot.json",
+      "sha256": "9a072d425d87814d162458b0714f7e20a0bb936d6a4ccee54563aa9520d7d8a5",
+      "inputSeconds": 120.002677097,
+      "unique": 12000,
+      "physical": 12120,
+      "correct": true,
+      "cleanupComplete": true
+    },
+    {
+      "profile": "steps",
+      "revision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
+      "evidence": "steps.json",
+      "sha256": "46c5cd44bf269cc7c604c0e02102a529e0ab5a44f2f6c38e8045ce464613626b",
+      "inputSeconds": 180.003815165,
+      "unique": 21000,
+      "physical": 21210,
+      "correct": true,
+      "cleanupComplete": true
+    },
+    {
+      "profile": "soak",
+      "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+      "evidence": "soak.json",
+      "sha256": "763cbf287e9da17110d846aad67d6c7cb800f94960eafc3b5c9a7eac18608106",
+      "inputSeconds": 1800.007581735,
+      "unique": 90000,
+      "physical": 90900,
+      "correct": true,
+      "cleanupComplete": true
+    },
+    {
+      "profile": "smoke",
+      "revision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+      "evidence": "smoke.json",
+      "sha256": "478f93372646938367c98f2835ef75684c09638ad90488564a7a198d274db0b4",
+      "inputSeconds": 60.004691152,
+      "unique": 1200,
+      "physical": 1212,
+      "correct": true,
+      "cleanupComplete": true
+    }
+  ],
+  "localChecks": {
+    "unitRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+    "unit": 147,
+    "harness": 24,
+    "integrationRevision": "0904368441febca2a85195711bdcc9241d1d74a3",
+    "actualKafkaPostgres": 100,
+    "scope": "HISTORICAL_COMMAND_RESULTS; FINAL_HEAD_CI_IS_SEPARATE"
+  },
+  "review": {
+    "soakEntryRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
+    "verdict": "APPROVE_FOR_SOAK_ENTRY",
+    "session": "e85497ba-6427-4337-ad5a-be04cf0a8342",
+    "finalHeadReviewPending": true
+  },
+  "limitations": [
+    "ONE_EXECUTION_PER_PROFILE; NOT_A_MAXIMUM_CAPACITY_OR_SLA",
+    "NO_PUBLIC_SOURCE_OR_EXTERNAL_DEPLOYMENT",
+    "RF1_NO_HA_OR_AZ_CLAIM",
+    "SYNTHETIC_OUTBOX_INPUT_NOT_SPIKE_DETECTOR_ACCURACY",
+    "API_STATUS_AND_LATENCY_NOT_BODY_OR_UI_E2E",
+    "RECEIVED_TO_TRANSACTION_START_NOT_COMMIT; FULL_RUN_DISTRIBUTION_INCLUDES_STOP",
+    "HEAP_NOT_POST_GC; FINITE_DURATION_NOT_LEAK_ABSENCE",
+    "CLOCK_BRACKET_IS_INTERVAL_AND_ROUND_TRIP_UNCERTAINTY_NOT_EXACT_SKEW",
+    "SHARED_HOST_EXISTING_SERVICES_UNMODIFIED"
+  ]
+}

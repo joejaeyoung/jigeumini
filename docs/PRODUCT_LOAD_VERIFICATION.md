@@ -10,7 +10,7 @@ API 계측은 단일 클라이언트가 5초 고정 지연마다 8경로를 순�
 
 분석기에는 실험용 JMX 원격 옵션(인증/TLS 없음, 소유 내부망·호스트 미공개)과 별도 healthcheck를 overlay했다. 운영 이미지 기본 설정과 다른 계측 조건을 기록한다.
 
-seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 event UUID/payload를 새 Kafka offset으로1회 추가한다. 생성기는 예상 ledger UUID와 bucket별 count, 관측/분류/보고서 귀속, outbox/feed ID를 소비 구현과 별도로 누적한다. 기대 hash는 제품 EventCodec.hash를 재사용하므로 해시 알고리즘 자체의 독립 검증은 아니다. final drain 후 제품 DB와 전부 대조한다. accepted/ACK는 물리 발행 수, ledger는 고유 업무 수다.
+seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 event UUID/payload를 새 Kafka offset으로1회 추가한다. 균등 배정에서는 ordinal%100==0이 채널 index19에만 해당하여 중복900건이 한 채널에 집중된다(soak). hot 배정은 다르므로 균등한 중복 분포 시험으로 취급하지 않는다. 생성기는 예상 ledger UUID와 bucket별 count, 관측/분류/보고서 귀속, outbox/feed ID를 소비 구현과 별도로 누적한다. 기대 hash는 제품 EventCodec.hash를 재사용하므로 해시 알고리즘 자체의 독립 검증은 아니다. final drain 후 제품 DB와 전부 대조한다. accepted/ACK는 물리 발행 수, ledger는 고유 업무 수다.
 
 채널별 관측은30초마다 갱신하고 TTL120초를 사용한다. 수집 품질 telemetry도 합성 connected/alive/flush 입력이다. outbox는30초마다 합성 SQL로 생성하므로 실제 급증 탐지 정확도 검증이 아니다. 실제 Outbox 발행·알림 소비와 최종 건수는 대조한다. 중복 입력 주입은 chat ledger에 한정하며 알림 중복은 주입하지 않았다.
 
@@ -26,7 +26,7 @@ seed20261026·합성 채널20·category3개, 고유 chat100건마다 같은 even
 
 ## 계측 의미
 
-- 독립1초 offset 계측은 각 group의 commit을 먼저, topic end를 나중에 읽는다. 동시에 읽은 snapshot이 아니므로 lag는 관측 구간의 상한 성격이다. 각 partition의 실제 표본 시간 차로 입력/commit 처리량을 계산한다.
+- 독립1초 offset 계측은 각 group의 commit을 먼저, topic end를 나중에 읽는다. 동시에 읽은 snapshot이 아니므로 lag는 관측 구간의 상한 성격이다. 각 partition의 실제 표본 시간 차로 입력/commit 처리량을 계산한다. 한 주기에는 group6개 commit 조회와 end/begin 조회의 논리 Admin API 호출8회가 단일 broker에 추가된다. 실제 네트워크 요청 수는 내부 batching·재시도에 따라 다를 수 있다. partitions.sampledByPhase는 생성기 phase별 전체 분포이며 soak의 STOP·catch-up도 포함한다. p99/max lag와 최대 commit 처리율을 정상 상태 값으로 해석하지 않는다.
 - API/DB count query·JMX heap·생성기 RSS는5초 지연 주기, 컨테이너 CPU·docker stats 메모리 사용량과 host 여유 디스크는 별도 표본이다. 분석기 RSS는 별도로 /proc/1/status의 VmRSS를 읽는다. 누락/실패 표본도 보존한다. API latency는8경로별로 정상/STOP/복구 구간을 구분한다.
 - `receivedToTransactionTimestampMillis`는 receivedAt부터 PostgreSQL transaction 시작 timestamp까지다. DB commit 완료 시각이나 네트워크 전체 지연이 아니다. 전체 실행의 분포이며 정상/장애별로 분해하지 않았다.
 - JVM heap used는 GC 이후 생존 객체량이 아니다. RSS와 heap의 유한30분 표본은 메모리 누수 부재나 장기 SLA를 증명하지 않는다.
@@ -56,15 +56,26 @@ uniform/hot의 동일 입력률 단회에서 hot의 tail 지연이 더 컸다. �
 
 분석기 STOP은20.303초였다. STOP 중 양수 lag20표본을 관측했다. CONT 이후 고정 end까지 commit 관측은2.245초, 첫 ready200 표본은5.091초였다. 전자는약1초 offset 주기, 후자는약5초 API 주기에 따른 관측 상한으로 정밀도가 다르다. 정상 API2,784회는모두200, STOP 중8회는HttpTimeoutException, 복구 구간8회는200이다. 장애 오류를 정상 통계에서 별도로 표시하며 전체 기록에서 삭제하지 않았다.
 
-전체 실행의 ranking 지연은p50/p95/p99=7.938/64.850/3507.609ms, 최대21403.527ms, trend는7.931/64.913/3574.918ms, 최대21564.276ms다. 모두 전체 실행의 quantile이다. STOP 중 입력은 약1.1%로 p99·최댓값에 큰 영향을 줄 수 있지만, 시간별 지연을 분해하지 않았으므로 정상 구간 p50/p95 값으로 따로 표시하지 않는다. 낮은 입력률50/s인 soak의 p95가 uniform100/s의26.757ms보다 높았던 원인은 미규명이다. 테이블 증가·DB 유지 작업·계측 count query 등이 가설일 수 있으나 이를 구별하는 자료가 없고 실행 DB를 정리해 사후 분해할 수 없다. 정합성과 장애 회복·유한 자원 관측의 PASS이며 지연 안정성이나 원인별 비용을 입증한 결과가 아니다. 정상 DB count query는348표본, p50/p95/p99=18.523/36.647/42.836ms다. 이는7개 관측용 count(*) 질의 묶음의 시간으로 제품 DB 트랜잭션 지연이 아니며, 이 계측도 공유 DB에 부하를 더한다.
+전체 실행의 ranking 지연은p50/p95/p99=7.938/64.850/3507.609ms, 최대21403.527ms, trend는7.931/64.913/3574.918ms, 최대21564.276ms다. 모두 전체 실행의 quantile이다. STOP 중 입력은 약1.1%로 p99·최댓값에 큰 영향을 줄 수 있지만, 시간별 지연을 분해하지 않았으므로 정상 구간 p50/p95 값으로 따로 표시하지 않는다. 낮은 입력률50/s인 soak의 p95가 uniform100/s의26.757ms보다 높았던 원인은 미규명이다. 테이블 증가·DB 유지 작업·계측 count query·Kafka CPU 한도 접근 등이 후보지만 원인은 미규명이다. 처리 지연의 시간별 분해 자료가 없고 실행 DB를 정리해 사후 분해할 수 없다. API/관측용 DB count의 시계열은 원본 samples.jsonl에 남아 있으며 제품 처리 지연과는 구분한다. 정합성과 장애 회복·유한 자원 관측의 PASS이며 지연 안정성이나 원인별 비용을 입증한 결과가 아니다. 정상 DB count query는348표본, p50/p95/p99=18.523/36.647/42.836ms다. 이는7개 관측용 count(*) 질의 묶음의 시간으로 제품 DB 트랜잭션 지연이 아니며, 이 계측도 공유 DB에 부하를 더한다.
 
 독립 offset1,780표본은모두완전했고 정상 느린 계측348표본과 정상10초window176/176이 충족됐다. 정상 최대 계측 공백5.780초, 최대 offset 표본 간격1.078초다. 분석기 heap used 최대52,227,464byte·RSS303,341,568byte, 입력기 heap59,588,976byte·RSS229,638,144byte, 표본상 버퍼 나이 최대64ms를 기록했다. heap은350표본, 분석기 RSS는138표본이다.
 
-시계 차이 범위는 START[-10,396]ms(불확실성406ms), RESUME[-9,165]ms(174ms)다. 입력 종료 후 모든 대조·정상 종료·이번 실행 container/volume/비밀 제거가 통과했다. 원본 hash·표본 수·분포는 [정제 근거 색인](poc/evidence/product-load-2026-10-26/summary.json)에 연결한다. [soak 상세](poc/evidence/product-load-2026-10-26/soak.json)의 files는 result/load/offsets/samples 원본 hash, partitions는 group별 분포, apiLatencyMillis는 경로·구간별 응답, minuteSamples는 분단위 heap/RSS 표본, memoryBytes는 전체 메모리 분포다. [정제 스크립트](../scripts/product-load-summary.py)가 해당 원본에서 계산하며 quantile은 (N-1)·p 위치를 선형 보간한다.
+CPU는 약13초 간격의 docker stats 점 표본138개다. 각 서비스의 p95/p99/max(%)는 다음과 같다.
+
+| 서비스 | p95 | p99 | 최대 |
+|---|---|---|---|
+| Kafka | 83.647 | 99.766 | 103.300 |
+| PostgreSQL | 18.276 | 22.558 | 98.620 |
+| 분석기 | 40.733 | 58.588 | 82.580 |
+| 입력기 | 4.519 | 11.589 | 94.740 |
+
+Kafka는 1 CPU 한도 부근의 표본이 있었지만 cgroup cpu.stat의 throttling과 STOP/처리 지연의 시간 상관은 수집하지 않았다. 50건/s를 지속 가능한 운영 용량으로 결론내리지 않는다. 입력기 pacing 지연 최대692.672ms도 원인 미분리다. 같은 probe cgroup에서 시계 bracket용 JVM을 기동하는 비용은 가능한 후보일 뿐 검증한 원인은 아니다.
+
+시계 차이 범위는 START[-10,396]ms(불확실성406ms), RESUME[-9,165]ms(174ms)다. 입력 종료 후 모든 대조·정상 종료·이번 실행 container/volume/비밀 제거가 통과했다. 원본 hash·표본 수·분포는 [정제 근거 색인](poc/evidence/product-load-2026-10-26/summary.json)에 연결한다. [soak 상세](poc/evidence/product-load-2026-10-26/soak.json)의 files는 result/load/offsets/samples 원본 hash, partitions는 group별 분포, apiLatencyMillis는 경로·구간별 응답, minuteSamples는 분단위 분석기 heap 최대·입력기 RSS 최대·버퍼 나이이며 분석기 RSS의 분단위 값은 없다. memoryBytes는 전체 메모리 분포다. 입력기 RSS 상승(약176→230MB)은 예상값 맵과 표본 리스트 누적의 영향을 포함하므로 제품의 메모리 증가로 해석하지 않는다. [정제 스크립트](../scripts/product-load-summary.py)는 표본 분포를 (N-1)·p 위치 선형 보간으로 계산한다. transaction 지연 quantile은 probe SQL percentile_cont 결과를 복사한다. harnessRevision은 실행 이미지 revision, curatorSha256은 정제 스크립트의 hash이며 command는 정제 인자로 재구성한 재현 명령이다.
 
 ## 환경·재현·남은 범위
 
-호스트 Darwin25.6 arm64·CPU15·RAM48GiB, Docker29.5.3 linux/aarch64·CPU8·메모리8,217,145,344byte다. 전용 벤치마크 호스트가 아니며 다른 기존 서비스는 그대로 두었다. 입력기/분석기는 각1CPU·컨테이너640MiB·JVM-Xms64m/-Xmx384m이다. probe class는 실행별로 복사하여 hash를 기록하고 이미지/JAR build identity를 확인한다. Kafka는RF1이며 HA/AZ/디스크 손실은 별도 이슈다.
+호스트 Darwin25.6 arm64·CPU15·RAM48GiB, Docker29.5.3 linux/aarch64·CPU8·메모리8,217,145,344byte다. 전용 벤치마크 호스트가 아니며 다른 기존 서비스는 그대로 두었다. 입력기/분석기는 각1CPU·컨테이너640MiB·JVM-Xms64m/-Xmx384m이고 Kafka는1CPU·768MiB, PostgreSQL은1CPU·384MiB다. probe class는 실행별로 복사하여 hash를 기록하고 이미지/JAR build identity를 확인한다. Kafka는RF1이며 HA/AZ/디스크 손실은 별도 이슈다.
 
 ```sh
 ./scripts/product-load <고정 이미지 manifest.json> uniform <새 결과 디렉터리>

@@ -352,3 +352,7 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 #43의420efa3(선행#42/#52/#54포함)을통합했다. Clockargs와bootstrapargs충돌은 mode/clock/bootstrap 위치를통일하고, 2종시작진단을#54의phase/예외타입/허용코드진단으로합쳤다. 실제producer관측과clock제어는보존한다. 진단쓰기실패가cleanup을막지않게했고 성공한process/report만함께등록한다. 제품Clock전달과임대전metadata재시도경계를모두유지하고기존한도는바꾸지않았다. 새통합HEAD의20개Fleet회귀와최종리뷰/CI를확인한다.
 
 통합 `34e824e`에서 단위152·하네스24·JAR, 실제 Kafka/DB Fleet20개가 143.251초에 실패0으로 통과했다. XML·각 진단 hash와 permit 경계3개 결과를 보존했다. Standards/Spec은 각각 지적0·차단0이다. 원래 CI14개 수치와 로컬 통합20개 수치를 혼합하지 않는다.
+
+### #43 환경 한계·통계 범위 재검토
+
+최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.

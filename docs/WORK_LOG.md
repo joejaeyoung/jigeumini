@@ -271,3 +271,4 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - JMX는 시험 overlay의 내부망에서만 열고 분석기 heap을 읽는다. 분석기 RSS·컨테이너 CPU/메모리와 생성기 heap/RSS는 별도 표본이다. 기존 운영 compose를 바꾸지 않는다. 실행 클래스는 결과 디렉터리에 고정 복사하고 hash를 남겨 뒤의 빌드가 실행을 바꾸지 않게 한다.
 - 균등/80% 편향 각120초100건/s, 단계50/100/200건/s 각60초, soak50건/s1800초를 고정한다. 100건마다 동일 UUID를 새 offset으로 중복 발행한다. smoke/soak은 분석기만20초 SIGSTOP/CONT하며 입력은 계속한다. 실행 전 설계이며 아직 통과 근거는 아니다.
 - 최초 b91b8e7 smoke는 격리 인프라/분석기 시작 후 `OWNED_CONTAINER_MISSING`으로 중단했다. 생성기 one-off가 `api` service label을 공유해 API 소유권 조회에 컨테이너2개가 반환된 것이 원인이다. 생성기를 별도 `load-probe` service로 분리한다. 최초 결과와 정리 성공을 보존하며 완료로 세지 않는다.
+- f71423a의60초 smoke는 고유1200·물리1212·모든 집계 대조·STOP/CONT·자원 정리를 통과했다. 다만 리뷰에서 입력 중 offset 조회 순서의 음수 lag 가능성과 정지 구간에 한정하지 않은 lag 단언을 지적해, 최종 근거로 쓰기 전에 commit→end 조회 순서/관측 시각과 STOP 구간 표본을 보강한다. 비밀 생성 뒤 파일 준비는 정리가 보장되는 phase로 옮기고 Python/Java 계획 일치를 장애 주입 전에 대조한다.

@@ -14,18 +14,21 @@ class ProductLoad(module.Rehearsal):
         super().__init__(manifest,manifest,directory)
         self.deadline=time.monotonic()+self.duration+900
         self.overlay=self.directory/'load-compose.json'
+        self.output=self.directory/'probe-output';self.classes=self.directory/'probe-classes'
+        self.result.update({'scope':'SINGLE_HOST_RF1_WHOLE_PRODUCT_SYNTHETIC_LOAD','profile':profile,
+            'resourceSamples':[],'loadContract':{'channels':20,'seed':20261026,'durationSeconds':self.duration,'faultAtSeconds':self.fault_at,'faultSeconds':self.fault_seconds,'resources':'deploy/compose.yaml limits; separate probe JVM Xmx384m in api service limits','jmx':'ISOLATED_INTERNAL_TEST_NETWORK_ONLY'}})
+    def prepare(self):
         self.overlay.write_text(json.dumps({'services':{
             'api':{'environment':{'JAVA_TOOL_OPTIONS':'-Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=api -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'},'healthcheck':{'test':['CMD-SHELL',"JAVA_TOOL_OPTIONS= java -Xmx32m -cp '/app/classes:/app/lib/*' io.chatpulse.poc.PocApplication ops probe"]}},
             'load-probe':{'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True}}
         }}))
-        self.output=self.directory/'probe-output';self.output.mkdir();self.output.chmod(0o777)
-        self.classes=self.directory/'probe-classes';target=self.classes/'io/chatpulse/operations';target.mkdir(parents=True)
+        self.output.mkdir();self.output.chmod(0o777)
+        target=self.classes/'io/chatpulse/operations';target.mkdir(parents=True)
         files=list((ROOT/'server/build/classes/java/test/io/chatpulse/operations').glob('ProductLoad*.class'))
         if not files:raise RuntimeError('LOAD_CLASSES_MISSING')
         for path in files:shutil.copy2(path,target/path.name)
-        self.result.update({'scope':'SINGLE_HOST_RF1_WHOLE_PRODUCT_SYNTHETIC_LOAD','profile':profile,
-            'fixtureClasses':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(target.glob('*.class'))},
-            'resourceSamples':[],'loadContract':{'channels':20,'seed':20261026,'durationSeconds':self.duration,'faultAtSeconds':self.fault_at,'faultSeconds':self.fault_seconds,'resources':'deploy/compose.yaml limits; separate probe JVM Xmx384m in api service limits','jmx':'ISOLATED_INTERNAL_TEST_NETWORK_ONLY'}})
+        self.result['fixtureClasses']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(target.glob('*.class'))}
+        return {'frozenClasses':len(files)}
     def compose(self,*args,**kwargs):
         if not hasattr(self,'overlay'):return super().compose(*args,**kwargs)
         return self.command(['docker','compose','--env-file',str(self.envfile),'-p',self.project,'-f',str(ROOT/'deploy/compose.yaml'),'-f',str(self.overlay),*args],**kwargs)
@@ -57,6 +60,10 @@ class ProductLoad(module.Rehearsal):
             info=json.loads(self.command(['docker','inspect',self.probe_id]).stdout)[0]
             path=self.output/'load.json'
             progress=json.loads(path.read_text()) if path.exists() else {}
+            if progress:
+                plan=progress['plan']
+                if (plan['name']!=self.profile or sum(s['seconds'] for s in plan['stages'])!=self.duration
+                    or plan['faultAtSeconds']!=self.fault_at or plan['faultSeconds']!=self.fault_seconds):raise RuntimeError('LOAD_PLAN_MISMATCH')
             if info['State']['Status']=='exited':break
             elapsed=progress.get('elapsedSeconds',0)
             if fault is None and self.fault_at>=0 and elapsed>=self.fault_at:
@@ -74,15 +81,18 @@ class ProductLoad(module.Rehearsal):
         if info['State']['ExitCode']!=0 or info['State']['OOMKilled'] or not progress.get('correct'):raise RuntimeError('LOAD_FAILED')
         if self.fault_at>=0:
             if not fault or 'resumedAt' not in fault:raise RuntimeError('LOAD_FAULT_NOT_EXECUTED')
-            after=[s for s in progress['samples']+[progress['finalSample']] if str(s['at'])>=fault['resumedAt']]
-            lagged=[s for s in progress['samples'] if str(s['at'])>=fault['stoppedAt'] and any((p.get('lag') or 0)>0 for p in s.get('partitions',[]))]
+            def instant(value):return datetime.datetime.fromisoformat(str(value).replace('Z','+00:00'))
+            def offsets_at(sample):return max(instant(p['offsetsObservedAt']) for p in sample['partitions'])
+            after=[s for s in progress['samples']+[progress['finalSample']] if s.get('partitions') and offsets_at(s)>=instant(fault['resumedAt'])]
+            lagged=[s for s in progress['samples'] if s.get('partitions') and instant(fault['stoppedAt'])<=offsets_at(s)<instant(fault['resumedAt']) and any((p.get('lag') or 0)>0 for p in s['partitions'])]
             recovered=next((s for s in after if len(s.get('partitions',[]))==24 and all(p.get('lag')==0 for p in s['partitions'])),None)
             if not lagged or not recovered:raise RuntimeError('LOAD_FAULT_LAG_NOT_OBSERVED')
-            fault['firstZeroLagAt']=recovered['at'];fault['secondsResumeToFirstZeroLagSample']=(datetime.datetime.fromisoformat(str(recovered['at']).replace('Z','+00:00'))-datetime.datetime.fromisoformat(fault['resumedAt'])).total_seconds()
+            fault['firstZeroLagAt']=offsets_at(recovered).isoformat();fault['secondsResumeToFirstZeroLagSample']=(offsets_at(recovered)-instant(fault['resumedAt'])).total_seconds()
+            fault['stoppedLagSamples']=len(lagged)
             fault.pop('monotonicStop',None)
         return {'correct':True,'unique':progress['expectedUnique'],'physical':progress['expectedPhysical'],'inputSeconds':progress['inputSeconds'],'drainSeconds':progress['drainSeconds']}
     def scenarios(self):
-        self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize)
+        self.phase('PREPARE_PROBE',self.prepare);self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize)
         self.phase('ANALYZER_IMAGE',lambda:self.up_apps(self.candidate));self.phase('RUNTIME_BOUNDARIES',self.audit)
         self.phase('PRODUCT_LOAD',self.load);self.phase('FINAL_GRACEFUL_STOP',self.stop_api)
     def cleanup(self):

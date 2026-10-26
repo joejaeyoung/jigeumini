@@ -12,6 +12,7 @@ import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 import javax.management.remote.*;
 import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -53,9 +54,10 @@ final class ProductLoadMeasurements implements AutoCloseable {
         var responses=new ArrayList<Map<String,Object>>();
         for(String path:paths) {
             long begin=System.nanoTime();var value=new LinkedHashMap<String,Object>();value.put("path",path);
+            value.put("startedAt",Instant.now());
             try {value.put("status",http.send(HttpRequest.newBuilder(URI.create("http://api:8080"+path)).timeout(Duration.ofSeconds(2)).GET().build(),HttpResponse.BodyHandlers.discarding()).statusCode());}
             catch(Exception error){value.put("error",error.getClass().getSimpleName());}
-            value.put("millis",(System.nanoTime()-begin)/1e6);responses.add(value);
+            value.put("millis",(System.nanoTime()-begin)/1e6);value.put("finishedAt",Instant.now());responses.add(value);
         }
         out.put("api",responses);
         out.put("generatorHeapUsedBytes",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
@@ -65,20 +67,25 @@ final class ProductLoadMeasurements implements AutoCloseable {
             var memory=(CompositeData)jmx.getMBeanServerConnection().getAttribute(new ObjectName("java.lang:type=Memory"),"HeapMemoryUsage");
             out.put("analyzerHeapUsedBytes",memory.get("used"));out.put("analyzerHeapMaxBytes",memory.get("max"));
         }catch(Exception error){out.put("analyzerHeapError",error.getClass().getSimpleName());try{if(jmx!=null)jmx.close();}catch(Exception ignored){}jmx=null;}
-        out.put("sampleSeconds",(System.nanoTime()-started)/1e9);return out;
+        out.put("sampleSeconds",(System.nanoTime()-started)/1e9);out.put("finishedAt",Instant.now());return out;
     }
     synchronized List<Map<String,Object>> partitions() throws Exception {
+        // 입력 중에도 commit이 뒤에서 읽은 end를 넘지 않도록 commit→end 순서로 표본을 잡는다.
+        // 하나의 원자 snapshot은 아니며 각 lag는 이 조회 구간의 상한이다.
+        var commits=new LinkedHashMap<String,Map<TopicPartition,OffsetAndMetadata>>();
+        for(String group:groups.keySet())commits.put(group,admin.listConsumerGroupOffsets(group).partitionsToOffsetAndMetadata().get(4,TimeUnit.SECONDS));
         var specifications=new HashMap<TopicPartition,OffsetSpec>();
         for(String topic:List.of(config.topic(),config.observationsTopic(),config.notificationsTopic()))for(int p=0;p<3;p++)specifications.put(new TopicPartition(topic,p),OffsetSpec.latest());
         var ends=admin.listOffsets(specifications).all().get(4,TimeUnit.SECONDS);
+        Instant observedAt=Instant.now();
         specifications.replaceAll((p,v)->OffsetSpec.earliest());
         var begins=admin.listOffsets(specifications).all().get(4,TimeUnit.SECONDS);
         var values=new ArrayList<Map<String,Object>>();long now=System.nanoTime();double seconds=(now-previousAt)/1e9;
         for(var group:groups.entrySet()) {
-            var committed=admin.listConsumerGroupOffsets(group.getKey()).partitionsToOffsetAndMetadata().get(4,TimeUnit.SECONDS);
+            var committed=commits.get(group.getKey());
             for(String topic:group.getValue())for(int p=0;p<3;p++) {
                 var tp=new TopicPartition(topic,p);var value=new LinkedHashMap<String,Object>();
-                value.put("group",group.getKey());value.put("topic",topic);value.put("partition",p);value.put("begin",begins.get(tp).offset());value.put("end",ends.get(tp).offset());
+                value.put("group",group.getKey());value.put("topic",topic);value.put("partition",p);value.put("begin",begins.get(tp).offset());value.put("end",ends.get(tp).offset());value.put("offsetsObservedAt",observedAt);
                 var offset=committed.get(tp);String key=group.getKey()+"/"+topic+"/"+p;
                 value.put("committed",offset==null?null:offset.offset());value.put("lag",offset==null?null:ends.get(tp).offset()-offset.offset());
                 if(offset!=null) {Long prior=previous.put(key,offset.offset());value.put("committedRecordsPerSecond",prior==null?null:(offset.offset()-prior)/seconds);}

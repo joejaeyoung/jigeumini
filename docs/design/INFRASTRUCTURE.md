@@ -1,7 +1,7 @@
 # 현재 인프라 아키텍처와 운영 전 결정
 
-2026-10-26 · [#67](https://github.com/joejaeyoung/jigeumini/issues/67) · F12/F13/F15/F16 → T08/T13/T14/T15/T16.
-코드 기준 `6e0e8b2`. 현재 작업 상태는 [STATUS](../STATUS.md)에 둔다.
+2026-10-27 · #65 재검증 반영 · [#67](https://github.com/joejaeyoung/jigeumini/issues/67) · F12/F13/F15/F16 → T08/T13/T14/T15/T16.
+구조 초안의 코드 기준은 `6e0e8b2`, 후속 용량은 #65의 실행 commit별 근거를 따른다. 현재 작업 상태는 [STATUS](../STATUS.md)에 둔다.
 
 ## 무엇까지 나왔는가
 
@@ -36,7 +36,7 @@ flowchart LR
 - 채팅 topic은 방송별로 만들지 않는다. 현재 key는 channelId/P3이다. ranking/trend/categories/reports가 채팅을, observations/categories/reports가 관측을, notifications가 알림을 읽는다. 총6개 group·입력 관계8개·진행 위치24개다.
 - [Compose](../../deploy/compose.yaml)는 웹1·분석기/API1·PG1·combined Kafka1/RF1·명시 migration이다. fleet는 같은 서버 이미지의 별도 진입점이다.
 - 비특권 이미지·비밀 파일·내부망·schema VALIDATE·source identity/offset 복구 guard가 있다. loopback 웹·내부 PLAINTEXT이며 운영 TLS/SASL·중앙 경보를 설치한 구성은 아니다. [실행·복구 계약](../../deploy/README.md).
-- 공식 앱 등록은 익명 READ 경로의 전제가 아니다. 공개 목록 cursor 순회는 [조사](../research/CHZZK_PUBLIC_CATALOG.md)했고 제품 어댑터·장기 quota/범위 검증이 남는다. #47은 공식 인증 경로 선택 시 검증이다. 공개 live 검증 상한3개를 합성100/150채널 측정으로 변경하지 않는다.
+- 공식 앱 등록은 익명 READ 경로의 전제가 아니다. 공개 목록 cursor 순회는 [조사](../research/CHZZK_PUBLIC_CATALOG.md)했고 제품 어댑터·장기 quota/범위 검증이 남는다. #47은 공식 인증 경로 선택 시 검증이다. 공개 live 검증 상한3개를 합성 부하 측정으로 변경하지 않는다.
 
 ## 운영 HA 배치 후보
 
@@ -75,10 +75,11 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 | 근거 | 확인 범위 | 운영 산정 의미 |
 |---|---|---|
-| 변경 전150 통과·180 실패; #64 후450 저부하5분 통과 | collector/probe Xmx384MiB·container640MiB·총100건/s/API10/s 합성 WS | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md).600은 최초 SLO 초과, 반복은 시계 오류로 용량 판정 제외. 정확한 최대·인기 방송 수용량 미확정 |
-| 100채널·총500건/s·API10요청/s | 1KiB 합성 WS·80% 편향·fresh DB·5분·P3/RF1 | 다음 전체 제품 비교의 출발점. 운영 SLA/실원천/HA 용량 미검증 |
-| 균등2,000건/s 단기 통과 | 20채널·60/120초, category lag 증가 | 지속 처리량으로 채택하지 않음 |
-| 약1.45~1.55KB/고유 채팅 증가 | 짧은 혼합 입력·fresh DB | 기간을 곱한 값은 추정. WAL/replica/백업/정리 포함 실측 필요 |
+| 600채널 저부하 반복/5분 통과·1,000채널 실패 | collector/probe Xmx384MiB·container640MiB·전체100건/s/API10/s 합성 WS | [#65 비용·경계 검증](../PROJECTION_PERFORMANCE_VERIFICATION.md). 1,000은 readiness/watermark 실패, 정확한 최대·인기 방송 수용량 미확정 |
+| 100채널·총500건/s·API10요청/s 재통과 | 1KiB 합성 WS·80% 편향·fresh DB·5분·P3/RF1 | 기존 복합 비교 후보를 유지. 실원천/fleet/HA와 장기 DB 검증 필요 |
+| 100채널·총1,000건/s·API10요청/s 단회 통과 | 1KiB·80% 편향·30초 준비+240초 측정 | 상향 비교 근거이며 운영 최대나 안정 상한으로 채택하지 않음 |
+| 균등2,000건/s 120초·DB2CPU의3,000건/s 60초 형식 통과 | 20채널, category/report lag 증가 | 지속 처리량으로 채택하지 않음. 분석기/API JVM2CPU·Kafka2CPU 단회도 운영 SKU 산정 근거로 부족 |
+| 약1.45~1.55KB/고유 채팅 증가 | #62의 짧은 혼합 입력·fresh DB | 기간을 곱한 값은 추정. #65 뒤 최신 schema·장기 DB·WAL/replica/백업/정리 포함 실측 필요 |
 
 [용량 경계](../CAPACITY_VERIFICATION.md)의 Docker VM8CPU·약7.65GiB는 비교 환경이다. 제품 container 한도 합계4.5CPU·2,496MiB는 별도 합성 원천과 OS/cache/운영 여유를 제외하며 운영 VM 추천 사양이 아니다. 단순 bucket 샤딩 실험의 개선율을 이 전체 제품 후보에 곱하지 않는다.
 
@@ -90,8 +91,8 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 |---|---|---|
 | hot 방송 샤딩 | #67 단순 bucket 실제 분산 대조 완료. 전체 제품 품질·관측·replay·전환과 지속 부하 검증 | [도입 검토](../pipeline/SHARDING_REVIEW.md), [#68](https://github.com/joejaeyoung/jigeumini/issues/68), [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
 | 저장·보존/복구 창 | dedup/replay 하한을 지키는 유한 정리, 장기 DB·Kafka 증가/삭제량 | [#63](https://github.com/joejaeyoung/jigeumini/issues/63) |
-| 수집 worker 수 | #64 버퍼·종료 개선 검증.450 저부하와100 복합을 구분하고 fleet/실원천 비용 뒤 worker 수 결정 | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md), [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
-| 처리 자원 | 전체 projection/API 동시 부하, SQL/잠금·pool·계측 비용 분리, 반복·지속 실행 | [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
+| 수집 worker 수 | #64 버퍼·종료 개선 검증.후속 #65의600 저부하와100 복합을 구분하고 fleet/실원천 비용·실패 여유를 확인한 뒤 worker 수 결정 | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md), [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
+| 처리 자원 | SQL 호출·관측 색인 개선 및 계측/CPU 대조 완료. 실제 GC는 Serial이며 API 증설은 6개 소비 group을 포함한 전체 JVM에 적용. 장기 DB와 외부 환경에서 재산정 | [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
 | 실제 장애 영역 | 계정/리전/AZ/예산/정리 조건 뒤 정상·영역 장애·복귀 대조 | [#48](https://github.com/joejaeyoung/jigeumini/issues/48) |
 | 외부 운영 | 목표 부하/SLO/RPO/RTO, 공급자/SKU/월견적, 도메인/TLS, Kafka 인증·비밀 회전·중앙 경보·외부 백업 복원, PG 전환·앱 가용성 | [#49](https://github.com/joejaeyoung/jigeumini/issues/49) |
 

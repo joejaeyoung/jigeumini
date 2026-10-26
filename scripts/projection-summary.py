@@ -41,6 +41,12 @@ def summarize(directory):
     result['sqlTimelineScope']='HOST_SNAPSHOT_TIMES; NOT_ATOMIC_WITH_PROBE_OR_CPU; INCLUDES_STARTUP_DRAIN_AND_FINAL_ORACLE'
     result['apiHealth']=raw.get('analysis',{}).get('api')
     result['coverage']=raw.get('analysis',{}).get('measurementCoverage')
+    fault=raw.get('fault')
+    result['fault']={k:fault.get(k) for k in ('stoppedAt','stoppedAtEpochMillis','generatorElapsedAtStop','signal','resumedAt','resumedAtEpochMillis','actualStoppedSeconds')} if fault else None
+    recovery=raw.get('analysis',{}).get('recovery')
+    result['recovery']={k:recovery.get(k) for k in ('scope','stoppedLagSamples','targetObservedAtEpochMillis','recoveredAtEpochMillis',
+        'secondsResumeToFixedWatermark','secondsResumeToReadiness200','recoveryWindowEndEpochMillis','recoveryGraceSeconds',
+        'maximumRecoveryBudgetSeconds','maximumOffsetSampleIntervalSeconds')} if recovery else None
     result['clockTimeline']=[{k:sample.get(k) for k in ('phase','startedAtEpochMillis','elapsedSeconds','probeGcMillis','probeThreadCount','generatorHeapUsedBytes','generatorRssBytes','analyzerHeapUsedBytes')} for sample in load.get('samples',[])]
     result['inputStartedAtEpochMillis']=load.get('inputStartedAtEpochMillis')
     result['sideInputTimings']=[{k:row.get(k) for k in ('scheduledSecond','startedElapsedSeconds','finishedElapsedSeconds','observationAckMillis','outboxMillis')} for row in load.get('sideInputTimings',[])]

@@ -117,3 +117,15 @@ F01/F13/F14 → T02/T08/T11/T12/T14. `IncomingText`는 UTF-8 전체 한도·surr
 `ChatSocketClient`는 고정 Tomcat container의 설정·연결·종료를 소유하는 작은 내부 모듈이다. `ChannelProbe`는 재접속 정책과 scheduler 수명을 유지한다. 소켓 close와 container destroy의 차이를 이 모듈에 감추고 late handshake도 정리한다. 공유 singleton client·범용 transport interface는 도입하지 않는다. 정확히1MiB·wire fragment·재접속·다른 owner 보존과 실제 heap/자원 반복 시험으로 경계를 검증한다. [조사](research/COLLECTOR_TEXT_MEMORY.md).
 
 최종 리뷰에서 실험 태스크의 속성 평가는 실행 인자가 제공될 때만 하도록 보완해 일반 Gradle 탐색과 실험 실행의 설정 경계를 분리했다. 정제기의 실제/기대 종료값·출처도 구분하며 전체 메시지 한도를 전역 조립 예산으로 설명하지 않는다.
+
+## 2026-10-27 · 집계 SQL와 진단 책임 #65
+
+F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14, F16 → T16. [검증 문서](PROJECTION_PERFORMANCE_VERIFICATION.md)에 입력·실행 commit·정제 근거·한계를 연결한다.
+
+- CategoryStore는 관측 시점 결합과 입력 저장을 같은 SQL에 두고 배치별 partition 진행만 합친다. 멱등 ledger와 bucket·offset은 기존 transaction을 공유한다.
+- ReportStore는 새 관측의 기존 기록 보정, 새 채팅 귀속, 채팅만 있는 경우의 TTL 갱신을 구분했다. 전역 generic repository나 store 사이 공유 상태를 추가하지 않았다. 순서가 필요한 채널 잠금과 별칭/만료 방어는 기존 경계에 둔다.
+- ChatConnection은 최초 실패 확정을 한 곳에서 원자적으로 소유한다. 예외·ready·observer가 같은 완료 값을 사용하게 해 cleanup/transport 경합에 의한 다른 실패 코드를 제거했다. 예외만 바꾸고 실제 원인을 고쳤다고 주장하지 않는다.
+- 부하 원본과 판정·정제를 구분한다. 가시성 미관측을 성공 표본 quantile에 숨기지 않고, 미완료·시계 오류·중첩 실행도 hash와 제외 이유를 보존한다. 정제기의 원본/보조 코드 hash를 버전 관리한다.
+- migration 하네스는 다음 번호를 계산하되 제품 버전·이미지 revision/buildId·이전 schema를 검증한다. 복원 계약을 우회하는 번호만의 수정은 하지 않았다.
+
+계약 회귀·실제 DB·부하 최종 대조와 구현 CI 179/142/38/29/31을 확인했다. 초기 Standards/Spec 지적0, 연결 진단 Spec P2는 회귀 후 해결했다. 비차단 watermark 토픽 표시는 문서에 반영했다. 최종 HEAD의 Claude 승인과 CI는 PR71 병합 게이트로 남긴다.

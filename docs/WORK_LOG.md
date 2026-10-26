@@ -641,6 +641,18 @@ DIRECT 저율 시험의 과거최대지연805.7ms는 발생tick이 없어STOP/GC
 
 0cfa701 Spec리뷰에서 ended 조회와 fail 사이에 transport callback이 먼저 완료하면 observer와예외의 코드가 갈리는 P2를 확인했다. 통계 보고 중 다른 thread가 WS_TRANSPORT를 확정하는 회귀가 수정 전 HANDSHAKE_TIMEOUT_OR_CONNECT로 실패했다. fail이 원자적으로 처음 확정된 동일 실패를 반환하고 ready에도 전달하도록 보완했다. 원본 red/green 로그·XML은 보존한다. 이전cleanup가림과이번경합은 별도 재현이며 최초실제WS종료의원인을 확정하지 않는다.
 
-1,000채널은 연결준비오류0·9000수신/9090ACK·최종전체대조/24lag0이지만 readiness503 3회와category/report watermark30.425/28.410초로 실패했다. 부하API600개 자체는모두200·p95197ms다. 준비/입력전실패나수신상한으로부르지 않는다. 직렬실행기가후속복합시험을중단했으며 소유자원정리/기존8container보존을 확인했다.
+1,000채널은 연결준비오류0·9000수신/9090ACK·최종전체대조/24lag0이지만 readiness503 3회와 채팅 토픽의 category/report watermark30.425/28.410초로 실패했다. report 관측 토픽의 최대는29.418초다. 부하API600개 자체는모두200·p95197ms다. 준비/입력전실패나수신상한으로부르지 않는다. 직렬실행기가후속복합시험을중단했으며 소유자원정리/기존8container보존을 확인했다.
 
 보완 뒤 `./scripts/check`는 단위179·하네스38·실행JAR를 통과했다. 연결 관련12개 회귀도 실패/오류0이다. 최종부하·Claude·CI승인과구분한다.
+
+### #65 최종 비용·용량 대조 정리
+
+2026-10-27 KST. e4319e9의 push40380847007/PR40380852486 양쪽에서 단위179·실제142·하네스38·웹29·Chromium31과 실패/오류/skip0을 XML·job log로 확인했다. 이 구현 게이트와 최종 문서 HEAD의 Claude/CI를 구분한다.
+
+100채널·1KiB·80%편향·API10 고정의1,000/s는30초 준비+240초 측정, 고유255,000/물리257,550·전체대조·최종24lag0으로 통과했다. 균등2,000/s120초는 형식 통과이나 category/report 채팅 lag 기울기+24.991/+38.427건/s가 남아 안정 지속량으로 채택하지 않았다. 3,000/s control/API2/Kafka2/DB2 CPU 대조도 같은e4319e9 이미지로 직렬 실행했다. API2는 전체 분석기 JVM이다. 단회 DB2의 형식 통과를 증설 효과나 운영 최대 확정으로 쓰지 않는다.
+
+final-full2500은 승인20개 중19개·frame38·APPROVAL_TIMEOUT1에서 입력 전에 중단했다. 입력/발행0·원천 READ20·protocol/socket 오류0·OOMfalse다. cleanup을 확인하고 원본을 보존했다. 승인 전용 호스트 loopback20채널×100회는2,000승인/4,000frame·실패0으로 미재현이었다. 공식 Java-WebSocket/Spring/Tomcat 소스 조사를 문서에 남겼으나 실패 당시 queue/interestOps/실제 쓰기 증거가 없어 원인은 확정하지 않았다. timeout을 늘리거나 시작 실패를 통과로 완화하지 않았다.
+
+나머지 FULL/NO_COUNTS·hot/DIRECT 대조의 실제 판정·입력·시각·코드/hash와 실패 실행은 [전체 검증](PROJECTION_PERFORMANCE_VERIFICATION.md)·[정제 근거](poc/evidence/projection-performance-2026-10-27/summary.json)에 연결한다. 소유 실행 자원을 정리하고 원래8개container와 미리보기를 보존했다. 다른worktree와 외부 인프라는 변경하지 않았다.
+
+Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.418초를 구분했다. STATUS 기술 목표7개, 현재 인프라와 과거 용량 문서, 제품V13/시험V14 복구 구분, 리팩토링 결정을 함께 갱신한다. #63의 보존·#68 샤딩 판단, 조건부 공식경로#47과 실제외부#48/#49는 남긴다.

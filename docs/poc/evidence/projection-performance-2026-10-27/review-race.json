@@ -1,0 +1,29 @@
+{
+  "base": "0cfa701d976156ec9c6bb2756dac9f95849ac32f",
+  "implementationReview": {
+    "standards": {
+      "hard": 0,
+      "judgment": 0,
+      "evidenceHashesVerified": 8
+    },
+    "spec": {
+      "blocking": 1,
+      "severity": "P2",
+      "finding": "Handshake fallback and observer cause diverge when transport callback wins after the initial read",
+      "resolutionCommit": "e4319e9"
+    }
+  },
+  "followupReview": {
+    "head": "e4319e9",
+    "spec": {
+      "blocking": 0,
+      "previousP2Resolved": true
+    },
+    "standards": {
+      "hard": 0,
+      "judgment": 1,
+      "finding": "Label chat topic for report watermark28.410; observation topic maximum29.418",
+      "resolution": "Final documentation labels chat topic and gives report all-topic maximum29.418 separately."
+    }
+  }
+}

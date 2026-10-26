@@ -1,0 +1,705 @@
+{
+  "recordedAt": "2026-10-26T01:19:36.072477+00:00",
+  "issue": 41,
+  "pullRequest": "https://github.com/joejaeyoung/jigeumini/pull/50",
+  "baseCommit": "dcdc2440c0cb0d65087501c806051413241e3038",
+  "verifiedCodeCommit": "43bedc2c07922a2a30647d8050848175e9389f35",
+  "technicalGoals": [
+    "T02",
+    "T03",
+    "T05",
+    "T08"
+  ],
+  "features": [
+    "F03",
+    "F09"
+  ],
+  "scope": "SYNTHETIC_LOCAL_SINGLE_BROKER_TREND_RECOVERY",
+  "environment": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "kafka": "apache/kafka:4.1.2",
+    "postgresql": "postgres:16.14-alpine",
+    "replicationFactor": 1,
+    "partitions": 3,
+    "activeBrokerPartitions": [
+      0
+    ],
+    "directSqlLogicalPartitions": [
+      0,
+      1
+    ],
+    "java": "Corretto 21.0.11",
+    "python": "3.14.4"
+  },
+  "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+  "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+  "input": "합성 채널1개·UUID event/topic/group/schema. 원문/닉네임/사용자 ID/토큰 없음. 실제 공개 원천 호출 없음.",
+  "unit": {
+    "totals": {
+      "tests": 147,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.categories.CategoryQueriesTest",
+        "timestamp": "2026-10-26T01:14:21.154Z",
+        "seconds": 0.8,
+        "xmlSha256": "20a5d45c820bfb865712076117112b8091734ef0f103fdffbceeea03e81b0259"
+      },
+      {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.discovery.OfficialBroadcastCatalogTest",
+        "timestamp": "2026-10-26T01:14:21.955Z",
+        "seconds": 1.194,
+        "xmlSha256": "8d20aeab6a46d1e36b2b16e2147959808269ce5752905805a0ba5890a635c6eb"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.discovery.SelectionCliTest",
+        "timestamp": "2026-10-26T01:14:23.150Z",
+        "seconds": 0.049,
+        "xmlSha256": "83b4bdcba3fe659da87f67a161e23f50695aa6ab80eb6d2508d9ee11147e42ca"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.discovery.SelectionPolicyTest",
+        "timestamp": "2026-10-26T01:14:23.200Z",
+        "seconds": 0.007,
+        "xmlSha256": "ddf8903290ed23e6b75a7f527d14f9400847e9fe32cca2aedbafe8daa2be9b07"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.FleetCliTest",
+        "timestamp": "2026-10-26T01:14:23.207Z",
+        "seconds": 0.017,
+        "xmlSha256": "56642a77c4ab7d25c7904ed0db7bf1d274e656cf67333e6efa3f47aebe1e9a9b"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.FleetPlanTest",
+        "timestamp": "2026-10-26T01:14:23.224Z",
+        "seconds": 0.002,
+        "xmlSha256": "0d8c77ea26bd21b006bd94e97a3fe90dd012e014838db4c209b0af4e66d271b7"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.LeaseAuthorityTest",
+        "timestamp": "2026-10-26T01:14:23.226Z",
+        "seconds": 0.004,
+        "xmlSha256": "488b2a0999033ad1eb87040cc8c37280edf272f5bd5530b8c05f282b428fd3af"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.LeasedObservationsTest",
+        "timestamp": "2026-10-26T01:14:23.230Z",
+        "seconds": 0.145,
+        "xmlSha256": "d788daf3a42223aac3ef71d85b9ffda83b1da2fe42b5e09a463ef21eccc85ab8"
+      },
+      {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
+        "timestamp": "2026-10-26T01:14:23.375Z",
+        "seconds": 0.085,
+        "xmlSha256": "b37b4929e95f6d2330f9c73d110f9f1be9c208e1c99dea40d8d8548e26ad7cd0"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.metadata.MetadataControllerTest",
+        "timestamp": "2026-10-26T01:14:23.460Z",
+        "seconds": 0.042,
+        "xmlSha256": "fb489c78887a66f887cb61fcc372c3a2fa7243c7cc537877057ae9426862506c"
+      },
+      {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.metadata.MetadataServiceTest",
+        "timestamp": "2026-10-26T01:14:23.502Z",
+        "seconds": 0.007,
+        "xmlSha256": "5f6f0f01358ba5f2b0ebb5272043854abe0f3075526447695d679271b8e1bba9"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.notifications.NotificationControllerTest",
+        "timestamp": "2026-10-26T01:14:23.509Z",
+        "seconds": 0.042,
+        "xmlSha256": "108aa672320a7f5b2ce12f741988dc8a6942b117578a872f3a49a82facb902e4"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.notifications.SpikeDetectedTest",
+        "timestamp": "2026-10-26T01:14:23.551Z",
+        "seconds": 0.009,
+        "xmlSha256": "3b05ccb7bbe77000dfc28fda0fa4a1457b2641255732d5214c307a09b4716a68"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.observations.BroadcastObservedTest",
+        "timestamp": "2026-10-26T01:14:23.560Z",
+        "seconds": 0.008,
+        "xmlSha256": "ddf918a5fbd5254235ac7be4898b5d3e0337f2c5284ca17e971b470ed6938689"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.observations.ObservationCollectorTest",
+        "timestamp": "2026-10-26T01:14:23.568Z",
+        "seconds": 0.003,
+        "xmlSha256": "f033677888ef62c4e0b2a7c204e5278009b4cdf650e21cbea91b12372603bd5d"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.observations.ObservationControllerTest",
+        "timestamp": "2026-10-26T01:14:23.572Z",
+        "seconds": 0.043,
+        "xmlSha256": "3f6831987aebcf9d8e28225a68b232d30198f198f17c22525d4b43af36ab1595"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.operations.RuntimeEnvironmentTest",
+        "timestamp": "2026-10-26T01:14:23.615Z",
+        "seconds": 0.005,
+        "xmlSha256": "ef578b4f77a69f5f6c84553ef999dbd04d5910c012e7347aa4e73dbeb7b9894f"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.BatchConsumersTest",
+        "timestamp": "2026-10-26T01:14:23.620Z",
+        "seconds": 0.034,
+        "xmlSha256": "b19236a9236a62e6d203550105ac5cb9c4dd1a4639d2ea2d6515dd9a0f690f90"
+      },
+      {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+        "timestamp": "2026-10-26T01:14:23.654Z",
+        "seconds": 0.439,
+        "xmlSha256": "e00124ef052b6a5187007a7538e4c5302e4fc8dda8c610da4e9932d8240a8246"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.DeadLetterTest",
+        "timestamp": "2026-10-26T01:14:24.094Z",
+        "seconds": 0.004,
+        "xmlSha256": "e962a9d39b1f5acbda3aa7df4763f1b8c38ea756446773e054c99b5af35a7a5a"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.EventCodecTest",
+        "timestamp": "2026-10-26T01:14:24.098Z",
+        "seconds": 0.007,
+        "xmlSha256": "12ad669a6df9b3d28d4780e4dfc161cdf021136b19d5dd6ce04fcc4b78f3be7c"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.ExperimentPublisherTest",
+        "timestamp": "2026-10-26T01:14:24.105Z",
+        "seconds": 0.004,
+        "xmlSha256": "637d6ad982d41d99e1cdc101948a57138c2b61e492498d2dff4d7afa740db628"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.ExperimentSamplerTest",
+        "timestamp": "2026-10-26T01:14:24.109Z",
+        "seconds": 0.052,
+        "xmlSha256": "0582ac5a26c9378a79513da687cda43da32e9ae0e9976ff62cd6f0f4ea04fbb6"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.KafkaSupportTest",
+        "timestamp": "2026-10-26T01:14:24.162Z",
+        "seconds": 0.163,
+        "xmlSha256": "7ab610b0abad26a4a0d02298d91fa8579ea29f2e61ecebc255b1947445dd7b68"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.KafkaTopicPolicyTest",
+        "timestamp": "2026-10-26T01:14:24.325Z",
+        "seconds": 0.002,
+        "xmlSha256": "9bf6b1ae7d8319671e43f2c45c140777594cfb919a9d267afe6cb6d393741c89"
+      },
+      {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.poc.ChannelProbeTest",
+        "timestamp": "2026-10-26T01:14:24.327Z",
+        "seconds": 11.264,
+        "xmlSha256": "0e927e1e65409c37700d0d5bef0e5e7b30c0a366cdf6b8786b42d134e4597011"
+      },
+      {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.poc.ChatProtocolTest",
+        "timestamp": "2026-10-26T01:14:35.591Z",
+        "seconds": 0.008,
+        "xmlSha256": "885e229e8fcee544b60692a8a2cff71e96dea8cc914032fb5652f814b8c95573"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.poc.ChzzkHttpSourceTest",
+        "timestamp": "2026-10-26T01:14:35.600Z",
+        "seconds": 0.013,
+        "xmlSha256": "8e21260b87403c7629f2e255279a9a897ae3a84a52c42f544aaaca49b7183ab8"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.quality.QualityPolicyTest",
+        "timestamp": "2026-10-26T01:14:35.613Z",
+        "seconds": 0.002,
+        "xmlSha256": "abb4fe6816cc54d106520ae7d3a8e358431ee5386131c7be3da2c7488d4a0b8b"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.quality.QualityScheduleTest",
+        "timestamp": "2026-10-26T01:14:35.615Z",
+        "seconds": 0.002,
+        "xmlSha256": "f39f84276d406ae678975339ac449952290716c020f43d245b600e815570fd8d"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.quality.RankingControllerTest",
+        "timestamp": "2026-10-26T01:14:35.618Z",
+        "seconds": 0.02,
+        "xmlSha256": "c1e8dbb4512f0ad3f1aa2a50b34c65649563fe4ded98bee3404047fa24680a43"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.quality.TrendPolicyTest",
+        "timestamp": "2026-10-26T01:14:35.638Z",
+        "seconds": 0.0,
+        "xmlSha256": "df5630655df3211763adbe64e964b789160a0002c2dfd68b1fbd4825ceec0f38"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.replay.ReplayManifestTest",
+        "timestamp": "2026-10-26T01:14:35.638Z",
+        "seconds": 0.008,
+        "xmlSha256": "b818360fea2fd76ddeea647819355c5fa2530f05c4e4d86e111c3bf45dce8120"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.reports.ReportPolicyTest",
+        "timestamp": "2026-10-26T01:14:35.646Z",
+        "seconds": 0.003,
+        "xmlSha256": "96ba44f0f18bd3c01fcb942cc3c3df659d8514c054ce8320626159b9959713e0"
+      }
+    ]
+  },
+  "integration": {
+    "totals": {
+      "tests": 100,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "suites": [
+      {
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.categories.CategoryIntegrationTest",
+        "timestamp": "2026-10-26T01:14:37.566Z",
+        "seconds": 16.442,
+        "xmlSha256": "c9aa34360ed8a19da24a24d7e029e3f3a0021b92493f65e3242e62a863cad08e"
+      },
+      {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.FleetIntegrationTest",
+        "timestamp": "2026-10-26T01:14:54.010Z",
+        "seconds": 44.21,
+        "xmlSha256": "ba0c769ebc0037f98f58d00baa2108294b2ed077b2273ae681cf5616b9de9226"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.fleet.FleetRuntimeIntegrationTest",
+        "timestamp": "2026-10-26T01:15:38.221Z",
+        "seconds": 9.839,
+        "xmlSha256": "6e2661d3b4119546fd03c7462af88d258a6fca2e4f1524dc7033801f804a00b2"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.notifications.NotificationIntegrationTest",
+        "timestamp": "2026-10-26T01:15:48.061Z",
+        "seconds": 63.519,
+        "xmlSha256": "fd4da35f459577deb7cf822ed417b1ec47e2c65406f20f8f245d7ee05c7e011b"
+      },
+      {
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.observations.ObservationIntegrationTest",
+        "timestamp": "2026-10-26T01:16:51.581Z",
+        "seconds": 12.701,
+        "xmlSha256": "a26d3087414a60081ae901c310ba11541dbca0ee324296927af18a8648c01a7c"
+      },
+      {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.operations.RecoveryPlanIntegrationTest",
+        "timestamp": "2026-10-26T01:17:04.286Z",
+        "seconds": 6.748,
+        "xmlSha256": "3f932903cb5aa1806ea0d24cdd467311779b799b1537b779914a5799558b8163"
+      },
+      {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
+        "timestamp": "2026-10-26T01:17:11.035Z",
+        "seconds": 46.438,
+        "xmlSha256": "b6a9326eef84b1f65f61f7fdff533a774a0f8c371a3f2993667970c5ee2a229c"
+      },
+      {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.KafkaSupportIntegrationTest",
+        "timestamp": "2026-10-26T01:17:57.474Z",
+        "seconds": 1.852,
+        "xmlSha256": "4deb7db54d2430accfdc7546e9e65b284d5679395c3cb174ea181ca5a66c3457"
+      },
+      {
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.LoadExperimentIntegrationTest",
+        "timestamp": "2026-10-26T01:17:59.327Z",
+        "seconds": 5.808,
+        "xmlSha256": "3951b9e8828c646553d14a99b6336c9eadc9a954d750a4a80f9e04791af1233a"
+      },
+      {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.PartitionExpansionIntegrationTest",
+        "timestamp": "2026-10-26T01:18:05.135Z",
+        "seconds": 0.587,
+        "xmlSha256": "a209c3764790501445558b8f141a49761d8ac6f4d664e91bd5061fe89428d25f"
+      },
+      {
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.PipelineIntegrationTest",
+        "timestamp": "2026-10-26T01:18:05.722Z",
+        "seconds": 12.415,
+        "xmlSha256": "ce812517b690f83deffd1184e16035dea944ff686244d885bf67b7275559fba9"
+      },
+      {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.RankingIntegrationTest",
+        "timestamp": "2026-10-26T01:18:18.137Z",
+        "seconds": 8.902,
+        "xmlSha256": "7d78c1997f185abc196490d930ccd9afa7a68d0def767bba59ca112a6b03543e"
+      },
+      {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.pipeline.TrendRecoveryIntegrationTest",
+        "timestamp": "2026-10-26T01:18:27.040Z",
+        "seconds": 11.873,
+        "xmlSha256": "42502279f0a26b8211c0f84ec640099135d4f4f3836bea4ea52bd673ea8c9acb"
+      },
+      {
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.replay.ReplayIntegrationTest",
+        "timestamp": "2026-10-26T01:18:38.914Z",
+        "seconds": 30.338,
+        "xmlSha256": "5c3e6172ffb0f7e263906d939366d3d5a831dd6962091a354ae276147fbfec74"
+      },
+      {
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "name": "io.chatpulse.reports.ReportIntegrationTest",
+        "timestamp": "2026-10-26T01:19:09.252Z",
+        "seconds": 13.705,
+        "xmlSha256": "abd9f08c0eac26f50e65afe0c6b57b0a57c807976f29b016c760be42476b4260"
+      }
+    ]
+  },
+  "harness": {
+    "tests": 20,
+    "failures": 0
+  },
+  "commands": [
+    {
+      "command": "./scripts/check",
+      "commit": "43bedc2c07922a2a30647d8050848175e9389f35",
+      "exitCode": 0,
+      "logSha256": "61cd3d52030b7fa843062517648137f085d5ea27595b69d7da0be6e2dc5f58c3",
+      "logCompletedAt": "2026-10-26T01:14:36.091397+00:00"
+    },
+    {
+      "command": "./scripts/integration",
+      "commit": "43bedc2c07922a2a30647d8050848175e9389f35",
+      "exitCode": 0,
+      "logSha256": "d40f3e78811d079d79ea8a30640d93f6272c1a11de44c8721cdb2a2f4ef1257a",
+      "logCompletedAt": "2026-10-26T01:19:23.403060+00:00"
+    }
+  ],
+  "cases": [
+    {
+      "case": "BATCH_AND_CROSS_BATCH_DUPLICATES",
+      "ledger": 2,
+      "buckets": [
+        1,
+        1
+      ],
+      "dbNext": 5,
+      "originalSourceOffsets": [
+        0,
+        2
+      ],
+      "rankingUnchanged": true
+    },
+    {
+      "case": "PERSISTED_ID_CONFLICT",
+      "code": "EVENT_ID_CONFLICT",
+      "fullSnapshotRolledBack": true,
+      "retryLedger": 2,
+      "retryDbNext": 3,
+      "batchInternalConflict": "PRE_SQL_REJECTION_NOT_ROLLBACK"
+    },
+    {
+      "case": "DEFERRED_SQL_FAILURE",
+      "sqlState": "P1002",
+      "mismatchedStateWouldThrow": "P1003",
+      "writesObservedBeforeFailure": {
+        "ledger": 3,
+        "bucketSum": 3,
+        "dbNextByPartition": [
+          2,
+          1
+        ]
+      },
+      "triggerAttempts": 1,
+      "fullSnapshotRolledBack": true,
+      "rankingUnchanged": true,
+      "retryLedger": 3,
+      "retryBuckets": [
+        2,
+        1
+      ],
+      "redeliveryInserted": 0
+    },
+    {
+      "case": "IN_PLACE_RECOVERY_AND_STRICT_RESTART",
+      "triggerAttemptsAtLeast": 2,
+      "rankingCommitDuringFailure": 4,
+      "trendCommitDuringFailure": 1,
+      "dlqRecords": 0,
+      "projectionFailures": 0,
+      "inPlaceRecoveredCommit": 4,
+      "restartOffsetReset": "none",
+      "afterNewOffsetDuplicatesCommit": 6,
+      "finalLedger": 3,
+      "finalBuckets": [
+        2,
+        1
+      ],
+      "originalSourceOffsets": [
+        0,
+        1,
+        3
+      ],
+      "emptyPartitionCommits": [
+        0,
+        0
+      ]
+    },
+    {
+      "case": "DB_COMMIT_JVM_HALT_SAME_OFFSET_REDELIVERY",
+      "exitCode": 91,
+      "dbNextAfterHalt": 1,
+      "kafkaCommitAfterHalt": 0,
+      "actualRedeliveredOffsets": [
+        0
+      ],
+      "fullSnapshotUnchangedOnRedelivery": true,
+      "restartOffsetReset": "none",
+      "afterDuplicateAndNewInputCommit": 3,
+      "finalLedger": 2,
+      "finalBuckets": [
+        1,
+        1
+      ],
+      "originalSourceOffsets": [
+        0,
+        2
+      ]
+    }
+  ],
+  "reviewHistory": [
+    {
+      "head": "60796907f336c1ada27dce3d77985a978695e110",
+      "initialFullIntegration": {
+        "tests": 99,
+        "failures": 0
+      },
+      "claude": "REQUEST_CHANGES",
+      "reason": [
+        "진행 위치 쓰기 자체의 rollback 증거",
+        "DB commit 성공 후 같은 Kafka offset 재전달 증거"
+      ]
+    },
+    {
+      "head": "43bedc2c07922a2a30647d8050848175e9389f35",
+      "claude": "APPROVE",
+      "sessionId": "cb4274e2-535a-4c10-ae18-a5b6cc466877",
+      "method": "제공된 소스/diff의 정적 검토. 리뷰어 도구·테스트 실행 없음. 최종 문서 HEAD는 PR 통합 게이트에서 재확인.",
+      "Standards": {
+        "hardViolations": 0,
+        "heuristics": 0,
+        "blocking": 0
+      },
+      "Spec": {
+        "findings": 0,
+        "blocking": 0
+      }
+    }
+  ],
+  "sources": [
+    "https://www.postgresql.org/docs/16/sql-createtrigger.html",
+    "https://www.postgresql.org/docs/16/functions-sequence.html"
+  ],
+  "limitations": [
+    "broker 입력은 partition0이며 나머지2개는 빈 commit0만 확인한다. DB 직접 호출의2논리partition 검증과 구분한다.",
+    "sequence 계측은 transaction abort 후 호출 증거이며 PostgreSQL 서버 crash 후 영속 보장이 아니다.",
+    "원천 중복·전체 Exactly-once·다중AZ·디스크 손실·새 live·고부하·웹의 새 로컬 검증은 포함하지 않는다.",
+    "최종 정확한 HEAD Claude 승인·push/PR CI·병합은 PR50의 통합 게이트 댓글을 따른다."
+  ],
+  "cleanup": {
+    "ownedTestTopicsGroupsSchemasRemoved": true,
+    "developmentBrokerAndPostgresKeptForNextIssues": true,
+    "otherWorktreeModified": false,
+    "unrelatedServicesModified": false
+  }
+}

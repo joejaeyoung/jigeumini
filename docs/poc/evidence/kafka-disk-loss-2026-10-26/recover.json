@@ -1,0 +1,827 @@
+{
+  "scenario" : "recover",
+  "startedAt" : "2026-10-26T02:53:08.474892Z",
+  "revision" : "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+  "workingTreeDirty" : false,
+  "scope" : "LOCAL_OWNED_VOLUME_REMOVAL_NO_AZ_POWER_LOSS_OR_BIT_CORRUPTION_CLAIM",
+  "cluster" : {
+    "bootstrap" : "localhost:50415,localhost:50416,localhost:50417",
+    "image" : "apache/kafka:4.1.2",
+    "project" : "jigeumini-ha-9ebd4f8cc8ae4f499569fb3c5cae68ff",
+    "scope" : "ONE_HOST_SYNTHETIC_NO_AZ_GUARANTEE",
+    "controllers" : 3,
+    "brokers" : 3,
+    "maximumContainerMemoryBytes" : 2818572288,
+    "owner" : "9ebd4f8cc8ae4f499569fb3c5cae68ff",
+    "clusterId" : "ZeVxb4IxT7aQHID7cIhm_A"
+  },
+  "phases" : [ {
+    "name" : "BASELINE_RF3",
+    "startedAt" : "2026-10-26T02:53:17.592491Z",
+    "result" : {
+      "partitions" : [ {
+        "partition" : 0,
+        "leader" : 3,
+        "replicas" : [ 3, 1, 2 ],
+        "isr" : [ 3, 1, 2 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 1,
+        "leader" : 1,
+        "replicas" : [ 1, 2, 3 ],
+        "isr" : [ 1, 2, 3 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 2,
+        "leader" : 2,
+        "replicas" : [ 2, 3, 1 ],
+        "isr" : [ 2, 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      } ],
+      "database" : {
+        "bucketTotal" : 10,
+        "processedEvents" : 10,
+        "projection" : "disk",
+        "runId" : "a4aa28cba8dd498f905aeb26842e79d9"
+      },
+      "consumableEnd" : [ {
+        "partition" : 0,
+        "end" : 10
+      }, {
+        "partition" : 1,
+        "end" : 0
+      }, {
+        "partition" : 2,
+        "end" : 0
+      } ],
+      "endAvailable" : true,
+      "quorumLeader" : 1002
+    },
+    "passed" : true,
+    "seconds" : 0.609762
+  }, {
+    "name" : "REMOVE_ONE_REPLICA_DISK",
+    "startedAt" : "2026-10-26T02:53:18.212144Z",
+    "result" : {
+      "erasure" : {
+        "emptyBeforeFormat" : {
+          "directoryEntries" : 0,
+          "metadata" : { },
+          "records" : [ ],
+          "crcValid" : true
+        },
+        "deletionConfirmed" : true,
+        "volume" : "jigeumini-ha-9ebd4f8cc8ae4f499569fb3c5cae68ff_broker1-data",
+        "broker" : 1
+      },
+      "before" : {
+        "metadata" : {
+          "cluster.id" : "ZeVxb4IxT7aQHID7cIhm_A",
+          "node.id" : "1",
+          "directory.id" : "QYTpOBmLahtF1F2lXxKK_g"
+        },
+        "crcValid" : true,
+        "records" : [ {
+          "partition" : 0,
+          "offset" : 0,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "466f291ac91ea88024c5d0c28ab28a12a9d6af9ca0526c441f3ddbb4853b0192"
+        }, {
+          "partition" : 0,
+          "offset" : 1,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "16bf320873e359d07d3be9aefd90542ed5dcadf3a39751742f9b75bb99b422c5"
+        }, {
+          "partition" : 0,
+          "offset" : 2,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "6cbaf2e095520b15346f3151733cf5974fd9a3bd759cde1c0a8672c231363ffc"
+        }, {
+          "partition" : 0,
+          "offset" : 3,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "6f0abe5fe13add7c8631fa62e19cb2b43ec31c939f14eda337e4b55db0fc6285"
+        }, {
+          "partition" : 0,
+          "offset" : 4,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "03ec8c6ceed3c29f22167dc21cde2813aadfecc0e8c45e6e6d898b1ef31ce1be"
+        }, {
+          "partition" : 0,
+          "offset" : 5,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "e5cff5d5884dc469ee276487436851fa7d2a028fa6f4585285d9f7b82591b126"
+        }, {
+          "partition" : 0,
+          "offset" : 6,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "26e2a4d98392ad56b27fc32f49e4288d6d4ff6d2654f0418e1d019f1ef3970c8"
+        }, {
+          "partition" : 0,
+          "offset" : 7,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d18a19c1563c6cad399675cb3fe7ce9db7e0b025b5d340d14e44f654483fe9c5"
+        }, {
+          "partition" : 0,
+          "offset" : 8,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8d3f7f0c0c1a8548839f4f4391878b6be987d1ca234874fdb963ff8a65714322"
+        }, {
+          "partition" : 0,
+          "offset" : 9,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "938d595bacb7210dd19e61a0dd4ca9d70e3dcb9ccc708747a8459522319197da"
+        } ],
+        "directoryEntries" : 14
+      }
+    },
+    "passed" : true,
+    "seconds" : 7.334680125
+  }, {
+    "name" : "CONTINUE_WITH_TWO_REPLICAS",
+    "startedAt" : "2026-10-26T02:53:25.548530Z",
+    "result" : {
+      "partitions" : [ {
+        "partition" : 0,
+        "leader" : 3,
+        "replicas" : [ 3, 1, 2 ],
+        "isr" : [ 3, 2 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 1,
+        "leader" : 2,
+        "replicas" : [ 1, 2, 3 ],
+        "isr" : [ 2, 3 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 2,
+        "leader" : 2,
+        "replicas" : [ 2, 3, 1 ],
+        "isr" : [ 2, 3 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      } ],
+      "database" : {
+        "bucketTotal" : 20,
+        "processedEvents" : 20,
+        "projection" : "disk",
+        "runId" : "a4aa28cba8dd498f905aeb26842e79d9"
+      },
+      "consumableEnd" : [ {
+        "partition" : 0,
+        "end" : 20
+      }, {
+        "partition" : 1,
+        "end" : 0
+      }, {
+        "partition" : 2,
+        "end" : 0
+      } ],
+      "endAvailable" : true,
+      "quorumLeader" : 1002
+    },
+    "passed" : true,
+    "seconds" : 8.443591833
+  }, {
+    "name" : "REBUILD_EMPTY_REPLICA",
+    "startedAt" : "2026-10-26T02:53:33.993472Z",
+    "result" : {
+      "partitions" : [ {
+        "partition" : 0,
+        "leader" : 3,
+        "replicas" : [ 3, 1, 2 ],
+        "isr" : [ 3, 2, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 1,
+        "leader" : 2,
+        "replicas" : [ 1, 2, 3 ],
+        "isr" : [ 2, 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      }, {
+        "partition" : 2,
+        "leader" : 2,
+        "replicas" : [ 2, 3, 1 ],
+        "isr" : [ 2, 3, 1 ],
+        "elr" : [ ],
+        "lastKnownElr" : [ ]
+      } ],
+      "database" : {
+        "bucketTotal" : 30,
+        "processedEvents" : 30,
+        "projection" : "disk",
+        "runId" : "a4aa28cba8dd498f905aeb26842e79d9"
+      },
+      "consumableEnd" : [ {
+        "partition" : 0,
+        "end" : 30
+      }, {
+        "partition" : 1,
+        "end" : 0
+      }, {
+        "partition" : 2,
+        "end" : 0
+      } ],
+      "endAvailable" : true,
+      "quorumLeader" : 1002
+    },
+    "passed" : true,
+    "seconds" : 3.633838041
+  }, {
+    "name" : "READ_REBUILT_DISK",
+    "startedAt" : "2026-10-26T02:53:37.628396Z",
+    "result" : {
+      "disk" : {
+        "directoryEntries" : 14,
+        "metadata" : {
+          "cluster.id" : "ZeVxb4IxT7aQHID7cIhm_A",
+          "node.id" : "1",
+          "directory.id" : "bD6G-CjZQtKy8DpcQ7vl2A"
+        },
+        "records" : [ {
+          "partition" : 0,
+          "offset" : 0,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "466f291ac91ea88024c5d0c28ab28a12a9d6af9ca0526c441f3ddbb4853b0192"
+        }, {
+          "partition" : 0,
+          "offset" : 1,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "16bf320873e359d07d3be9aefd90542ed5dcadf3a39751742f9b75bb99b422c5"
+        }, {
+          "partition" : 0,
+          "offset" : 2,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "6cbaf2e095520b15346f3151733cf5974fd9a3bd759cde1c0a8672c231363ffc"
+        }, {
+          "partition" : 0,
+          "offset" : 3,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "6f0abe5fe13add7c8631fa62e19cb2b43ec31c939f14eda337e4b55db0fc6285"
+        }, {
+          "partition" : 0,
+          "offset" : 4,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "03ec8c6ceed3c29f22167dc21cde2813aadfecc0e8c45e6e6d898b1ef31ce1be"
+        }, {
+          "partition" : 0,
+          "offset" : 5,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "e5cff5d5884dc469ee276487436851fa7d2a028fa6f4585285d9f7b82591b126"
+        }, {
+          "partition" : 0,
+          "offset" : 6,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "26e2a4d98392ad56b27fc32f49e4288d6d4ff6d2654f0418e1d019f1ef3970c8"
+        }, {
+          "partition" : 0,
+          "offset" : 7,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "d18a19c1563c6cad399675cb3fe7ce9db7e0b025b5d340d14e44f654483fe9c5"
+        }, {
+          "partition" : 0,
+          "offset" : 8,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "8d3f7f0c0c1a8548839f4f4391878b6be987d1ca234874fdb963ff8a65714322"
+        }, {
+          "partition" : 0,
+          "offset" : 9,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "938d595bacb7210dd19e61a0dd4ca9d70e3dcb9ccc708747a8459522319197da"
+        }, {
+          "partition" : 0,
+          "offset" : 10,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "7b84c8f82e1d004a05c362e84325bbc38eaa448e133462223fe6d173e3af6022"
+        }, {
+          "partition" : 0,
+          "offset" : 11,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "5750aa0c2b4f4a78b681d0546b45446eaeb71bcb1c74bb6570ec3647ea1d954d"
+        }, {
+          "partition" : 0,
+          "offset" : 12,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "86303fea40170ca21fe4ca83e80abb66c74a41685785235e3066041de1f15cc5"
+        }, {
+          "partition" : 0,
+          "offset" : 13,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "1df592193434581773fa2298773733bf7f867e30f7dbbae32d307a99d7882dd4"
+        }, {
+          "partition" : 0,
+          "offset" : 14,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "0790a79a5e8e347587844e6e18026bdb82bc08789a71783d16045d75fd2fcc72"
+        }, {
+          "partition" : 0,
+          "offset" : 15,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "da1920b705db0dfd15229e6f2ac5f0632389b02e5480c9d1309525f33804dfa7"
+        }, {
+          "partition" : 0,
+          "offset" : 16,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "b36e953997a2f4c2950dc5401876a929628babd8ed4bac9e14b9a09760b1f98a"
+        }, {
+          "partition" : 0,
+          "offset" : 17,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "50fc8cd4ab89d3b9c963dde4197f5df4cd157c6291c7c894a03d38165f2d89fd"
+        }, {
+          "partition" : 0,
+          "offset" : 18,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "6195464146b22ebbbceb7112c4b9e228921f8960940f8fc2271fb2db778a2002"
+        }, {
+          "partition" : 0,
+          "offset" : 19,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "4f73262f03438fc6dec1694aa44d27dbf5797fda257f4a48efcc1dd3ae747645"
+        }, {
+          "partition" : 0,
+          "offset" : 20,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "013880727eef8a1fac3708dc6d1de9e14ddf7b329f3cec315fa283d5eba2fe19"
+        }, {
+          "partition" : 0,
+          "offset" : 21,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "cefaa683fc7c918aff2a8955eb4e68173123a6df55a433471489d97dc4a36a2b"
+        }, {
+          "partition" : 0,
+          "offset" : 22,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "f9adf0c3fbece628a0a543a21e6ddc1c9c84e97dfbfae7bc3e88b94f680b0340"
+        }, {
+          "partition" : 0,
+          "offset" : 23,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "76155267fa60e45c639a5ccc8868346fb49fe689cf13b6025c70bdfead904fff"
+        }, {
+          "partition" : 0,
+          "offset" : 24,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "eaae8526657c85e349b023c60d64f224ee9fe9d833419f6921e3eab9e6431acb"
+        }, {
+          "partition" : 0,
+          "offset" : 25,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "744d114586dd7c3c7dfa04ca50d7146c77a92e9ae90f1b690769adb3777c9a59"
+        }, {
+          "partition" : 0,
+          "offset" : 26,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "0588228bffb447aa29ae55fc0fcbc5e5d3fa8c4576f826b46a35da2925b75d16"
+        }, {
+          "partition" : 0,
+          "offset" : 27,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "fd79ff9791f41f9822e720636cafb4a6aa21545d8c5844e9db3e62fbea511b75"
+        }, {
+          "partition" : 0,
+          "offset" : 28,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "871118a5c7e903c0be265131bf55a458f07cf5638452198f88762a8e8d3f22d3"
+        }, {
+          "partition" : 0,
+          "offset" : 29,
+          "leaderEpoch" : 0,
+          "control" : false,
+          "sha256" : "a26fc4441ba7d54018919cbb7a4fbc60307195e971ed873242ab339cc4d1da7a"
+        } ],
+        "crcValid" : true
+      },
+      "directoryIdChanged" : true,
+      "offsetDigestDifferences" : 0
+    },
+    "passed" : true,
+    "seconds" : 11.285278959
+  }, {
+    "name" : "ISR_ONE_REJECTS_ACK_ALL",
+    "startedAt" : "2026-10-26T02:53:48.919512Z",
+    "result" : {
+      "startupRejected" : true,
+      "startupCode" : "TOPIC_VISIBILITY_DEADLINE",
+      "controlProducerRetries" : 0,
+      "snapshot" : {
+        "partitions" : [ {
+          "partition" : 0,
+          "leader" : 3,
+          "replicas" : [ 3, 1, 2 ],
+          "isr" : [ 3 ],
+          "elr" : [ 2 ],
+          "lastKnownElr" : [ ]
+        }, {
+          "partition" : 1,
+          "leader" : 3,
+          "replicas" : [ 1, 2, 3 ],
+          "isr" : [ 3 ],
+          "elr" : [ 2 ],
+          "lastKnownElr" : [ ]
+        }, {
+          "partition" : 2,
+          "leader" : 3,
+          "replicas" : [ 2, 3, 1 ],
+          "isr" : [ 3 ],
+          "elr" : [ 2 ],
+          "lastKnownElr" : [ ]
+        } ],
+        "database" : {
+          "bucketTotal" : 30,
+          "processedEvents" : 30,
+          "projection" : "disk",
+          "runId" : "a4aa28cba8dd498f905aeb26842e79d9"
+        },
+        "endAvailable" : false,
+        "endFailureTypes" : [ "ExecutionException", "TimeoutException" ],
+        "quorumLeader" : 1002
+      },
+      "productDelivery" : {
+        "eventId" : "f9e3ad2f-c754-4a76-bf2b-37e651261369",
+        "startedAt" : "2026-10-26T02:53:59.763764Z",
+        "acknowledged" : false,
+        "failureTypes" : [ "ExecutionException", "KafkaProducerException", "TimeoutException" ],
+        "finishedAt" : "2026-10-26T02:54:09.765309Z"
+      },
+      "controlFailureTypes" : [ "ExecutionException", "NotEnoughReplicasException" ],
+      "policyNotReadyObserved" : true,
+      "startupFailureTypes" : [ "IllegalStateException", "TimeoutException" ]
+    },
+    "passed" : true,
+    "seconds" : 28.854479666
+  }, {
+    "name" : "ISR_RESTORED_RECONCILIATION",
+    "startedAt" : "2026-10-26T02:54:17.775246Z",
+    "result" : {
+      "attempted" : 34,
+      "missingAcknowledged" : 0,
+      "databaseUnique" : 32,
+      "offsetDigests" : {
+        "0:0" : "466f291ac91ea88024c5d0c28ab28a12a9d6af9ca0526c441f3ddbb4853b0192",
+        "0:1" : "16bf320873e359d07d3be9aefd90542ed5dcadf3a39751742f9b75bb99b422c5",
+        "0:10" : "7b84c8f82e1d004a05c362e84325bbc38eaa448e133462223fe6d173e3af6022",
+        "0:11" : "5750aa0c2b4f4a78b681d0546b45446eaeb71bcb1c74bb6570ec3647ea1d954d",
+        "0:12" : "86303fea40170ca21fe4ca83e80abb66c74a41685785235e3066041de1f15cc5",
+        "0:13" : "1df592193434581773fa2298773733bf7f867e30f7dbbae32d307a99d7882dd4",
+        "0:14" : "0790a79a5e8e347587844e6e18026bdb82bc08789a71783d16045d75fd2fcc72",
+        "0:15" : "da1920b705db0dfd15229e6f2ac5f0632389b02e5480c9d1309525f33804dfa7",
+        "0:16" : "b36e953997a2f4c2950dc5401876a929628babd8ed4bac9e14b9a09760b1f98a",
+        "0:17" : "50fc8cd4ab89d3b9c963dde4197f5df4cd157c6291c7c894a03d38165f2d89fd",
+        "0:18" : "6195464146b22ebbbceb7112c4b9e228921f8960940f8fc2271fb2db778a2002",
+        "0:19" : "4f73262f03438fc6dec1694aa44d27dbf5797fda257f4a48efcc1dd3ae747645",
+        "0:2" : "6cbaf2e095520b15346f3151733cf5974fd9a3bd759cde1c0a8672c231363ffc",
+        "0:20" : "013880727eef8a1fac3708dc6d1de9e14ddf7b329f3cec315fa283d5eba2fe19",
+        "0:21" : "cefaa683fc7c918aff2a8955eb4e68173123a6df55a433471489d97dc4a36a2b",
+        "0:22" : "f9adf0c3fbece628a0a543a21e6ddc1c9c84e97dfbfae7bc3e88b94f680b0340",
+        "0:23" : "76155267fa60e45c639a5ccc8868346fb49fe689cf13b6025c70bdfead904fff",
+        "0:24" : "eaae8526657c85e349b023c60d64f224ee9fe9d833419f6921e3eab9e6431acb",
+        "0:25" : "744d114586dd7c3c7dfa04ca50d7146c77a92e9ae90f1b690769adb3777c9a59",
+        "0:26" : "0588228bffb447aa29ae55fc0fcbc5e5d3fa8c4576f826b46a35da2925b75d16",
+        "0:27" : "fd79ff9791f41f9822e720636cafb4a6aa21545d8c5844e9db3e62fbea511b75",
+        "0:28" : "871118a5c7e903c0be265131bf55a458f07cf5638452198f88762a8e8d3f22d3",
+        "0:29" : "a26fc4441ba7d54018919cbb7a4fbc60307195e971ed873242ab339cc4d1da7a",
+        "0:3" : "6f0abe5fe13add7c8631fa62e19cb2b43ec31c939f14eda337e4b55db0fc6285",
+        "0:30" : "a3b8c232b6d2d3575bcc2fd800cc13daec33e5ba0c2fe42776e159b354f81f05",
+        "0:31" : "c12a5be5eb01c4b4f5710584d2926d04d1b77175b288c100647271884bca3b9c",
+        "0:4" : "03ec8c6ceed3c29f22167dc21cde2813aadfecc0e8c45e6e6d898b1ef31ce1be",
+        "0:5" : "e5cff5d5884dc469ee276487436851fa7d2a028fa6f4585285d9f7b82591b126",
+        "0:6" : "26e2a4d98392ad56b27fc32f49e4288d6d4ff6d2654f0418e1d019f1ef3970c8",
+        "0:7" : "d18a19c1563c6cad399675cb3fe7ce9db7e0b025b5d340d14e44f654483fe9c5",
+        "0:8" : "8d3f7f0c0c1a8548839f4f4391878b6be987d1ca234874fdb963ff8a65714322",
+        "0:9" : "938d595bacb7210dd19e61a0dd4ca9d70e3dcb9ccc708747a8459522319197da"
+      },
+      "unconfirmedPresent" : 0,
+      "brokerPhysical" : 32,
+      "acknowledged" : 32,
+      "setDifference" : 0,
+      "brokerUnique" : 32
+    },
+    "passed" : true,
+    "seconds" : 4.336112375
+  } ],
+  "deliveries" : [ {
+    "eventId" : "560a76ba-5dc6-41af-9147-556fe3361b44",
+    "startedAt" : "2026-10-26T02:53:17.593146Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 0,
+    "sha256" : "466f291ac91ea88024c5d0c28ab28a12a9d6af9ca0526c441f3ddbb4853b0192",
+    "finishedAt" : "2026-10-26T02:53:17.858739Z"
+  }, {
+    "eventId" : "f63b27bc-a09c-4b8e-8f59-2fd2450b83c0",
+    "startedAt" : "2026-10-26T02:53:17.859323Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 1,
+    "sha256" : "16bf320873e359d07d3be9aefd90542ed5dcadf3a39751742f9b75bb99b422c5",
+    "finishedAt" : "2026-10-26T02:53:17.870986Z"
+  }, {
+    "eventId" : "be1c63d9-4c6e-48a1-9e19-ee655f38f6c9",
+    "startedAt" : "2026-10-26T02:53:17.871452Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 2,
+    "sha256" : "6cbaf2e095520b15346f3151733cf5974fd9a3bd759cde1c0a8672c231363ffc",
+    "finishedAt" : "2026-10-26T02:53:17.882743Z"
+  }, {
+    "eventId" : "c0866b81-cfcc-40b1-bffb-1a21468545b4",
+    "startedAt" : "2026-10-26T02:53:17.883158Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 3,
+    "sha256" : "6f0abe5fe13add7c8631fa62e19cb2b43ec31c939f14eda337e4b55db0fc6285",
+    "finishedAt" : "2026-10-26T02:53:17.894391Z"
+  }, {
+    "eventId" : "29adf8ae-d3bc-40f3-b315-0dfda5e667e2",
+    "startedAt" : "2026-10-26T02:53:17.894870Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 4,
+    "sha256" : "03ec8c6ceed3c29f22167dc21cde2813aadfecc0e8c45e6e6d898b1ef31ce1be",
+    "finishedAt" : "2026-10-26T02:53:17.905162Z"
+  }, {
+    "eventId" : "51d385b0-5c57-449b-b909-31995177aef9",
+    "startedAt" : "2026-10-26T02:53:17.905665Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 5,
+    "sha256" : "e5cff5d5884dc469ee276487436851fa7d2a028fa6f4585285d9f7b82591b126",
+    "finishedAt" : "2026-10-26T02:53:17.916262Z"
+  }, {
+    "eventId" : "7e25b1fa-7da4-4b2d-8c43-ebe576288c9e",
+    "startedAt" : "2026-10-26T02:53:17.916717Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 6,
+    "sha256" : "26e2a4d98392ad56b27fc32f49e4288d6d4ff6d2654f0418e1d019f1ef3970c8",
+    "finishedAt" : "2026-10-26T02:53:17.926150Z"
+  }, {
+    "eventId" : "a2dd68a0-94c5-45fc-bc56-9923cda32397",
+    "startedAt" : "2026-10-26T02:53:17.926634Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 7,
+    "sha256" : "d18a19c1563c6cad399675cb3fe7ce9db7e0b025b5d340d14e44f654483fe9c5",
+    "finishedAt" : "2026-10-26T02:53:17.935410Z"
+  }, {
+    "eventId" : "7dc96ab0-7d1c-484f-8b58-72736ed2c628",
+    "startedAt" : "2026-10-26T02:53:17.935830Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 8,
+    "sha256" : "8d3f7f0c0c1a8548839f4f4391878b6be987d1ca234874fdb963ff8a65714322",
+    "finishedAt" : "2026-10-26T02:53:17.944172Z"
+  }, {
+    "eventId" : "82ac2952-6694-41b7-a634-246a4c8a6493",
+    "startedAt" : "2026-10-26T02:53:17.944686Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 9,
+    "sha256" : "938d595bacb7210dd19e61a0dd4ca9d70e3dcb9ccc708747a8459522319197da",
+    "finishedAt" : "2026-10-26T02:53:17.956365Z"
+  }, {
+    "eventId" : "39605c2e-14a1-4fe8-97c5-ca29ff9d63dc",
+    "startedAt" : "2026-10-26T02:53:25.549022Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 10,
+    "sha256" : "7b84c8f82e1d004a05c362e84325bbc38eaa448e133462223fe6d173e3af6022",
+    "finishedAt" : "2026-10-26T02:53:25.559576Z"
+  }, {
+    "eventId" : "2f422403-8745-4f2f-8918-6c8eaf4abc87",
+    "startedAt" : "2026-10-26T02:53:25.560095Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 11,
+    "sha256" : "5750aa0c2b4f4a78b681d0546b45446eaeb71bcb1c74bb6570ec3647ea1d954d",
+    "finishedAt" : "2026-10-26T02:53:25.570013Z"
+  }, {
+    "eventId" : "bb0c027c-0f7b-4a80-b67e-9afd9150e951",
+    "startedAt" : "2026-10-26T02:53:25.570533Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 12,
+    "sha256" : "86303fea40170ca21fe4ca83e80abb66c74a41685785235e3066041de1f15cc5",
+    "finishedAt" : "2026-10-26T02:53:25.580295Z"
+  }, {
+    "eventId" : "6965f30e-d106-4b25-bb1b-4fbd24c436b7",
+    "startedAt" : "2026-10-26T02:53:25.580932Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 13,
+    "sha256" : "1df592193434581773fa2298773733bf7f867e30f7dbbae32d307a99d7882dd4",
+    "finishedAt" : "2026-10-26T02:53:25.592720Z"
+  }, {
+    "eventId" : "8dc87f04-f52a-4034-8e29-ff56cb365508",
+    "startedAt" : "2026-10-26T02:53:25.593349Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 14,
+    "sha256" : "0790a79a5e8e347587844e6e18026bdb82bc08789a71783d16045d75fd2fcc72",
+    "finishedAt" : "2026-10-26T02:53:25.603023Z"
+  }, {
+    "eventId" : "20c20f0e-8db8-4f3f-b56b-ce7ae33bfe0c",
+    "startedAt" : "2026-10-26T02:53:25.603605Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 15,
+    "sha256" : "da1920b705db0dfd15229e6f2ac5f0632389b02e5480c9d1309525f33804dfa7",
+    "finishedAt" : "2026-10-26T02:53:25.613929Z"
+  }, {
+    "eventId" : "12fd9be5-e30a-42e8-b784-8b79d110544f",
+    "startedAt" : "2026-10-26T02:53:25.614514Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 16,
+    "sha256" : "b36e953997a2f4c2950dc5401876a929628babd8ed4bac9e14b9a09760b1f98a",
+    "finishedAt" : "2026-10-26T02:53:25.625482Z"
+  }, {
+    "eventId" : "81069819-85a1-42a2-b11f-7980337fe2aa",
+    "startedAt" : "2026-10-26T02:53:25.626078Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 17,
+    "sha256" : "50fc8cd4ab89d3b9c963dde4197f5df4cd157c6291c7c894a03d38165f2d89fd",
+    "finishedAt" : "2026-10-26T02:53:25.635718Z"
+  }, {
+    "eventId" : "ef078601-73c4-46d3-8cf2-7145e67b3be5",
+    "startedAt" : "2026-10-26T02:53:25.636219Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 18,
+    "sha256" : "6195464146b22ebbbceb7112c4b9e228921f8960940f8fc2271fb2db778a2002",
+    "finishedAt" : "2026-10-26T02:53:25.645751Z"
+  }, {
+    "eventId" : "58a64858-0f90-489d-9907-1d63f8836c8c",
+    "startedAt" : "2026-10-26T02:53:25.646252Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 19,
+    "sha256" : "4f73262f03438fc6dec1694aa44d27dbf5797fda257f4a48efcc1dd3ae747645",
+    "finishedAt" : "2026-10-26T02:53:25.655137Z"
+  }, {
+    "eventId" : "1486f36b-7e24-4fdb-9f94-4a6b42820516",
+    "startedAt" : "2026-10-26T02:53:37.297031Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 20,
+    "sha256" : "013880727eef8a1fac3708dc6d1de9e14ddf7b329f3cec315fa283d5eba2fe19",
+    "finishedAt" : "2026-10-26T02:53:37.308186Z"
+  }, {
+    "eventId" : "2baf983f-746c-4f53-b3ec-f251a8803773",
+    "startedAt" : "2026-10-26T02:53:37.309177Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 21,
+    "sha256" : "cefaa683fc7c918aff2a8955eb4e68173123a6df55a433471489d97dc4a36a2b",
+    "finishedAt" : "2026-10-26T02:53:37.320034Z"
+  }, {
+    "eventId" : "344facb8-56ee-4abe-ad56-3bd79dc8874b",
+    "startedAt" : "2026-10-26T02:53:37.320606Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 22,
+    "sha256" : "f9adf0c3fbece628a0a543a21e6ddc1c9c84e97dfbfae7bc3e88b94f680b0340",
+    "finishedAt" : "2026-10-26T02:53:37.329932Z"
+  }, {
+    "eventId" : "258b24e1-27a8-4c42-976c-e90d1216bae6",
+    "startedAt" : "2026-10-26T02:53:37.330428Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 23,
+    "sha256" : "76155267fa60e45c639a5ccc8868346fb49fe689cf13b6025c70bdfead904fff",
+    "finishedAt" : "2026-10-26T02:53:37.338500Z"
+  }, {
+    "eventId" : "5479d650-83e7-48dd-98e8-9f4fb1e939cb",
+    "startedAt" : "2026-10-26T02:53:37.338924Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 24,
+    "sha256" : "eaae8526657c85e349b023c60d64f224ee9fe9d833419f6921e3eab9e6431acb",
+    "finishedAt" : "2026-10-26T02:53:37.347501Z"
+  }, {
+    "eventId" : "9d216c7f-1979-48e5-b9c9-b77a0f855f67",
+    "startedAt" : "2026-10-26T02:53:37.348104Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 25,
+    "sha256" : "744d114586dd7c3c7dfa04ca50d7146c77a92e9ae90f1b690769adb3777c9a59",
+    "finishedAt" : "2026-10-26T02:53:37.357592Z"
+  }, {
+    "eventId" : "f7737eb1-c0dd-4c42-aa1c-92478c231be4",
+    "startedAt" : "2026-10-26T02:53:37.358045Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 26,
+    "sha256" : "0588228bffb447aa29ae55fc0fcbc5e5d3fa8c4576f826b46a35da2925b75d16",
+    "finishedAt" : "2026-10-26T02:53:37.366868Z"
+  }, {
+    "eventId" : "1b25b3c0-d025-4481-a643-1d778fec049f",
+    "startedAt" : "2026-10-26T02:53:37.367490Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 27,
+    "sha256" : "fd79ff9791f41f9822e720636cafb4a6aa21545d8c5844e9db3e62fbea511b75",
+    "finishedAt" : "2026-10-26T02:53:37.376660Z"
+  }, {
+    "eventId" : "9952fc83-28b5-4940-901f-56d727072242",
+    "startedAt" : "2026-10-26T02:53:37.377137Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 28,
+    "sha256" : "871118a5c7e903c0be265131bf55a458f07cf5638452198f88762a8e8d3f22d3",
+    "finishedAt" : "2026-10-26T02:53:37.386418Z"
+  }, {
+    "eventId" : "2ebd7cdc-e17f-49a4-82b4-30501b35e860",
+    "startedAt" : "2026-10-26T02:53:37.386843Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 29,
+    "sha256" : "a26fc4441ba7d54018919cbb7a4fbc60307195e971ed873242ab339cc4d1da7a",
+    "finishedAt" : "2026-10-26T02:53:37.394399Z"
+  }, {
+    "eventId" : "f9e3ad2f-c754-4a76-bf2b-37e651261369",
+    "startedAt" : "2026-10-26T02:53:59.763764Z",
+    "acknowledged" : false,
+    "failureTypes" : [ "ExecutionException", "KafkaProducerException", "TimeoutException" ],
+    "finishedAt" : "2026-10-26T02:54:09.765309Z"
+  }, {
+    "eventId" : "9eebf671-2184-4817-a7e0-0ff9fec8ea9f",
+    "startedAt" : "2026-10-26T02:54:21.514842Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 30,
+    "sha256" : "a3b8c232b6d2d3575bcc2fd800cc13daec33e5ba0c2fe42776e159b354f81f05",
+    "finishedAt" : "2026-10-26T02:54:21.524891Z"
+  }, {
+    "eventId" : "c07e90bf-326b-4ff4-84fa-0c084e6df318",
+    "startedAt" : "2026-10-26T02:54:21.525902Z",
+    "acknowledged" : true,
+    "partition" : 0,
+    "offset" : 31,
+    "sha256" : "c12a5be5eb01c4b4f5710584d2926d04d1b77175b288c100647271884bca3b9c",
+    "finishedAt" : "2026-10-26T02:54:21.534801Z"
+  } ],
+  "frozenProbe" : {
+    "sha256" : "dd4576c6254c216f3953d2b6c159e5318b2f346601659a7c3c6bacc7d912856a",
+    "class" : "io.chatpulse.pipeline.KafkaDiskProbe",
+    "bytes" : 7593
+  },
+  "runtime" : {
+    "features" : "{group.version=FinalizedVersionRange[min_version_level:1, max_version_level:1], transaction.version=FinalizedVersionRange[min_version_level:2, max_version_level:2], eligible.leader.replicas.version=FinalizedVersionRange[min_version_level:1, max_version_level:1], metadata.version=FinalizedVersionRange[min_version_level:27, max_version_level:27]}",
+    "java" : "21.0.11",
+    "kafkaClient" : "4.1.2",
+    "imageId" : "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e"
+  },
+  "initialTopicId" : "g-OaeqnHQaqty79Jqy40IA",
+  "correct" : true,
+  "cleanupComplete" : true,
+  "finishedAt" : "2026-10-26T02:54:24.958684Z"
+}

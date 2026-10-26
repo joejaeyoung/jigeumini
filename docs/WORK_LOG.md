@@ -260,3 +260,12 @@ recover와 last-copy는 새 cluster를 각각 사용한다. 전자는 ISR2 지�
 ### #45 진입 리뷰 보완
 
 Claude43b3474 진입 리뷰는 REQUEST_CHANGES였다. 불충분 ISR은 직접 KafkaTopicPolicy.NotReady 확인과 TOPIC_VISIBILITY_DEADLINE 원인을 함께 요구하고, 마지막 복사본 손실은 3개 실제 container Running/OOM 상태와 Admin 등록 broker ID1/2/3을 확인한 뒤 판정한다. SOURCE_UNAVAILABLE/OFFSET_TRUNCATED만 허용하고 다른 실패를 복구 불가 증거로 취급하지 않는다. readonly 디스크 helper도 소유 project/name으로 정리하고 실행 classpath는 고정한다. 빈 partition 초기 commit 지적은 기존 BatchConsumers.initialOffsets가 모두 commit하므로 해당 소스를 추가 제공해 재검토한다. 실제 손실 실험 전 진입 재검토를 수행하며 아직 결과를 PASS로 표시하지 않는다.
+
+
+### #45 실제 디스크 유실 실행
+
+2026-10-26 clean f992ef1에서 recover7단계와last-copy6단계를 각각새소유6노드로 실행했다. 전자는새directory ID와30건offset/hash 재구성·ISR1 실제거부 뒤최종ACK32=broker32=DB32·차이0이다. 후자는 최신tail10건의두물리copy를지우고3broker모두복귀했으나 source/oldmanifest가SOURCE_UNAVAILABLE였다. DB20은유지되고sourceRecoverySucceeded=false이며 읽기불가건수는null로기록했다. 실행종료정리모두true. [검증](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md)·[정제근거](poc/evidence/kafka-disk-loss-2026-10-26/summary.json)에단계/시각/commit/hash를연결했다.
+
+리팩토링은 소유 cluster 수명·readonly record probe·실험판정 경계를 유지한다. 실제디스크삭제와원천조회오류를구분하고 임의의일반예외로PASS하지않는다. 빈partitioncommit은기존공통소비계약을재사용했다. 진입Claude지적3개보완후APPROVE FOR EXPERIMENT를받았고 최종근거HEAD는다시리뷰/CI한다.
+
+f992ef1의 `./scripts/check` 단위147·하네스20·JAR도 통과했다. 실제 디스크 실험13단계와 일반 integration CI는 서로 다른 검증으로 기록한다.

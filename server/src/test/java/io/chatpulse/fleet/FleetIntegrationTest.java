@@ -184,6 +184,53 @@ class FleetIntegrationTest {
             assertEquals(2L,epoch());stop(b);boundaryEvidence.put("databaseDiscardedBytes",database.discardedBytes());assertReconciled();
         }
     }
+    @Test void unassignedWorkerRetriesRolledBackPlanLockAndCollectsAfterUnlock() throws Exception {
+        source.automatic=false;plan(List.of(CHANNEL));Process child;
+        try(var blocker=holdPlanLock()) {
+            child=start(15432,1);ready(0);awaitWorkerLockWait();
+            long began=System.nanoTime();Thread.sleep(2300);assertTrue(child.isAlive());
+            assertTrue(source.accepted.isEmpty());assertEquals(0,((Number)leases.status().get("assigned")).intValue());
+            blocker.rollback();boundaryEvidence.put("observedLockHoldSeconds",(System.nanoTime()-began)/1e9);
+        }
+        awaitConnected(1);var marker=source.marker(false);awaitMarker(marker,1);stop(child);
+        var result=report(0);assertTrue(result.path("complete").asBoolean());assertTrue(result.path("leaseContentionRetries").asInt()>0);
+        assertEquals(1L,epoch());assertReconciled();
+    }
+    @Test void persistentPlanLockExhaustsUnassignedRetriesWithoutSourceAdmission() throws Exception {
+        source.automatic=false;plan(List.of(CHANNEL));
+        try(var blocker=holdPlanLock()) {
+            var child=start(15432,1);ready(0);awaitWorkerLockWait();assertTrue(child.waitFor(18,TimeUnit.SECONDS));
+            var result=report(0);assertFalse(result.path("complete").asBoolean());assertEquals(5,result.path("leaseContentionRetries").asInt());
+            assertEquals("COLLECTION_LEASE_LOST",result.path("failureCode").asText());
+            assertTrue(result.path("leases").isEmpty());assertEquals(0,result.path("delivery").path("accepted").asInt());
+            assertTrue(source.accepted.isEmpty());assertTrue(readBrokerEvents().isEmpty());
+            assertEquals(0,((Number)leases.status().get("assigned")).intValue());boundaryEvidence.put("workerResult",JSON.readValue(Files.readString(reports.getFirst()),Map.class));
+            blocker.rollback();
+        }
+    }
+    @Test void ownedLeasePlanLockFailureDoesNotRetryOrReacquireInSameProcess() throws Exception {
+        source.automatic=false;plan(List.of(CHANNEL));var child=start(15432,1);var owner=ready(0);awaitConnected(1);
+        var marker=source.marker(false);awaitMarker(marker,1);
+        try(var blocker=holdPlanLock()) {
+            awaitWorkerLockWait();assertTrue(child.waitFor(15,TimeUnit.SECONDS));
+            assertFalse(report(0).path("complete").asBoolean());assertEquals(0,report(0).path("leaseContentionRetries").asInt());
+            assertEquals("COLLECTION_LEASE_LOST",report(0).path("failureCode").asText());blocker.rollback();
+        }
+        var replacement=UUID.randomUUID();await().atMost(Duration.ofSeconds(10)).until(()->!tick(replacement,1,Map.of()).leases().isEmpty());
+        assertEquals(2L,epoch());assertOldOwnerCannotChangeCurrent(owner,1);assertReconciled();
+    }
+    private java.sql.Connection holdPlanLock() throws Exception {
+        var connection=ds.getConnection();
+        try {
+            connection.setAutoCommit(false);
+            try(var statement=connection.createStatement();var rows=statement.executeQuery("SELECT singleton FROM collector_plan WHERE singleton=1 FOR UPDATE")){assertTrue(rows.next());}
+            return connection;
+        }catch(Exception|Error failure){connection.close();throw failure;}
+    }
+    private void awaitWorkerLockWait() {
+        await().atMost(Duration.ofSeconds(5)).until(()->jdbc.queryForObject(
+                "SELECT count(*) FROM pg_stat_activity WHERE application_name LIKE ? AND wait_event_type='Lock'",Integer.class,"fleet_"+schema+"_%")>0);
+    }
     @Test void websocketOnlyDisconnectionKeepsLeaseAndReconnectsWithoutRecoveringSourceGap() throws Exception {
         source.automatic=false;plan(List.of(CHANNEL));
         try(var websocket=new ControlledTcpProxy(source.getPort())) {

@@ -363,3 +363,10 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실패를 확인하고 병합을 보류했다. 원래 실패의80개 DB 표본에서 이전 PID의 idle in transaction, 대기 PID의 transactionid 잠금17개 표본을 확인했다. 최종 SQLSTATE는 당시 보고서에 없어 확정하지 않는다.
 
 실제 plan 행 FOR UPDATE 응답 직후 클라이언트를 멈추는 시험 전용 장벽을 넣고 대기 worker 등록 후 DB blackhole을 주입했다. 수정 전 로컬1개가 epoch2 기대/실제1로 실패했다. 표본 사이 수분 공백이 있어 이 실행의495초를 복구 시간으로 사용하지 않는다. 원본·hash는 work/remaining-validation/fleet-lock-red-01에 보존했다. 가설은 유휴 transaction 잠금 유지, 대기 worker 시작 지연, 단순 실행 속도 저하 순서이며 등록/잠금/대기 상태를 따로 확인한다.
+
+
+#60의 두 번째 수정 전 실행은 장애 주입 전에 A가 종료하여 owner가 null인 진단 전제 실패였다. 첫 실행의 잔여 observed 파일을 두 번째 결과로 사용하지 않는다. 이어 유휴 timeout만 추가한 대조에서는 이전 잠금 PID가 사라졌으나 대기 worker가 이미 종료하여 epoch2 기대/실제1로 다시 실패했다(39.867초, 잠금 대기3개 표본). 이 분리는 유휴 잠금 제한과 미배정 충돌 재시도가 모두 필요함을 보여준다. 최초 CI에서 실제 SQLSTATE를 기록하지 않은 한계는 유지한다.
+
+잠금 분류는 CollectorLeases의 transaction 완료 경계, 미배정 재시도 횟수와 기한은 CollectorWorker에 둔다. 보유 임대·연결/SQL취소·불확정 transaction을 동일하게 재시도하는 범용 도구를 만들지 않았다. 실제2JVM blackhole, 실제 대기/영구잠금/보유임대와 JDBC rollback 실패·불확정 commit의 합성 경계를 추가한다.
+
+수정 후 집중 검증은 JDBC/worker 단위7개와 실제 Kafka/DB4개가 모두 통과했다. blackhole의 유휴 잠금 해제·epoch2 인계, 미배정 잠금 해제 후 수집, 영구 충돌5회 제한, 보유 임대 충돌의 재시도0을 확인했다. 이후 깨끗한 revision에서 check와 Fleet 전체 회귀를 실행해 통합 영향을 확인한다.

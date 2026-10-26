@@ -2,9 +2,11 @@ package io.chatpulse.fleet;
 
 import io.chatpulse.discovery.SelectionPolicy.SourceMode;
 import java.sql.Timestamp;
+import java.sql.SQLException;
 import java.time.*;
 import java.util.*;
 import javax.sql.DataSource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -13,12 +15,21 @@ import org.springframework.transaction.support.TransactionTemplate;
 public final class CollectorLeases {
     public record Lease(String channelId,long epoch,Instant expiresAt,String policyVersion) { }
     public record Grant(Instant databaseNow,List<Lease> leases) { }
+    /** rollback이 끝난 잠금 충돌만 worker의 미배정 재시도 정책에 전달한다. */
+    static final class PlanContended extends RuntimeException {
+        private PlanContended(DataAccessException cause){super("FLEET_PLAN_LOCK_CONTENDED",cause);}
+    }
     private final JdbcTemplate jdbc;private final TransactionTemplate tx;
     public CollectorLeases(DataSource ds) {
         jdbc=new JdbcTemplate(ds);jdbc.setQueryTimeout(3);
         tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(4);
     }
-    private void lock() {jdbc.execute("SET LOCAL lock_timeout='1s'");jdbc.execute("SET LOCAL statement_timeout='3s'");jdbc.queryForObject("SELECT singleton FROM collector_plan WHERE singleton=1 FOR UPDATE",Integer.class);}
+    private void lock() {
+        // SQL 사이 client 단절로 열린 transaction도 서버가 종료해 plan 잠금을 풀어야 한다.
+        jdbc.execute("SET LOCAL idle_in_transaction_session_timeout='2s'");
+        jdbc.execute("SET LOCAL lock_timeout='1s'");jdbc.execute("SET LOCAL statement_timeout='3s'");
+        jdbc.queryForObject("SELECT singleton FROM collector_plan WHERE singleton=1 FOR UPDATE",Integer.class);
+    }
     private Instant now(){return jdbc.queryForObject("SELECT clock_timestamp()",(rs,n)->rs.getTimestamp(1).toInstant());}
     public void apply(FleetPlan plan) {
         tx.executeWithoutResult(status->{
@@ -40,7 +51,7 @@ public final class CollectorLeases {
     public Grant tick(UUID owner,int capacity,Duration ttl,SourceMode mode,Map<String,Long> held,Set<String> connected,boolean acquire) {
         if(owner==null||capacity<1||capacity>20||ttl.compareTo(Duration.ofSeconds(6))<0||ttl.compareTo(Duration.ofSeconds(60))>0
                 ||held.size()>20||connected.size()>20||mode==SourceMode.OFFICIAL_AUTHORIZED)throw new IllegalArgumentException("FLEET_WORKER_LIMIT");
-        return tx.execute(status->{
+        try {return tx.execute(status->{
             lock();Instant now=now();var stamp=Timestamp.from(now);
             var plan=jdbc.queryForMap("SELECT * FROM collector_plan WHERE singleton=1");
             if(!mode.name().equals(plan.get("source_mode"))||!((Timestamp)plan.get("valid_until")).toInstant().isAfter(now))throw new IllegalStateException("FLEET_PLAN_UNAVAILABLE");
@@ -71,7 +82,11 @@ public final class CollectorLeases {
                 leases=owned(owner,now);
             }
             return new Grant(now,List.copyOf(leases));
-        });
+        });}catch(DataAccessException failure) {
+            // TransactionSystemException(commit/rollback 실패)은 이 분류에 들어오지 않는다.
+            if(failure.getMostSpecificCause() instanceof SQLException sql&&"55P03".equals(sql.getSQLState()))throw new PlanContended(failure);
+            throw failure;
+        }
     }
     private List<Lease> owned(UUID owner,Instant now) {
         return jdbc.query("SELECT channel_id,epoch,valid_until,policy_version FROM collector_lease WHERE owner=? AND valid_until>? AND selected ORDER BY channel_id",

@@ -43,7 +43,7 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 
 ## migration이 포함된 릴리스와 비밀 수명
 
-이번 이미지 교체/복귀는 동일 V12 migration 집합만 검증했다. checksum 손상 시험은 실패한 DDL migration을 재현한 것이 아니다. strict VALIDATE는 새 migration이 적용된 DB에서 이전 이미지를 거부한다. 따라서 migration 포함 릴리스의 복귀는 같은 DB의 이미지 교체로 처리할 수 없으며, 이전 schema 백업을 새DB에 복원하고 보존 입력/진행 위치를 검사해 재생하는 절차가 필요하다. 이 경로를 실제 새 migration 전후 이미지로 연결한 실험은 미검증이다. 파괴적 변경은 별도 forward fix/복구 계획이 필요하다.
+이번 이미지 교체/복귀는 동일 V12 migration 집합만 검증했다. checksum 손상 시험은 실패한 DDL migration을 재현한 것이 아니다. strict VALIDATE는 새 migration이 적용된 DB에서 이전 이미지를 거부한다. 따라서 migration 포함 릴리스의 복귀는 같은 DB의 이미지 교체로 처리할 수 없으며, 이전 schema 백업을 새DB에 복원하고 보존 입력/진행 위치를 검사해 재생하는 절차가 필요하다. 이 경로의 시험 전용 V13 리허설은 루트 README의 `migration-images`/`migration-rehearsal` 명령으로 실행한다. V13은 기존 집계의 합계를 별도 점검 테이블에 backfill하며 제품 동작은 바꾸지 않는다. 실제 실행 결과는 STATUS를 따른다. 파괴적 변경은 별도 forward fix/복구 계획이 필요하다.
 
 배포 또는 VALIDATE 모드에서 비밀 파일이 없으면 `SECRET_FILE_REQUIRED`로 거부한다. 로컬 리허설은 생성한 secret 파일을0700 디렉터리 안에0444로 두어 UID10001/컨테이너DB가 읽게 한다. 실제 운영은 비밀 관리자의 서비스별 UID/GID·접근 권한으로 주입한다. init-db.sh는 새 PG 데이터 디렉터리에서만 실행되며 기존 볼륨 역할 생성이나 비밀 회전을 수행하지 않는다. 비밀은 psql argv에 전달하지 않는다. 성공적인 소유 자원 정리 뒤 생성 secret과 dump도 삭제하고 hash/숫자만 남긴다. 정리 실패 시 로컬 work를0700 경계 안에서 보관하고 소유 자원 확인 후 수동 정리한다.
 

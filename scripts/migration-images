@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 2 ]] || { echo '사용법: ./scripts/migration-images <제품 이미지.json> <새 이미지 디렉터리>'; exit 2; }
+exec python3 scripts/migration-images.py "$@"

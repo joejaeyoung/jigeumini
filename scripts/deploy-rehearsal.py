@@ -71,6 +71,7 @@ class Rehearsal:
         port=self.compose('port','web','8080').stdout.strip();assert re.fullmatch(r'127\.0\.0\.1:\d+',port)
         self.base='http://'+port;self.ready()
         live=json.loads(self.http('/livez')[1]);revision=json.loads(self.http('/revision.json')[1]);assert live['identity']['revision']==revision['revision']==manifest['revision']
+        assert live['identity']['buildId']==manifest['buildId']
         return {'revision':revision['revision'],'buildId':live['identity']['buildId'],'ready':True}
     def stop_api(self):
         begin=time.monotonic();self.owned('api');self.compose('stop','-t','60','api',timeout=75);_,info=self.owned('api')
@@ -84,7 +85,7 @@ class Rehearsal:
             return found['rankingCount']==chat and found['trendCount']==chat and found['notificationCount']==notifications and found['pendingOutbox']==0 and found['category_event']['rows']==chat and found['report_event']['rows']==chat
         self.until(complete,90);return found
     def preflight(self):
-        assert not self.command(['git','status','--porcelain']).stdout.strip()
+        if self.command(['git','status','--porcelain']).stdout.strip():raise RuntimeError('REHEARSAL_REQUIRES_CLEAN_COMMIT')
         assert self.command(['git','rev-parse','HEAD']).stdout.strip()==self.candidate['revision']
         info=json.loads(self.command(['docker','info','--format','{{json .}}']).stdout)
         assert info['MemTotal']>=6*1024**3 and shutil.disk_usage(ROOT).free>=2*1024**3
@@ -161,18 +162,20 @@ class Rehearsal:
         self.sql("UPDATE flyway_schema_history SET checksum="+str(checksum)+" WHERE version='1'")
         self.up_apps(self.baseline);assert self.snapshot(20,2)==self.expected
         return {'checksumMismatchStartRejected':rejected,'automaticRepair':False,'previousImageRecovered':True,'scope':'SAME_MIGRATION_SET_CHECKSUM_CORRUPTION'}
-    def restore(self):
+    def restore(self,target=None):
+        target=target or self.candidate
         self.stop_api();started=time.monotonic();started_at=self.now();original_database=self.sql('SELECT current_database()').stdout.strip();original_group=self.environment['CONSUMER_GROUP']
+        self.image(target)
         self.sql('CREATE DATABASE restored OWNER app_owner',database='chatpulse');cid,_=self.owned('postgres')
         self.command(['docker','exec','-i',cid,'pg_restore','-U','app_owner','-d','restored','--exit-on-error','--no-owner'],input=(self.directory/'database.dump').read_bytes(),binary=True)
         self.environment['DATABASE_NAME']='restored';self.write_env()
         restored=self.probe('snapshot');assert restored==self.result['backupSnapshot']
         restored_database=self.sql('SELECT current_database()').stdout.strip();assert restored_database!=original_database
         plan=self.ops('recovery-plan');assert not plan['safeForStartup'] and plan['recoverableFromRetainedLog'];self.result['restoredPlanBefore']=plan
-        self.image(self.candidate);self.compose('up','-d','--no-deps','--force-recreate','api')
+        self.image(target);self.compose('up','-d','--no-deps','--force-recreate','api')
         rejected=self.rejected_start('RECOVERY_ALIGNMENT_REQUIRED')
         prepared=self.ops('recover-groups','deploy-recovered');self.environment['CONSUMER_GROUP']='deploy-recovered';self.write_env()
-        self.up_apps(self.candidate);actual=self.snapshot(20,2)
+        self.up_apps(target);actual=self.snapshot(20,2)
         differences=[key for key in self.expected if self.expected[key]!=actual[key]]
         self.result['restoredSnapshot']=actual;self.result['restoredPlanAfter']=self.ops('recovery-plan');assert not differences
         assert self.result['restoredPlanAfter']['safeForStartup']
@@ -184,17 +187,19 @@ class Rehearsal:
                 'chatGapAfterRecovery':self.expected['rankingCount']-actual['rankingCount'],'businessSnapshotDifferences':differences,'newGroups':prepared['groups'],
                 'oldGroupsModified':old_changed,'restoredIntoNewDatabase':restored_database!=original_database,'originalDatabase':original_database,
                 'restoredDatabase':restored_database,'alignmentStartRejected':rejected}
+    def scenarios(self):
+        self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit);self.phase('COLLECTOR_CLI_PREFLIGHT',self.collector_preflight)
+        self.event_base=(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(seconds=120)).replace(microsecond=0).isoformat()
+        self.result['syntheticEventBase']=self.event_base
+        self.phase('SEED_BEFORE_BACKUP',lambda:self.probe('seed','0',self.event_base));self.phase('BASELINE_DATA',lambda:self.snapshot(10,1));self.phase('DATABASE_OUTAGE',self.database_fault)
+        self.phase('BACKUP',self.backup);self.phase('UPGRADE_IMAGE',lambda:self.up_apps(self.candidate));self.phase('SEED_AFTER_BACKUP',lambda:self.probe('seed','1',self.event_base))
+        self.expected=self.snapshot(20,2);self.result['expectedSnapshot']=self.expected
+        self.phase('BROWSER',self.browser)
+        self.phase('STOP_NEW_IMAGE',self.stop_api);self.phase('ROLLBACK_IMAGE',lambda:self.up_apps(self.baseline));assert self.snapshot(20,2)==self.expected
+        self.phase('SCHEMA_FAILURE_ROLLBACK',self.schema_failure);self.phase('RESTORE_NEW_DATABASE',self.restore);self.phase('FINAL_GRACEFUL_STOP',self.stop_api)
     def run(self):
         try:
-            self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize);self.phase('BASELINE_IMAGE',lambda:self.up_apps(self.baseline));self.phase('RUNTIME_BOUNDARIES',self.audit);self.phase('COLLECTOR_CLI_PREFLIGHT',self.collector_preflight)
-            self.event_base=(datetime.datetime.now(datetime.timezone.utc)-datetime.timedelta(seconds=120)).replace(microsecond=0).isoformat()
-            self.result['syntheticEventBase']=self.event_base
-            self.phase('SEED_BEFORE_BACKUP',lambda:self.probe('seed','0',self.event_base));self.phase('BASELINE_DATA',lambda:self.snapshot(10,1));self.phase('DATABASE_OUTAGE',self.database_fault)
-            self.phase('BACKUP',self.backup);self.phase('UPGRADE_IMAGE',lambda:self.up_apps(self.candidate));self.phase('SEED_AFTER_BACKUP',lambda:self.probe('seed','1',self.event_base))
-            self.expected=self.snapshot(20,2);self.result['expectedSnapshot']=self.expected
-            self.phase('BROWSER',self.browser)
-            self.phase('STOP_NEW_IMAGE',self.stop_api);self.phase('ROLLBACK_IMAGE',lambda:self.up_apps(self.baseline));assert self.snapshot(20,2)==self.expected
-            self.phase('SCHEMA_FAILURE_ROLLBACK',self.schema_failure);self.phase('RESTORE_NEW_DATABASE',self.restore);self.phase('FINAL_GRACEFUL_STOP',self.stop_api)
+            self.scenarios()
             self.result['correct']=True
         except Exception as error:
             self.result.update({'correct':False,'failureType':type(error).__name__})

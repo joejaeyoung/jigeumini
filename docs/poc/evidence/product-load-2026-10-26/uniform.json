@@ -48,10 +48,10 @@
   },
   "command": "./scripts/product-load work/remaining-validation/product-load-images-05.json uniform work/remaining-validation/product-load-uniform-05",
   "harnessRevision": "f9a91f6f138d4e144ba4d24f1d88f7f060987897",
-  "curatorSha256": "8a2e348b80e0408f7d388e95ab492ef13044a4b819a652be4ab16bf182a747f2",
+  "curatorSha256": "e7fced75e36eaf79fb820be03f7ef93406e8b820297761ffae70bd5a7f3e82ec",
   "commandProvenance": "RECONSTRUCTED_FROM_CURATOR_ARGUMENTS_NOT_CAPTURED_SHELL",
   "latencyQuantileSource": "PROBE_SQL_PERCENTILE_CONT_COPIED_FROM_RESULT",
-  "partitionDistributionScope": "FULL_GENERATOR_PHASE_INCLUDING_STOP_AND_CATCH_UP",
+  "partitionDistributionScope": "FULL_GENERATOR_PHASE_WITHOUT_INJECTED_STOP",
   "clockBrackets": null,
   "clockBracketMeaning": "INTERVAL_BOUND_WITH_ROUND_TRIP_UNCERTAINTY; NOT_EXACT_SKEW_OR_PROOF_OF_ABSOLUTE_SKEW_UNDER_250MS",
   "files": {

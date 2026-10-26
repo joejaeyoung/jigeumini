@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-26T04:30:28.675804+00:00",
+  "command": "./scripts/infra down",
+  "removedContainers": [
+    "chat-pulse-postgres-1",
+    "chat-pulse-kafka-1"
+  ],
+  "retainedVolumes": [
+    "chat-pulse_kafka-data",
+    "chat-pulse_postgres-data"
+  ],
+  "volumeNamesUnchanged": true,
+  "otherContainerIdsAndNamesUnchanged": true,
+  "otherContainerCount": 6,
+  "scope": "#60 로컬 회귀 종료 후 프로젝트 개발 Kafka/PostgreSQL만 종료. 다른 서비스의 상태 판정은 컨테이너 ID·이름 대조 범위다."
+}

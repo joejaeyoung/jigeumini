@@ -18,7 +18,7 @@ Spring7.0.10의 [SQLStateSQLExceptionTranslator](https://raw.githubusercontent.c
 
 ## 수정 경계
 
-수집 임대 transaction에만 `SET LOCAL idle_in_transaction_session_timeout='2s'`를 적용한다. 기존 잠금1초·SQL3초·클라이언트 transaction4초 제한과 병행하며 전역 DB 설정을 바꾸지 않는다. 이 경로는 DB 호출 사이에 원천 HTTP나 Kafka 요청을 수행하지 않는다. 서버 유휴 timeout은 wall clock RTO 보장이나 장애 중 전체 입력 복원을 뜻하지 않는다.
+수집 임대 transaction에만 `SET LOCAL idle_in_transaction_session_timeout='2s'`를 적용한다. 잠금 대기는1초 lock_timeout이3초 statement_timeout보다 먼저 적용되도록 유지한다.57014로 종료한 SQL은 재시도하지 않는다. 기존 클라이언트 transaction4초 제한과 병행하며 전역 DB 설정을 바꾸지 않는다. 이 경로는 DB 호출 사이에 원천 HTTP나 Kafka 요청을 수행하지 않는다. 서버 유휴 timeout은 wall clock RTO 보장이나 장애 중 전체 입력 복원을 뜻하지 않는다.
 
 rollback을 완료한 임대 tick의55P03만 도메인 잠금 충돌로 전달한다. 아직 임대를 갖지 않은 worker는 기존1초 scheduler 간격으로 최대5회 연속 재시도하고6번째 충돌에서 종료한다. 정상 tick 뒤 연속 횟수를 초기화한다. 기존 실행 기한도 적용하며 누적 재시도 수만 결과에 남긴다. 보유 임대가 있거나 종료 중이면 재시도하지 않는다. 연결 실패·SQL 취소·불확정 commit·rollback 실패도 기존 실패 종료 경계를 유지한다.
 

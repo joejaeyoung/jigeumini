@@ -16,7 +16,7 @@ F16/F08 → T02/T04/T16. clean `4a6b7a82af1396ba80207dd3698687bc35ac0714`의 실
 
 원본 PGDATA, base, archive, restored/missing/gap PGDATA와 누락용 archive copy는 서로 다른 소유 label volume이다. physical DB/WAL이나 생성 비밀을 host 공유 근거로 복사하지 않는다. helper는 network none, 원본 archive는 복구 컨테이너에서 readonly다. 기본 Compose 예산 외에 복구PG3×384MiB와 helper256MiB를 사전 여유 계산에 넣는다. 다른 프로젝트와 worktree는 수정하지 않는다.
 
-정제 결과는 backup manifest hash, 필수 WAL 이름/hash, 시각·LSN·timeline, 업무 snapshot hash/count, 실제 오류 코드, 단계 시간, group 위치를 포함한다. probe class는 실행별 고정/hash 대조한다. 종료 시 이번 실행의 container/volume/비밀을 제거하고 정리 확인을 남긴다.
+정제 결과는 backup manifest hash, 필수 WAL 이름/hash, 시각·LSN·timeline, 업무 snapshot hash/count, 오류 코드(하네스 분류 포함), 단계 시간, group 위치를 포함한다. probe class는 실행별 고정/hash 대조한다. 종료 시 이번 실행의 container/volume/비밀을 제거하고 정리 확인을 남긴다.
 
 ## 실행
 
@@ -48,10 +48,14 @@ named restore point로 고정한 목표이며 임의 timestamp target은 실행�
 
 pg_stat_archiver의 archived_count6·failed_count4를 함께 기록했다. 이번 실행은 필요한segment3개를 모두 확보하고 실제사용·hash를 확인했으나, 앞선archive실패의 원인 로그는 수집하지 않아 미확정이다. archive오류0회나 장기 archive 안정성을 주장하지 않는다.
 
-physical base/archive/PGDATA와 생성비밀은 전부 소유volume에만 두었다. 종료시volume·container·비밀제거를 확인했고 공유근거는설정/LSN/파일명/hash/count/코드만 남겼다. `./scripts/check` 단위147·하네스20·JAR도 통과했다.
+physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접근 권한0700의 실행 디렉터리 아래 임시 secrets 파일에 두고 Compose secrets로 주입했으며 종료 시 삭제했다. volume·container·비밀 제거를 확인했고 공유 근거는 설정/LSN/파일명/hash/count/코드만 남겼다. 실행 코드 `4a6b7a8`의 `./scripts/check`는 단위147·하네스20·JAR가 통과했다. 통합 `44449cd`의 check는 단위152·하네스24·JAR 통과이며 별도 실행이다.
 
 ## 리팩토링·리뷰
 
 기존 배포 리허설의 소유권·이미지identity·업무snapshot·그룹정렬을 재사용하고, WAL archive/restore와 물리복원단계만 분리했다. probeclass를실행별고정하고 실제 삭제전clusterID를검사한다. 소유helper cleanup도maintenance profile을포함한다. 최초64537f8은Claude APPROVE FOR EXPERIMENT였고 후속비차단의소유권/WAL차이검사를반영했다. 최종실제근거HEAD의Claude·push/PR CI는별도게이트다.
 
 최종 보완에서 실제 cluster ID 불일치 가드와 maintenance cleanup의 실패 경로를 별도 음성 실행한 것은 아니다. 코드 가드 존재와 성공 실행의 정리 통과 범위로만 기록한다. archive 실패4회의 원인은 여전히 미확정이며 오류 없는 archive 운영의 근거로 사용하지 않는다.
+
+첫 사전 검사 실패는 volume 생성 전이므로 그 결과의 `physicalBackupAndArchiveVolumesRemoved=true`는 생성했던 데이터를 삭제했다는 뜻이 아니라 소유 잔여 자원이 없다는 확인이다. 원본과 커밋된 preflight-failure.json의 SHA256은 같다.
+
+4a6b7a8 대비 통합3986b15의 main resources·deploy 전체(DB 초기화/Dockerfile 포함)·이미지 생성 스크립트·web·루트 Gradle 설정도 불변이다. server/build.gradle은 디스크 시험용 JavaExec task만 추가했고 제품 의존성은 바꾸지 않았다. 44449cd→3986b15는 문서/근거만 변경됐다. 이 경로별 대조는 통합 JAR와 실제 실행한4a6b7a8 이미지의 byte 동일성을 주장하지 않는다.

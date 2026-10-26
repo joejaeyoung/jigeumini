@@ -23,7 +23,7 @@
 | [#60 DB 유휴 임대 transaction·대기 복구](https://github.com/joejaeyoung/jigeumini/issues/60) | T02/T08/T11/T14 | PR58 e90dc32의 PR CI40263104263 실패: 이전 idle transaction이 plan 잠금을 유지하고 대기 worker가 종료. 실제 SQL 잠금 장벽으로 epoch2 기대/실제1을 로컬 재현. [조사](research/FLEET_DB_LOCK.md)에 유휴 기한만으로 대기 종료를 복구할 수 없는 대조를 기록. ea7da9b 단위159·하네스24·실제Fleet23 통과, Standards/Spec 지적0. [검증](fleet/DB_LOCK_VERIFICATION.md)·[근거](poc/evidence/fleet-db-lock-2026-10-26/full-fleet.json). #44와 함께 최종 게이트 확인 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
-개발 Kafka/PostgreSQL은 필요한 통합 시험 때 기동한다. #46의 자체 격리 실험 전에는 자원 여유를 위해 개발 서비스만 볼륨 보존하여 종료했다. 다른 worktree와 서비스는 변경하지 않는다.
+#60 회귀까지 마친 뒤04:30:28 UTC에 개발 Kafka/PostgreSQL을 `./scripts/infra down`으로 종료했다. 개발 named volume2개는 보존했고 다른6개 container의 ID·이름이 같음을 확인했다. [정리 근거](poc/evidence/local-cleanup-after-fleet-lock-2026-10-26.json). volume 내용 checksum은 측정하지 않았다. 다른 worktree는 변경하지 않았다.
 
 ## 전체 코드 구조 개선 #39
 

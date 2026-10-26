@@ -36,3 +36,5 @@ DB SQLSTATE 분류는 CollectorLeases의 transaction 완료 경계에 모으고,
 [집중 실행 근거](../poc/evidence/fleet-db-lock-2026-10-26/focused.json)의6.228초는 해당 실행의 관측값이다. 전체 회귀의 시각·개별 계수는 별도 근거를 사용하며 운영 RTO 상한으로 일반화하지 않는다. 웹 코드 변경은 없고 전체 push/PR CI에서는 실제 통합 suite와 웹 검증을 다시 확인한다.
 
 `f37a4c0...ea7da9b`의 읽기 전용 Standards는 하드/heuristic/차단0, Spec은 지적/차단0이었다. 두 리뷰는 코드·명세·원본 hash를 검사했으며 직접 테스트를 실행하거나 최종 CI 성공을 판정한 기록은 아니다.
+
+DB backend 표본은 최대100개로 제한한다. 표본 수를 지속 시간으로 환산하지 않으며 인계 시간은 별도 nanoTime 경계로 측정한다. 최초 표본 수 차이만으로 실행 간 부하나 복구 속도를 비교하지 않는다.

@@ -350,3 +350,5 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 94da3ad의push40260027568·PR40260031297에서실제Fleet14개(새경계7개)가모두통과했다. 전자는전체성공, 후자는기존Outbox1개실패였다. [검증](fleet/FAILURE_BOUNDARIES_VERIFICATION.md)·[근거](poc/evidence/collector-boundaries-2026-10-26/summary.json)에실제2JVM시계/분리장애와별도같은JVM의permit/send/ACK경합을구분했다. DBblackhole인계6.082초·이전프로세스생존·이전sessionmarker0, WS공백1/복원0, 검사후send는ACK가능을기록했다.
 
 #43의420efa3(선행#42/#52/#54포함)을통합했다. Clockargs와bootstrapargs충돌은 mode/clock/bootstrap 위치를통일하고, 2종시작진단을#54의phase/예외타입/허용코드진단으로합쳤다. 실제producer관측과clock제어는보존한다. 진단쓰기실패가cleanup을막지않게했고 성공한process/report만함께등록한다. 제품Clock전달과임대전metadata재시도경계를모두유지하고기존한도는바꾸지않았다. 새통합HEAD의20개Fleet회귀와최종리뷰/CI를확인한다.
+
+통합 `34e824e`에서 단위152·하네스24·JAR, 실제 Kafka/DB Fleet20개가 143.251초에 실패0으로 통과했다. XML·각 진단 hash와 permit 경계3개 결과를 보존했다. Standards/Spec은 각각 지적0·차단0이다. 원래 CI14개 수치와 로컬 통합20개 수치를 혼합하지 않는다.

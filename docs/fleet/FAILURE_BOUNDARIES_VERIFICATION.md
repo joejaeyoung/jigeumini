@@ -8,6 +8,8 @@
 
 GitHub Actions의 `94da3ad`에서 push40260027568·PR40260031297의 Fleet14개가 각각143.817/143.001초에 통과했다. 전체 push는성공, PR은 기존 Outbox 시험1개 실패였다. #52/#54 반영 후 최종 HEAD의 리뷰·CI는 별도다. [정제 근거](../poc/evidence/collector-boundaries-2026-10-26/summary.json)에 두 실행과 XML/JSON hash를 기록한다. 아래 수치는 push 실행이다.
 
+통합 코드 `34e824e`의 로컬 `./scripts/check`는 단위152·하네스24·JAR, 실제 Kafka/DB Fleet20개는 143.251초에 실패0으로 통과했다. #54 시작 복구/유한 실패와 정상 인계5회, #44 경계7개를 함께 실행했다. [통합 근거](../poc/evidence/collector-boundaries-2026-10-26/integrated-local.json)는 기존 CI14개와 별도 실행으로 보존한다. Standards/Spec 검토는 각각 지적0·차단0이다.
+
 ## 실제 두 프로세스 결과
 
 | 조건 | 관측 | 집합 대조 |

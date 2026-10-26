@@ -38,5 +38,13 @@
     "broker fencing이 아닌 협력 worker의 마지막 permit 검사이며 검사 후 send 경합은 ACK 가능",
     "합성 원천 공백1건은 복원되지 않음",
     "이 CI는 #52/#54 통합 전; 최종 병합 게이트 별도"
-  ]
+  ],
+  "integratedLocal": {
+    "revision": "34e824ef3db461cb8474d0be779bd7c148409d8b",
+    "evidence": "integrated-local.json",
+    "unit": 152,
+    "harness": 24,
+    "fleet": 20,
+    "failures": 0
+  }
 }

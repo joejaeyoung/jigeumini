@@ -1,0 +1,36 @@
+{
+  "recordedDate": "2026-10-27 KST",
+  "base": "cca98772927a5c8e42717c2df3128829e827f83f",
+  "decision": "DEFER_PRODUCT_SHARDING",
+  "productDefault": {
+    "partitions": 3,
+    "shardsPerChannel": 1,
+    "consumersPerGroup": 1
+  },
+  "newLoadExecuted": false,
+  "productShardingCorrectnessExecuted": false,
+  "sources": [
+    {
+      "path": "docs/poc/evidence/sharding-2026-10-26/report/summary.json",
+      "sha256": "cf542617472d285bafd8933c97a7ca07aafec98ced18728b5b87ae9d54409a74"
+    },
+    {
+      "path": "docs/poc/evidence/projection-performance-2026-10-27/summary.json",
+      "sha256": "5646f764331ad3f91da8683ea161561fffe960fc9e924978f711cc4ad5f0b034"
+    },
+    {
+      "path": "docs/PROJECTION_PERFORMANCE_VERIFICATION.md",
+      "sha256": "2bada96c65815ce0fc3a21bbe23ccc3bda2cb558b79d74722ab0e2401299bcdc"
+    },
+    {
+      "path": "docs/pipeline/SHARDING_REVIEW.md",
+      "sha256": "33d009a5e06564da8b478caa8cc50adb3b8b2239a979bd53cd540b6f51683d5d"
+    }
+  ],
+  "limitations": [
+    "SIMPLE_BUCKET_C3_BENEFIT_IS_NOT_PRODUCT_BENEFIT",
+    "C1_SINGLE_LAST_RUN_DOES_NOT_ISOLATE_CAUSE",
+    "PRODUCT_MIXED_ROUTING_QUALITY_TRANSITION_PITR_NOT_EXECUTED",
+    "REOPEN_THRESHOLDS_ARE_DESIGN_CHOICES_NOT_MEASUREMENTS"
+  ]
+}

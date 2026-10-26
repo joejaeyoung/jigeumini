@@ -28,8 +28,8 @@
   },
   "curators": {
     "collector": {
-      "bytes": 7479,
-      "sha256": "d6747a0d80d0eb41f94d494088a3f87b65ab3d028135744457dcaee10f967a96"
+      "bytes": 8287,
+      "sha256": "a306c59862c64d7e242c8996b6ae1192543d606ce9e3d649ef4c28030d14b415"
     },
     "capacity": {
       "bytes": 10290,
@@ -76,7 +76,6 @@
       "codeCommit": "f9b7713932dc14cf7ea3ae5b88dd88dbc33d8ba7",
       "mainTree": "10e2f9a905573a03e13e1df94b345e9aa9269c91",
       "experimentSourceSha256": "92753adf270dbf3babc783a5699e56140e9e55fdd2126d414814dafa252cf270",
-      "gradleExitCode": 1,
       "completed": false,
       "command": [
         "./scripts/collector-memory",
@@ -94,7 +93,12 @@
         }
       },
       "runtimeFailureCode": "JAVA_HEAP_SPACE",
-      "commandProvenance": "SESSION_COMMAND_AND_CLEAN_COMMIT_RECONSTRUCTED"
+      "childExitCode": 3,
+      "childExitCodeProvenance": "GRADLE_PROCESS_FAILURE_LOG",
+      "commandProvenance": "SESSION_COMMAND_AND_CLEAN_COMMIT_RECONSTRUCTED",
+      "gradleExitCode": null,
+      "gradleExitCodeProvenance": "NOT_CAPTURED_IN_ARTIFACT",
+      "expectedGradleExitCode": 1
     },
     {
       "scope": "LOCAL_WEBSOCKET_ONLY_NO_HTTP_KAFKA_DB_OR_ORACLE",
@@ -205,7 +209,6 @@
       "codeCommit": "f9b7713932dc14cf7ea3ae5b88dd88dbc33d8ba7",
       "mainTree": "10e2f9a905573a03e13e1df94b345e9aa9269c91",
       "experimentSourceSha256": "92753adf270dbf3babc783a5699e56140e9e55fdd2126d414814dafa252cf270",
-      "gradleExitCode": 1,
       "completed": true,
       "command": [
         "./scripts/collector-memory",
@@ -222,7 +225,12 @@
           "sha256": "8d859518681681fd50b0b925f5d43bc53919925a3a16830f2d0301257142d616"
         }
       },
-      "commandProvenance": "SESSION_COMMAND_AND_CLEAN_COMMIT_RECONSTRUCTED"
+      "childExitCode": 2,
+      "childExitCodeProvenance": "GRADLE_PROCESS_FAILURE_LOG",
+      "commandProvenance": "SESSION_COMMAND_AND_CLEAN_COMMIT_RECONSTRUCTED",
+      "gradleExitCode": null,
+      "gradleExitCodeProvenance": "NOT_CAPTURED_IN_ARTIFACT",
+      "expectedGradleExitCode": 1
     },
     {
       "scope": "LOCAL_WEBSOCKET_ONLY_NO_HTTP_KAFKA_DB_OR_ORACLE",
@@ -308,7 +316,6 @@
       "codeCommit": "876bb68bf1236e8ab52d47db5438998424f44019",
       "mainTree": "d6632ba8c2572139a0aa5c8fe8d117d4a8a2f2f1",
       "experimentSourceSha256": "92753adf270dbf3babc783a5699e56140e9e55fdd2126d414814dafa252cf270",
-      "gradleExitCode": 0,
       "completed": true,
       "command": [
         "./scripts/collector-memory",
@@ -325,7 +332,12 @@
           "sha256": "e423870b8dc8ae8171cdcb23c95f3d14ec9c96dc6b58700b8e41702a2d28c645"
         }
       },
-      "commandProvenance": "CAPTURED_WRAPPER"
+      "childExitCode": null,
+      "childExitCodeProvenance": "NOT_SEPARATELY_CAPTURED",
+      "commandProvenance": "CAPTURED_WRAPPER",
+      "gradleExitCode": 0,
+      "gradleExitCodeProvenance": "CAPTURED_WRAPPER",
+      "expectedGradleExitCode": 0
     },
     {
       "scope": "LOCAL_WEBSOCKET_ONLY_NO_HTTP_KAFKA_DB_OR_ORACLE",
@@ -435,7 +447,6 @@
       "codeCommit": "876bb68bf1236e8ab52d47db5438998424f44019",
       "mainTree": "d6632ba8c2572139a0aa5c8fe8d117d4a8a2f2f1",
       "experimentSourceSha256": "92753adf270dbf3babc783a5699e56140e9e55fdd2126d414814dafa252cf270",
-      "gradleExitCode": 0,
       "completed": true,
       "command": [
         "./scripts/collector-memory",
@@ -452,7 +463,12 @@
           "sha256": "b32a3f627d08bc7add9a65a5f9d5726dd76dbbe457537aa79d79b872f1dc9e53"
         }
       },
-      "commandProvenance": "CAPTURED_WRAPPER"
+      "childExitCode": null,
+      "childExitCodeProvenance": "NOT_SEPARATELY_CAPTURED",
+      "commandProvenance": "CAPTURED_WRAPPER",
+      "gradleExitCode": 0,
+      "gradleExitCodeProvenance": "CAPTURED_WRAPPER",
+      "expectedGradleExitCode": 0
     }
   ],
   "productRuns": [
@@ -731,6 +747,10 @@
         "measurementCoverage": null,
         "failures": null,
         "readinessStatuses": {}
+      },
+      "probeThreads": {
+        "maximumSampled": null,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
       },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
@@ -1570,6 +1590,10 @@
         "readinessStatuses": {
           "200": 59
         }
+      },
+      "probeThreads": {
+        "maximumSampled": 256,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
       },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
@@ -2639,6 +2663,10 @@
           "200": 18
         }
       },
+      "probeThreads": {
+        "maximumSampled": 419,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
+      },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
         "scope": "PROBE_SLOW_SAMPLES; CLOCK_DIVERGENCE_OBSERVATION_NOT_CAUSE_IDENTIFICATION",
@@ -3545,6 +3573,10 @@
         "readinessStatuses": {
           "200": 18
         }
+      },
+      "probeThreads": {
+        "maximumSampled": 655,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
       },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
@@ -4453,6 +4485,10 @@
           "200": 18
         }
       },
+      "probeThreads": {
+        "maximumSampled": 956,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
+      },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
         "scope": "PROBE_SLOW_SAMPLES; CLOCK_DIVERGENCE_OBSERVATION_NOT_CAUSE_IDENTIFICATION",
@@ -5358,6 +5394,10 @@
         "readinessStatuses": {
           "200": 59
         }
+      },
+      "probeThreads": {
+        "maximumSampled": 956,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
       },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
@@ -6442,6 +6482,10 @@
           "503": 2
         }
       },
+      "probeThreads": {
+        "maximumSampled": 1257,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
+      },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",
         "scope": "PROBE_SLOW_SAMPLES; CLOCK_DIVERGENCE_OBSERVATION_NOT_CAUSE_IDENTIFICATION",
@@ -7351,6 +7395,10 @@
         "readinessStatuses": {
           "200": 18
         }
+      },
+      "probeThreads": {
+        "maximumSampled": 1259,
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"
       },
       "wallVsMonotonicResidual": {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",

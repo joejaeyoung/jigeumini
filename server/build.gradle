@@ -94,7 +94,9 @@ tasks.register('collectorMemoryExperiment', JavaExec) {
     maxHeapSize = '64m'
     jvmArgs '-XX:+ExitOnOutOfMemoryError'
     workingDir = rootProject.projectDir
-    args providers.gradleProperty('collectorMemoryProfile').get(), providers.gradleProperty('collectorMemoryOutput').get()
+    if (providers.gradleProperty('collectorMemoryProfile').isPresent() && providers.gradleProperty('collectorMemoryOutput').isPresent()) {
+        args providers.gradleProperty('collectorMemoryProfile').get(), providers.gradleProperty('collectorMemoryOutput').get()
+    }
 }
 
 tasks.register('haExperiment', JavaExec) {

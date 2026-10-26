@@ -115,3 +115,5 @@ F01/F10 → T02/T04/T06/T07/T08. 기존 suffix 배정의 hash 충돌을 발견�
 F01/F13/F14 → T02/T08/T11/T12/T14. `IncomingText`는 UTF-8 전체 한도·surrogate 경계·완료/실패 초기화를 소유한다. `ChatConnection`은 완성 메시지만 protocol/sink/관측에 전달한다. 공개 `ChatProtocol.decode(String, ...)`도 같은 byte 검사를 사용하고 내부 Complete 경로는 중복 순회를 피한다. 실제 UTF-8 codec은 transport가 담당하며 별도 JSON parser를 만들지 않는다.
 
 `ChatSocketClient`는 고정 Tomcat container의 설정·연결·종료를 소유하는 작은 내부 모듈이다. `ChannelProbe`는 재접속 정책과 scheduler 수명을 유지한다. 소켓 close와 container destroy의 차이를 이 모듈에 감추고 late handshake도 정리한다. 공유 singleton client·범용 transport interface는 도입하지 않는다. 정확히1MiB·wire fragment·재접속·다른 owner 보존과 실제 heap/자원 반복 시험으로 경계를 검증한다. [조사](research/COLLECTOR_TEXT_MEMORY.md).
+
+최종 리뷰에서 실험 태스크의 속성 평가는 실행 인자가 제공될 때만 하도록 보완해 일반 Gradle 탐색과 실험 실행의 설정 경계를 분리했다. 정제기의 실제/기대 종료값·출처도 구분하며 전체 메시지 한도를 전역 조립 예산으로 설명하지 않는다.

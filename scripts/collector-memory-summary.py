@@ -4,6 +4,7 @@ from collections import Counter
 import importlib.util
 import json
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -33,15 +34,24 @@ def memory(root, name, commit, expected_exit):
     result.update({"name": name, "codeCommit": commit, "mainTree": revision(commit + ":server/src/main"),
                    "experimentSourceSha256": hashlib.sha256(subprocess.check_output([
                        "git", "show", commit + ":server/src/test/java/io/chatpulse/poc/CollectorMemoryExperiment.java"])).hexdigest(),
-                   "gradleExitCode": expected_exit, "completed": "finishedAt" in raw,
+                   "completed": "finishedAt" in raw,
                    "command": ["./scripts/collector-memory", raw["profile"], str(path)],
                    "artifacts": {path.name: digest(path), log.name: digest(log)}})
-    if "Java heap space" in log.read_text(): result["runtimeFailureCode"] = "JAVA_HEAP_SPACE"
+    log_text = log.read_text()
+    if "Java heap space" in log_text: result["runtimeFailureCode"] = "JAVA_HEAP_SPACE"
+    child_exit = re.search(r"finished with non-zero exit value (\d+)", log_text)
+    result["childExitCode"] = int(child_exit.group(1)) if child_exit else None
+    result["childExitCodeProvenance"] = "GRADLE_PROCESS_FAILURE_LOG" if child_exit else "NOT_SEPARATELY_CAPTURED"
     execution = root / (name + "-execution.json")
     result["commandProvenance"] = "CAPTURED_WRAPPER" if execution.exists() else "SESSION_COMMAND_AND_CLEAN_COMMIT_RECONSTRUCTED"
+    result["gradleExitCode"] = None
+    result["gradleExitCodeProvenance"] = "NOT_CAPTURED_IN_ARTIFACT"
+    result["expectedGradleExitCode"] = expected_exit
     if execution.exists():
         meta = json.loads(execution.read_text())
         assert meta["codeCommit"] == commit and meta["exitCode"] == expected_exit
+        result["gradleExitCode"] = meta["exitCode"]
+        result["gradleExitCodeProvenance"] = "CAPTURED_WRAPPER"
     return result
 
 def execution(path):
@@ -61,6 +71,9 @@ def product(directory):
         str(response.get("status", "ERROR")) for sample in raw.get("load", {}).get("samples", [])
         for response in sample.get("api", []) if response.get("path") == "/readyz"))
     load = raw.get("load", {})
+    result["probeThreads"] = {"maximumSampled": max((sample["probeThreadCount"]
+        for sample in load.get("samples", []) if "probeThreadCount" in sample), default=None),
+        "scope": "PROBE_ALL_SLOW_SAMPLES; INCLUDES_ORACLE_API_AND_SAMPLING_THREADS"}
     base = load.get("inputStartedAtEpochMillis")
     result["wallVsMonotonicResidual"] = {
         "formula": "sample.startedAtEpochMillis - inputStartedAtEpochMillis - sample.elapsedSeconds * 1000",

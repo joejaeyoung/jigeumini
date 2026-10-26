@@ -38,9 +38,11 @@ msgTime/messageTime의 정수 epoch milliseconds를 사용한다. 현재보다 5
   UTF-8 byte/UTF-16 surrogate 경계와 마지막 조각을 구분하며 완성된 JSON만 한 번 처리·계수한다.
   누적 초과는 FRAME_TOO_LARGE, 잘못된 surrogate는 INVALID_TEXT_ENCODING으로 실패·손실 기록한다.
   완성·실패·연결 종료 때 조립 버퍼를 버리며 이전 연결의 부분 JSON을 재사용하지 않는다.
+  실패가 확정되면 즉시 수신 처리를 비활성화한다. 실제 socket close 전 도착한 후속 조각·완성 메시지도 처리·발행하지 않는다.
 - `ChatSocketClient`는 ChannelProbe 실행당 소유 Tomcat container를 닫고 공유 IO group 등록을 해제한다.
   재접속은 같은 owner 안에서 진행하며 종료와 겹쳐 늦게 완료된 연결도 닫는다.
-  다른 실행의 container·연결은 유지한다. 큰 메시지 조립 중의 유한 메모리 비용은 여전히 존재한다.
+  다른 실행의 container·연결은 유지한다. 메시지별 조립 한도만 있으며 연결 전체의 조립 메모리 예산은 없다.
+  여러 연결에 큰 메시지가 동시에 오면 실행 중 heap 부족이 가능하며 T11 후속 검증 범위다.
 - 독립 heartbeat scheduler에서 20초마다 JSON ping을 전송하고 10초 안에 pong을 기다린다.
   채팅이 계속 들어와도 pong이 없으면 timeout이다. 서버 ping에는 즉시 pong을 보낸다.
 - 채팅방 상태를 30초마다 다시 확인하고 room 변경 시 토큰부터 재발급한다.

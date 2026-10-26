@@ -34,6 +34,7 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         experiment.result.put("limitations",List.of("BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M","FILE_DELETE_DELAY_1S","TIME_CASE_RETENTION_4S_NOT_24H","BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT","LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA","NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"));
         try{experiment.open();experiment.scenario(false);experiment.scenario(true);experiment.result.put("correct",true);}
         catch(Exception failure){experiment.result.put("correct",false);experiment.result.put("failedPhase",experiment.phase);experiment.result.put("failureType",failure.getClass().getSimpleName());
+            if(failure.getCause()!=null)experiment.result.put("causeType",failure.getCause().getClass().getSimpleName());
             if(failure.getMessage()!=null&&failure.getMessage().matches("RETENTION_[A-Z_]+"))experiment.result.put("failureCode",failure.getMessage());}
         finally{experiment.close();Runtime.getRuntime().removeShutdownHook(hook);experiment.result.put("cleanupComplete",experiment.cleaned);if(!experiment.cleaned)experiment.result.put("correct",false);experiment.result.put("finishedAt",Instant.now().toString());experiment.save();}
         System.out.println(JSON.writeValueAsString(Map.of("correct",experiment.result.get("correct"),"cleanupComplete",experiment.cleaned)));
@@ -62,13 +63,18 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
         require(ready,"RETENTION_BROKER_NOT_READY");
         result.put("container",Map.of("cpus",1,"memoryBytes",768L*1024*1024,"replicationFactor",1));
         var resource=new ConfigResource(ConfigResource.Type.BROKER,"1");
-        result.put("retentionCheckMillis",admin.describeConfigs(List.of(resource)).all().get(5,TimeUnit.SECONDS).get(resource).get("log.retention.check.interval.ms").value());save();
+        result.put("retentionCheckMillis",admin.describeConfigs(List.of(resource)).all().get(5,TimeUnit.SECONDS).get(resource).get("log.retention.check.interval.ms").value());
+        // 첫 하네스의 16KiB 설정 실패를 broker 오류 형으로 재확인한다. 4.1의 최소값은 1MiB다.
+        boolean invalidRejected=false;
+        try{admin.createTopics(List.of(new NewTopic("retention.invalid."+owner,1,(short)1).configs(Map.of("segment.bytes","16384")))).all().get(5,TimeUnit.SECONDS);}
+        catch(ExecutionException failure){if(failure.getCause() instanceof org.apache.kafka.common.errors.InvalidConfigurationException){invalidRejected=true;result.put("minimumSegmentRejection",failure.getCause().getClass().getSimpleName());}else throw failure;}
+        require(invalidRejected,"RETENTION_INVALID_CONFIG_ACCEPTED");save();
     }
     private void scenario(boolean bytes) throws Exception {
         phase=bytes?"BYTES_FIRST":"TIME_FIRST";String topic="retention."+(bytes?"bytes.":"time.")+owner;
         var config=new LinkedHashMap<String,String>();config.put("cleanup.policy","delete");config.put("message.timestamp.type","CreateTime");
         config.put("retention.ms",bytes?"86400000":"4000");config.put("retention.bytes",bytes?"268435456":"-1");
-        config.put("segment.bytes",bytes?"33554432":"16384");config.put("segment.ms",bytes?"604800000":"1000");config.put("file.delete.delay.ms","1000");
+        config.put("segment.bytes",bytes?"33554432":"1048576");config.put("segment.ms",bytes?"604800000":"1000");config.put("file.delete.delay.ms","1000");
         admin.createTopics(List.of(new NewTopic(topic,3,(short)1).configs(config))).all().get(10,TimeUnit.SECONDS);
         var row=new LinkedHashMap<String,Object>();result.put(bytes?"bytesFirst":"timeFirst",row);row.put("startedAt",Instant.now().toString());
         var resource=new ConfigResource(ConfigResource.Type.TOPIC,topic);var effective=admin.describeConfigs(List.of(resource)).all().get(5,TimeUnit.SECONDS).get(resource);

@@ -680,3 +680,5 @@ origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #6
 고정 cd4dd43의 Standards/Spec 리뷰에서 report 부모1,000행 한도 진단과 오래된 pending outbox 첫 수신 누락을 발견했다. CleanupBatch로 각 삭제 한도 도달을 보존하고, 소비 인터페이스에서 정리 책임을 분리했다. 알림은 현재 outbox가 존재하는 경우 기간 밖에서도 receipt를 남기되 feed7일 조회는 유지한다. 실제 Kafka의8일 지연 첫 발행·소비와 자식 없는 부모1,001개 정리를 추가해13개 경계 테스트가 통과했다. 새 DB/WAL·Kafka segment 하네스는 측정 전 구현 단계다.
 
 #65의 squash commit과 승인 HEAD 전체 트리가 동일함을 확인한 뒤 동일 내용의 develop 이력을 연결했다. 기능 내용을 폐기하는 merge에는 사용하지 않았다. 다른 worktree는 변경하지 않았다.
+
+보존 하네스93cf16f의 DB 측정은 정합/cleanup 통과다. 각 집계60,000행×3회·동시10,000건을 대조했고 shared floor 대기는119ms였다. 500/s 목표 입력은 최대pacing1.783초로 밀려 처리율 보장으로 세지 않는다. Kafka 첫 실행은 topic 생성 단계에서 종료했고 소유 자원을 정리했다. 원인은 최초 결과에서 cause를 누락해 확정하지 않았으며, 16KiB segment가 공식4.1 최소1MiB 미만인 설정을 찾아 최소값으로 수정하고 동일broker의 InvalidConfigurationException 대조를 추가했다.

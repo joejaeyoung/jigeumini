@@ -2,7 +2,7 @@
 
 2026-10-26 · 기능 이슈 병합·후속 구조 개선 회귀 기준
 
-## 기술 검증 보강 #41~#49
+## 기술 검증 보강 #41~#49·CI 보완 #52
 
 2026-10-26 사용자 요청으로 미검증 경계를 독립 이슈로 등록했다. 기반은 PR #40 병합 `dcdc244`다.
 구현 이슈 완료와 기술 검증 범위를 구분하며, 아래 외부 조건이 준비되지 않은 이슈는 실제 실행을 완료로 표시하지 않는다.
@@ -10,14 +10,15 @@
 | 이슈 | 기술 목표 | 상태·선행 조건 |
 |---|---|---|
 | [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 완료: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50) 최종 `bde3a47` Claude APPROVE·push40253684968/PR40253689010 SUCCESS 뒤 `c2aeffc`로 develop 병합. 단위147·실제100·하네스20·웹29/31; [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[근거](poc/evidence/trend-recovery-2026-10-26.json) |
-| [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 진행 중: [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51), `bc2ff5b`의 V13 복구16단계·기존 V12 회귀17단계·하네스20개 통과·Claude 정적 APPROVE; [검증](DEPLOYMENT_MIGRATION_VERIFICATION.md)·[근거](poc/evidence/migration-recovery-2026-10-26/summary.json), 최종 문서 HEAD 리뷰/CI 대기 |
-| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 진행 중: 격리 이미지의 그룹6개·API 동시 실행, 독립 입력 기대값·그룹별 lag·heap/RSS·분석기 STOP/CONT 하네스 구현. smoke와 최소30분 부하 실행 전 |
+| [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 진행 중: [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51), `bc2ff5b`의 V13 복구16단계·기존 V12 회귀17단계·하네스20개 통과·Claude 정적 APPROVE; [검증](DEPLOYMENT_MIGRATION_VERIFICATION.md)·[근거](poc/evidence/migration-recovery-2026-10-26/summary.json), 최종 `44615d0` Claude APPROVE·push40254939425 성공, PR40254943726 Outbox 시험 실패로 병합 대기(#52). 재실행 성공을 원인 수정으로 계산하지 않음 |
+| [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 진행 중: 격리 이미지의 그룹6개·API 동시 실행, 독립 입력 기대값·그룹별 lag·heap/RSS·분석기 STOP/CONT 하네스 구현. `6799d11` smoke60초 고유1200/물리1212 대조·정리 통과. 계측 시간 공백 검사를 보강하며 전체 matrix와 최소30분 실행 대기 |
 | [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
 | [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | 대기: 소유한 격리 replica 데이터 손실·새 디스크 복구 |
 | [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 대기: base backup/WAL·복원 목표·Kafka 위치 정렬 |
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |
 | [#48 실제 다중 호스트/AZ](https://github.com/joejaeyoung/jigeumini/issues/48) | T08/T10/T15 | #43/#45 및 외부 계정·리전·AZ·예산 필요 |
 | [#49 외부 배포·운영 복구](https://github.com/joejaeyoung/jigeumini/issues/49) | T08/T13/T15/T16 | #42/#43/#46/#47/#48 및 배포 대상·도메인·운영 목표 필요 |
+| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | 진행 중: PR51 CI의 예상 예외 미발생을 보존. 로컬40회 재현 안 됨; 실제 broker 설정·거부 준비와 복구 대기 계약 보강 예정 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
 이번 검증을 위해 개발 Kafka/PostgreSQL을 다시 기동했다. 다른 worktree와 서비스는 변경하지 않는다.

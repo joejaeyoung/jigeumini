@@ -46,7 +46,7 @@ public final class ProductLoadProbe {
             try(var telemetry=new CollectionTelemetry(jdbc,tx,publisher);var measurements=new ProductLoadMeasurements(config,jdbc,publisher,fixture.channels.get(0))) {
                 Instant base=Instant.now().minusSeconds(2).truncatedTo(ChronoUnit.MICROS);result.put("eventBase",base);result.put("channelOrder",fixture.channels);
                 for(String channel:fixture.channels) {telemetry.start(channel);telemetry.connected(channel,id("session/"+channel),base);}
-                telemetry.start();startNanos=System.nanoTime();
+                telemetry.start();startNanos=System.nanoTime();result.put("inputStartedAtEpochMillis",System.currentTimeMillis());
                 scheduler.scheduleWithFixedDelay(()->{
                     try {
                         var sample=measurements.sample(phase,elapsed());

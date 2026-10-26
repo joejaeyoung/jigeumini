@@ -202,7 +202,7 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 ./scripts/product-load work/product-load-images.json soak work/product-load-soak
 ```
 
-각 출력 경로는 새 디렉터리여야 한다. soak은50건/s·20채널·30분과 분석기20초 정지/재개를 포함한다. 관측/세션/heartbeat와 outbox는 합성 입력이다. 결과는 `result.json`과 `probe-output/load.json`, 독립1초 offset 표본은 `probe-output/offsets.jsonl`에 남는다. API/DB 지연·별도 JVM 메모리는5초 주기로 따로 읽고, 종료 후 모든 집계를 대조한다. 복구 시간은 재개 뒤 첫 Kafka end를 고정해 해당 위치까지 따라잡은 표본 시각이다. 입력 종료 뒤 전체0lag도 확인한다. 정상 구간 계측 성공률90%·최소 표본 수·API200을 완료 조건으로 검사한다. heap용 JMX는 시험 내부망에만 열고 자동 정리한다. 표본 시간은 실제 간격으로 해석하며 운영 용량/SLA를 뜻하지 않는다. 이미지·고정 복사한 시험 클래스는 로컬에 남는다.
+각 출력 경로는 새 디렉터리여야 한다. soak은50건/s·20채널·30분과 분석기20초 정지/재개를 포함한다. 관측/세션/heartbeat와 outbox는 합성 입력이다. 결과는 `result.json`과 `probe-output/load.json`, 독립1초 offset 표본은 `probe-output/offsets.jsonl`에 남는다. API/DB 지연·별도 JVM 메모리는5초 주기로 따로 읽고, 종료 후 모든 집계를 대조한다. 복구 시간은 재개 뒤 첫 Kafka end를 고정해 해당 위치까지 따라잡은 표본 시각이다. 입력 종료 뒤 전체0lag도 확인한다. 정상 구간 계측 성공률90%·최소 표본 수·API200을 완료 조건으로 검사한다. API/DB/heap/RSS/버퍼는 정상10초 창의90% 이상을 함께 관측하고 정상 구간의 완전한 표본 간격이15초를 넘으면 실패한다. heap용 JMX는 시험 내부망에만 열고 자동 정리한다. 표본 시간은 실제 간격으로 해석하며 운영 용량/SLA를 뜻하지 않는다. 이미지·고정 복사한 시험 클래스는 로컬에 남는다.
 
 | 위치 | 내용 |
 |---|---|

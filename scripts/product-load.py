@@ -94,7 +94,7 @@ class ProductLoad(module.Rehearsal):
         return sample
     def start_fixture(self,service,main,args,output,heap):
         name=self.project+'-'+service
-        self.compose('run','-d','--no-deps','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
+        self.compose('run','-d','--no-deps','--use-aliases','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
             '-v',str(self.classes)+':/probe:ro','-v',str(self.libraries)+':/probe-lib:ro','-v',str(self.frozen_plan)+':/load-plan.json:ro',
             '-v',str(output)+':/output',service,'-Xms32m','-Xmx'+heap,
             '-Dsun.rmi.transport.tcp.responseTimeout=2000','-Dsun.rmi.transport.tcp.handshakeTimeout=2000',

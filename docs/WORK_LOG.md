@@ -272,3 +272,8 @@ F16/F08 → T02/T04/T16. origin/develop에서 technicaltest/postgres-pitr를 분
 base/T/C·named target pause/쓰기거부·resume/새timeline·Kafka 새group 초기offset/최종업무대조·필수WAL누락FATAL·retentiongap거부를 순차 검사한다. 원본 physical backup/archive와 모든 복구 PGDATA를 소유 volume으로 분리하고 성공/실패 모두 공통 정리 수명으로 회수한다. 새로운 overlay 쓰기도 run의 PREPARE 단계로 옮겨 파일 생성 실패 뒤 비밀 정리가 가능하도록 했다.
 
 사전 Spec/Standards는 동적 import의 pyc가 clean preflight를 깨는 문제, WAL helper0644 실행 모드, 새group 초기offset 독립 검사 공백을 찾아 수정했다. import bytecode 억제·100755·최초 offset 없음→DB next==commit 직접 관측을 반영했다. 테스트용 DeploymentProbe만 실제 deleteRecords 음성 시나리오를 추가하고 제품 복구/소비 코드는 재사용했다. 정적 리뷰와 실제 성공을 구분하며 실행 결과는 후속 근거로 기록한다.
+
+
+### #46 진입 승인 후 보완
+
+Claude64537f8은 APPROVE FOR EXPERIMENT였다. 비차단 권고를 반영해 실제 retention gap 삭제 전에 이번 소유 Kafka cluster ID 일치를 요구하고, WAL 복사본 차이가 필요한 segment 하나뿐인지 hash inventory로 확인한다. 누락 WAL이 실제 restore helper 사용 목록에 없음을 검사하고 복원 서버 버전도 원본과 대조한다. maintenance profile의 helper를 cleanup에 포함하며 trim 전 복원 DB의 보존 로그 복구 가능성도 확인한다. 원본 backup/archive를 그대로 보존한 새 복원 디스크만 사용한다.

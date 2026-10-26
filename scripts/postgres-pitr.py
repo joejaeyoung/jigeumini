@@ -28,6 +28,7 @@ class PitrRehearsal(module.Rehearsal):
         self.overlay.write_text(json.dumps({'services':services,'volumes':{'pitr-'+name:{'labels':labels} for name in volumes}}))
     def compose(self,*args,**kwargs):
         if not hasattr(self,'overlay') or not self.overlay.exists():return super().compose(*args,**kwargs)
+        if args and args[0]=='down':args=('--profile','maintenance',*args)
         return self.command(['docker','compose','--env-file',str(self.envfile),'-p',self.project,'-f',str(ROOT/'deploy/compose.yaml'),'-f',str(self.overlay),*args],**kwargs)
     def sql(self,statement,database=None,user='app_owner',check=True,sqlstate=False):
         cid,_=self.owned(self.database_service)
@@ -119,11 +120,18 @@ class PitrRehearsal(module.Rehearsal):
         self.helper('cp -a /pitr/archive/. /pitr/missing-archive/; rm /pitr/missing-archive/'+self.target_wal+'; chown -R postgres:postgres /pitr/missing-archive')
         check=self.helper('test ! -e /pitr/missing-archive/'+self.target_wal+'; test ! -e /pitr/base/pg_wal/'+self.target_wal+'; sha256sum /pitr/archive/'+self.target_wal).stdout.split()[0]
         assert check==self.result['archiveHashes'][self.target_wal]
+        inventory=self.helper('for dir in archive missing-archive; do for file in /pitr/$dir/*; do test -f "$file" || continue; sha256sum "$file"; done; done').stdout.splitlines()
+        inventories={'archive':{},'missing-archive':{}}
+        for line in inventory:
+            digest,path=line.split(maxsplit=1);parts=path.split('/');inventories[parts[-2]][parts[-1]]=digest
+        expected=dict(inventories['archive']);expected.pop(self.target_wal)
+        assert inventories['missing-archive']==expected
         self.compose('up','-d','--no-deps','pitr-missing');self.until(lambda:self.owned('pitr-missing')[1]['State']['Status']=='exited',90)
         _,info=self.owned('pitr-missing');assert info['State']['ExitCode']!=0 and not info['State']['OOMKilled']
         logs=self.compose('logs','--no-color','--no-log-prefix','pitr-missing').stdout
         assert 'recovery ended before configured recovery target was reached' in logs
-        return {'requiredWal':self.target_wal,'missingFromArchiveCopy':True,'absentFromBase':True,'targetReached':False,'writableSuccess':False,'exitCode':info['State']['ExitCode'],'failureCode':'RECOVERY_ENDED_BEFORE_TARGET','sourceArchivePreserved':True}
+        used=self.helper('if test -f /pitr/used/missing.log; then cat /pitr/used/missing.log; fi').stdout.splitlines();assert self.target_wal not in used
+        return {'requiredWal':self.target_wal,'missingFromArchiveCopy':True,'absentFromBase':True,'targetReached':False,'writableSuccess':False,'exitCode':info['State']['ExitCode'],'failureCode':'RECOVERY_ENDED_BEFORE_TARGET','sourceArchivePreserved':True,'archiveCopyDiffersOnlyByRequiredWal':True,'archiveFilesActuallyUsed':sorted(set(used))}
     def restore_to_pause(self,mode):
         self.prepare_restore(mode);began=time.monotonic();self.compose('up','-d','--no-deps','pitr-'+mode);self.choose_database('pitr-'+mode)
         def paused():
@@ -135,8 +143,9 @@ class PitrRehearsal(module.Rehearsal):
         readonly=self.sql("INSERT INTO pitr_fixture_marker VALUES (9,'must_fail_in_recovery')",user='app_runtime',check=False,sqlstate=True)
         assert readonly.returncode!=0 and re.search(r'ERROR:\s+25006',readonly.stderr)
         used=self.helper('cat /pitr/used/'+mode+'.log').stdout.splitlines();assert self.target_wal in used
-        state=json.loads(self.sql("SELECT json_build_object('replayLsn',pg_last_wal_replay_lsn()::text,'lastReplayTransaction',pg_last_xact_replay_timestamp(),'systemIdentifier',(pg_control_system()).system_identifier::text,'timeline',(pg_control_checkpoint()).timeline_id,'target',current_setting('recovery_target_name'))").stdout)
+        state=json.loads(self.sql("SELECT json_build_object('replayLsn',pg_last_wal_replay_lsn()::text,'lastReplayTransaction',pg_last_xact_replay_timestamp(),'systemIdentifier',(pg_control_system()).system_identifier::text,'timeline',(pg_control_checkpoint()).timeline_id,'target',current_setting('recovery_target_name'),'serverVersion',current_setting('server_version'))").stdout)
         assert state['systemIdentifier']==self.result['postgres']['systemIdentifier'] and state['target']==self.target
+        assert state['serverVersion']==self.result['postgres']['serverVersion']
         return {'secondsToTargetPause':time.monotonic()-began,'snapshotDifferences':[],'inRecovery':True,'pauseState':'paused','readonlySqlState':'25006','markerIds':markers,'archiveFilesActuallyUsed':sorted(set(used)),'state':state}
     def promote(self):
         began=time.monotonic();self.sql('SELECT pg_wal_replay_resume()');self.until(lambda:self.sql('SELECT pg_is_in_recovery()').stdout.strip()=='f',30)
@@ -163,7 +172,8 @@ class PitrRehearsal(module.Rehearsal):
         return {'secondsToVerifiedCatchup':time.monotonic()-began,'newGroups':groups['groups'],'alignmentStartRejected':rejected,'oldGroupsModified':False,'businessSnapshotDifferences':[],'chatRecoveredFromKafka':10}
     def retention_gap(self):
         self.restore_to_pause('gap');self.promote();self.environment['CONSUMER_GROUP']='deploy-live';self.write_env()
-        before=self.probe('snapshot');trim=self.probe('trim-retained-chat');assert trim['lowWatermark']==11
+        before=self.probe('snapshot');before_plan=self.ops('recovery-plan');assert before_plan['recoverableFromRetainedLog'] and not before_plan['safeForStartup']
+        trim=self.probe('trim-retained-chat',self.environment['KAFKA_CLUSTER_ID']);assert trim['lowWatermark']==11
         plan=self.ops('recovery-plan');assert not plan['recoverableFromRetainedLog'] and not plan['safeForStartup']
         gaps=[x for x in plan['partitions'] if x['code']=='RETENTION_GAP'];assert len(gaps)==4 and all(x['databaseNext']==10 and x['begin']==11 for x in gaps)
         rejected=self.compose('run','--rm','--no-deps','-e','DEPLOYMENT_MAINTENANCE=true','migrate','ops','recover-groups','pitr-denied',check=False)

@@ -64,8 +64,9 @@ public final class DeploymentProbe {
                 result=data;
             } else if(args[0].equals("trim-retained-chat")) {
                 // 이번 리허설의 합성 topic/partition0 범위만 대상으로 실제 retention gap을 만든다.
-                if(!config.runId().equals("deploy-v1")||!config.topic().equals("chat.received.v1"))throw new IllegalArgumentException("SYNTHETIC_TRIM_SCOPE");
+                if(args.length!=2||!config.runId().equals("deploy-v1")||!config.topic().equals("chat.received.v1"))throw new IllegalArgumentException("SYNTHETIC_TRIM_SCOPE");
                 try(var admin=org.apache.kafka.clients.admin.Admin.create(Map.of("bootstrap.servers",config.bootstrap()))) {
+                    if(!args[1].equals(admin.describeCluster().clusterId().get(10,TimeUnit.SECONDS)))throw new IllegalStateException("SYNTHETIC_TRIM_SCOPE");
                     var partition=new org.apache.kafka.common.TopicPartition(config.topic(),0);
                     long begin=admin.listOffsets(Map.of(partition,org.apache.kafka.clients.admin.OffsetSpec.earliest())).all().get(10,TimeUnit.SECONDS).get(partition).offset();
                     long end=admin.listOffsets(Map.of(partition,org.apache.kafka.clients.admin.OffsetSpec.latest())).all().get(10,TimeUnit.SECONDS).get(partition).offset();

@@ -71,5 +71,12 @@
     "unitTests": 147,
     "harnessTests": 20,
     "jarBuild": "PASS"
+  },
+  "integratedCheck": {
+    "revision": "7e0ca6f0d37a7de25e24a9bff2b248738251dc93",
+    "unitTests": 152,
+    "harnessTests": 24,
+    "jarBuild": "PASS",
+    "executedDiskCodeUnchangedFrom": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469"
   }
 }

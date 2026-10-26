@@ -60,6 +60,9 @@ final class ProductLoadMeasurements implements AutoCloseable {
         }
         out.put("api",responses);
         out.put("generatorHeapUsedBytes",ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed());
+        out.put("probeThreadCount",ManagementFactory.getThreadMXBean().getThreadCount());
+        out.put("probeGcMillis",ManagementFactory.getGarbageCollectorMXBeans().stream().mapToLong(java.lang.management.GarbageCollectorMXBean::getCollectionTime).filter(v->v>=0).sum());
+        if(ManagementFactory.getOperatingSystemMXBean() instanceof com.sun.management.UnixOperatingSystemMXBean unix)out.put("probeOpenFileDescriptors",unix.getOpenFileDescriptorCount());
         try {out.put("generatorRssBytes",rss());}catch(Exception e){out.put("generatorRssError",e.getClass().getSimpleName());}
         try {
             if(jmx==null)jmx=JMXConnectorFactory.connect(new JMXServiceURL("service:jmx:rmi:///jndi/rmi://api:9010/jmxrmi"));

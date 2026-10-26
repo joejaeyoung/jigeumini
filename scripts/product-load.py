@@ -3,32 +3,45 @@
 import datetime,hashlib,importlib.util,json,pathlib,re,shutil,sys,time
 sys.dont_write_bytecode=True
 from product_load_results import analyze
+from product_load_plan import read as read_plan,RESOURCE_PROFILES
+from product_load_capacity import analyze_capacity
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('deployment_rehearsal',ROOT/'scripts/deploy-rehearsal.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
-PLANS={'smoke':(60,15,20),'uniform':(120,-1,0),'hot':(120,-1,0),'steps':(180,-1,0),'soak':(1800,300,20)}
-
 class ProductLoad(module.Rehearsal):
     def __init__(self,manifest,profile,directory):
-        if profile not in PLANS:raise ValueError('LOAD_PROFILE')
-        self.profile=profile;self.duration,self.fault_at,self.fault_seconds=PLANS[profile];self.paused=False;self.probe_id=None
+        self.plan,self.capacity_mode=read_plan(profile)
+        self.profile=self.plan['name'];self.duration=sum(s['seconds'] for s in self.plan['stages'])
+        self.fault_at,self.fault_seconds=self.plan['faultAtSeconds'],self.plan['faultSeconds'];self.paused=False;self.probe_id=None;self.source_id=None
         super().__init__(manifest,manifest,directory)
         self.deadline=time.monotonic()+self.duration+900
         self.overlay=self.directory/'load-compose.json'
-        self.output=self.directory/'probe-output';self.classes=self.directory/'probe-classes'
-        self.result.update({'scope':'SINGLE_HOST_RF1_WHOLE_PRODUCT_SYNTHETIC_LOAD','profile':profile,
-            'resourceSamples':[],'loadContract':{'channels':20,'seed':20261026,'durationSeconds':self.duration,'faultAtSeconds':self.fault_at,'faultSeconds':self.fault_seconds,'resources':'deploy/compose.yaml limits; separate probe JVM Xmx384m in api service limits','jmx':'ISOLATED_INTERNAL_TEST_NETWORK_ONLY'}})
+        self.output=self.directory/'probe-output';self.classes=self.directory/'probe-classes';self.libraries=self.directory/'probe-libs'
+        self.source_output=self.directory/'source-output';self.frozen_plan=self.directory/'load-plan.json'
+        self.result.update({'scope':'SINGLE_HOST_RF1_WHOLE_PRODUCT_SYNTHETIC_LOAD','profile':self.profile,'capacityExperiment':self.capacity_mode,
+            'resourceSamples':[],'loadContract':{**self.plan,'seed':20261026,'durationSeconds':self.duration,'resources':'deploy/compose.yaml limits with explicit resourceProfile; probe Xmx384m, separate source Xmx128m/256MiB','jmx':'ISOLATED_INTERNAL_TEST_NETWORK_ONLY'}})
+    def memory_budget_bytes(self):return super().memory_budget_bytes()+(256*1024**2 if self.plan['sourceMode']=='WEBSOCKET' else 0)
     def prepare(self):
-        self.overlay.write_text(json.dumps({'services':{
+        services={
             'api':{'environment':{'JAVA_TOOL_OPTIONS':'-Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Djava.rmi.server.hostname=api -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'},'healthcheck':{'test':['CMD-SHELL',"JAVA_TOOL_OPTIONS= java -Xmx32m -cp '/app/classes:/app/lib/*' io.chatpulse.poc.PocApplication ops probe"]}},
             'load-probe':{'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True}}
-        }}))
+        }
+        if self.plan['sourceMode']=='WEBSOCKET':services['synthetic-source']={'extends':{'file':str(ROOT/'deploy/compose.yaml'),'service':'api'},'environment':{'JAVA_TOOL_OPTIONS':''},'healthcheck':{'disable':True},'secrets':[],'mem_limit':'256m','cpus':1.0}
+        for service,cpus in RESOURCE_PROFILES[self.plan['resourceProfile']].items():services.setdefault(service,{})['cpus']=cpus
+        self.overlay.write_text(json.dumps({'services':services}))
+        self.frozen_plan.write_text(json.dumps(self.plan))
         self.output.mkdir();self.output.chmod(0o777)
-        target=self.classes/'io/chatpulse/operations';target.mkdir(parents=True)
-        files=list((ROOT/'server/build/classes/java/test/io/chatpulse/operations').glob('ProductLoad*.class'))
+        self.source_output.mkdir();self.source_output.chmod(0o777);self.libraries.mkdir()
+        class_root=ROOT/'server/build/classes/java/test'
+        files=[p for p in class_root.rglob('ProductLoad*.class') if 'Test' not in p.name]
         if not files:raise RuntimeError('LOAD_CLASSES_MISSING')
-        for path in files:shutil.copy2(path,target/path.name)
-        self.result['fixtureClasses']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(target.glob('*.class'))}
+        for path in files:
+            target=self.classes/path.relative_to(class_root);target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(path,target)
+        jars=list((ROOT/'server/build/product-load-libs').glob('Java-WebSocket-*.jar'))
+        if len(jars)!=1:raise RuntimeError('LOAD_WEBSOCKET_LIBRARY_MISSING')
+        shutil.copy2(jars[0],self.libraries/jars[0].name)
+        self.result['fixtureClasses']={str(p.relative_to(self.classes)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(self.classes.rglob('*.class'))}
+        self.result['fixtureLibraries']={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in self.libraries.glob('*.jar')}
         return {'frozenClasses':len(files)}
     def compose(self,*args,**kwargs):
         if not hasattr(self,'overlay'):return super().compose(*args,**kwargs)
@@ -42,9 +55,9 @@ class ProductLoad(module.Rehearsal):
             'probeHeapMaxBytes':384*1024**2,'apiMemoryLimitBytes':info['HostConfig']['Memory'],'apiNanoCpus':info['HostConfig']['NanoCpus']}
         return result
     def resources(self):
-        sample={'at':self.now()};ids=[]
+        sample={'at':self.now()};ids=[];roles={}
         for service in ['api','kafka','postgres']:
-            cid,_=self.owned(service);ids.append(cid)
+            cid,_=self.owned(service);ids.append(cid);roles[service]=cid
             if service=='api':
                 try:
                     status=self.command(['docker','exec',cid,'cat','/proc/1/status']).stdout
@@ -52,7 +65,16 @@ class ProductLoad(module.Rehearsal):
                     if not match:raise RuntimeError('ANALYZER_RSS_UNAVAILABLE')
                     sample['analyzerRssBytes']=int(match[1])*1024
                 except Exception as error:sample['analyzerRssError']=type(error).__name__
-        ids.append(self.probe_id)
+        ids.append(self.probe_id);roles['collector-probe']=self.probe_id
+        if self.source_id:ids.append(self.source_id);roles['synthetic-source']=self.source_id
+        sample['containerRoles']=roles;sample['cpuStat']={}
+        for role,cid in roles.items():
+            try:sample['cpuStat'][role]={k:int(v) for k,v in (line.split() for line in self.command(['docker','exec',cid,'cat','/sys/fs/cgroup/cpu.stat'],timeout=5).stdout.splitlines())}
+            except Exception as error:sample['cpuStat'][role]={'error':type(error).__name__}
+        sample['dataDirectoryKiB']={}
+        for role,path in [('kafka','/var/lib/kafka/data'),('postgres','/var/lib/postgresql/data')]:
+            try:sample['dataDirectoryKiB'][role]=int(self.command(['docker','exec',roles[role],'du','-sk',path],timeout=5).stdout.split()[0])
+            except Exception as error:sample['dataDirectoryKiB'][role]={'error':type(error).__name__}
         try:
             values=self.command(['docker','stats','--no-stream','--format','{{json .}}',*ids],timeout=10).stdout
             sample['containers']=[json.loads(line) for line in values.splitlines()]
@@ -70,24 +92,30 @@ class ProductLoad(module.Rehearsal):
         # 같은 호스트 시험에서 초 단위 복구값을 읽기 위한 한도다. 실제 bracket을 근거에 남긴다.
         if after-before>1000 or sample['skewLowerMillis']>250 or sample['skewUpperMillis']<-250:raise RuntimeError('LOAD_CLOCK_REFERENCE_UNALIGNED')
         return sample
-    def load(self):
-        name=self.project+'-probe'
+    def start_fixture(self,service,main,args,output,heap):
+        name=self.project+'-'+service
         self.compose('run','-d','--no-deps','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
-            '-v',str(self.classes)+':/probe:ro','-v',str(self.output)+':/output','load-probe','-Xms64m','-Xmx384m',
+            '-v',str(self.classes)+':/probe:ro','-v',str(self.libraries)+':/probe-lib:ro','-v',str(self.frozen_plan)+':/load-plan.json:ro',
+            '-v',str(output)+':/output',service,'-Xms32m','-Xmx'+heap,
             '-Dsun.rmi.transport.tcp.responseTimeout=2000','-Dsun.rmi.transport.tcp.handshakeTimeout=2000',
-            '-cp','/app/classes:/app/lib/*:/probe','io.chatpulse.operations.ProductLoadProbe',self.profile,'/output/load.json')
+            '-cp','/app/classes:/app/lib/*:/probe:/probe-lib/*',main,*args)
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('PROBE_OWNER_MISMATCH')
         if any((info['NetworkSettings']['Ports'] or {}).values()) or not all(n['Internal'] for n in json.loads(self.command(['docker','network','inspect',*info['NetworkSettings']['Networks']]).stdout)):raise RuntimeError('PROBE_EXTERNAL_NETWORK')
-        self.probe_id=info['Id'];self.clock_bracket('START');api,_=self.owned('api');fault=None;last_sample=0
+        return info['Id']
+    def load(self):
+        if self.plan['sourceMode']=='WEBSOCKET':self.source_id=self.start_fixture('synthetic-source','io.chatpulse.operations.ProductLoadSocketServer',['/load-plan.json','/output/source.json'],self.source_output,'128m')
+        self.probe_id=self.start_fixture('load-probe','io.chatpulse.operations.ProductLoadProbe',['/load-plan.json','/output/load.json'],self.output,'384m')
+        if not self.capacity_mode or self.fault_at>=0:self.clock_bracket('START')
+        else:self.result['clockReference']='SAME_DOCKER_VM; MONOTONIC_RATE_AND_ELAPSED; NO_HOST_RECOVERY_TIMESTAMP_COMPARISON'
+        api,_=self.owned('api');fault=None;last_sample=0
         while time.monotonic()<self.deadline-90:
             info=json.loads(self.command(['docker','inspect',self.probe_id]).stdout)[0]
             path=self.output/'progress.json'
             progress=json.loads(path.read_text()) if path.exists() else {}
             if progress:
                 plan=progress['plan']
-                if (plan['name']!=self.profile or sum(s['seconds'] for s in plan['stages'])!=self.duration
-                    or plan['faultAtSeconds']!=self.fault_at or plan['faultSeconds']!=self.fault_seconds):raise RuntimeError('LOAD_PLAN_MISMATCH')
+                if plan!=self.plan:raise RuntimeError('LOAD_PLAN_MISMATCH')
             if info['State']['Status']=='exited':
                 final=self.output/'load.json';progress=json.loads(final.read_text()) if final.exists() else progress
                 break
@@ -103,6 +131,12 @@ class ProductLoad(module.Rehearsal):
             time.sleep(1)
         else:raise RuntimeError('LOAD_PROCESS_TIMEOUT')
         self.result['load']=progress;self.result['probeExitCode']=info['State']['ExitCode'];self.result['probeOomKilled']=info['State']['OOMKilled']
+        source_file=self.source_output/'source.json'
+        if source_file.exists():self.result['syntheticSourceSnapshot']=json.loads(source_file.read_text())
+        if self.source_id:
+            source_info=json.loads(self.command(['docker','inspect',self.source_id]).stdout)[0]
+            self.result['sourceProcess']={k:source_info['State'][k] for k in ('Status','ExitCode','OOMKilled')}
+        if self.capacity_mode:self.result['capacityAnalysis']=analyze_capacity(self.plan,progress,self.output/'offsets.jsonl',self.result.get('syntheticSourceSnapshot'))
         self.checkpoint()
         if info['State']['ExitCode']!=0 or info['State']['OOMKilled'] or not progress.get('correct'):raise RuntimeError('LOAD_FAILED')
         if self.fault_at>=0 and (not fault or 'resumedAt' not in fault):raise RuntimeError('LOAD_FAULT_NOT_EXECUTED')
@@ -125,5 +159,5 @@ class ProductLoad(module.Rehearsal):
         super().cleanup()
 
 if __name__=='__main__':
-    if len(sys.argv)!=4:raise SystemExit('usage: product-load <image-manifest.json> <smoke|uniform|hot|steps|soak> <new-output-directory>')
+    if len(sys.argv)!=4:raise SystemExit('usage: product-load <image-manifest.json> <smoke|uniform|hot|steps|soak|plan.json> <new-output-directory>')
     raise SystemExit(ProductLoad(sys.argv[1],sys.argv[2],sys.argv[3]).run())

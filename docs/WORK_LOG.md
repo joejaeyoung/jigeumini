@@ -235,10 +235,12 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 사용자 요청으로 #41~#49를 등록하고 구현 가능한 로컬6건과 실제 인증/외부 환경이 필요한3건으로 나눴다. 각 이슈에 기존 F/T ID, 실패 주입과 대조 조건, 선행 조건을 연결했다. 진행 상태는 STATUS에서 관리한다.
 - `origin/develop`의 PR #40 병합 `dcdc244`에서 `technicaltest/trend-rollback`을 분기했다. 다른 develop worktree를 변경하지 않았다.
 - T02의 남은 경계는 `ranking-trend` 자체의 SQL rollback이다. 기존 ranking SQL 실패 시험과 trend 중복/독립 소비만으로 이 경계를 완료 처리하지 않았다.
-- 새 시험은 정상 입력의 배치 내부/간 중복·충돌, bucket 작성 뒤 progress SQLSTATE `P1002` 주입, 전체 ledger/bucket/progress snapshot 복원을 직접 대조한다. 실제 두 group은 trend만 실패하는 동안 ranking이 진행하고, 실패한 정상 입력이 DLQ로 가지 않는지 확인한다. 장애 제거 뒤 `none` 재시작과 추가 중복 입력에서 기대 UUID 집합·bucket·모든 partition offset을 확인한다.
+- 최초 시험은 정상 입력의 배치 내부/간 중복·충돌, bucket 작성 뒤 progress SQLSTATE `P1002` 주입과 snapshot 대조였다. 아래 리뷰 후 commit 시점의 progress 쓰기 rollback, 같은 consumer의 실행 중 회복, 별도 JVM 종료/동일 offset 재수신으로 보강했다. broker 입력은 partition0에 한정하고 빈 partition1/2의 offset0 유지도 확인한다.
 - 리팩토링 점검: 주입·snapshot·broker offset 확인은 이 장애 시나리오의 테스트 내부 helper로 모았다. 기존 제품 소비/저장 경계와 재시도 정책은 그대로 검증하며 공통 제품 코드에 새로운 시험용 분기를 넣지 않았다. 실행 결과는 실제 완료 후 근거에 기록한다.
 
 - 최초 `6079690`의 단위147·하네스20·실제99개가 통과했다. Standards/Spec은 지적0건이었지만 Claude는 REQUEST_CHANGES로 progress 쓰기 자체의 rollback 입증과 DB commit 성공 뒤 같은 Kafka offset 재전달의 직접 근거를 요구했다. 최초 시험을 최종 완료 근거로 승격하지 않았다.
 - 지연 constraint trigger로 commit 시점의 ledger3·bucket합3·partition별 progress2/1을 실제 조회한 뒤 `P1002`를 발생시킨다. 상태가 다르면 `P1003`으로 실패해 잘못된 주입 지점의 통과를 막는다. rollback되지 않는 시험 sequence로 실제 trigger 호출을 계측한다.
 - 정상 입력 SQL 재시도는 같은 consumer에서 장애 제거 후 회복하도록 보강했다. 별도 JVM을 trend DB commit 직후 halt(91)하고 DB next1/Kafka commit0을 대조한다. 같은 group의 none 재시작 listener에서 실제 offset0 수신과 DB snapshot 불변을 확인한 뒤 새 offset의 중복/정상 입력을 대조한다. 최초 source_offset 보존도 확인한다.
 - 보강 집중5개가 통과했다. 공식 PostgreSQL16 [constraint trigger](https://www.postgresql.org/docs/16/sql-createtrigger.html)와 [sequence](https://www.postgresql.org/docs/16/functions-sequence.html) 문서(2026-10-26 조회)로 commit 시점 검사와 abort 후 sequence 유지의 계측 범위를 확인했다. sequence를 DB 장애 후 영속 증거로 확장하지 않는다. 보강 commit의 전체 회귀·최종 리뷰/CI는 이어 확인한다.
+
+- 보강 `43bedc2`의 `./scripts/check` 단위147·하네스20·JAR, `./scripts/integration` 실제100개가 모두 통과했다. 정제 근거에 suite/XML·명령 로그 hash·JAR/build ID와 실제 시각을 연결했다. Standards/Spec 각각 지적0·차단0이며 Claude 보강 재리뷰도 APPROVE다. session timeout6초와 Gradle classpath를 확인하고 partition 범위·이전 문단의 회복 순서를 정정했다. T02는 이 합성/로컬 장애 범위에서 검증됨으로 바꾸며, 원천 중복·전체 Exactly-once와 운영 장애는 확장하지 않는다. 최종 문서 HEAD 승인·push/PR CI·병합은 PR #50 통합 게이트에 남긴다.

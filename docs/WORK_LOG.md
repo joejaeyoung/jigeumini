@@ -254,6 +254,12 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 
 - 첫 `47d5659` 실행은 제품 이미지 빌드 뒤 fixture FROM에 로컬 image ID를 전달해 실패했다. BuildKit이 이를 docker.io/library/sha256 태그로 해석했다. DB/Compose 시험은 시작하지 않았다. 로컬 manifest의 tag가 기록한 image ID와 같은지 빌드 전후 검사하고 그 tag를 base로 사용하도록 보완한다. 최초 출력은 ignored work에 보존한다.
 
-- 두 번째 `0227330`은 fixture 이미지4개를 만들었으나 dynamic import가 scripts/__pycache__를 만들어 clean-tree 사전 검사에서 거부됐다. Compose를 시작하지 않았고 생성 secret 정리가 완료됐다. bytecode 생성을 끄고 소유한 pyc만 정리했다.
+- 두 번째 `0227330`은 기준 이미지와 fixture 이미지3개/manifest4개를 만들었으나 dynamic import가 scripts/__pycache__를 만들어 clean-tree 사전 검사에서 거부됐다. Compose를 시작하지 않았고 생성 secret 정리가 완료됐다. bytecode 생성을 끄고 소유한 pyc만 정리했다.
 - Spec 리뷰의 차단1건: 별도 연결에는 미커밋 DDL도 보이지 않으므로 schema만 같다고 중단 transaction 종료를 단정할 수 없다. interrupted fixture에 연결 검사1초와 고정 application_name을 지정하고, kill137 뒤 해당 PostgreSQL backend가 사라진 것을 확인한 후 snapshot/history를 대조하도록 보완했다. [PostgreSQL16 연결 검사](https://www.postgresql.org/docs/16/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL)는 기본0에서 다음 socket 상호작용까지 단절 감지가 지연될 수 있다고 설명한다. 시험 설정의 범위이며 운영 기본값의 즉시 종료 보장을 주장하지 않는다.
 - Standards의 자원 생성 순서 지적에 따라 실패/중단 manifest를 비밀 생성 전에 읽도록 옮겼다. Flyway history의 version·checksum·success도 snapshot에 포함해 기존 history와 복원 결과를 비교한다.
+
+- clean `bc2ff5b`의 V13 리허설16단계가 통과했다. 중단137/backend 종료/marker1, SQL 실패 뒤DDL/history복원, V13 backfill10/10, 구 V12 시작거부, 새DB V12복원·새group6개·집계20/알림2·기존group불변·선택snapshot차이0이다. 복원 관측25.163초, 실제웹8경로+리포트상세/26API200/JS오류0, 종료1.243초·OOM없음·소유Compose자원/secret/dump정리를 확인했다.
+- 공유 리허설의 복원 대상 선택을 앞당긴 영향은 기존 V12 17단계로 별도 확인했다(기준0227330→후보bc2ff5b). 하네스20개·문서/ID검사 통과. 두 최초실패와 성공 두 실행의 시각·manifest·hash를 정제근거에 보존했다. 생성 이미지는 로컬 manifest로 남기며 Compose 자원정리와 구분한다.
+- Standards의 초기heuristic1건과 Spec의 초기차단1건을 해소했고 bc2ff5b는 둘 다 남은지적0이다. Claude 정적리뷰도 APPROVE다. 비차단의10초JDBC timeout/느린호스트 kill창, 코드에서 파생된설정값/결과, 실제SQLSTATE미수집·marker판정범위를 검증문서에 명시한다. 최종문서HEAD Claude/push/PR CI는 PR51게이트에서 확인한다. T16은 WAL PITR·외부운영 등이남아 부분검증을 유지한다.
+
+- #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.

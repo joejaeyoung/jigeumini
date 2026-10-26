@@ -1,0 +1,146 @@
+{
+  "recordedAt": "2026-10-26T01:29:48.415969+00:00",
+  "issue": 42,
+  "pullRequest": "https://github.com/joejaeyoung/jigeumini/pull/51",
+  "features": [
+    "F16",
+    "F08"
+  ],
+  "technicalGoals": [
+    "T04",
+    "T16"
+  ],
+  "verifiedCodeCommit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+  "scope": "SINGLE_HOST_RF1_SYNTHETIC_MIGRATION_FIXTURE",
+  "runs": [
+    {
+      "file": "primary.json",
+      "sha256": "3749c91e6e9f81ae76ef11d9bb82e6f511c594235dccce09a40446fa1ee5e88c",
+      "phases": 16,
+      "codeCommit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "startedAt": "2026-10-26T01:24:10.996062+00:00",
+      "finishedAt": "2026-10-26T01:26:28.454743+00:00"
+    },
+    {
+      "file": "compatibility.json",
+      "sha256": "12b8135320acdd55ca8d3e32fce2dc242f673b13205aed119d8350462e2a356e",
+      "phases": 17,
+      "codeCommit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "startedAt": "2026-10-26T01:26:47.796041+00:00",
+      "finishedAt": "2026-10-26T01:28:49.975364+00:00"
+    }
+  ],
+  "environment": {
+    "node": "24.20.0",
+    "postgresql": "16.14-alpine",
+    "kafka": "4.1.2",
+    "javaImage": "deploy/server.Dockerfile의 고정 digest",
+    "flyway": "11.14.1"
+  },
+  "commands": [
+    {
+      "command": "fnm exec --using 24.20.0 ./scripts/deploy-images work/remaining-validation/migration-baseline-03.json",
+      "commit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "exitCode": 0
+    },
+    {
+      "command": "./scripts/migration-images work/remaining-validation/migration-baseline-03.json work/remaining-validation/migration-images-03",
+      "commit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "exitCode": 0
+    },
+    {
+      "command": "fnm exec --using 24.20.0 ./scripts/migration-rehearsal work/remaining-validation/migration-images-03 work/remaining-validation/migration-run-03",
+      "commit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "exitCode": 0
+    },
+    {
+      "command": "fnm exec --using 24.20.0 ./scripts/deploy-rehearsal work/remaining-validation/migration-baseline-02.json work/remaining-validation/migration-baseline-03.json work/remaining-validation/migration-compat-03",
+      "commit": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+      "exitCode": 0
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts/tests",
+      "tests": 20,
+      "exitCode": 0
+    }
+  ],
+  "logs": [
+    {
+      "file": "migration-images-01.log",
+      "sha256": "9a8b2200dcb8f1a8519a6f73687ede97e80c806d347ed21d8d51a89e2e7b8a9b"
+    },
+    {
+      "file": "migration-images-02.log",
+      "sha256": "07d88a6a0dcf0ea36d38adf9555ccc8276b68798acd57edce3fab051532544eb"
+    },
+    {
+      "file": "migration-images-03.log",
+      "sha256": "65dc6731fd2510a03b7a127aaa1381b1b72161792e0bfa7e53c253672a88c729"
+    },
+    {
+      "file": "migration-run-02.log",
+      "sha256": "a331896bc9a46cff414d36e3114d3d6b50416b33ef7651136ed8a9423cd8365f"
+    },
+    {
+      "file": "migration-run-03.log",
+      "sha256": "0c84d85a1f72cba0f37488cc6b27211a30d96f7319b931ea369acea0be14603b"
+    },
+    {
+      "file": "migration-compat-03.log",
+      "sha256": "f359911641240c05a84b0d4a6ff24a214463d69ea6b0e8d842aae9b51ec69f90"
+    },
+    {
+      "file": "migration-harness.log",
+      "sha256": "4de6d57f459860c01bfaf9f7a0c6c7f7aed79dd5ea586ee40b9e13bfd562d6ca"
+    }
+  ],
+  "initialFailures": [
+    {
+      "commit": "47d56590fea6603f17adc4ec1327d9cd052da3e6",
+      "phase": "FIXTURE_IMAGE_BUILD",
+      "exitCode": 2,
+      "reason": "BuildKit이 로컬 image ID를 docker.io/library/sha256 이름으로 해석",
+      "databaseStarted": false,
+      "resolution": "기록한 local tag가 실제 ID와 같은지 빌드 전후 확인"
+    },
+    {
+      "commit": "0227330434754a8335bd6c8b880dd83fa8bc03d6",
+      "phase": "PREFLIGHT",
+      "exitCode": 2,
+      "reason": "dynamic import의 scripts/__pycache__ 생성으로 clean tree 검사 거부",
+      "databaseStarted": false,
+      "cleanupComplete": true,
+      "sensitiveArtifactsRemoved": true,
+      "resolution": "bytecode 생성 금지, 소유 pyc 제거"
+    }
+  ],
+  "staticReview": {
+    "base": "bde3a47098fb9fccaf3f63ef593bad910e8fb177",
+    "head": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "Standards": {
+      "initialHeuristics": 1,
+      "remainingFindings": 0,
+      "blocking": 0
+    },
+    "Spec": {
+      "initialBlocking": 1,
+      "remainingFindings": 0,
+      "blocking": 0
+    },
+    "method": "code-review 독립 두 에이전트의 읽기 전용 정적 검토. 실제 실행 없음."
+  },
+  "limitations": [
+    "같은 코드 commit에 시험용 SQL을 얹은 V13 artifact다. 일반 제품 릴리스나 파괴적 migration의 downgrade가 아니다.",
+    "업무 snapshot은 DeploymentProbe가 선택한 열·UUID·집계 hash이며 모든 DB 열을 비교하지 않는다.",
+    "interrupted fixture에만 client_connection_check_interval=1s를 적용했다. 기본 설정의 즉시 단절 감지 보장을 뜻하지 않는다.",
+    "복구25.163초는 API 종료 후 새DB생성 직전부터 선택 집계 확인까지의 한 표본이며 운영 RTO/SLA가 아니다.",
+    "WAL PITR·다중AZ·실제 공식 원천·외부배포·비밀회전은 미검증이다.",
+    "최종 정확한 HEAD Claude승인·push/PR CI·병합은 PR51 통합 게이트를 따른다."
+  ],
+  "claudeReview": {
+    "head": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
+    "decision": "APPROVE",
+    "sessionId": "8c1936cd-5f1e-470c-bdc7-e2d36d1987d6",
+    "method": "제공된 diff/소스의 정적 검토. 리뷰어 도구/시험 실행 없음. 최종 문서 HEAD는 PR51에서 재확인."
+  }
+}

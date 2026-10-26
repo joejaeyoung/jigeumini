@@ -23,7 +23,7 @@ public final class FleetWorkerProcess {
     private static void execute(String[] args,StartupDiagnostic diagnostic) throws Exception {
         diagnostic.phase("STARTING");
         if(org.slf4j.LoggerFactory.getILoggerFactory() instanceof ch.qos.logback.classic.LoggerContext context)context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).setLevel(ch.qos.logback.classic.Level.OFF);
-        var factory=KafkaSupport.producerFactory("localhost:19092");
+        var factory=KafkaSupport.producerFactory(args.length>6?args[6]:"localhost:19092");
         boolean delayedReport=args.length>5&&args[5].equals("DELAY_REPORT");
         if(args.length>5&&args[5].equals("DELAY_PRODUCER"))factory.addPostProcessor(producer->{
             try {Files.writeString(Path.of(args[4]+".producer-starting"),"PRODUCER_STARTING",StandardOpenOption.CREATE_NEW);
@@ -31,6 +31,18 @@ public final class FleetWorkerProcess {
                 while(!Files.exists(Path.of(args[4]+".producer-release"))){if(System.nanoTime()>deadline)throw new IllegalStateException("SYNTHETIC_RELEASE_TIMEOUT");Thread.sleep(20);}
                 Files.writeString(Path.of(args[4]+".producer-ready"),"PRODUCER_READY",StandardOpenOption.CREATE_NEW);return producer;}
             catch(Exception failure){producer.close(Duration.ZERO);throw new IllegalStateException("SYNTHETIC_PRODUCER_DELAY_FAILED");}
+        });
+        factory.addPostProcessor(producer->{
+            @SuppressWarnings("unchecked") var observed=(org.apache.kafka.clients.producer.Producer<String,byte[]>)java.lang.reflect.Proxy.newProxyInstance(
+                    FleetWorkerProcess.class.getClassLoader(),new Class<?>[]{org.apache.kafka.clients.producer.Producer.class},(proxy,method,values)->{
+                        boolean metadata=method.getName().equals("partitionsFor");
+                        if(metadata)diagnostic.phase("METADATA_REQUEST");
+                        try {var value=method.invoke(producer,values);if(metadata)diagnostic.phase("METADATA_READY");return value;}
+                        catch(java.lang.reflect.InvocationTargetException failure){
+                            if(metadata)diagnostic.phase(failure.getCause() instanceof org.apache.kafka.common.errors.TimeoutException?"METADATA_TIMEOUT":"METADATA_FAILED");
+                            throw failure.getCause();
+                        }
+                    });return observed;
         });
         try(var ds=PostgresSupport.open(args[0],"chatpulse","local-chatpulse",false)) {
             diagnostic.phase("DATABASE_OPEN");

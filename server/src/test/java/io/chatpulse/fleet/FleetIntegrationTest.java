@@ -124,12 +124,29 @@ class FleetIntegrationTest {
         var diagnostic=JSON.readTree(Files.readString(report));assertTrue(diagnostic.path("complete").asBoolean());
         assertEquals(0,diagnostic.path("delivery").path("rejected").asInt());assertReconciled();
     }
+    @Test void initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission() throws Exception {
+        plan(List.of(CHANNEL));
+        try(var bootstrap=new ControlledTcpProxy(19092)) {
+            bootstrap.mode(ControlledTcpProxy.Mode.BLACKHOLE);
+            var child=start(15432,1,"BOOTSTRAP_GATE","localhost:"+bootstrap.port());
+            Path diagnostic=Path.of(reports.getFirst()+".diagnostic.json");
+            await().atMost(Duration.ofSeconds(15)).until(()->Files.exists(diagnostic)&&JSON.readTree(Files.readString(diagnostic)).path("phases").valueStream().anyMatch(p->p.path("phase").asText().equals("METADATA_TIMEOUT")));
+            assertTrue(bootstrap.discardedBytes()>0);assertEquals(0,((Number)leases.status().get("assigned")).intValue());assertTrue(source.accepted.isEmpty());
+            bootstrap.mode(ControlledTcpProxy.Mode.CUT);bootstrap.mode(ControlledTcpProxy.Mode.FORWARD);
+            awaitConnected(1);stop(child);
+            assertTrue(JSON.readTree(Files.readString(reports.getFirst())).path("complete").asBoolean());assertReconciled();
+        }
+    }
     private Process start(int dbPort,int capacity) throws Exception {return start(dbPort,capacity,false);}
     private Process start(int dbPort,int capacity,boolean delayedReport) throws Exception {return start(dbPort,capacity,delayedReport?"DELAY_REPORT":null);}
     private Process start(int dbPort,int capacity,String fixtureMode) throws Exception {
+        return start(dbPort,capacity,fixtureMode,null);
+    }
+    private Process start(int dbPort,int capacity,String fixtureMode,String bootstrap) throws Exception {
         Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();reports.add(report);
         var command=new ArrayList<>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()));
         if(fixtureMode!=null)command.add(fixtureMode);
+        if(bootstrap!=null)command.add(bootstrap);
         var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
     }
     private void stop(Process process) throws Exception {process.destroy();assertTrue(process.waitFor(35,TimeUnit.SECONDS));}

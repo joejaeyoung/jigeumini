@@ -228,3 +228,12 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 로컬 기본 Node는26.3.1이었고 Homebrew node@24 경로도 같은26을 가리켰다. 초기 결과는 보조 기록으로 두고 fnm의 실제24.20.0으로 웹29/Chromium31을 재실행해 통과했다. CI도 .nvmrc 버전을 사용한다.
 - 정제 근거에는 최초 전체94개와 후속 집중3개를 구분하고 XML/log hash, 현재 JAR/buildId, 실행환경·미검증 항목을 기록했다. 최초 JAR hash는 후속 빌드 전에 보관하지 않았으며 사후 생성하지 않았다. 최종 HEAD의 전체 CI/Claude/병합은 PR40의 통합 게이트 기록을 따른다.
 - 검증 후 chat-pulse Kafka/PostgreSQL만 정지하고 데이터 볼륨을 보존했다. 다른 worktree HEAD707230a와 phone 서비스는 변경하지 않았다. 공개 원천·외부 배포·새 HA/고부하 실험은 수행하지 않았다.
+
+
+## 2026-10-26 남은 기술 검증 등록과 trend 장애 경계 #41
+
+- 사용자 요청으로 #41~#49를 등록하고 구현 가능한 로컬6건과 실제 인증/외부 환경이 필요한3건으로 나눴다. 각 이슈에 기존 F/T ID, 실패 주입과 대조 조건, 선행 조건을 연결했다. 진행 상태는 STATUS에서 관리한다.
+- `origin/develop`의 PR #40 병합 `dcdc244`에서 `technicaltest/trend-rollback`을 분기했다. 다른 develop worktree를 변경하지 않았다.
+- T02의 남은 경계는 `ranking-trend` 자체의 SQL rollback이다. 기존 ranking SQL 실패 시험과 trend 중복/독립 소비만으로 이 경계를 완료 처리하지 않았다.
+- 새 시험은 정상 입력의 배치 내부/간 중복·충돌, bucket 작성 뒤 progress SQLSTATE `P1002` 주입, 전체 ledger/bucket/progress snapshot 복원을 직접 대조한다. 실제 두 group은 trend만 실패하는 동안 ranking이 진행하고, 실패한 정상 입력이 DLQ로 가지 않는지 확인한다. 장애 제거 뒤 `none` 재시작과 추가 중복 입력에서 기대 UUID 집합·bucket·모든 partition offset을 확인한다.
+- 리팩토링 점검: 주입·snapshot·broker offset 확인은 이 장애 시나리오의 테스트 내부 helper로 모았다. 기존 제품 소비/저장 경계와 재시도 정책은 그대로 검증하며 공통 제품 코드에 새로운 시험용 분기를 넣지 않았다. 실행 결과는 실제 완료 후 근거에 기록한다.

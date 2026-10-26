@@ -83,4 +83,4 @@ terminal 결과가 만료되면 부모 행을 잠가 result_expired_at을 먼저
 
 DELETE 성공 직후 파일 크기가 줄지 않을 수 있다. VACUUM으로 재사용 가능한 공간, 실제 파일 크기·WAL·OS 여유를 구분한다. 정상 작업에서 VACUUM FULL을 자동 실행하지 않는다. V14 색인 생성은 writer를 정지한 명시 migration 구간에서 수행한다. 큰 기존 DB의 적용 시간은 별도 리허설이 필요하다.
 
-PITR/백업은 ledger·bucket·progress·원천 identity·retention_window를 같은 시점으로 복원한다. 일부 guard만 최신/과거 값으로 섞지 않는다. Kafka가 필요한 prefix를 이미 지웠다면 #46의 복구 절차도 무손실 완료를 보장하지 못한다. retention.ms=24시간과 retention.bytes=256MiB/partition은 최소24시간 복구 창의 약속이 아니다. 실제 segment/bounds/파일 삭제 시각을 별도로 측정한다.
+PITR/백업은 ledger·bucket·progress·원천 identity·retention_window를 같은 시점으로 복원한다. 일부 guard만 최신/과거 값으로 섞지 않는다. Kafka가 필요한 prefix를 이미 지웠다면 #46의 복구 절차도 무손실 완료를 보장하지 못한다. retention.ms=24시간과 retention.bytes=256MiB/partition은 최소24시간 복구 창의 약속이 아니다. [실제 segment/bounds/파일 삭제 측정](RETENTION_VERIFICATION.md)에서 24시간 설정과 256MiB/partition의 크기 만료를 구분했다. 가속 시험의 관측 시간을 운영 복구 창으로 사용하지 않는다.

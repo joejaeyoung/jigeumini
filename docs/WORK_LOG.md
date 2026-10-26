@@ -690,3 +690,11 @@ Kafka 대조에서16KiB segment의 InvalidConfigurationException을 실제broker
 12c0c3e에서 시간 만료는3partition 모두40→40으로 배출되고 파일 제거와 RETENTION_EXPIRED를 확인했다. 크기 만료 기대는 잘못 세웠다. hot296,820,471bytes의 초과28,385,015bytes가 첫segment33,511,699bytes보다 작아 실제코드의 삭제조건을 충족하지 않았다. 45초 미삭제를 실패근거로 보존하고, fixed24h/256MiB/32MiB 설정 그대로 합성입력을500,000→600,000건으로 늘려 충분한segment초과를 만든다. 설정상 byte값을 엄격한파일상한으로 해석하지 않는다.
 
 901a7c0은 시간만료 통과 후 크기시험의 파일조회 명령에서 HA_COMMAND_FAILED로 중단했다. stderr가보존되지않아그실행의직접원인은미확정이다. 삭제동시find/stat사이파일이사라질수있는경계를확인해, stat실패뒤실제파일부재인경우만계수하고기타오류는실패로남긴다. 각partition의활성log존재와3개연속안정표본을요구한다. 원본실패결과를덮어쓰지않는다.
+
+### #63 보존 경계·저장 실측과 로컬 회귀
+
+8624c04의 Kafka 시간·크기 보존 대조는 실제 offset prefix·파일 제거·만료 manifest 거부와 소유 자원 정리를 통과했다. 시간 4초 시험의 관측 완료에는 초기 정리 지연 약 30초가 포함된다. 24시간/256MiB 크기 대조는 hot earliest 90,314와 log 289,167,144bytes를 확인했고, segment 단위 보존을 엄격한 byte cap으로 설명하지 않는다. 앞선 5회 실패·관측 예산/입력량/파일 조회 보완을 정제 근거에 모두 보존했다.
+
+전체 회귀는 단위 179개·하네스 38개·실제 Kafka/DB 155개, 실패/오류/skip 0이다. Claude의 고정 12c0c3e 정적 구현 리뷰는 APPROVE였다. 비차단 의견에서 오래된 알림/replay 문구를 수정했고, 오류 격리 이력·spike FK 분기를 기존 테스트에 추가해 보존 13개를 다시 확인했다. 실제 단일 consumer·trend namespace·기존 bucket 색인을 확인했다. 장기 DB의 반복 timeout과 다중 writer의 정리율은 별도 검증 범위로 남긴다. 고유 schema의 CLI 진단/terminal 정리·재실행도 통과하고 schema를 정리했다.
+
+PR72 첫 push/PR CI는 GitHub 계정 결제 또는 사용 한도 문제로 runner가 시작되지 않았다. 사용자에게 Billing & plans 확인을 요청했다. 테스트 실패로 세거나 CI 게이트를 생략하지 않으며, 최종 HEAD 승인/CI 전에는 병합하지 않는다.

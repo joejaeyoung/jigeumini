@@ -1,0 +1,1220 @@
+{
+  "phase": "INPUT_RECONCILIATION",
+  "startedAt": "2026-10-26T20:14:38.068869Z",
+  "scope": "SYNTHETIC_SINGLE_SHARED_POSTGRES_SCHEMA",
+  "rowsPerProjectionPerCycle": 60000,
+  "limitations": [
+    "CLOCK_AGED_SYNTHETIC_HISTORY_NOT_MULTI_DAY_SOAK",
+    "CLUSTER_WAL_DELTA_INCLUDES_OTHER_DATABASE_WRITERS",
+    "NO_FULL_PRODUCT_API_OR_KAFKA_LOAD",
+    "DELETE_DOES_NOT_PROMISE_OS_FILE_SHRINK"
+  ],
+  "revision": "93cf16ff71529d6d83289b67d2087ddddc7cd7ff",
+  "workingTreeDirty": false,
+  "postgresVersion": "16.14",
+  "beforeMigration": {
+    "schemaTotals": {
+      "table_bytes": 76595200,
+      "index_bytes": 84205568,
+      "total_bytes": 160800768
+    },
+    "selectedRelations": [
+      {
+        "relname": "category_bucket",
+        "table_bytes": 6578176,
+        "index_bytes": 10838016,
+        "total_bytes": 17416192
+      },
+      {
+        "relname": "category_event",
+        "table_bytes": 12017664,
+        "index_bytes": 14352384,
+        "total_bytes": 26370048
+      },
+      {
+        "relname": "chat_bucket_10s",
+        "table_bytes": 13606912,
+        "index_bytes": 40951808,
+        "total_bytes": 54558720
+      },
+      {
+        "relname": "processed_event",
+        "table_bytes": 31244288,
+        "index_bytes": 11272192,
+        "total_bytes": 42516480
+      },
+      {
+        "relname": "report_bucket",
+        "table_bytes": 81920,
+        "index_bytes": 57344,
+        "total_bytes": 139264
+      },
+      {
+        "relname": "report_event",
+        "table_bytes": 12959744,
+        "index_bytes": 6225920,
+        "total_bytes": 19185664
+      },
+      {
+        "relname": "report_session",
+        "table_bytes": 16384,
+        "index_bytes": 49152,
+        "total_bytes": 65536
+      }
+    ],
+    "otherRelationCount": 35,
+    "otherTotals": {
+      "table_bytes": 90112,
+      "index_bytes": 458752,
+      "total_bytes": 548864
+    }
+  },
+  "migrationMillis": 253.110125,
+  "migrationWalBytes": 9003136,
+  "afterMigration": {
+    "schemaTotals": {
+      "table_bytes": 76595200,
+      "index_bytes": 94126080,
+      "total_bytes": 170721280
+    },
+    "selectedRelations": [
+      {
+        "relname": "category_bucket",
+        "table_bytes": 6578176,
+        "index_bytes": 10838016,
+        "total_bytes": 17416192
+      },
+      {
+        "relname": "category_event",
+        "table_bytes": 12017664,
+        "index_bytes": 14352384,
+        "total_bytes": 26370048
+      },
+      {
+        "relname": "chat_bucket_10s",
+        "table_bytes": 13606912,
+        "index_bytes": 40951808,
+        "total_bytes": 54558720
+      },
+      {
+        "relname": "processed_event",
+        "table_bytes": 31244288,
+        "index_bytes": 21127168,
+        "total_bytes": 52371456
+      },
+      {
+        "relname": "report_bucket",
+        "table_bytes": 81920,
+        "index_bytes": 57344,
+        "total_bytes": 139264
+      },
+      {
+        "relname": "report_event",
+        "table_bytes": 12959744,
+        "index_bytes": 6225920,
+        "total_bytes": 19185664
+      },
+      {
+        "relname": "report_session",
+        "table_bytes": 16384,
+        "index_bytes": 49152,
+        "total_bytes": 65536
+      }
+    ],
+    "otherRelationCount": 37,
+    "otherTotals": {
+      "table_bytes": 90112,
+      "index_bytes": 524288,
+      "total_bytes": 614400
+    }
+  },
+  "activeReportRowsProtected": 60000,
+  "cycles": [
+    {
+      "cycle": 0,
+      "before": {
+        "schemaTotals": {
+          "table_bytes": 76603392,
+          "index_bytes": 94134272,
+          "total_bytes": 170737664
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6578176,
+            "index_bytes": 10838016,
+            "total_bytes": 17416192
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12017664,
+            "index_bytes": 14352384,
+            "total_bytes": 26370048
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13606912,
+            "index_bytes": 40951808,
+            "total_bytes": 54558720
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 31244288,
+            "index_bytes": 21127168,
+            "total_bytes": 52371456
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 81920,
+            "index_bytes": 57344,
+            "total_bytes": 139264
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12959744,
+            "index_bytes": 6225920,
+            "total_bytes": 19185664
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 16384,
+            "index_bytes": 49152,
+            "total_bytes": 65536
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 98304,
+          "index_bytes": 532480,
+          "total_bytes": 630784
+        }
+      },
+      "liveRankingBefore": 0,
+      "batches": [
+        {
+          "report": {
+            "deletedRows": 10601,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 181.162
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 223.4715
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 222.80075
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 276.812792
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 207.651625
+        },
+        {
+          "report": {
+            "deletedRows": 10001,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 223.674208
+        },
+        {
+          "report": {
+            "deletedRows": 0,
+            "limited": false
+          },
+          "categoryDeleted": 0,
+          "ranking": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "trend": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "durationMillis": 197.935208
+        }
+      ],
+      "cleanupMillis": 1533.556875,
+      "cleanupWalBytes": 26213672,
+      "afterDelete": {
+        "schemaTotals": {
+          "table_bytes": 77037568,
+          "index_bytes": 94560256,
+          "total_bytes": 171597824
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6578176,
+            "index_bytes": 10838016,
+            "total_bytes": 17416192
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12017664,
+            "index_bytes": 14352384,
+            "total_bytes": 26370048
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13697024,
+            "index_bytes": 41082880,
+            "total_bytes": 54779904
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 31580160,
+            "index_bytes": 21413888,
+            "total_bytes": 52994048
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 81920,
+            "index_bytes": 57344,
+            "total_bytes": 139264
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12959744,
+            "index_bytes": 6225920,
+            "total_bytes": 19185664
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 16384,
+            "index_bytes": 49152,
+            "total_bytes": 65536
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      },
+      "liveRankingAfter": 600,
+      "afterVacuum": {
+        "schemaTotals": {
+          "table_bytes": 77119488,
+          "index_bytes": 94609408,
+          "total_bytes": 171728896
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 10838016,
+            "total_bytes": 17424384
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 14352384,
+            "total_bytes": 26378240
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13705216,
+            "index_bytes": 41082880,
+            "total_bytes": 54788096
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 31588352,
+            "index_bytes": 21438464,
+            "total_bytes": 53026816
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 57344,
+            "total_bytes": 147456
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 6250496,
+            "total_bytes": 19218432
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      }
+    },
+    {
+      "cycle": 1,
+      "before": {
+        "schemaTotals": {
+          "table_bytes": 77832192,
+          "index_bytes": 182452224,
+          "total_bytes": 260284416
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21618688,
+            "total_bytes": 28205056
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28696576,
+            "total_bytes": 40722432
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13713408,
+            "index_bytes": 79609856,
+            "total_bytes": 93323264
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 32292864,
+            "index_bytes": 39575552,
+            "total_bytes": 71868416
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 90112,
+            "total_bytes": 180224
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12271616,
+            "total_bytes": 25239552
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      },
+      "liveRankingBefore": 2000,
+      "batches": [
+        {
+          "report": {
+            "deletedRows": 10601,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 310.807875
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 245.845209
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 221.645125
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 213.044875
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 230.739083
+        },
+        {
+          "report": {
+            "deletedRows": 10001,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 281.2345
+        },
+        {
+          "report": {
+            "deletedRows": 0,
+            "limited": false
+          },
+          "categoryDeleted": 0,
+          "ranking": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "trend": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "durationMillis": 135.013125
+        }
+      ],
+      "cleanupMillis": 1638.363458,
+      "cleanupWalBytes": 67589272,
+      "afterDelete": {
+        "schemaTotals": {
+          "table_bytes": 78241792,
+          "index_bytes": 182747136,
+          "total_bytes": 260988928
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21618688,
+            "total_bytes": 28205056
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28696576,
+            "total_bytes": 40722432
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13713408,
+            "index_bytes": 79609856,
+            "total_bytes": 93323264
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 32702464,
+            "index_bytes": 39870464,
+            "total_bytes": 72572928
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 90112,
+            "total_bytes": 180224
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12271616,
+            "total_bytes": 25239552
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      },
+      "liveRankingAfter": 2800,
+      "afterVacuum": {
+        "schemaTotals": {
+          "table_bytes": 78249984,
+          "index_bytes": 183083008,
+          "total_bytes": 261332992
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21667840,
+            "total_bytes": 28254208
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28770304,
+            "total_bytes": 40796160
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13713408,
+            "index_bytes": 79659008,
+            "total_bytes": 93372416
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 32710656,
+            "index_bytes": 39936000,
+            "total_bytes": 72646656
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 114688,
+            "total_bytes": 204800
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12345344,
+            "total_bytes": 25313280
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      }
+    },
+    {
+      "cycle": 2,
+      "before": {
+        "schemaTotals": {
+          "table_bytes": 79134720,
+          "index_bytes": 183607296,
+          "total_bytes": 262742016
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21667840,
+            "total_bytes": 28254208
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28942336,
+            "total_bytes": 40968192
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13860864,
+            "index_bytes": 79659008,
+            "total_bytes": 93519872
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 33447936,
+            "index_bytes": 39936000,
+            "total_bytes": 73383936
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 114688,
+            "total_bytes": 204800
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12697600,
+            "total_bytes": 25665536
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      },
+      "liveRankingBefore": 4200,
+      "batches": [
+        {
+          "report": {
+            "deletedRows": 10601,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 259.5985
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 210.750375
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 213.488625
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 206.82575
+        },
+        {
+          "report": {
+            "deletedRows": 10000,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 203.095
+        },
+        {
+          "report": {
+            "deletedRows": 10001,
+            "limited": true
+          },
+          "categoryDeleted": 20000,
+          "ranking": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "trend": {
+            "limited": true,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 10000,
+            "ledgerDeleted": 10000,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 20000
+          },
+          "durationMillis": 208.0905
+        },
+        {
+          "report": {
+            "deletedRows": 0,
+            "limited": false
+          },
+          "categoryDeleted": 0,
+          "ranking": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "trend": {
+            "limited": false,
+            "eventFloor": "2026-10-18T20:14:30Z",
+            "bucketsDeleted": 0,
+            "ledgerDeleted": 0,
+            "receivedFloor": "2026-10-23T20:14:30Z",
+            "deletedRows": 0
+          },
+          "durationMillis": 116.735375
+        }
+      ],
+      "cleanupMillis": 1418.613875,
+      "cleanupWalBytes": 26069888,
+      "afterDelete": {
+        "schemaTotals": {
+          "table_bytes": 79568896,
+          "index_bytes": 183607296,
+          "total_bytes": 263176192
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21667840,
+            "total_bytes": 28254208
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28942336,
+            "total_bytes": 40968192
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13901824,
+            "index_bytes": 79659008,
+            "total_bytes": 93560832
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 33841152,
+            "index_bytes": 39936000,
+            "total_bytes": 73777152
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 114688,
+            "total_bytes": 204800
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12697600,
+            "total_bytes": 25665536
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      },
+      "liveRankingAfter": 5000,
+      "afterVacuum": {
+        "schemaTotals": {
+          "table_bytes": 79593472,
+          "index_bytes": 183623680,
+          "total_bytes": 263217152
+        },
+        "selectedRelations": [
+          {
+            "relname": "category_bucket",
+            "table_bytes": 6586368,
+            "index_bytes": 21667840,
+            "total_bytes": 28254208
+          },
+          {
+            "relname": "category_event",
+            "table_bytes": 12025856,
+            "index_bytes": 28942336,
+            "total_bytes": 40968192
+          },
+          {
+            "relname": "chat_bucket_10s",
+            "table_bytes": 13901824,
+            "index_bytes": 79675392,
+            "total_bytes": 93577216
+          },
+          {
+            "relname": "processed_event",
+            "table_bytes": 33865728,
+            "index_bytes": 39936000,
+            "total_bytes": 73801728
+          },
+          {
+            "relname": "report_bucket",
+            "table_bytes": 90112,
+            "index_bytes": 114688,
+            "total_bytes": 204800
+          },
+          {
+            "relname": "report_event",
+            "table_bytes": 12967936,
+            "index_bytes": 12697600,
+            "total_bytes": 25665536
+          },
+          {
+            "relname": "report_session",
+            "table_bytes": 49152,
+            "index_bytes": 49152,
+            "total_bytes": 98304
+          }
+        ],
+        "otherRelationCount": 37,
+        "otherTotals": {
+          "table_bytes": 106496,
+          "index_bytes": 540672,
+          "total_bytes": 647168
+        }
+      }
+    }
+  ],
+  "input": {
+    "uniqueEvents": 10000,
+    "twoProjectionBatchP95Millis": 296.825833,
+    "maximumPacingMillis": 1782.690875,
+    "twoProjectionBatchMaximumMillis": 341.791708,
+    "elapsedMillis": 20782.79525,
+    "targetEventsPerSecond": 500
+  },
+  "finalRanking": {
+    "runId": "retention-experiment",
+    "bucketTotal": 10000,
+    "processedEvents": 10000,
+    "projection": "ranking"
+  },
+  "finalTrend": {
+    "runId": "retention-experiment",
+    "bucketTotal": 10000,
+    "processedEvents": 10000,
+    "projection": "ranking-trend"
+  },
+  "remainingExpiredEvents": 0,
+  "remainingCategory": 0,
+  "remainingReport": 0,
+  "lockedFloor": {
+    "elapsedMillis": 119.461334,
+    "refused": true
+  },
+  "cleanupComplete": true,
+  "finishedAt": "2026-10-26T20:15:02.393648Z",
+  "correct": true,
+  "source": {
+    "path": "work/retention-63/storage-first.json",
+    "sha256": "812c94e47acb4cf55b1cf10ccd75ce73fbf38a562d1e5c1ddc53b6e0f45158ab"
+  },
+  "command": "./scripts/retention-experiment storage work/retention-63/storage-first.json",
+  "technicalGoals": [
+    "T02",
+    "T04",
+    "T08",
+    "T16"
+  ],
+  "executionBinaryHashRecorded": false
+}

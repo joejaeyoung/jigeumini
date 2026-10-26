@@ -1,0 +1,3332 @@
+{
+  "technicalGoals": [
+    "T04",
+    "T08",
+    "T16"
+  ],
+  "scope": "같은 Docker 호스트의 소유 단일 broker, 가속 검사·파일 삭제 주기",
+  "runs": [
+    {
+      "startedAt": "2026-10-26T20:15:26.027994Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "93cf16ff71529d6d83289b67d2087ddddc7cd7ff",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "cpus": 1,
+        "replicationFactor": 1,
+        "memoryBytes": 805306368
+      },
+      "retentionCheckMillis": "1000",
+      "correct": false,
+      "failedPhase": "TIME_FIRST",
+      "failureType": "ExecutionException",
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:15:29.457686Z",
+      "source": {
+        "path": "work/retention-63/kafka-first.json",
+        "sha256": "497beb0678326340c3d30e8062893a2a4a563abc180422f0d9fb422d50dd072d"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-first.json",
+      "executionBinaryHashRecorded": false
+    },
+    {
+      "startedAt": "2026-10-26T20:16:51.014567Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "3366272906becf4a898b5413482bcbe4276c6110",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "cpus": 1,
+        "replicationFactor": 1,
+        "memoryBytes": 805306368
+      },
+      "retentionCheckMillis": "1000",
+      "minimumSegmentRejection": "InvalidConfigurationException",
+      "correct": false,
+      "failedPhase": "TIME_FIRST",
+      "failureType": "IllegalStateException",
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:16:55.131902Z",
+      "source": {
+        "path": "work/retention-63/kafka-corrected.json",
+        "sha256": "028af004c40d54230924533f3401005b5b5303fd4a1c0acbd55fd71062b38b34"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-corrected.json",
+      "executionBinaryHashRecorded": false,
+      "timeFirst": {
+        "startedAt": "2026-10-26T20:16:54.538615Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "4000",
+          "retention.bytes": "-1",
+          "segment.bytes": "1048576",
+          "segment.ms": "1000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 0,
+        "timeline": []
+      }
+    },
+    {
+      "startedAt": "2026-10-26T20:18:17.172945Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "eccb5af8a12cf0d0ec4b85a5b955a437eab6669b",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "replicationFactor": 1,
+        "memoryBytes": 805306368,
+        "cpus": 1
+      },
+      "retentionCheckMillis": "1000",
+      "minimumSegmentRejection": "InvalidConfigurationException",
+      "correct": false,
+      "failedPhase": "TIME_FIRST",
+      "failureType": "IllegalStateException",
+      "failureCode": "RETENTION_DELETION_UNOBSERVED",
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:18:51.432170Z",
+      "source": {
+        "path": "work/retention-63/kafka-verified.json",
+        "sha256": "06b48b04111cf6d88854f6d072a844fce563f8b2e2cf0dc95b0fa1659a1b1a75"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-verified.json",
+      "executionBinaryHashRecorded": false,
+      "timeFirst": {
+        "startedAt": "2026-10-26T20:18:20.673282Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "4000",
+          "retention.bytes": "-1",
+          "segment.bytes": "1048576",
+          "segment.ms": "1000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "firstTimestamp": "2026-10-26T20:18:20.967Z",
+          "durationMillis": 6.060709,
+          "compression": "none",
+          "payloadBytes": 700,
+          "keyBytes": 32,
+          "additionalRecords": 90,
+          "initialRecords": 30
+        },
+        "acknowledged": [
+          40,
+          40,
+          40
+        ],
+        "deliveryFailures": 0,
+        "initial": {
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "earliest": 0,
+              "partition": 0,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 10
+            }
+          ],
+          "logBytes": 22422,
+          "at": "2026-10-26T20:18:20.967070Z",
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7480,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7480
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979047
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "earliest": 0,
+              "partition": 0,
+              "end": 40
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 40
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 40
+            }
+          ],
+          "logBytes": 89295,
+          "at": "2026-10-26T20:18:21.029054Z",
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 29771,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29771
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001338
+            },
+            {
+              "partition": 1,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            },
+            {
+              "partition": 2,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            }
+          ]
+        },
+        "lastObserved": {
+          "deletedLogBytes": 89295,
+          "bounds": [
+            {
+              "earliest": 40,
+              "partition": 0,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 1,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 2,
+              "end": 40
+            }
+          ],
+          "logBytes": 0,
+          "at": "2026-10-26T20:18:50.659250Z",
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 0,
+              "allObservedFileLogicalBytes": 29899
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 0,
+              "allObservedFileLogicalBytes": 29890
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 0,
+              "allObservedFileLogicalBytes": 29890
+            }
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 53,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:18:21.103848Z",
+            "lastObservedAt": "2026-10-26T20:18:49.517282Z",
+            "samples": 51,
+            "state": {
+              "deletedLogBytes": 0,
+              "bounds": [
+                {
+                  "earliest": 0,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 2,
+                  "end": 40
+                }
+              ],
+              "logBytes": 89295,
+              "filesMatchEarliest": true
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:18:50.088220Z",
+            "lastObservedAt": "2026-10-26T20:18:50.088220Z",
+            "samples": 1,
+            "state": {
+              "deletedLogBytes": 89295,
+              "bounds": [
+                {
+                  "earliest": 0,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 2,
+                  "end": 40
+                }
+              ],
+              "logBytes": 0,
+              "filesMatchEarliest": true
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:18:50.659250Z",
+            "lastObservedAt": "2026-10-26T20:18:50.659250Z",
+            "samples": 1,
+            "state": {
+              "deletedLogBytes": 89295,
+              "bounds": [
+                {
+                  "earliest": 40,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 2,
+                  "end": 40
+                }
+              ],
+              "logBytes": 0,
+              "filesMatchEarliest": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "startedAt": "2026-10-26T20:19:58.006131Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "12c0c3ee698437ac5f0143a4f8c1586b54ade55a",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "cpus": 1,
+        "replicationFactor": 1,
+        "memoryBytes": 805306368
+      },
+      "retentionCheckMillis": "1000",
+      "minimumSegmentRejection": "InvalidConfigurationException",
+      "correct": false,
+      "failedPhase": "BYTES_FIRST",
+      "failureType": "IllegalStateException",
+      "failureCode": "RETENTION_DELETION_UNOBSERVED",
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:21:23.234080Z",
+      "source": {
+        "path": "work/retention-63/kafka-final.json",
+        "sha256": "8227a19ba2a18c27458e18226341d372cdd089e703aa6644ac97ba23b663527e"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-final.json",
+      "executionBinaryHashRecorded": false,
+      "timeFirst": {
+        "startedAt": "2026-10-26T20:20:01.620348Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "4000",
+          "retention.bytes": "-1",
+          "segment.bytes": "1048576",
+          "segment.ms": "1000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "compression": "none",
+          "payloadBytes": 700,
+          "keyBytes": 32,
+          "additionalRecords": 90,
+          "initialRecords": 30,
+          "firstTimestamp": "2026-10-26T20:20:01.904Z",
+          "durationMillis": 6.485167
+        },
+        "acknowledged": [
+          40,
+          40,
+          40
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "oldManifestCode": "RETENTION_EXPIRED",
+        "finishedAt": "2026-10-26T20:20:33.320247Z",
+        "correct": true,
+        "initial": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 0
+            },
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 1
+            },
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 2
+            }
+          ],
+          "logBytes": 22422,
+          "at": "2026-10-26T20:20:01.904888Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7480,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7480
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979047
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 40,
+              "earliest": 0,
+              "partition": 0
+            },
+            {
+              "end": 40,
+              "earliest": 0,
+              "partition": 1
+            },
+            {
+              "end": 40,
+              "earliest": 0,
+              "partition": 2
+            }
+          ],
+          "logBytes": 89295,
+          "at": "2026-10-26T20:20:01.976611Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 29771,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29771
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001338
+            },
+            {
+              "partition": 1,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            },
+            {
+              "partition": 2,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            }
+          ]
+        },
+        "final": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 0
+            },
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 1
+            },
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 2
+            }
+          ],
+          "logBytes": 0,
+          "at": "2026-10-26T20:20:33.306203Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "lastObserved": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 0
+            },
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 1
+            },
+            {
+              "end": 40,
+              "earliest": 40,
+              "partition": 2
+            }
+          ],
+          "logBytes": 0,
+          "at": "2026-10-26T20:20:33.243005Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "retention": {
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ],
+          "observedAt": "2026-10-26T20:20:33.253174Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME"
+        },
+        "retainedBounds": {
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ],
+          "observedAt": "2026-10-26T20:20:33.320216Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME"
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 56,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:20:02.037220Z",
+            "lastObservedAt": "2026-10-26T20:20:30.431637Z",
+            "samples": 51,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "bounds": [
+                {
+                  "end": 40,
+                  "earliest": 0,
+                  "partition": 0
+                },
+                {
+                  "end": 40,
+                  "earliest": 0,
+                  "partition": 1
+                },
+                {
+                  "end": 40,
+                  "earliest": 0,
+                  "partition": 2
+                }
+              ],
+              "logBytes": 89295
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:20:31.005154Z",
+            "lastObservedAt": "2026-10-26T20:20:31.581047Z",
+            "samples": 2,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 89295,
+              "bounds": [
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 0
+                },
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 1
+                },
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 2
+                }
+              ],
+              "logBytes": 0
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:20:32.136561Z",
+            "lastObservedAt": "2026-10-26T20:20:33.243005Z",
+            "samples": 3,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "bounds": [
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 0
+                },
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 1
+                },
+                {
+                  "end": 40,
+                  "earliest": 40,
+                  "partition": 2
+                }
+              ],
+              "logBytes": 0
+            }
+          }
+        ]
+      },
+      "bytesFirst": {
+        "startedAt": "2026-10-26T20:20:33.367242Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "86400000",
+          "retention.bytes": "268435456",
+          "segment.bytes": "33554432",
+          "segment.ms": "604800000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "compression": "none",
+          "payloadBytes": 700,
+          "keyBytes": 32,
+          "additionalRecords": 500000,
+          "initialRecords": 30,
+          "firstTimestamp": "2026-10-26T20:20:33.455Z",
+          "durationMillis": 4028.08875
+        },
+        "acknowledged": [
+          400010,
+          50010,
+          50010
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "initial": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 0
+            },
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 1
+            },
+            {
+              "end": 10,
+              "earliest": 0,
+              "partition": 2
+            }
+          ],
+          "logBytes": 22413,
+          "at": "2026-10-26T20:20:33.455005Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 400010,
+              "earliest": 0,
+              "partition": 0
+            },
+            {
+              "end": 50010,
+              "earliest": 0,
+              "partition": 1
+            },
+            {
+              "end": 50010,
+              "earliest": 0,
+              "partition": 2
+            }
+          ],
+          "logBytes": 371248188,
+          "at": "2026-10-26T20:20:37.554522Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 296820471,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 45162,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 28761209
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33511699
+                }
+              ],
+              "indexLogicalBytes": 21015788,
+              "allObservedFileLogicalBytes": 317836758
+            },
+            {
+              "partition": 1,
+              "logBytes": 37214316,
+              "logSegments": [
+                {
+                  "baseOffset": 45090,
+                  "bytes": 3661787
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33552529
+                }
+              ],
+              "indexLogicalBytes": 20996788,
+              "allObservedFileLogicalBytes": 58211211
+            },
+            {
+              "partition": 2,
+              "logBytes": 37213401,
+              "logSegments": [
+                {
+                  "baseOffset": 45090,
+                  "bytes": 3661603
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33551798
+                }
+              ],
+              "indexLogicalBytes": 20996692,
+              "allObservedFileLogicalBytes": 58210200
+            }
+          ]
+        },
+        "lastObserved": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "bounds": [
+            {
+              "end": 400010,
+              "earliest": 0,
+              "partition": 0
+            },
+            {
+              "end": 50010,
+              "earliest": 0,
+              "partition": 1
+            },
+            {
+              "end": 50010,
+              "earliest": 0,
+              "partition": 2
+            }
+          ],
+          "logBytes": 371248188,
+          "at": "2026-10-26T20:21:22.406313Z",
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 296820471,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 45162,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 28761209
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33511699
+                }
+              ],
+              "indexLogicalBytes": 21015788,
+              "allObservedFileLogicalBytes": 317836758
+            },
+            {
+              "partition": 1,
+              "logBytes": 37214316,
+              "logSegments": [
+                {
+                  "baseOffset": 45090,
+                  "bytes": 3661787
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33552529
+                }
+              ],
+              "indexLogicalBytes": 20996788,
+              "allObservedFileLogicalBytes": 58211211
+            },
+            {
+              "partition": 2,
+              "logBytes": 37213401,
+              "logSegments": [
+                {
+                  "baseOffset": 45090,
+                  "bytes": 3661603
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33551798
+                }
+              ],
+              "indexLogicalBytes": 20996692,
+              "allObservedFileLogicalBytes": 58210200
+            }
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 80,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:20:37.606069Z",
+            "lastObservedAt": "2026-10-26T20:21:22.406313Z",
+            "samples": 80,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "bounds": [
+                {
+                  "end": 400010,
+                  "earliest": 0,
+                  "partition": 0
+                },
+                {
+                  "end": 50010,
+                  "earliest": 0,
+                  "partition": 1
+                },
+                {
+                  "end": 50010,
+                  "earliest": 0,
+                  "partition": 2
+                }
+              ],
+              "logBytes": 371248188
+            }
+          }
+        ]
+      }
+    },
+    {
+      "startedAt": "2026-10-26T20:22:24.075349Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "901a7c087fa529e1f08fad5ca6c402804705c212",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "memoryBytes": 805306368,
+        "replicationFactor": 1,
+        "cpus": 1
+      },
+      "retentionCheckMillis": "1000",
+      "minimumSegmentRejection": "InvalidConfigurationException",
+      "correct": false,
+      "failedPhase": "BYTES_FIRST",
+      "failureType": "IllegalStateException",
+      "failureCode": "HA_COMMAND_FAILED",
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:23:05.259624Z",
+      "source": {
+        "path": "work/retention-63/kafka-segment-boundary.json",
+        "sha256": "ba062c0aab1b7b670a18c646405d632e5482b0e4744a62bd7e061958329c466b"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-segment-boundary.json",
+      "executionBinaryHashRecorded": false,
+      "timeFirst": {
+        "startedAt": "2026-10-26T20:22:27.765493Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "4000",
+          "retention.bytes": "-1",
+          "segment.bytes": "1048576",
+          "segment.ms": "1000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "durationMillis": 7.567084,
+          "firstTimestamp": "2026-10-26T20:22:28.069Z",
+          "initialRecords": 30,
+          "additionalRecords": 90,
+          "keyBytes": 32,
+          "payloadBytes": 700,
+          "compression": "none"
+        },
+        "acknowledged": [
+          40,
+          40,
+          40
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "oldManifestCode": "RETENTION_EXPIRED",
+        "finishedAt": "2026-10-26T20:22:59.562340Z",
+        "correct": true,
+        "initial": {
+          "at": "2026-10-26T20:22:28.069460Z",
+          "logBytes": 22422,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 0,
+              "end": 10
+            },
+            {
+              "partition": 1,
+              "earliest": 0,
+              "end": 10
+            },
+            {
+              "partition": 2,
+              "earliest": 0,
+              "end": 10
+            }
+          ],
+          "deletedLogBytes": 0,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7480,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7480
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979047
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "at": "2026-10-26T20:22:28.140911Z",
+          "logBytes": 89295,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 0,
+              "end": 40
+            },
+            {
+              "partition": 1,
+              "earliest": 0,
+              "end": 40
+            },
+            {
+              "partition": 2,
+              "earliest": 0,
+              "end": 40
+            }
+          ],
+          "deletedLogBytes": 0,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 29771,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29771
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001338
+            },
+            {
+              "partition": 1,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            },
+            {
+              "partition": 2,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            }
+          ]
+        },
+        "final": {
+          "at": "2026-10-26T20:22:59.547362Z",
+          "logBytes": 0,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 40,
+              "end": 40
+            },
+            {
+              "partition": 1,
+              "earliest": 40,
+              "end": 40
+            },
+            {
+              "partition": 2,
+              "earliest": 40,
+              "end": 40
+            }
+          ],
+          "deletedLogBytes": 0,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "lastObserved": {
+          "at": "2026-10-26T20:22:59.472994Z",
+          "logBytes": 0,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 40,
+              "end": 40
+            },
+            {
+              "partition": 1,
+              "earliest": 40,
+              "end": 40
+            },
+            {
+              "partition": 2,
+              "earliest": 40,
+              "end": 40
+            }
+          ],
+          "deletedLogBytes": 0,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "retention": {
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "observedAt": "2026-10-26T20:22:59.489439Z",
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ],
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ]
+        },
+        "retainedBounds": {
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "observedAt": "2026-10-26T20:22:59.562302Z",
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ],
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 56,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:22:28.202613Z",
+            "lastObservedAt": "2026-10-26T20:22:56.644005Z",
+            "samples": 51,
+            "state": {
+              "logBytes": 89295,
+              "bounds": [
+                {
+                  "partition": 0,
+                  "earliest": 0,
+                  "end": 40
+                },
+                {
+                  "partition": 1,
+                  "earliest": 0,
+                  "end": 40
+                },
+                {
+                  "partition": 2,
+                  "earliest": 0,
+                  "end": 40
+                }
+              ],
+              "deletedLogBytes": 0,
+              "filesMatchEarliest": true
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:22:57.217681Z",
+            "lastObservedAt": "2026-10-26T20:22:57.780442Z",
+            "samples": 2,
+            "state": {
+              "logBytes": 0,
+              "bounds": [
+                {
+                  "partition": 0,
+                  "earliest": 40,
+                  "end": 40
+                },
+                {
+                  "partition": 1,
+                  "earliest": 40,
+                  "end": 40
+                },
+                {
+                  "partition": 2,
+                  "earliest": 40,
+                  "end": 40
+                }
+              ],
+              "deletedLogBytes": 89295,
+              "filesMatchEarliest": true
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:22:58.339367Z",
+            "lastObservedAt": "2026-10-26T20:22:59.472994Z",
+            "samples": 3,
+            "state": {
+              "logBytes": 0,
+              "bounds": [
+                {
+                  "partition": 0,
+                  "earliest": 40,
+                  "end": 40
+                },
+                {
+                  "partition": 1,
+                  "earliest": 40,
+                  "end": 40
+                },
+                {
+                  "partition": 2,
+                  "earliest": 40,
+                  "end": 40
+                }
+              ],
+              "deletedLogBytes": 0,
+              "filesMatchEarliest": true
+            }
+          }
+        ]
+      },
+      "bytesFirst": {
+        "startedAt": "2026-10-26T20:22:59.609220Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "86400000",
+          "retention.bytes": "268435456",
+          "segment.bytes": "33554432",
+          "segment.ms": "604800000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "durationMillis": 4522.206084,
+          "firstTimestamp": "2026-10-26T20:22:59.707Z",
+          "initialRecords": 30,
+          "additionalRecords": 600000,
+          "keyBytes": 32,
+          "payloadBytes": 700,
+          "compression": "none"
+        },
+        "acknowledged": [
+          480010,
+          60010,
+          60010
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "initial": {
+          "at": "2026-10-26T20:22:59.707906Z",
+          "logBytes": 22413,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 0,
+              "end": 10
+            },
+            {
+              "partition": 1,
+              "earliest": 0,
+              "end": 10
+            },
+            {
+              "partition": 2,
+              "earliest": 0,
+              "end": 10
+            }
+          ],
+          "deletedLogBytes": 0,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "at": "2026-10-26T20:23:04.280767Z",
+          "logBytes": 412002078,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 45162,
+              "end": 480010
+            },
+            {
+              "partition": 1,
+              "earliest": 0,
+              "end": 60010
+            },
+            {
+              "partition": 2,
+              "earliest": 0,
+              "end": 60010
+            }
+          ],
+          "deletedLogBytes": 33511699,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 322671372,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 45162,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 451562,
+                  "bytes": 21109364
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 406410,
+                  "bytes": 33504228
+                }
+              ],
+              "indexLogicalBytes": 21021168,
+              "allObservedFileLogicalBytes": 377210794
+            },
+            {
+              "partition": 1,
+              "logBytes": 44664894,
+              "logSegments": [
+                {
+                  "baseOffset": 45088,
+                  "bytes": 11111071
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33553823
+                }
+              ],
+              "indexLogicalBytes": 20996976,
+              "allObservedFileLogicalBytes": 65661977
+            },
+            {
+              "partition": 2,
+              "logBytes": 44665812,
+              "logSegments": [
+                {
+                  "baseOffset": 45085,
+                  "bytes": 11113349
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33552463
+                }
+              ],
+              "indexLogicalBytes": 20997200,
+              "allObservedFileLogicalBytes": 65663119
+            }
+          ]
+        },
+        "lastObserved": {
+          "at": "2026-10-26T20:23:04.337826Z",
+          "logBytes": 412002078,
+          "bounds": [
+            {
+              "partition": 0,
+              "earliest": 45162,
+              "end": 480010
+            },
+            {
+              "partition": 1,
+              "earliest": 0,
+              "end": 60010
+            },
+            {
+              "partition": 2,
+              "earliest": 0,
+              "end": 60010
+            }
+          ],
+          "deletedLogBytes": 33511699,
+          "filesMatchEarliest": true,
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 322671372,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 45162,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 451562,
+                  "bytes": 21109364
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 406410,
+                  "bytes": 33504228
+                }
+              ],
+              "indexLogicalBytes": 21021168,
+              "allObservedFileLogicalBytes": 377210794
+            },
+            {
+              "partition": 1,
+              "logBytes": 44664894,
+              "logSegments": [
+                {
+                  "baseOffset": 45088,
+                  "bytes": 11111071
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33553823
+                }
+              ],
+              "indexLogicalBytes": 20996976,
+              "allObservedFileLogicalBytes": 65661977
+            },
+            {
+              "partition": 2,
+              "logBytes": 44665812,
+              "logSegments": [
+                {
+                  "baseOffset": 45085,
+                  "bytes": 11113349
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33552463
+                }
+              ],
+              "indexLogicalBytes": 20997200,
+              "allObservedFileLogicalBytes": 65663119
+            }
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 1,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:23:04.337826Z",
+            "lastObservedAt": "2026-10-26T20:23:04.337826Z",
+            "samples": 1,
+            "state": {
+              "logBytes": 412002078,
+              "bounds": [
+                {
+                  "partition": 0,
+                  "earliest": 45162,
+                  "end": 480010
+                },
+                {
+                  "partition": 1,
+                  "earliest": 0,
+                  "end": 60010
+                },
+                {
+                  "partition": 2,
+                  "earliest": 0,
+                  "end": 60010
+                }
+              ],
+              "deletedLogBytes": 33511699,
+              "filesMatchEarliest": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "startedAt": "2026-10-26T20:24:06.738012Z",
+      "scope": "SINGLE_OWNED_BROKER_ACCELERATED_RETENTION_CHECK_NO_HA",
+      "limitations": [
+        "BROKER_RETENTION_CHECK_1S_NOT_PRODUCTION_5M",
+        "FILE_DELETE_DELAY_1S",
+        "TIME_CASE_RETENTION_4S_NOT_24H",
+        "BYTES_CASE_PRODUCTION_256MIB_AND_32MIB_SEGMENTS_ACCELERATED_INPUT",
+        "LOG_FILE_BYTES_EXCLUDE_INDEX_AND_METADATA",
+        "NO_REAL_WORLD_24H_OR_PITR_RPO_GUARANTEE"
+      ],
+      "revision": "8624c04a7b1daecff77fa97f224bfe8f5abcdbf5",
+      "workingTreeDirty": false,
+      "imageId": "sha256:5cc2a2fd93fa2687b44015eee04fb2c3edd9e526bd64bf8bec5ff1e268772e0e",
+      "kafkaClient": "4.1.2",
+      "java": "21.0.11",
+      "container": {
+        "replicationFactor": 1,
+        "memoryBytes": 805306368,
+        "cpus": 1
+      },
+      "retentionCheckMillis": "1000",
+      "minimumSegmentRejection": "InvalidConfigurationException",
+      "correct": true,
+      "cleanupComplete": true,
+      "finishedAt": "2026-10-26T20:24:50.701174Z",
+      "source": {
+        "path": "work/retention-63/kafka-stable.json",
+        "sha256": "61542ab3ee4f44c2935c8dfcf872c6cfafc781af412479d15cc8bb5737692533"
+      },
+      "command": "./scripts/retention-experiment kafka work/retention-63/kafka-stable.json",
+      "executionBinaryHashRecorded": false,
+      "timeFirst": {
+        "startedAt": "2026-10-26T20:24:10.303888Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "4000",
+          "retention.bytes": "-1",
+          "segment.bytes": "1048576",
+          "segment.ms": "1000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "initialRecords": 30,
+          "firstTimestamp": "2026-10-26T20:24:10.618Z",
+          "durationMillis": 5.617917,
+          "compression": "none",
+          "payloadBytes": 700,
+          "keyBytes": 32,
+          "additionalRecords": 90
+        },
+        "acknowledged": [
+          40,
+          40,
+          40
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "oldManifestCode": "RETENTION_EXPIRED",
+        "finishedAt": "2026-10-26T20:24:41.862654Z",
+        "correct": true,
+        "initial": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 22422,
+          "at": "2026-10-26T20:24:10.618906Z",
+          "bounds": [
+            {
+              "earliest": 0,
+              "partition": 0,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 10
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7480,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7480
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979047
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 89295,
+          "at": "2026-10-26T20:24:10.687882Z",
+          "bounds": [
+            {
+              "earliest": 0,
+              "partition": 0,
+              "end": 40
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 40
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 40
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 29771,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29771
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001338
+            },
+            {
+              "partition": 1,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            },
+            {
+              "partition": 2,
+              "logBytes": 29762,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 29762
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 21001329
+            }
+          ]
+        },
+        "final": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 0,
+          "at": "2026-10-26T20:24:41.851745Z",
+          "bounds": [
+            {
+              "earliest": 40,
+              "partition": 0,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 1,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 2,
+              "end": 40
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "lastObserved": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 0,
+          "at": "2026-10-26T20:24:41.766027Z",
+          "bounds": [
+            {
+              "earliest": 40,
+              "partition": 0,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 1,
+              "end": 40
+            },
+            {
+              "earliest": 40,
+              "partition": 2,
+              "end": 40
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 1,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            },
+            {
+              "partition": 2,
+              "logBytes": 0,
+              "logSegments": [
+                {
+                  "baseOffset": 40,
+                  "bytes": 0
+                }
+              ],
+              "indexLogicalBytes": 10485756,
+              "allObservedFileLogicalBytes": 10485864
+            }
+          ]
+        },
+        "retention": {
+          "observedAt": "2026-10-26T20:24:41.778697Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ]
+        },
+        "retainedBounds": {
+          "observedAt": "2026-10-26T20:24:41.862629Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 2,
+              "capturedStart": 40,
+              "capturedEnd": 40,
+              "currentEarliest": 40,
+              "currentEnd": 40,
+              "capturedOffsetSpan": 0,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": null,
+              "lastProbe": null
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 54,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:24:10.764114Z",
+            "lastObservedAt": "2026-10-26T20:24:38.846986Z",
+            "samples": 49,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "disappearedFilesDuringStat": 0,
+              "logBytes": 89295,
+              "bounds": [
+                {
+                  "earliest": 0,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 0,
+                  "partition": 2,
+                  "end": 40
+                }
+              ]
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:24:39.435080Z",
+            "lastObservedAt": "2026-10-26T20:24:40.025492Z",
+            "samples": 2,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 89295,
+              "disappearedFilesDuringStat": 0,
+              "logBytes": 0,
+              "bounds": [
+                {
+                  "earliest": 40,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 2,
+                  "end": 40
+                }
+              ]
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:24:40.600300Z",
+            "lastObservedAt": "2026-10-26T20:24:41.766027Z",
+            "samples": 3,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "disappearedFilesDuringStat": 0,
+              "logBytes": 0,
+              "bounds": [
+                {
+                  "earliest": 40,
+                  "partition": 0,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 1,
+                  "end": 40
+                },
+                {
+                  "earliest": 40,
+                  "partition": 2,
+                  "end": 40
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "bytesFirst": {
+        "startedAt": "2026-10-26T20:24:41.909910Z",
+        "effectiveConfig": {
+          "cleanup.policy": "delete",
+          "message.timestamp.type": "CreateTime",
+          "retention.ms": "86400000",
+          "retention.bytes": "268435456",
+          "segment.bytes": "33554432",
+          "segment.ms": "604800000",
+          "file.delete.delay.ms": "1000"
+        },
+        "captured": [
+          {
+            "partition": 0,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 1,
+            "start": 0,
+            "end": 10
+          },
+          {
+            "partition": 2,
+            "start": 0,
+            "end": 10
+          }
+        ],
+        "input": {
+          "initialRecords": 30,
+          "firstTimestamp": "2026-10-26T20:24:42.022Z",
+          "durationMillis": 5382.968833,
+          "compression": "none",
+          "payloadBytes": 700,
+          "keyBytes": 32,
+          "additionalRecords": 600000
+        },
+        "acknowledged": [
+          480010,
+          60010,
+          60010
+        ],
+        "deliveryFailures": 0,
+        "observationBudgetSeconds": 45,
+        "oldManifestCode": "RETENTION_EXPIRED",
+        "finishedAt": "2026-10-26T20:24:50.375274Z",
+        "correct": true,
+        "initial": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 22413,
+          "at": "2026-10-26T20:24:42.022112Z",
+          "bounds": [
+            {
+              "earliest": 0,
+              "partition": 0,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 10
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 10
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 1,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            },
+            {
+              "partition": 2,
+              "logBytes": 7471,
+              "logSegments": [
+                {
+                  "baseOffset": 0,
+                  "bytes": 7471
+                }
+              ],
+              "indexLogicalBytes": 20971516,
+              "allObservedFileLogicalBytes": 20979038
+            }
+          ]
+        },
+        "afterInput": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 33504228,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 378500071,
+          "at": "2026-10-26T20:24:47.517068Z",
+          "bounds": [
+            {
+              "earliest": 90314,
+              "partition": 0,
+              "end": 480010
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 60010
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 60010
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 289167144,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 451562,
+                  "bytes": 21109364
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 406410,
+                  "bytes": 33504228
+                }
+              ],
+              "indexLogicalBytes": 21016172,
+              "allObservedFileLogicalBytes": 343693695
+            },
+            {
+              "partition": 1,
+              "logBytes": 44666065,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11117702
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548363
+                }
+              ],
+              "indexLogicalBytes": 20997864,
+              "allObservedFileLogicalBytes": 65664036
+            },
+            {
+              "partition": 2,
+              "logBytes": 44666862,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11118125
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548737
+                }
+              ],
+              "indexLogicalBytes": 20998080,
+              "allObservedFileLogicalBytes": 65665049
+            }
+          ]
+        },
+        "final": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 378500071,
+          "at": "2026-10-26T20:24:50.317293Z",
+          "bounds": [
+            {
+              "earliest": 90314,
+              "partition": 0,
+              "end": 480010
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 60010
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 60010
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 289167144,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 451562,
+                  "bytes": 21109364
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 406410,
+                  "bytes": 33504228
+                }
+              ],
+              "indexLogicalBytes": 21016172,
+              "allObservedFileLogicalBytes": 310183875
+            },
+            {
+              "partition": 1,
+              "logBytes": 44666065,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11117702
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548363
+                }
+              ],
+              "indexLogicalBytes": 20997864,
+              "allObservedFileLogicalBytes": 65664036
+            },
+            {
+              "partition": 2,
+              "logBytes": 44666862,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11118125
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548737
+                }
+              ],
+              "indexLogicalBytes": 20998080,
+              "allObservedFileLogicalBytes": 65665049
+            }
+          ]
+        },
+        "lastObserved": {
+          "filesMatchEarliest": true,
+          "deletedLogBytes": 0,
+          "disappearedFilesDuringStat": 0,
+          "logBytes": 378500071,
+          "at": "2026-10-26T20:24:50.120366Z",
+          "bounds": [
+            {
+              "earliest": 90314,
+              "partition": 0,
+              "end": 480010
+            },
+            {
+              "earliest": 0,
+              "partition": 1,
+              "end": 60010
+            },
+            {
+              "earliest": 0,
+              "partition": 2,
+              "end": 60010
+            }
+          ],
+          "filesByPartition": [
+            {
+              "partition": 0,
+              "logBytes": 289167144,
+              "logSegments": [
+                {
+                  "baseOffset": 270938,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 90314,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 361250,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 135474,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 180626,
+                  "bytes": 33510217
+                },
+                {
+                  "baseOffset": 451562,
+                  "bytes": 21109364
+                },
+                {
+                  "baseOffset": 316098,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 225786,
+                  "bytes": 33504228
+                },
+                {
+                  "baseOffset": 406410,
+                  "bytes": 33504228
+                }
+              ],
+              "indexLogicalBytes": 21016172,
+              "allObservedFileLogicalBytes": 310183875
+            },
+            {
+              "partition": 1,
+              "logBytes": 44666065,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11117702
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548363
+                }
+              ],
+              "indexLogicalBytes": 20997864,
+              "allObservedFileLogicalBytes": 65664036
+            },
+            {
+              "partition": 2,
+              "logBytes": 44666862,
+              "logSegments": [
+                {
+                  "baseOffset": 45078,
+                  "bytes": 11118125
+                },
+                {
+                  "baseOffset": 0,
+                  "bytes": 33548737
+                }
+              ],
+              "indexLogicalBytes": 20998080,
+              "allObservedFileLogicalBytes": 65665049
+            }
+          ]
+        },
+        "retention": {
+          "observedAt": "2026-10-26T20:24:50.185449Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 90314,
+              "currentEnd": 480010,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 0,
+              "missingPrefixOffsetSpan": 10,
+              "state": "RETENTION_EXPIRED",
+              "firstProbe": null,
+              "lastProbe": null
+            },
+            {
+              "partition": 1,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 0,
+              "currentEnd": 60010,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 10,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": {
+                "fromOffset": 0,
+                "toOffset": 10,
+                "state": "SAMPLED",
+                "offset": 0,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              },
+              "lastProbe": {
+                "fromOffset": 0,
+                "toOffset": 10,
+                "state": "SAMPLED",
+                "offset": 9,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              }
+            },
+            {
+              "partition": 2,
+              "capturedStart": 0,
+              "capturedEnd": 10,
+              "currentEarliest": 0,
+              "currentEnd": 60010,
+              "capturedOffsetSpan": 10,
+              "availableCapturedOffsetSpan": 10,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": {
+                "fromOffset": 0,
+                "toOffset": 10,
+                "state": "SAMPLED",
+                "offset": 0,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              },
+              "lastProbe": {
+                "fromOffset": 0,
+                "toOffset": 10,
+                "state": "SAMPLED",
+                "offset": 9,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              }
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ]
+        },
+        "retainedBounds": {
+          "observedAt": "2026-10-26T20:24:50.375251Z",
+          "timestampMeaning": "KAFKA_RECEIVED_AT_NOT_EVENT_TIME",
+          "partitions": [
+            {
+              "partition": 0,
+              "capturedStart": 90314,
+              "capturedEnd": 480010,
+              "currentEarliest": 90314,
+              "currentEnd": 480010,
+              "capturedOffsetSpan": 389696,
+              "availableCapturedOffsetSpan": 389696,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": {
+                "fromOffset": 90314,
+                "toOffset": 90514,
+                "state": "SAMPLED",
+                "offset": 90314,
+                "kafkaTimestamp": "2026-10-26T20:24:43.133Z"
+              },
+              "lastProbe": {
+                "fromOffset": 479810,
+                "toOffset": 480010,
+                "state": "SAMPLED",
+                "offset": 480009,
+                "kafkaTimestamp": "2026-10-26T20:24:47.400Z"
+              }
+            },
+            {
+              "partition": 1,
+              "capturedStart": 0,
+              "capturedEnd": 60010,
+              "currentEarliest": 0,
+              "currentEnd": 60010,
+              "capturedOffsetSpan": 60010,
+              "availableCapturedOffsetSpan": 60010,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": {
+                "fromOffset": 0,
+                "toOffset": 200,
+                "state": "SAMPLED",
+                "offset": 0,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              },
+              "lastProbe": {
+                "fromOffset": 59810,
+                "toOffset": 60010,
+                "state": "SAMPLED",
+                "offset": 60009,
+                "kafkaTimestamp": "2026-10-26T20:24:47.400Z"
+              }
+            },
+            {
+              "partition": 2,
+              "capturedStart": 0,
+              "capturedEnd": 60010,
+              "currentEarliest": 0,
+              "currentEnd": 60010,
+              "capturedOffsetSpan": 60010,
+              "availableCapturedOffsetSpan": 60010,
+              "missingPrefixOffsetSpan": 0,
+              "state": "AVAILABLE",
+              "firstProbe": {
+                "fromOffset": 0,
+                "toOffset": 200,
+                "state": "SAMPLED",
+                "offset": 0,
+                "kafkaTimestamp": "2026-10-26T20:24:41.926Z"
+              },
+              "lastProbe": {
+                "fromOffset": 59810,
+                "toOffset": 60010,
+                "state": "SAMPLED",
+                "offset": 60009,
+                "kafkaTimestamp": "2026-10-26T20:24:47.400Z"
+              }
+            }
+          ],
+          "limits": [
+            "OFFSET_SPAN_IS_NOT_RECORD_COUNT",
+            "BOUNDARY_PROBE_MAX_200_OFFSETS_AND_1_SECOND",
+            "NO_EVENT_TIME_COMPLETENESS",
+            "NO_DELETED_OR_FUTURE_INPUT"
+          ]
+        },
+        "timelineRepresentation": "CONSECUTIVE_EQUAL_STATE_FIRST_LAST_COUNT",
+        "observationsTotal": 5,
+        "timeline": [
+          {
+            "firstObservedAt": "2026-10-26T20:24:47.632700Z",
+            "lastObservedAt": "2026-10-26T20:24:48.252589Z",
+            "samples": 2,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 33504228,
+              "disappearedFilesDuringStat": 0,
+              "logBytes": 378500071,
+              "bounds": [
+                {
+                  "earliest": 90314,
+                  "partition": 0,
+                  "end": 480010
+                },
+                {
+                  "earliest": 0,
+                  "partition": 1,
+                  "end": 60010
+                },
+                {
+                  "earliest": 0,
+                  "partition": 2,
+                  "end": 60010
+                }
+              ]
+            }
+          },
+          {
+            "firstObservedAt": "2026-10-26T20:24:48.869379Z",
+            "lastObservedAt": "2026-10-26T20:24:50.120366Z",
+            "samples": 3,
+            "state": {
+              "filesMatchEarliest": true,
+              "deletedLogBytes": 0,
+              "disappearedFilesDuringStat": 0,
+              "logBytes": 378500071,
+              "bounds": [
+                {
+                  "earliest": 90314,
+                  "partition": 0,
+                  "end": 480010
+                },
+                {
+                  "earliest": 0,
+                  "partition": 1,
+                  "end": 60010
+                },
+                {
+                  "earliest": 0,
+                  "partition": 2,
+                  "end": 60010
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

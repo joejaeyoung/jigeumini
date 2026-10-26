@@ -186,22 +186,32 @@ class RetentionIntegrationTest {
         jdbc.update("INSERT INTO ranking_entry(snapshot_id,channel_id,reference_count,coverage,status,reasons) VALUES (?,?,1,1,'HEALTHY','[]')",snapshot,CHANNEL);
         jdbc.update("INSERT INTO snapshot_quality_revision VALUES (?,?,'KNOWN_LOSS',?)",snapshot,CHANNEL,Timestamp.from(old));
         jdbc.update("INSERT INTO collection_loss VALUES (?,?,?,?,?)",UUID.randomUUID(),CHANNEL,Timestamp.from(old.minusSeconds(10)),Timestamp.from(old),"TEST");
+        for(Instant quarantined:List.of(old,started))jdbc.update("""
+                INSERT INTO projection_failure(projection,run_id,failure_id,source_topic,topic_id,
+                  source_partition,source_offset,error_code,channel_id,affected_from,affected_to,quarantined_at)
+                VALUES ('ranking',?,?,?,?,0,0,'TEST',?,?,?,?)
+                """,RUN,UUID.randomUUID().toString(),topic,"synthetic-topic",CHANNEL,Timestamp.from(old.minusSeconds(10)),Timestamp.from(old),Timestamp.from(quarantined));
         var history=new HistoryRetention(jdbc,tx,RUN,clock);
         assertThat(history.cleanup()).containsEntry("protectedByReports",true);assertThat(count("ranking_snapshot")).isEqualTo(1);assertThat(count("collection_loss")).isEqualTo(1);
+        assertThat(count("projection_failure")).isEqualTo(2);
         jdbc.update("UPDATE report_session SET ended_at=? WHERE report_id=?",Timestamp.from(started.minusSeconds(9*86400)),report);
         assertThat(history.cleanup()).containsEntry("protectedByReports",false);
         for(String table:List.of("ranking_snapshot","ranking_entry","snapshot_quality_revision","collection_loss"))assertThat(count(table)).isZero();
+        assertThat(count("projection_failure")).isEqualTo(1); // 오래된 영향 범위여도 최근 격리는 보존한다.
+        clock.now=started.plusSeconds(9*86400);history.cleanup();assertThat(count("projection_failure")).isZero();
     }
     @Test void notificationReceiptIsKeptUntilOutboxAcknowledgementCanBeRetired() {
         var feed=new io.chatpulse.notifications.NotificationStore(jdbc,tx,RUN,clock);UUID id=UUID.randomUUID();Instant old=started.minusSeconds(10*86400);
         var spike=new io.chatpulse.notifications.SpikeDetected(1,id,RUN,CHANNEL,old,"chat-spike-v1",100,new java.math.BigDecimal(50),new java.math.BigDecimal(2),"HEALTHY_AT_DETECTION");
         jdbc.update("INSERT INTO spike_event(spike_id,run_id,channel_id,evaluated_at,algorithm_version,count,baseline,ratio) VALUES (?,?,?,?,'chat-spike-v1',100,50,2)",id,RUN,CHANNEL,Timestamp.from(old));
         jdbc.update("INSERT INTO spike_outbox(spike_id,run_id,created_at) VALUES (?,?,?)",id,RUN,Timestamp.from(old));
+        var history=new HistoryRetention(jdbc,tx,RUN,clock);history.cleanup();assertThat(count("spike_event")).isEqualTo(1);
         clock.now=old;var record=new ConsumerRecord<String,byte[]>(topic,0,0,CHANNEL,spike.encode());feed.apply(List.of(record));
         clock.now=started;assertThat(feed.cleanup()).isZero();assertThat(count("notification_event")).isEqualTo(1);
         jdbc.update("UPDATE spike_outbox SET published_at=?",Timestamp.from(started.minusSeconds(8*86400)));
         try(var outbox=new io.chatpulse.notifications.SpikeOutbox(jdbc,tx,IntegrationSupport.BOOTSTRAP,topic,RUN)){assertThat(outbox.cleanup()).isEqualTo(1);}
         assertThat(feed.cleanup()).isEqualTo(1);clock.now=old;feed.apply(List.of(record));assertThat(count("notification_event")).isZero();
+        clock.now=started;history.cleanup();assertThat(count("spike_event")).isZero();
     }
     @Test void delayedFirstDeliveryConfirmsOldOutboxWithoutReturningItToTheFeed() throws Exception {
         KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP,topic);

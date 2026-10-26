@@ -1,0 +1,127 @@
+{
+  "scope": "실행기 미시작, 코드 테스트 결과 아님",
+  "runs": [
+    {
+      "conclusion": "failure",
+      "databaseId": 40395092953,
+      "event": "push",
+      "headSha": "901a7c087fa529e1f08fad5ca6c402804705c212",
+      "jobs": [
+        {
+          "completedAt": "2026-10-26T20:22:49Z",
+          "conclusion": "failure",
+          "databaseId": 121825906937,
+          "name": "tech-goals",
+          "startedAt": "2026-10-26T20:22:47Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395092953/job/121825906937",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:49Z",
+          "conclusion": "failure",
+          "databaseId": 121825907263,
+          "name": "web",
+          "startedAt": "2026-10-26T20:22:47Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395092953/job/121825907263",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:50Z",
+          "conclusion": "failure",
+          "databaseId": 121825907385,
+          "name": "server",
+          "startedAt": "2026-10-26T20:22:47Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395092953/job/121825907385",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:47Z",
+          "conclusion": "skipped",
+          "databaseId": 121825909636,
+          "name": "branch-policy",
+          "startedAt": "2026-10-26T20:22:48Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395092953/job/121825909636",
+          "failureMessages": []
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395092953"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 40395103827,
+      "event": "pull_request",
+      "headSha": "901a7c087fa529e1f08fad5ca6c402804705c212",
+      "jobs": [
+        {
+          "completedAt": "2026-10-26T20:22:54Z",
+          "conclusion": "failure",
+          "databaseId": 121825944304,
+          "name": "server",
+          "startedAt": "2026-10-26T20:22:52Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395103827/job/121825944304",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:54Z",
+          "conclusion": "failure",
+          "databaseId": 121825944308,
+          "name": "web",
+          "startedAt": "2026-10-26T20:22:52Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395103827/job/121825944308",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:53Z",
+          "conclusion": "failure",
+          "databaseId": 121825944353,
+          "name": "tech-goals",
+          "startedAt": "2026-10-26T20:22:52Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395103827/job/121825944353",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        },
+        {
+          "completedAt": "2026-10-26T20:22:54Z",
+          "conclusion": "failure",
+          "databaseId": 121825944549,
+          "name": "branch-policy",
+          "startedAt": "2026-10-26T20:22:52Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395103827/job/121825944549",
+          "failureMessages": [
+            "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings"
+          ]
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40395103827"
+    }
+  ]
+}

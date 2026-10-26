@@ -35,7 +35,7 @@ heartbeat는 루프에서 5초마다 및 DB 배치 commit 때 갱신한다. poll
 
 비교 일치 시 `equal=true`·종료 코드 0, 불일치 시 `equal=false`·코드 2다. 출력은 matched/mismatched bucket 수, 양쪽 합계, 최대 100개 bucket 차이, 각 run의 읽음/필터 제외/고유/중복/오류 수, manifest와 실제 진행 위치다. 두 run 일치는 같은 버그를 공유할 수 있으므로 합성 고정 기대값 대조 시험도 함께 사용한다. 원문·사용자 정보·토큰·원본 예외는 출력하지 않는다. 실패 run의 계수는 마지막 성공 commit까지이며 실패 배치의 읽기 시도 건수를 포함하지 않는다.
 
-기본 접속은 loopback Kafka/PostgreSQL이다. 기존 `PIPELINE_BOOTSTRAP_SERVERS`, `PIPELINE_TOPIC`, `PIPELINE_JDBC_URL`, `PIPELINE_DB_USER`, `PIPELINE_DB_PASSWORD`로 접속을 설정한다. 명령 실행 권한이 있는 로컬 운영자용이며 HTTP 관리 API를 열지 않는다. 단일 호스트·단일 broker 검증이며 HA·네트워크 분할 복구는 주장하지 않는다. replay 결과의 자동 보존 삭제·운영 승격·알고리즘 버전 간 비교는 후속 범위다.
+기본 접속은 loopback Kafka/PostgreSQL이다. 기존 `PIPELINE_BOOTSTRAP_SERVERS`, `PIPELINE_TOPIC`, `PIPELINE_JDBC_URL`, `PIPELINE_DB_USER`, `PIPELINE_DB_PASSWORD`로 접속을 설정한다. 명령 실행 권한이 있는 로컬 운영자용이며 HTTP 관리 API를 열지 않는다. 단일 호스트·단일 broker 검증이며 HA·네트워크 분할 복구는 주장하지 않는다. 결과 자동 보존 삭제는 아래 #63 계약을 따른다. 운영 승격·알고리즘 버전 간 비교는 후속 범위다.
 
 
 ## 조회와 migration·빌드 이력 (#16)

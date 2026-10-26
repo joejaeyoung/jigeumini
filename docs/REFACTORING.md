@@ -131,3 +131,12 @@ F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14, F16 → T16. [검증 �
 계약 회귀·실제 DB·부하 최종 대조와 구현 CI 179/142/38/29/31을 확인했다. 초기 Standards/Spec 지적0, 연결 진단 Spec P2는 회귀 후 해결했다. 비차단 watermark 토픽 표시는 문서에 반영했다. 최종 HEAD의 Claude 승인과 CI는 PR71 병합 게이트로 남긴다.
 
 최종 a536259의 [Standards/Spec 검토](poc/evidence/projection-performance-2026-10-27/review-final.json)는 각각 차단0·비차단1이었다. 세션 TTL 색인 설명과 미실행 계측의 #49 재개 조건을 보완했다. 제품·하네스 실행 코드는 유지했다.
+
+
+## 2026-10-27 보존 경계 #63
+
+F01/F08/F10/F16 → T02/T04/T08/T16. `RetentionWindow`가 하한·잠금 순서를 소유하고 `ProjectionRetention`/`ReplayRetention`/`HistoryRetention`이 서로 다른 보호 계약을 맡는다. `RetentionMaintenance`는 실행 예산·재시도·진단만 관리하며 도메인 DELETE를 알지 않는다. 기존소비인터페이스에서cleanup을제거하고worker한곳으로수명주기를모았다.
+
+리뷰에서report부모1,000행한도가int합계에서소실되는문제를확인해`CleanupBatch`로삭제량과한도도달을함께전달했다. `KafkaSupport.awaitTopic`의고정기한·예외분류를설정validator와분리해실험도공유하며제품정책최소값은유지한다. 임의시간partition이나범용정리SQL생성기는현재멱등PK·보호참조가달라추출하지않았다.
+
+검증은[보존 경계·실제저장량](pipeline/RETENTION_VERIFICATION.md)에연결한다. Standards최종8624c04지적0, Spec93cf16f이전P2해소·추가지적0. 단기삭제처리율을장기운영용량으로해석하지않는다.

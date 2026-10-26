@@ -1,0 +1,18 @@
+{
+  "head": "a53625981266683f08ffd7b1ccf82b95c6acedd8",
+  "base": "5d8e441253f8d3222ad4b414f1f87eedb24e2f64",
+  "standards": {
+    "hard": 0,
+    "judgment": 1,
+    "finding": "V13 supports per-session latest-observation TTL refresh, not channel-based new-chat attribution",
+    "sourceHashChecks": "32/32 result,45/45 sampled side artifacts,56/56 XML per CI",
+    "resolution": "Corrected V13 as session TTL refresh index"
+  },
+  "spec": {
+    "blocking": 0,
+    "nonblocking": 1,
+    "severity": "P3",
+    "finding": "Explicitly track unseparated idle/fetch/offset and VM-wide observations",
+    "resolution": "Added partial/unexecuted scope and concrete issue49 resumption conditions"
+  }
+}

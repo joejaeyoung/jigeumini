@@ -171,6 +171,12 @@ CPU 평균은 준비·배출을 포함한 표본 구간 평균들의 산술평�
 
 JVM heap/RSS/thread 표본은 collector 외에 oracle·API 부하·측정을 포함한다. GC 이전 peak를 생존 heap으로 해석하지 않는다. scheduler/HTTP/WS 수명과 공유 VM 경합을 합친 값이므로 #64 독립G1/Xmx64 실험의 연결당 계수로 환산하지 않는다. CPU 대조도 평균·몇 초 표본이며 운영 cloud 성능이나 단독 자원의 최대치를 입증하지 않는다.
 
+### 미분리 계측의 후속 조건
+
+COUNT/du 생략·저율 입력·역할별 CPU 대조는 완료했다. **Kafka idle/fetch·1초 offset 조회 각각의 비용 분리와 VM 전체/기존 container 부하 관측은 미실행**이다. 현재 모드는 이 호출들을 독립적으로 끄지 않으며, 원본에 VM 전체 표본도 없어 과거 실행의 영향을 사후 분리할 수 없다. 기존8개 서비스의 부하를 유지한 공유 VM 결과인 점도 남는다.
+
+이 항목은 [#49 운영 용량 검증](https://github.com/joejaeyoung/jigeumini/issues/49)에서 운영 후보를 확정하기 전에 재개한다. 대상·리전·예산이 정해지면 테스트 전용 환경에서 같은 CPU/DB 크기로 무입력 broker, idle consumer, offset 조회 켜기/끄기, 저율100/s와 후보500/s를 비교한다. COUNT/du/SQL 진단 설정은 고정하고 실행 순서를 바꾼 반복을 둔다. VM 전체와 모든 동거 container의 CPU·throttle·메모리/I/O를 공통 시간축으로 읽는다. 기존 서비스 중단으로 격리했다고 가정하지 않는다. offset 계측을 끈 회차는 비용 비교로만 쓰고 SLO/용량 통과로 분류하지 않는다. 이 대조 전에는 단회 CPU 증설 결과를 운영 SKU 효과로 채택하지 않는다.
+
 ## 연결 실패 진단과 실패 실행 해석
 
 7998bed의 `after-operating100-rate1000`은 입력 전 WS_CLOSED 1회가 있었고 재접속 뒤 수신255,000/ACK257,550을 마쳤으나 마지막 collector health에서 실패했다. 최종DB대조는 수행하지 못해 처리량 통과나 한계로 사용하지 않는다. 시작 오류를 입력 전에 거부하고 close 숫자코드·CONNECT/APPROVAL 대기 종류를 기록하도록 보완했다. 처음 소켓이 닫힌 원인은 미확정이다.

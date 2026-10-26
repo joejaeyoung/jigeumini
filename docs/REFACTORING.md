@@ -129,3 +129,5 @@ F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14, F16 → T16. [검증 �
 - migration 하네스는 다음 번호를 계산하되 제품 버전·이미지 revision/buildId·이전 schema를 검증한다. 복원 계약을 우회하는 번호만의 수정은 하지 않았다.
 
 계약 회귀·실제 DB·부하 최종 대조와 구현 CI 179/142/38/29/31을 확인했다. 초기 Standards/Spec 지적0, 연결 진단 Spec P2는 회귀 후 해결했다. 비차단 watermark 토픽 표시는 문서에 반영했다. 최종 HEAD의 Claude 승인과 CI는 PR71 병합 게이트로 남긴다.
+
+최종 a536259의 [Standards/Spec 검토](poc/evidence/projection-performance-2026-10-27/review-final.json)는 각각 차단0·비차단1이었다. 세션 TTL 색인 설명과 미실행 계측의 #49 재개 조건을 보완했다. 제품·하네스 실행 코드는 유지했다.

@@ -656,3 +656,5 @@ final-full2500은 승인20개 중19개·frame38·APPROVAL_TIMEOUT1에서 입력 
 나머지 FULL/NO_COUNTS·hot/DIRECT 대조의 실제 판정·입력·시각·코드/hash와 실패 실행은 [전체 검증](PROJECTION_PERFORMANCE_VERIFICATION.md)·[정제 근거](poc/evidence/projection-performance-2026-10-27/summary.json)에 연결한다. 소유 실행 자원을 정리하고 원래8개container와 미리보기를 보존했다. 다른worktree와 외부 인프라는 변경하지 않았다.
 
 Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.418초를 구분했다. STATUS 기술 목표7개, 현재 인프라와 과거 용량 문서, 제품V13/시험V14 복구 구분, 리팩토링 결정을 함께 갱신한다. #63의 보존·#68 샤딩 판단, 조건부 공식경로#47과 실제외부#48/#49는 남긴다.
+
+최종a536259의 Standards/Spec은 각각 차단0·비차단1이었다. V13이 새 채팅 귀속이 아니라 세션별 TTL 갱신의 최신 관측 조회를 돕는다고 정정했다. idle/fetch·1초 offset 비용과 VM 전체/동거 workload 관측은 미실행으로 구분하고, #49의 운영 SKU 확정 전 대조·재개 조건으로 명시했다. 과거 원본에 없는 계측을 완료로 처리하지 않았다. 보완 HEAD의 Claude/CI를 다시 확인한다.

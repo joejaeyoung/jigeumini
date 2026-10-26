@@ -6,7 +6,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /** 기존 회귀 profile과 용량 실험이 공유하는 유한 입력 계약. */
 record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultAtSeconds, int faultSeconds,
-        String sourceMode, int apiRequestsPerSecond, int apiMaxInFlight, String resourceProfile) {
+        String sourceMode, int apiRequestsPerSecond, int apiMaxInFlight, String resourceProfile, String payloadProfile) {
     record Stage(String name, int seconds, int eventsPerSecond, boolean hot) {
         Stage {
             if (name==null || !name.matches("[a-z][a-z0-9_-]{0,39}") || seconds<10 || seconds>1800
@@ -15,6 +15,9 @@ record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultA
         }
     }
     ProductLoadPlan {
+        if(payloadProfile==null)payloadProfile="MINIMAL";
+        if(!Set.of("MINIMAL","KOREAN_1K").contains(payloadProfile) || ("DIRECT".equals(sourceMode) && !payloadProfile.equals("MINIMAL")))
+            throw new IllegalArgumentException("LOAD_PAYLOAD_PROFILE");
         if(name==null || !name.matches("[a-z][a-z0-9_-]{0,39}") || channels<2 || channels>1000
                 || stages==null || stages.isEmpty() || stages.size()>10 || sourceMode==null
                 || !Set.of("DIRECT","WEBSOCKET").contains(sourceMode)
@@ -32,6 +35,7 @@ record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultA
     }
     int seconds() {return stages.stream().mapToInt(Stage::seconds).sum();}
     long uniqueEvents() {return stages.stream().mapToLong(s->(long)s.seconds()*s.eventsPerSecond()).sum();}
+    String syntheticChatText() {return payloadProfile.equals("KOREAN_1K")?"가".repeat(341)+"S":"SYNTHETIC";}
     boolean websocket() {return sourceMode.equals("WEBSOCKET");}
     String phaseAtMillis(long millis) {
         if(millis<0)return "INITIALIZE";

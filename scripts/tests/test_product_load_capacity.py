@@ -57,10 +57,13 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.assertEqual('MEASUREMENT_INCOMPLETE',self.analyze()['classification'])
     def test_plan_budgets_and_original_profiles(self):
         self.assertEqual(90000,sum(s['seconds']*s['eventsPerSecond'] for s in plans.read('soak')[0]['stages']))
-        for key,value in [('channels',1001),('channels',True),('apiRequestsPerSecond',201),('sourceMode','PUBLIC'),('resourceProfile','UNKNOWN')]:
+        for key,value in [('channels',1001),('channels',True),('apiRequestsPerSecond',201),('sourceMode','PUBLIC'),('resourceProfile','UNKNOWN'),('payloadProfile','UNKNOWN'),('payloadProfile','KOREAN_1K')]:
             with self.subTest(key=key,value=value):
                 plan=copy.deepcopy(self.plan);plan[key]=value
                 with self.assertRaises(ValueError):plans.validate(plan)
+        self.assertEqual('MINIMAL',plans.validate(self.plan)['payloadProfile'])
+        socket=copy.deepcopy(self.plan);socket.update(sourceMode='WEBSOCKET',payloadProfile='KOREAN_1K')
+        self.assertEqual('KOREAN_1K',plans.validate(socket)['payloadProfile'])
         self.plan['stages'][0].update(seconds=1800,eventsPerSecond=10000)
         with self.assertRaises(ValueError):plans.validate(self.plan)
 

@@ -18,10 +18,10 @@ def summarize(directory,manifest):
     def scope(a,b):
         if fault and a<=fault['resumedAtEpochMillis'] and b>=fault['stoppedAtEpochMillis']:return 'duringStop'
         if fault and a<=recovery_end and b>=fault['resumedAtEpochMillis']:return 'duringRecovery'
-        return 'normal' 
+        return 'normal'
     s={k:r.get(k) for k in ['scope','profile','startedAt','finishedAt','correct','cleanupComplete','sensitiveArtifactsRemoved','probeExitCode','probeOomKilled','fixtureClasses','loadContract']}
     s['revision']=r['candidate']['revision'];s['images']=r['candidate'];s['command']=f'./scripts/product-load {manifest} {r["profile"]} {directory}'
-    s['harnessRevision']=r['candidate']['revision'];s['curatorSha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest();s['commandProvenance']='RECONSTRUCTED_FROM_CURATOR_ARGUMENTS_NOT_CAPTURED_SHELL';s['latencyQuantileSource']='PROBE_SQL_PERCENTILE_CONT_COPIED_FROM_RESULT';s['partitionDistributionScope']='FULL_GENERATOR_PHASE_INCLUDING_STOP_AND_CATCH_UP';s['clockBrackets']=r.get('clockBrackets');s['clockBracketMeaning']='INTERVAL_BOUND_WITH_ROUND_TRIP_UNCERTAINTY; NOT_EXACT_SKEW_OR_PROOF_OF_ABSOLUTE_SKEW_UNDER_250MS'
+    s['harnessRevision']=r['candidate']['revision'];s['curatorSha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest();s['commandProvenance']='RECONSTRUCTED_FROM_CURATOR_ARGUMENTS_NOT_CAPTURED_SHELL';s['latencyQuantileSource']='PROBE_SQL_PERCENTILE_CONT_COPIED_FROM_RESULT';s['partitionDistributionScope']='FULL_GENERATOR_PHASE_INCLUDING_STOP_AND_CATCH_UP' if fault else 'FULL_GENERATOR_PHASE_WITHOUT_INJECTED_STOP';s['clockBrackets']=r.get('clockBrackets');s['clockBracketMeaning']='INTERVAL_BOUND_WITH_ROUND_TRIP_UNCERTAINTY; NOT_EXACT_SKEW_OR_PROOF_OF_ABSOLUTE_SKEW_UNDER_250MS'
     s['files']={name:{'bytes':(directory/name).stat().st_size,'sha256':hashlib.sha256((directory/name).read_bytes()).hexdigest()} for name in ['result.json','probe-output/load.json','probe-output/offsets.jsonl','probe-output/samples.jsonl'] if (directory/name).exists()}
     s['phases']=[{k:p[k] for k in ['name','startedAt','passed','seconds','result'] if k in p} for p in r['phases']]
     for k in ['plan','seed','channels','inputContract','inputSeconds','maximumPacingDelayMillis','expectedUnique','expectedPhysical','expectedObservations','expectedOutbox','drainSeconds','reconciliation','receivedToTransactionTimestampMillis','healthyRankingEntries']:

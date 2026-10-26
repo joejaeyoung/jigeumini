@@ -64,7 +64,10 @@
     "마지막 복사본 유실 뒤60초 fullISR 대기와 실제 source 조회 범위; 영원히 leader가 생기지 않는다고 단정하지 않음",
     "sourceUnavailable를0건 읽기로 기록하지 않으며 읽기 가능한 log의 OFFSET_TRUNCATED 결과는 이번 실행에서 관측하지 않음",
     "broker incarnation/등록 epoch는 측정하지 않음; 기록된 record leaderEpoch·directoryId·topicId와 구분",
-    "단일 실행·합성32/20건은 운영 처리 용량/복구 SLA가 아님"
+    "단일 실행·합성32/20건은 운영 처리 용량/복구 SLA가 아님",
+    "Case D with all replica disks empty was not executed",
+    "First empty disk intermediate sample is immediately after container creation; registration/running checked at final sample only",
+    "Fixed probe classes and result JSON remain under ignored work; not included in cleanupComplete"
   ],
   "localCheck": {
     "revision": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
@@ -78,5 +81,6 @@
     "harnessTests": 24,
     "jarBuild": "PASS",
     "executedDiskCodeUnchangedFrom": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469"
-  }
+  },
+  "correctMeaning": "Scenario assertions and owned container/volume/schema cleanup passed; last-copy sourceRecoverySucceeded remains false"
 }

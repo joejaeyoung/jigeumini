@@ -23,7 +23,7 @@
     "resultSha256": "71f1d208918423d3db131c034ccb1d8406140063953caa7a9762ed2466fea551",
     "failureType": "AssertionError",
     "actualTrace": "preflight-diagnosis.json",
-    "resolution": "개발용 Kafka/PostgreSQL을 볼륨 보존하여 종료한 뒤 같은 HEAD로 재실행; 다른 서비스 유지",
+    "resolution": "개발용 Kafka/PostgreSQL을 volume 삭제 옵션 없이 종료한 뒤 같은 HEAD로 재실행; 다른 서비스 유지",
     "result": "preflight-failure.json",
     "developmentServices": "Stopped after soak/disk tests with volumes retained; restarted for #44 regression; volume checksums not measured"
   },
@@ -71,6 +71,18 @@
       "server/src/main/java/io/chatpulse/operations",
       "server/src/main/java/io/chatpulse/pipeline",
       "server/src/main/java/io/chatpulse/db"
-    ]
+    ],
+    "additionalUnchangedPaths": {
+      "server/src/main/resources": "UNCHANGED",
+      "deploy": "UNCHANGED",
+      "scripts/deploy-images": "UNCHANGED",
+      "scripts/deploy-images.py": "UNCHANGED",
+      "web": "UNCHANGED",
+      "build.gradle": "UNCHANGED",
+      "gradle": "UNCHANGED",
+      "settings.gradle": "UNCHANGED"
+    },
+    "buildGradleDifference": "Only diskLossExperiment JavaExec test task added; production dependencies unchanged",
+    "identityLimit": "Path comparison does not claim integrated JAR/image byte equality with executed 4a6b7a8"
   }
 }

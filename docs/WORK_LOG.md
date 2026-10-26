@@ -418,3 +418,9 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 통합 `44449cd` check는 단위152·하네스24·JAR 통과다. 실행4a6b7a8 대비 PITR스크립트/helper·DeploymentProbe·PocApplication·operations/pipeline/db·compose 경로의 diff0과 파일 존재를 확인했다. 새 product코드 영향은 collector/Clock 경로로 한정되어 이 PITR 실행은 반복하지 않는다.
 
 #42 최종c34dc2b Claude APPROVE·push40262248304/PR40262253338 SUCCESS와 각각단위151·실제125(실패0)를 확인해 PR51을03b9648로 develop 병합했다. #42와 #52의 모든 완료조건·보드를 완료했다. #52 원래 CI 원인 미확정 기록은 유지한다.
+
+## 2026-10-26 기술 검증 최종 기록 정리
+
+#43~46 최종 구현 HEAD는 각각 Claude APPROVE다. 이 문서 보완은 구현/실험 결과를 바꾸지 않고 리뷰의 비차단 설명을 정리한다. #43의 단기 CPU 해석 한계·장애 없는 profile 라벨·curator 출처, #44의 실행별 수치 출처·blackhole 인과 한계·미실행 경계, #45의 손실 경계 성공/원천 복구 실패·중간 container 생성 표본·미실행 D, #46의 코드 경로 대조/이미지 identity 한계를 명시했다. 원본5개를 정제 스크립트로 다시 계산해 공유 근거의 모든 필드 일치를 확인했다.
+
+로컬 실험 종료 후 `./scripts/infra down`으로 개발 서비스만 종료했다. 소유 실행 container0·기존 named volume2개, 다른 프로젝트의 실행 container 이름6개를 이전 목록과 대조했다. volume 내용 checksum과 다른 container ID의 전후 비교는 하지 않았다. 정제 근거를 보관하며 PoC/API/web는 재기동하지 않았다. 각 PR 최종 CI/병합 결과와 외부 조건이 필요한 #47~49의 열린 상태는 후속 기록에 반영한다.

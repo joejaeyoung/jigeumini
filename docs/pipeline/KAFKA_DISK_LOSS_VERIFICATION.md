@@ -26,7 +26,7 @@ clean `f992ef12a9e6cbe47b85ff6ca04fd352fd902469`에서 두 시나리오를 각�
 
 초기10건이 있는 follower S를 내려 오래된 디스크를 보존했다. 남은 두 broker에서tail10건을 ACK하고 DB20건과 삭제 전 replay manifest를 고정했다. 두 최신 디스크를 차례로 정지·검사하여 각각20건 offset/hash가 있음을 확인한 뒤 둘 다 영구 삭제했다. S에는초기10건만 있으며 tail의 물리복사본은0개였다. 원본 segment를 다른 복구 경로로 공급하지 않았다.
 
-S만 복귀, 첫 빈 디스크 복귀, 모든broker복귀를 각각 관측했다. 최종broker1/2/3의 실제Running·OOM없음·Admin등록을 확인했으며 topicId는 유지됐다. 최종 관측은leader없음·ISR없음·ELR없음·lastKnownElr=[1]이었다. fullISR를60초 기다려도 준비되지 않았고 source capture와 기존manifest validate는둘다SOURCE_UNAVAILABLE로 거부했다.
+S 복귀 뒤, 첫 빈 디스크 컨테이너 생성 직후, 모든 broker 복귀 후를 각각 관측했다. 첫 빈 디스크의 중간 표본은 등록·Running 완료를 보장하지 않으며 해당 보장은 최종 표본에만 있다. 최종broker1/2/3의 실제Running·OOM없음·Admin등록을 확인했으며 topicId는 유지됐다. 최종 관측은leader없음·ISR없음·ELR없음·lastKnownElr=[1]이었다. fullISR를60초 기다려도 준비되지 않았고 source capture와 기존manifest validate는둘다SOURCE_UNAVAILABLE로 거부했다.
 
 DB의20건은 그대로 남았지만 Kafka source 복구 성공으로 표시하지 않았다. 읽을 수 없는 source의 실제건수·누락건수는null이다. 물리tail삭제10건과 조회로 읽은 broker건수는 구분한다. 정책을 낮추거나 unclean election·topic 재생성을 수행하지 않았다. 이 제한된 관측으로 이후에도 영원히 leader가 없다고 주장하지 않으며, OFFSET_TRUNCATED를 관측한 실행으로 바꾸지 않는다.
 
@@ -43,3 +43,5 @@ LocalKafkaCluster의 기존 소유권 경계를 재사용하고 readonly disk pr
 ```
 
 두 실행 모두 이번 실행의 container/volume/schema만 정리했다. 기존 개발 데이터·다른 서비스는 유지했다. 최종 source 불가 진단은 일반 metadata/API 실패와 구분하도록 고정 오류와 실제 broker 복귀 조건을 요구한다.
+
+`last-copy`의 `correct=true`는 의도한 손실 경계와 정리 검사가 통과했다는 뜻이며 source 복구 성공이 아니다. `sourceRecoverySucceeded=false`와 tailCopiesRemaining0은 앞선 실제 디스크/입력 대조에서 도출한 판정이다. 조사 사례 D(모든 replica를 빈 디스크로 시작)는 실행하지 않았다. `cleanupComplete`는 소유 container/volume/schema 정리를 뜻하며 gitignored 결과 JSON과 `.probe-classes`의 고정 시험 class는 재현 근거로 남는다.

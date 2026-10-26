@@ -22,7 +22,7 @@
 | [#54 수집기 시작 진단·CI 인계](https://github.com/joejaeyoung/jigeumini/issues/54) | T08/T14 | 완료: PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공 후07f2444로 병합. 최종CI 단위151·실제125(Fleet13). [조사](research/FLEET_STARTUP.md)·[근거](poc/evidence/fleet-startup-2026-10-26.json)·[최종 게이트](poc/evidence/fleet-startup-final-gates-2026-10-26.json). 과거 CI 원인 미확정 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
-개발 Kafka/PostgreSQL은 필요한 통합 시험 때 기동한다. #46의 자체 격리 실험 전에는 자원 여유를 위해 개발 서비스만 볼륨 보존하여 종료했다. 다른 worktree와 서비스는 변경하지 않는다.
+로컬 통합 시험을 마친 뒤 개발 Kafka/PostgreSQL을 `./scripts/infra down`으로 종료했다. 개발 named volume2개는 삭제하지 않았고 다른 프로젝트의 실행 container 이름6개가 이전 목록과 같음을 확인했다. [정리 근거](poc/evidence/local-cleanup-2026-10-26.json). volume 내용 checksum·다른 container의 전후 ID는 측정하지 않았다. 다른 worktree는 변경하지 않았다.
 
 ## 전체 코드 구조 개선 #39
 

@@ -98,7 +98,7 @@ class ProductLoad(module.Rehearsal):
         name=self.project+'-'+service
         self.compose('run','-d','--no-deps','--use-aliases','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
             '-v',str(self.classes)+':/probe:ro','-v',str(self.libraries)+':/probe-lib:ro','-v',str(self.frozen_plan)+':/load-plan.json:ro',
-            '-v',str(output)+':/output',service,'-Xms32m','-Xmx'+heap,
+            '-v',str(output)+':/output',service,'-Xms32m','-Xmx'+heap,'-XX:+ExitOnOutOfMemoryError',
             '-Dsun.rmi.transport.tcp.responseTimeout=2000','-Dsun.rmi.transport.tcp.handshakeTimeout=2000',
             '-cp','/app/classes:/app/lib/*:/probe:/probe-lib/*',main,*args)
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
@@ -135,6 +135,9 @@ class ProductLoad(module.Rehearsal):
             time.sleep(1)
         else:raise RuntimeError('LOAD_PROCESS_TIMEOUT')
         self.result['load']=progress;self.result['probeExitCode']=info['State']['ExitCode'];self.result['probeOomKilled']=info['State']['OOMKilled']
+        log=self.command(['docker','logs','--tail','50',self.probe_id],check=False)
+        failures={'Java heap space':'JAVA_HEAP_SPACE','GC overhead limit exceeded':'GC_OVERHEAD_LIMIT','unable to create native thread':'NATIVE_THREAD_LIMIT','OutOfMemoryError: Metaspace':'METASPACE_LIMIT'}
+        self.result['probeFailureCodes']=[code for marker,code in failures.items() if marker in log.stdout+log.stderr]
         self.result['storageAfter']=self.storage()
         self.result['productProcesses']={}
         for service in ('api','kafka','postgres'):

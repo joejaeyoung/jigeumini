@@ -61,7 +61,8 @@ def summarize(directory):
             'relationGrowthBytes':{k:v['totalBytes']-before['relations'].get(k,{}).get('totalBytes',0) for k,v in after['relations'].items() if v['totalBytes']!=before['relations'].get(k,{}).get('totalBytes',0)}}
     diagnostic=directory/'collector-startup-diagnostic.json'
     if diagnostic.exists():
-        detail=json.loads(diagnostic.read_text());result['diagnostic']={k:detail[k] for k in ('processState','hostConfig','cgroup','heapErrorEvidence','stopReason','stopRequestedAt') if k in detail}
+        detail=json.loads(diagnostic.read_text());result['diagnostic']={k:detail[k] for k in ('processState','hostConfig','cgroup','stopReason','stopRequestedAt') if k in detail}
+        result['diagnostic']['heapFailureCodeCounts']={code:sum(marker in line for line in detail.get('heapErrorEvidence',[])) for marker,code in [('Java heap space','JAVA_HEAP_SPACE'),('GC overhead limit exceeded','GC_OVERHEAD_LIMIT'),('unable to create native thread','NATIVE_THREAD_LIMIT')]}
         result['diagnostic']['sourcePeakConnections']=detail.get('sourceAtStop',{}).get('peakConnections')
     result['sourceArtifacts']={str(p.relative_to(directory)):digest(p) for p in [path,*[directory/name for name in ('probe-output/load.json','probe-output/offsets.jsonl','probe-output/samples.jsonl','source-output/source.json','collector-startup-diagnostic.json','load-plan.json')]] if p.exists()}
     manifests=[p for p in directory.parent.glob('images*.json') if json.loads(p.read_text()).get('revision')==run['candidate']['revision']]

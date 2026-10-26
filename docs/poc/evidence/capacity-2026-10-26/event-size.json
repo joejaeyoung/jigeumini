@@ -1,0 +1,16 @@
+{
+  "syntheticEvents": 1000,
+  "meanValueBytes": 426.594,
+  "minimumValueBytes": 417,
+  "maximumValueBytes": 427,
+  "keyBytes": 32,
+  "scope": "SYNTHETIC_EVENT_CODEC_VALUE_ONLY; NO_RAW_CHAT; EXCLUDES_RECORD_BATCH_INDEX_AND_REPLICATION",
+  "schemaVersion": 1,
+  "sourceRevision": "c015e205801897fa22e70836201824dfeda9e509",
+  "jarSha256": "e2f1d2b0eff4a4e5d9cd8bba61ca14c666e3ae643f893898cf52040a89ec2504",
+  "sourceFile": "server/src/test/java/io/chatpulse/poc/CapacityEventSizeProbe.java",
+  "sourceSha256": "7dde7e6fb2cfacc23066b0f3eac5d869d09850fc749b2e1c7b9532619e5f672f",
+  "command": "java -Dloader.path=server/build/classes/java/test -Dloader.main=io.chatpulse.poc.CapacityEventSizeProbe -cp server/build/libs/chat-pulse-poc.jar org.springframework.boot.loader.launch.PropertiesLauncher",
+  "recordedOutputSha256": "1d7942313111872f58c9aafe7e2acb54d49d3ee0bedb7bad6ab4d115b7bb52b7",
+  "at": "2026-10-26T11:20:15.135751+00:00"
+}

@@ -82,7 +82,7 @@
       "gradle": "UNCHANGED",
       "settings.gradle": "UNCHANGED"
     },
-    "buildGradleDifference": "Only diskLossExperiment JavaExec test task added; production dependencies unchanged",
-    "identityLimit": "Path comparison does not claim integrated JAR/image byte equality with executed 4a6b7a8"
+    "buildGradleDifference": "diskLossExperiment 시험용 JavaExec task만 추가했으며 제품 의존성은 불변",
+    "identityLimit": "경로 비교는 통합 JAR/이미지와 실제 실행4a6b7a8의 byte 동일성을 주장하지 않음"
   }
 }

@@ -48,7 +48,7 @@ named restore point로 고정한 목표이며 임의 timestamp target은 실행�
 
 pg_stat_archiver의 archived_count6·failed_count4를 함께 기록했다. 이번 실행은 필요한segment3개를 모두 확보하고 실제사용·hash를 확인했으나, 앞선archive실패의 원인 로그는 수집하지 않아 미확정이다. archive오류0회나 장기 archive 안정성을 주장하지 않는다.
 
-physical base/archive/PGDATA와 생성비밀은 전부 소유volume에만 두었다. 종료시volume·container·비밀제거를 확인했고 공유근거는설정/LSN/파일명/hash/count/코드만 남겼다. 실행 코드 `4a6b7a8`의 `./scripts/check`는 단위147·하네스20·JAR가 통과했다. 통합 `44449cd`의 check는 단위152·하네스24·JAR 통과이며 별도 실행이다.
+physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접근 권한0700의 실행 디렉터리 아래 임시 secrets 파일에 두고 Compose secrets로 주입했으며 종료 시 삭제했다. volume·container·비밀 제거를 확인했고 공유 근거는 설정/LSN/파일명/hash/count/코드만 남겼다. 실행 코드 `4a6b7a8`의 `./scripts/check`는 단위147·하네스20·JAR가 통과했다. 통합 `44449cd`의 check는 단위152·하네스24·JAR 통과이며 별도 실행이다.
 
 ## 리팩토링·리뷰
 

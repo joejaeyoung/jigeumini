@@ -150,7 +150,6 @@
     "soakEntryRevision": "03eb75f5acc716ac9164a8252789dac8d868cae9",
     "verdict": "APPROVE_FOR_SOAK_ENTRY",
     "session": "e85497ba-6427-4337-ad5a-be04cf0a8342",
-    "finalHeadReviewPending": false,
     "finalGateRecord": "PR59 exact final HEAD review/CI comments; entry verdict above is historical",
     "finalHeadRevision": "357435d9032bf287f64e13d08b2e41f08427dc30",
     "finalHeadVerdict": "APPROVE"

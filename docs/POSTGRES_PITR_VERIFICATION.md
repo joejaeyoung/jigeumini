@@ -1,6 +1,6 @@
 # PostgreSQL 시점 복구 검증 #46
 
-F16/F08 → T02/T04/T16. 구현·사전 정적 검토 단계이며 실제 실행 결과는 아직 없다. [조사](research/POSTGRES_RECOVERY.md)의 PostgreSQL16 physical backup/WAL/명시 target 계약을 따른다.
+F16/F08 → T02/T04/T16. clean `4a6b7a82af1396ba80207dd3698687bc35ac0714`의 실제12단계가2026-10-26에 통과했다. [조사](research/POSTGRES_RECOVERY.md)의 PostgreSQL16 physical backup/WAL/명시 target 계약을 따른다.
 
 ## 시나리오
 
@@ -25,4 +25,29 @@ F16/F08 → T02/T04/T16. 구현·사전 정적 검토 단계이며 실제 실행
 ./scripts/postgres-pitr work/pitr-images.json work/pitr-result
 ```
 
-clean commit과 같은 image revision을 요구한다. 실제 실행일·환경·입력·결과·검증 범위는 실행 뒤 이 문서와 근거에 추가한다. 물리 복원→목표 pause, 복구 종료→writable, 새group 준비→검증된 catchup 시간을 구분한다. 로컬 단회·동일 호스트 archive이며 외부 archive 내구성·운영 RTO/RPO/SLA를 확정하지 않는다.
+clean commit과 같은 image revision을 요구한다. 실제 실행일·환경·입력·결과는 [정제 근거](poc/evidence/postgres-pitr-2026-10-26/summary.json)에 있다. 물리 복원→목표 pause, 복구 종료→writable, 새group 준비→검증된 catchup 시간을 구분한다. 로컬 단회·동일 호스트 archive이며 외부 archive 내구성·운영 RTO/RPO/SLA를 확정하지 않는다.
+
+
+## 실제 실행 결과
+
+2026-10-26 03:00:10.979~03:01:43.582 UTC. PostgreSQL16.14·wal_level=replica·archive_mode=on·fsync/full_page_writes=on, WAL segment16MiB, 원본timeline1이다. 첫 실행은 자원 사전 검사에서 중단됐다. 실제 trace에서 사용량3,363,517,235.2byte+최대4,093,640,704byte가Docker8,217,145,344byte의90%를 넘었다. 개발Kafka/DB를 볼륨 보존하여 종료한 뒤 같은HEAD로 재실행했다. 다른 서비스는 변경하지 않았다.
+
+physical base는1,399파일·SHA256 manifest·pg_verifybackup을 통과했다. base에 포함된 WAL은000000010000000000000003, targetLSN은0/5051778이다. base 시작0/3000028부터 필요한3개 segment(끝3/4/5)가 모두 base/archive에 있고 hash를 기록했다. target WAL(끝5)은 base에 없어 archive를 실제 사용하는 복원을 검증한다.
+
+| 단계 | 실제 결과 |
+|---|---|
+| 필수WAL 누락 | 별도 archive copy에서끝5만 제거, 나머지hash동일. restore는끝3/4를 사용했으나 목표미달로exit1·RECOVERY_ENDED_BEFORE_TARGET. 원본archive보존 |
+| 목표pause | PGDATA복사·설정 뒤 기동부터2.785초. replayLSN0/5051778·paused·marker0/1만 존재·T snapshot 일치·runtime쓰기SQLSTATE25006 |
+| 승격 | pg_wal_replay_resume 뒤2.190초에쓰기·별도연결commit확인. 같은systemIdentifier·timeline2·history hash, T snapshot유지 |
+| Kafka재정렬·재생 | 원래group으로시작거부, 새6group의최초commit없음→모든partition DBnext==commit/ALIGNED 확인 후분석기시작. 21.083초에chat10건추가복원·C snapshot차이0·원래group commit불변 |
+| 보존공백 | 별도복원T에서chat partition0을begin11로삭제. DBnext10인4projection은RETENTION_GAP. 새group준비RECOVERY_RETENTION_GAP, offset생성없음·기존group/DB불변·시작거부 |
+
+시간은 각 표의 시작/종료 경계에 한정하며 전체 재해 복구 SLA가 아니다. 목표T의chat10·pendingoutbox1에서 최신C의chat20·알림2로 재생해 업무snapshot을 대조했다. 이 보존 입력의 관측 누락은0이지만 임의 wall-clock RPO초수나 삭제된 원천까지0손실을 보장하지 않는다. named restore point로 고정한 목표이며 임의 timestamp target은 실행하지 않았다.
+
+pg_stat_archiver의 archived_count6·failed_count4를 함께 기록했다. 이번 실행은 필요한segment3개를 모두 확보하고 실제사용·hash를 확인했으나, 앞선archive실패의 원인 로그는 수집하지 않아 미확정이다. archive오류0회나 장기 archive 안정성을 주장하지 않는다.
+
+physical base/archive/PGDATA와 생성비밀은 전부 소유volume에만 두었다. 종료시volume·container·비밀제거를 확인했고 공유근거는설정/LSN/파일명/hash/count/코드만 남겼다. `./scripts/check` 단위147·하네스20·JAR도 통과했다.
+
+## 리팩토링·리뷰
+
+기존 배포 리허설의 소유권·이미지identity·업무snapshot·그룹정렬을 재사용하고, WAL archive/restore와 물리복원단계만 분리했다. probeclass를실행별고정하고 실제 삭제전clusterID를검사한다. 소유helper cleanup도maintenance profile을포함한다. 최초64537f8은Claude APPROVE FOR EXPERIMENT였고 후속비차단의소유권/WAL차이검사를반영했다. 최종실제근거HEAD의Claude·push/PR CI는별도게이트다.

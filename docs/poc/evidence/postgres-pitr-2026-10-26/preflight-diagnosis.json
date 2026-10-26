@@ -1,0 +1,11 @@
+{
+  "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+  "scope": "ACTUAL_PREFLIGHT_ASSERTION_TRACE",
+  "sourceFile": "scripts/postgres-pitr.py",
+  "line": 46,
+  "currentUsageBytes": 3363517235.2000003,
+  "maximumBytes": 4093640704,
+  "dockerMemoryBytes": 8217145344,
+  "thresholdFraction": 0.9,
+  "cleanupComplete": true
+}

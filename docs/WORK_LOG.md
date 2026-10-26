@@ -277,3 +277,10 @@ base/T/C·named target pause/쓰기거부·resume/새timeline·Kafka 새group �
 ### #46 진입 승인 후 보완
 
 Claude64537f8은 APPROVE FOR EXPERIMENT였다. 비차단 권고를 반영해 실제 retention gap 삭제 전에 이번 소유 Kafka cluster ID 일치를 요구하고, WAL 복사본 차이가 필요한 segment 하나뿐인지 hash inventory로 확인한다. 누락 WAL이 실제 restore helper 사용 목록에 없음을 검사하고 복원 서버 버전도 원본과 대조한다. maintenance profile의 helper를 cleanup에 포함하며 trim 전 복원 DB의 보존 로그 복구 가능성도 확인한다. 원본 backup/archive를 그대로 보존한 새 복원 디스크만 사용한다.
+
+
+### #46 실제 physical PITR 완료
+
+2026-10-26 clean4a6b7a8에서첫실행자원사전검사실패를수치trace로확인했다. 허용90%초과여서개발Kafka/DB만볼륨보존종료한뒤같은HEAD로재실행했다. 03:00:10.979~03:01:43.582 UTC12단계통과. baseSHA256/pg_verifybackup·필수WAL3개·target0/5051778pause·readonly25006·timeline1→2·새6group정렬·chat10재생·업무snapshot차이0을확인했다. 누락WAL은목표미달FATAL, 실제begin11>DBnext10은4projection RETENTION_GAP·새group/DB불변이었다.
+
+[검증](POSTGRES_PITR_VERIFICATION.md)·[정제근거](poc/evidence/postgres-pitr-2026-10-26/summary.json)에시각/commit/image/probe/hash/LSN/집합을연결했다. archive failed_count4는숨기지않고원인미확정으로기록했다. 모든소유volume·container·비밀정리true이며다른서비스는유지했다. 단위147·하네스20·JAR통과. 기존배포소유권/그룹정렬경계를재사용하고물리복원책임만분리하는리팩토링을점검했다. 최종리뷰/CI는별도다.

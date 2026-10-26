@@ -9,7 +9,7 @@
 
 | 이슈 | 기술 목표 | 상태·선행 조건 |
 |---|---|---|
-| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 진행 중: `technicaltest/trend-rollback`, 직접 SQL 장애·독립 소비·strict 재시작 회귀 |
+| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 진행 중: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50), 최초 전체99개 통과 후 지연 trigger·별도 JVM 종료를 보강해 집중5개 통과; 최종 전체 회귀/리뷰 중 |
 | [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | 대기: 격리 시험 migration의 이전 schema 복원·보존 입력 재생 |
 | [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
 | [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |

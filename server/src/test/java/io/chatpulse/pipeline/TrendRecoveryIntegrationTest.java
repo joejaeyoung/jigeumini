@@ -1,8 +1,11 @@
 package io.chatpulse.pipeline;
 
 import io.chatpulse.poc.ChatEvent;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.ZoneOffset;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -10,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -30,6 +34,7 @@ class TrendRecoveryIntegrationTest {
     private ProjectionStore trend, ranking;
     private final EventCodec codec = new EventCodec();
     private Instant bucket;
+    private enum FailurePoint { PROGRESS_UPDATE, DEFERRED_COMMIT }
 
     @BeforeEach void setup() {
         String id = UUID.randomUUID().toString().replace("-", "");
@@ -40,9 +45,10 @@ class TrendRecoveryIntegrationTest {
         org.flywaydb.core.Flyway.configure().dataSource(ds).defaultSchema(schema).load().migrate();
         jdbc = new JdbcTemplate(ds);
         var tx = new TransactionTemplate(new DataSourceTransactionManager(ds)); tx.setTimeout(20);
-        trend = new ProjectionStore(jdbc, tx, codec, TREND, RUN);
-        ranking = new ProjectionStore(jdbc, tx, codec, "ranking", RUN);
         bucket = Instant.ofEpochSecond(Math.floorDiv(Instant.now().getEpochSecond(), 10) * 10 - 30);
+        var clock = Clock.fixed(bucket.plusSeconds(30), ZoneOffset.UTC);
+        trend = new ProjectionStore(jdbc, tx, codec, TREND, RUN, clock);
+        ranking = new ProjectionStore(jdbc, tx, codec, "ranking", RUN, clock);
     }
 
     @AfterEach void cleanup() throws Exception {
@@ -66,6 +72,7 @@ class TrendRecoveryIntegrationTest {
         assertEquals(0, trend.apply(List.of(record(a, 0, 3), record(b, 0, 4))));
         assertProjection(trend, Set.of(a.eventId(), b.eventId()), List.of(1L, 1L));
         assertEquals(5L, progress(TREND, 0));
+        assertEquals(0L, sourceOffset(a)); assertEquals(2L, sourceOffset(b));
         assertEquals(rankBefore, snapshot("ranking"));
     }
 
@@ -79,6 +86,7 @@ class TrendRecoveryIntegrationTest {
                 () -> trend.apply(List.of(record(b, 0, 1), record(changed, 0, 2))));
         assertEquals("EVENT_ID_CONFLICT", persistedConflict.getMessage());
         assertEquals(before, snapshot(TREND));
+        // 배치 내부 충돌은 SQL 전에 거부하며, 위 persistedConflict가 실제 rollback을 검증한다.
         var batchConflict = assertThrows(EventContractException.class,
                 () -> trend.apply(List.of(record(b, 0, 1), record(a, 0, 2), record(changed, 0, 3))));
         assertEquals("EVENT_ID_CONFLICT", batchConflict.getMessage());
@@ -92,12 +100,13 @@ class TrendRecoveryIntegrationTest {
         var a = event(bucket); var b = event(bucket.plusSeconds(1)); var c = event(bucket.plusSeconds(10));
         trend.apply(List.of(record(a, 0, 0))); ranking.apply(List.of(record(a, 0, 0)));
         var trendBefore = snapshot(TREND); var rankBefore = snapshot("ranking");
-        rejectTrendProgress("INSERT OR UPDATE");
+        rejectTrendProgress(FailurePoint.DEFERRED_COMMIT);
         var input = List.of(record(b, 0, 1), record(c, 1, 0));
         Throwable failure = assertThrows(RuntimeException.class, () -> trend.apply(input));
         while (failure.getCause() != null) failure = failure.getCause();
         assertInstanceOf(SQLException.class, failure);
         assertEquals("P1002", ((SQLException) failure).getSQLState());
+        assertEquals(1L, triggerAttempts());
         assertEquals(trendBefore, snapshot(TREND));
         assertEquals(rankBefore, snapshot("ranking"));
         allowTrendProgress();
@@ -107,7 +116,7 @@ class TrendRecoveryIntegrationTest {
         assertEquals(rankBefore, snapshot("ranking"));
     }
 
-    @Test void onlyTrendRetriesSqlFailureAndStrictRestartRecoversWithoutDoubleCounting() throws Exception {
+    @Test void trendRecoversInPlaceAndStrictRestartPreservesDuplicateIdentity() throws Exception {
         KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP, topic);
         var a = event(bucket); var b = event(bucket.plusSeconds(1)); var c = event(bucket.plusSeconds(10));
         var factory = KafkaSupport.producerFactory(IntegrationSupport.BOOTSTRAP);
@@ -122,10 +131,11 @@ class TrendRecoveryIntegrationTest {
                 send(producer, a);
                 awaitCommitted(admin, rankGroup, 1); awaitCommitted(admin, trendGroup, 1);
                 var before = snapshot(TREND);
-                rejectTrendProgress("UPDATE");
+                rejectTrendProgress(FailurePoint.PROGRESS_UPDATE);
                 send(producer, b); send(producer, b); send(producer, c);
                 awaitCommitted(admin, rankGroup, 4);
                 await().atMost(Duration.ofSeconds(30)).until(() -> (Long) trendConsumer.status().get("failedAttempts") >= 2);
+                assertTrue(triggerAttempts() >= 2);
                 assertEquals("RETRYING", trendConsumer.status().get("state"));
                 assertEquals("DB_OR_PROCESSING_UNAVAILABLE", trendConsumer.status().get("lastErrorCode"));
                 assertEquals(0L, rankConsumer.status().get("failedAttempts"));
@@ -137,10 +147,9 @@ class TrendRecoveryIntegrationTest {
                         new TopicPartition(topic + ".dlq", 1), OffsetSpec.latest(),
                         new TopicPartition(topic + ".dlq", 2), OffsetSpec.latest())).all().get(10, TimeUnit.SECONDS);
                 assertEquals(0, dlqEnds.values().stream().mapToLong(v -> v.offset()).sum());
-            }
-            allowTrendProgress();
-            try (var resumed = consumer(trendGroup, "none", trend, trendRecovery)) {
-                resumed.start(); awaitCommitted(admin, trendGroup, 4);
+                allowTrendProgress();
+                awaitCommitted(admin, trendGroup, 4);
+                assertEquals("RUNNING", trendConsumer.status().get("state"));
                 assertProjection(trend, Set.of(a.eventId(), b.eventId(), c.eventId()), List.of(2L, 1L));
             }
             try (var restarted = consumer(trendGroup, "none", trend, trendRecovery)) {
@@ -148,8 +157,40 @@ class TrendRecoveryIntegrationTest {
                 awaitCommitted(admin, trendGroup, 6);
                 assertProjection(trend, Set.of(a.eventId(), b.eventId(), c.eventId()), List.of(2L, 1L));
                 assertEquals(6L, progress(TREND, 0));
+                assertEquals(0L, sourceOffset(a)); assertEquals(1L, sourceOffset(b)); assertEquals(3L, sourceOffset(c));
                 assertCommitted(admin, rankGroup, 4);
                 assertProjection(ranking, Set.of(a.eventId(), b.eventId(), c.eventId()), List.of(2L, 1L));
+            }
+        } finally { factory.destroy(); }
+    }
+
+    @Test void committedTrendSurvivesJvmHaltAndReceivesTheSameOffsetWithoutIncrement() throws Exception {
+        KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP, topic);
+        var a = event(bucket); var b = event(bucket.plusSeconds(10));
+        var factory = KafkaSupport.producerFactory(IntegrationSupport.BOOTSTRAP);
+        var producer = new KafkaTemplate<>(factory);
+        try (var admin = admin()) {
+            send(producer, a);
+            var child = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                    "-cp", System.getProperty("integration.classpath"), TrendAfterCommitProcess.class.getName(), schema, topic, trendGroup)
+                    .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+            try { assertTrue(child.waitFor(40, TimeUnit.SECONDS)); assertEquals(91, child.exitValue()); }
+            finally { if (child.isAlive()) child.destroyForcibly().waitFor(); }
+            assertEquals(1L, trend.totals().get("bucketTotal"));
+            assertEquals(1L, trend.totals().get("processedEvents"));
+            assertEquals(1L, progress(TREND, 0)); assertCommitted(admin, trendGroup, 0);
+            var committed = snapshot(TREND);
+            var seen = new CopyOnWriteArrayList<Long>();
+            try (var recovery = new DeadLetterRecovery(IntegrationSupport.BOOTSTRAP, topic, jdbc, TREND, RUN);
+                 var resumed = new ProjectionConsumer(KafkaSupport.consumerFactory(IntegrationSupport.BOOTSTRAP, trendGroup, "none"),
+                         topic, trend, recovery, records -> records.forEach(r -> seen.add(r.offset())))) {
+                resumed.start(); awaitCommitted(admin, trendGroup, 1);
+                assertEquals(Set.of(0L), Set.copyOf(seen));
+                assertEquals(committed, snapshot(TREND));
+                send(producer, a); send(producer, b);
+                awaitCommitted(admin, trendGroup, 3);
+                assertProjection(trend, Set.of(a.eventId(), b.eventId()), List.of(1L, 1L));
+                assertEquals(0L, sourceOffset(a)); assertEquals(2L, sourceOffset(b));
             }
         } finally { factory.destroy(); }
     }
@@ -180,17 +221,39 @@ class TrendRecoveryIntegrationTest {
         assertEquals(List.of(Timestamp.from(bucket), Timestamp.from(bucket.plusSeconds(10))),
                 jdbc.queryForList("SELECT bucket_start FROM chat_bucket_10s WHERE projection=? AND run_id=? ORDER BY bucket_start", Timestamp.class, projection, RUN));
     }
-    private void rejectTrendProgress(String operation) {
+    private long sourceOffset(ChatEvent event) {
+        return jdbc.queryForObject("SELECT source_offset FROM processed_event WHERE projection=? AND run_id=? AND event_id=?",
+                Long.class, TREND, RUN, event.eventId());
+    }
+    private long triggerAttempts() {
+        return jdbc.queryForObject("SELECT CASE WHEN is_called THEN last_value ELSE 0 END FROM trend_failure_attempts", Long.class);
+    }
+    private void rejectTrendProgress(FailurePoint point) {
+        jdbc.execute("CREATE SEQUENCE trend_failure_attempts");
+        // COMMIT 시점에 세 저장 영역의 실제 새 값을 확인한 뒤 실패시킨다.
+        String writtenState = point == FailurePoint.DEFERRED_COMMIT ? """
+                    IF (SELECT count(*) FROM processed_event WHERE projection=NEW.projection AND run_id=NEW.run_id) IS DISTINCT FROM 3
+                        OR (SELECT sum(chat_count) FROM chat_bucket_10s WHERE projection=NEW.projection AND run_id=NEW.run_id) IS DISTINCT FROM 3
+                        OR (SELECT next_resolved_offset FROM projection_progress WHERE projection=NEW.projection AND run_id=NEW.run_id AND topic=NEW.topic AND partition=0) IS DISTINCT FROM 2
+                        OR (SELECT next_resolved_offset FROM projection_progress WHERE projection=NEW.projection AND run_id=NEW.run_id AND topic=NEW.topic AND partition=1) IS DISTINCT FROM 1 THEN
+                        RAISE EXCEPTION USING ERRCODE='P1003', MESSAGE='SYNTHETIC_WRITES_NOT_VISIBLE';
+                    END IF;
+                """ : "";
         jdbc.execute("""
                 CREATE FUNCTION reject_trend_progress() RETURNS trigger LANGUAGE plpgsql AS $$
                 BEGIN
                     IF NEW.projection = 'ranking-trend' THEN
+                """ + writtenState + """
+                        PERFORM nextval('trend_failure_attempts');
                         RAISE EXCEPTION USING ERRCODE = 'P1002', MESSAGE = 'SYNTHETIC_TREND_PROGRESS_FAILURE';
                     END IF;
                     RETURN NEW;
                 END $$
                 """);
-        jdbc.execute("CREATE TRIGGER reject_trend_progress BEFORE " + operation + " ON projection_progress FOR EACH ROW EXECUTE FUNCTION reject_trend_progress()");
+        String declaration = point == FailurePoint.DEFERRED_COMMIT
+                ? "CREATE CONSTRAINT TRIGGER reject_trend_progress AFTER INSERT OR UPDATE ON projection_progress DEFERRABLE INITIALLY DEFERRED"
+                : "CREATE TRIGGER reject_trend_progress BEFORE UPDATE ON projection_progress";
+        jdbc.execute(declaration + " FOR EACH ROW EXECUTE FUNCTION reject_trend_progress()");
     }
     private void allowTrendProgress() { jdbc.execute("DROP TRIGGER reject_trend_progress ON projection_progress"); }
     private Admin admin() {

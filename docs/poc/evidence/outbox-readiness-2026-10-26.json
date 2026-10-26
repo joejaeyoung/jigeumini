@@ -9,7 +9,7 @@
     "F07",
     "F09"
   ],
-  "executedAt": "2026-10-26T02:09:52.470ZZ",
+  "executedAt": "2026-10-26T02:09:52.470Z",
   "revision": "cb098c028a636e9a4e96f59d5300645c7d25401a",
   "scope": "LOCAL_SYNTHETIC_KAFKA_POSTGRES",
   "commands": [
@@ -24,11 +24,11 @@
   },
   "harnessTests": 20,
   "integration": {
-    "tests": "20",
-    "failures": "0",
-    "errors": "0",
-    "skipped": "0",
-    "time": "12.692"
+    "tests": 20,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "time": 12.692
   },
   "phaseCounts": {
     "BROKER_REJECTION_READY": 20,

@@ -8,7 +8,7 @@
 
 진행 중. Xmx384MiB/collector640MiB의 기존180채널 계획을 다시 실행해 최고172연결·입력0·JAVA_HEAP_SPACE/exit3을 재현했다. 소유 자원을 정리하고 기존8개 container를 보존했다. 별도 Xmx64MiB·Kafka/DB/기대 이벤트 저장소가 없는 loopback에서도32연결 heap 실패를 재현했다.8연결3회 종료 뒤 Tomcat 공유 IO group 등록 수가0→8→16→24로 남는 별도 수명 문제도 관측했다.
 
-[조사와 진단](research/COLLECTOR_TEXT_MEMORY.md)에 원인 가설·실제 라이브러리 계약·수신1MiB 보존 조건을 기록한다. 작은 청크·유한 전체 메시지 조립과 소유 transport 종료를 보완한 뒤 같은 피드백 루프·전체 제품/연결 경계·회귀를 검증한다. 공개 수집 상한은 변경하지 않는다.
+[조사와 진단](research/COLLECTOR_TEXT_MEMORY.md)에 원인 가설·실제 라이브러리 계약·수신1MiB 보존 조건을 기록했다.8,192문자 partial 청크와 유한 전체 UTF-8 조립, 소유 transport 종료를 구현했다. 초안 회귀에서 정확히1MiB·분할·초과·재접속·heartbeat·늦은 연결 정리가 통과했고, 동일 Xmx64MiB32연결2회 및8연결3회가 정상 종료해 IO 등록/스레드0으로 돌아왔다. 고정 commit의 재측정·전체 제품/연결 경계·최종 게이트를 진행한다. 공개 수집 상한은 변경하지 않는다.
 
 ## 방송 내부 샤딩·인프라 아키텍처 #67
 

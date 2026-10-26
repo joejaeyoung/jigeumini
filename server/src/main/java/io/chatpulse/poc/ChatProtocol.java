@@ -26,7 +26,11 @@ public final class ChatProtocol {
     public static String pong() { return "{\"cmd\":10000,\"ver\":\"2\"}"; }
 
     public Frame decode(String text, String channel, String room, UUID session, Instant received) {
-        if (text.length() > MAX_FRAME_BYTES) throw new SourceFailure("FRAME_TOO_LARGE", false);
+        return decode(IncomingText.complete(text), channel, room, session, received);
+    }
+
+    Frame decode(IncomingText.Complete complete, String channel, String room, UUID session, Instant received) {
+        String text = complete.text();
         JsonNode root;
         try { root = json.readTree(text); }
         catch (Exception e) { throw new SourceFailure("INVALID_JSON", false); }

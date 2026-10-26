@@ -567,3 +567,7 @@ hot 물리 24,300건을 8,047/8,117/8,136으로 실제 분산했고 배정 불�
 origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으로 옮겼다. F01/F13/F14 → T02/T08/T11/T12/T14. 깨끗한5048d88의180채널 전체 제품 계획은 최고172연결·입력0·JAVA_HEAP_SPACE·exit3을 재현했다. 실행 소유 자원과 생성 비밀은 정리했고 기존8개 container는 보존했다. 준비한 독립 Xmx64MiB loopback은32연결 heap 실패,8연결3회 종료 뒤 IO group 등록0→8→16→24를 재현했다. 하네스/기대 이벤트 비용과 분리한 실패 경계다.
 
 `diagnose`의 피드백 루프에 따라 큰 문자 버퍼·container 수명·부대 비용의 가설을 분리했다. [공식 source 조사](research/COLLECTOR_TEXT_MEMORY.md)에 partial 수신과 전체 메시지 한도, destroy/공유 group 계약을 기록한다. 청크 버퍼와 완성 메시지 조립을 분리하되1MiB·READ/heartbeat·개인정보 비저장 계약을 유지하고, 종료 자원 문제를 별도로 회귀 검증한다.
+
+### #64 수정과 작은 재현 대조
+
+8,192문자 partial 수신과 UTF-8 전체1MiB 조립을 분리했다. Chunk/whole 단계를 구분해 완성 frame만 decode·계수하며 초과/잘못된 surrogate/연결 종료에서 상태를 버린다. 소유 Tomcat container destroy와 late handshake 정리를 추가했다. 실제 socket fixture에서1MiB 혼합 Unicode·UTF-8 중간 분할·초과·부분 JSON 종료/재접속·양방향 heartbeat를 확인했고 다른 owner를 유지한 늦은 연결 정리도 통과했다. 초안 Xmx64MiB 실험은32연결2회·8연결3회 모두 correct=true, 매 종료 IO 등록/스레드0이다. 이 초안 수치는 고정 commit 재측정 전이며 운영 용량으로 쓰지 않는다.

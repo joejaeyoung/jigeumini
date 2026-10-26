@@ -1,7 +1,6 @@
 package io.chatpulse.poc;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Clock;
 import java.time.Instant;
@@ -12,13 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 final class ChatConnection implements AutoCloseable {
     private final ChatProtocol protocol = new ChatProtocol();
+    private final IncomingText incoming = new IncomingText();
     private final ProbeStats stats;
     private final CollectionObserver observer;
     private final String channel;
@@ -36,7 +34,7 @@ final class ChatConnection implements AutoCloseable {
     private final Duration pongTimeout;
     private final java.util.concurrent.ScheduledFuture<?> heartbeat;
 
-    ChatConnection(StandardWebSocketClient client, ScheduledExecutorService scheduler,
+    ChatConnection(ChatSocketClient client, ScheduledExecutorService scheduler,
             URI uri, String channel, String room, String token, ProbeStats stats,
             Duration pingInterval, Duration pongTimeout, EventSink sink, CollectionObserver observer, Clock clock) throws Exception {
         this.clock=clock;this.lastAlive=clock.instant();
@@ -44,20 +42,22 @@ final class ChatConnection implements AutoCloseable {
         this.pingInterval = pingInterval;
         this.pongTimeout = pongTimeout;
         var handler = new TextWebSocketHandler() {
+            @Override public boolean supportsPartialMessages() { return true; }
             @Override
             public void afterConnectionEstablished(WebSocketSession session) throws Exception {
                 if (!active.get()) { session.close(); return; }
                 socket = session;
-                session.setTextMessageSizeLimit(ChatProtocol.MAX_FRAME_BYTES);
+                session.setTextMessageSizeLimit(ChatSocketClient.TEXT_CHUNK_CHARACTERS);
                 send(protocol.connect(room, token));
             }
             @Override
             protected void handleTextMessage(WebSocketSession session, TextMessage message) {
                 if (!active.get()) return;
                 try {
-                    int byteCount = message.getPayload().getBytes(StandardCharsets.UTF_8).length;
-                    if (byteCount > ChatProtocol.MAX_FRAME_BYTES) throw new SourceFailure("FRAME_TOO_LARGE", false);
-                    var frame = protocol.decode(message.getPayload(), channel, room, sessionId, clock.instant());
+                    var complete = incoming.accept(message.getPayload(), message.isLast());
+                    if (complete == null) return;
+                    int byteCount = complete.bytes();
+                    var frame = protocol.decode(complete, channel, room, sessionId, clock.instant());
                     if (frame.command() == 10100 && !ready.isDone()) {
                         stats.connected();
                         observer.connected(channel, sessionId, clock.instant());
@@ -90,12 +90,13 @@ final class ChatConnection implements AutoCloseable {
                 fail(new SourceFailure("WS_CLOSED", false));
             }
         };
-        var connecting = client.execute(handler, new WebSocketHttpHeaders(), uri);
+        var connecting = client.connect(handler, uri);
         try {
             socket = connecting.get(10, TimeUnit.SECONDS);
             ready.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             active.set(false);
+            incoming.clear();
             stats.disconnected();
             connecting.thenAccept(session -> { try { session.close(); } catch (Exception ignored) { } });
             closeSocket();
@@ -130,6 +131,8 @@ final class ChatConnection implements AutoCloseable {
     }
 
     private void fail(SourceFailure failure) {
+        active.set(false);
+        incoming.clear();
         if (ended.complete(failure)) {
             observer.ended(sessionId, clock.instant(), failure.getMessage());
             if (failure.getMessage().contains("FRAME") || failure.getMessage().startsWith("INVALID_") || failure.getMessage().contains("PUBLISH") || failure.getMessage().contains("KAFKA")) {
@@ -144,6 +147,7 @@ final class ChatConnection implements AutoCloseable {
     @Override
     public void close() {
         active.set(false);
+        incoming.clear();
         stats.disconnected();
         observer.ended(sessionId, clock.instant(), "CLOSED");
         heartbeat.cancel(false);

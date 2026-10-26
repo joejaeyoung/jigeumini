@@ -25,6 +25,8 @@
 
 ## 변경 조건
 
-수신 청크는8,192문자 후보로 줄이고, 완성 메시지는 UTF-8 누적1MiB를 유지한다. surrogate 쌍이 청크 경계에 걸리는 경우와 누적 초과를 처리하고, 완성/실패/종료 때 조립 버퍼를 해제한다. READ/heartbeat 이외 송신·원문 저장을 추가하지 않는다. 종료한 owner의 늦은 연결 완료도 닫고 소유 container 정리를 보장한다.
+수신 청크를8,192문자로 줄이고, 완성 메시지는 UTF-8 누적1MiB를 유지한다. `IncomingText`가 surrogate 쌍·누적 초과를 처리하고 완성/실패/종료 때 조립 버퍼를 해제한다. `ChatSocketClient`가 container의 수명을 소유한다. READ/heartbeat 이외 송신·원문 저장을 추가하지 않는다. 종료한 owner의 늦은 연결 완료도 닫고 소유 container를 정리한다.
+
+합성 회귀는 실제1MiB 한글·이모지 메시지, wire UTF-8 byte 중간 분할,1MiB 초과 거부, 부분 JSON 중단 뒤 재접속, client/server heartbeat를 검사한다. 늦은 연결의 등록 직전에 owner를 닫는 별도 회귀에서 그 연결만 닫히고 다른 owner는 유지되는지 확인한다. HTTP 계약은 변경하지 않고 기존 실제 loopback 회귀를 실행한다.
 
 큰 메시지가 실제 도착한 동안의 유한 조립 메모리는 남는다. 모든 연결이 동시에1MiB를 받는 자원 상한과 평상시 연결 비용은 다르다. pure loopback은 HTTP/TLS/fleet/Kafka/DB 비용을 포함하지 않으므로 운영 채널 상한으로 환산하지 않는다. 개선 뒤 같은 전체 제품 계획·더 높은 연결 수·지속 실행·정리·Kafka/DB 계수와 품질을 따로 대조한다.

@@ -34,7 +34,7 @@ public class RetentionConfiguration {
         return new RetentionMaintenance(jdbc,p.runId(),List.of(
                 new RetentionMaintenance.Task("ranking",ranking::cleanup),new RetentionMaintenance.Task("trend",trend::cleanup),
                 new RetentionMaintenance.Task("replay",replay::cleanup),new RetentionMaintenance.Task("observations",()->counted(observations.cleanup())),
-                new RetentionMaintenance.Task("categories",()->counted(categories.cleanup())),new RetentionMaintenance.Task("reports",()->counted(reports.cleanup())),
+                new RetentionMaintenance.Task("categories",()->counted(categories.cleanup())),new RetentionMaintenance.Task("reports",()->reports.cleanup().summary()),
                 new RetentionMaintenance.Task("outbox",()->counted(outbox.cleanup())),new RetentionMaintenance.Task("notifications",()->counted(notifications.cleanup())),
                 new RetentionMaintenance.Task("history",history::cleanup)));
     }

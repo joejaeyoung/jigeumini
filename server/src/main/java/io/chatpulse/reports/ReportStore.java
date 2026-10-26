@@ -7,6 +7,7 @@ import io.chatpulse.poc.ChatEvent;
 import io.chatpulse.quality.QualityPolicy;
 import java.sql.Timestamp;
 import io.chatpulse.retention.RetentionWindow;
+import io.chatpulse.retention.CleanupBatch;
 import java.time.*;
 import java.util.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -240,25 +241,25 @@ public final class ReportStore implements DualTopicProjection {
             return new Detail(stored,minutes,intervals,unassigned(stored.session().channelId()),late,fresh());
         });
     }
-    @Override public int cleanup() {
+    public CleanupBatch cleanup() {
         return cleanupTx.execute(status->{
             jdbc.execute("SET LOCAL statement_timeout='1s'");jdbc.execute("SET LOCAL lock_timeout='100ms'");
             Instant oldest=retention.advance(null,clock.instant().minusSeconds(7*86400).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)).event();
-            if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT pg_try_advisory_xact_lock(hashtextextended(?,0))",Boolean.class,"report-cleanup/"+run)))return 0;
-            int deleted=0;
+            if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT pg_try_advisory_xact_lock(hashtextextended(?,0))",Boolean.class,"report-cleanup/"+run)))return CleanupBatch.empty();
+            var deleted=CleanupBatch.empty();
             // 미확정/활성 세션은 침묵만으로 삭제하지 않는다. 종료가 확인된 세션만 자식부터 한정 정리한다.
-            for(String table:List.of("report_event","report_observation","report_bucket"))deleted+=jdbc.update("DELETE FROM "+table+" WHERE ctid IN (SELECT c.ctid FROM "+table+" c JOIN report_session s ON s.run_id=c.run_id AND s.report_id=c.report_id WHERE s.run_id=? AND s.ended_at<? LIMIT 10000)",run,ts(oldest));
-            deleted+=jdbc.update("DELETE FROM report_event WHERE ctid IN (SELECT ctid FROM report_event WHERE run_id=? AND report_id IS NULL AND event_time<? LIMIT 10000)",run,ts(oldest));
-            deleted+=jdbc.update("DELETE FROM report_observation WHERE ctid IN (SELECT ctid FROM report_observation WHERE run_id=? AND report_id IS NULL AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120)));
-            deleted+=jdbc.update("DELETE FROM report_bucket WHERE ctid IN (SELECT ctid FROM report_bucket WHERE run_id=? AND message_count=0 LIMIT 10000)",run);
-            deleted+=jdbc.update("""
+            for(String table:List.of("report_event","report_observation","report_bucket"))deleted=deleted.add(jdbc.update("DELETE FROM "+table+" WHERE ctid IN (SELECT c.ctid FROM "+table+" c JOIN report_session s ON s.run_id=c.run_id AND s.report_id=c.report_id WHERE s.run_id=? AND s.ended_at<? LIMIT 10000)",run,ts(oldest)),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_event WHERE ctid IN (SELECT ctid FROM report_event WHERE run_id=? AND report_id IS NULL AND event_time<? LIMIT 10000)",run,ts(oldest)),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_observation WHERE ctid IN (SELECT ctid FROM report_observation WHERE run_id=? AND report_id IS NULL AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120))),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_bucket WHERE ctid IN (SELECT ctid FROM report_bucket WHERE run_id=? AND message_count=0 LIMIT 10000)",run),10000);
+            deleted=deleted.add(jdbc.update("""
                     DELETE FROM report_session WHERE ctid IN (SELECT s.ctid FROM report_session s WHERE run_id=? AND (ended_at<? OR EXISTS(SELECT 1 FROM report_alias a WHERE a.run_id=s.run_id AND a.alias_id=s.report_id)) AND NOT EXISTS(SELECT 1 FROM report_event e WHERE e.run_id=s.run_id AND e.report_id=s.report_id)
                     AND NOT EXISTS(SELECT 1 FROM report_observation o WHERE o.run_id=s.run_id AND o.report_id=s.report_id) AND NOT EXISTS(SELECT 1 FROM report_bucket b WHERE b.run_id=s.run_id AND b.report_id=s.report_id) LIMIT 1000)
-                    """,run,ts(oldest));
-            deleted+=jdbc.update("""
+                    """,run,ts(oldest)),1000);
+            deleted=deleted.add(jdbc.update("""
                     DELETE FROM report_alias WHERE ctid IN (SELECT a.ctid FROM report_alias a WHERE run_id=? AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=a.run_id AND s.report_id=a.canonical_id)
                       AND NOT EXISTS(SELECT 1 FROM report_alias next WHERE next.run_id=a.run_id AND next.alias_id=a.canonical_id) LIMIT 1000)
-                    """,run);
+                    """,run),1000);
             return deleted;
         });
     }

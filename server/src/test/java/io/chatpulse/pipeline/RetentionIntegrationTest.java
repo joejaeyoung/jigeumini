@@ -203,4 +203,32 @@ class RetentionIntegrationTest {
         try(var outbox=new io.chatpulse.notifications.SpikeOutbox(jdbc,tx,IntegrationSupport.BOOTSTRAP,topic,RUN)){assertThat(outbox.cleanup()).isEqualTo(1);}
         assertThat(feed.cleanup()).isEqualTo(1);clock.now=old;feed.apply(List.of(record));assertThat(count("notification_event")).isZero();
     }
+    @Test void delayedFirstDeliveryConfirmsOldOutboxWithoutReturningItToTheFeed() throws Exception {
+        KafkaSupport.ensureTopic(IntegrationSupport.BOOTSTRAP,topic);
+        var feed=new io.chatpulse.notifications.NotificationStore(jdbc,tx,RUN,clock);
+        UUID id=UUID.randomUUID();Instant old=started.minusSeconds(8*86400);
+        jdbc.update("INSERT INTO spike_event(spike_id,run_id,channel_id,evaluated_at,algorithm_version,count,baseline,ratio) VALUES (?,?,?,?,'chat-spike-v1',100,50,2)",id,RUN,CHANNEL,Timestamp.from(old));
+        jdbc.update("INSERT INTO spike_outbox(spike_id,run_id,created_at) VALUES (?,?,?)",id,RUN,Timestamp.from(old));
+        assertThat(feed.cleanup()).isZero();
+        try(var outbox=new io.chatpulse.notifications.SpikeOutbox(jdbc,tx,IntegrationSupport.BOOTSTRAP,topic,RUN)) {
+            assertThat(outbox.publishOne()).isTrue();feed.apply(readKafka(1));
+            assertThat(count("notification_event")).isEqualTo(1);assertThat(feed.cleanup()).isZero();
+            assertThat(feed.page(List.of(CHANNEL),started,UUID.randomUUID(),20).events()).isEmpty();
+            assertThat(outbox.cleanup()).isZero();
+            jdbc.update("UPDATE spike_outbox SET published_at=?",Timestamp.from(old));
+            assertThat(outbox.cleanup()).isEqualTo(1);assertThat(feed.cleanup()).isEqualTo(1);
+        }
+        assertThat(jdbc.queryForObject("SELECT next_offset FROM notification_progress",Long.class)).isEqualTo(1);
+    }
+    @Test void reportParentLimitIsReportedEvenWhenNoChildRowsExist() {
+        var reports=new ReportStore(jdbc,tx,RUN,topic,topic+".observations",clock);
+        jdbc.update("""
+                INSERT INTO report_session(run_id,report_id,channel_id,observed_from,observed_to,ended_at,payload,updated_at)
+                SELECT ?,md5(i::text)::uuid,?,?::timestamptz,?::timestamptz,?::timestamptz,'{}',?::timestamptz
+                FROM generate_series(1,1001) i
+                """,RUN,CHANNEL,Timestamp.from(started.minusSeconds(9*86400)),Timestamp.from(started.minusSeconds(8*86400)),Timestamp.from(started.minusSeconds(8*86400)),Timestamp.from(started));
+        assertThat(reports.cleanup().summary()).containsEntry("deletedRows",1000).containsEntry("limited",true);
+        assertThat(count("report_session")).isEqualTo(1);
+        assertThat(reports.cleanup().summary()).containsEntry("deletedRows",1).containsEntry("limited",false);
+    }
 }

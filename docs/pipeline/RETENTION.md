@@ -30,7 +30,7 @@ source identity, DB progress, alert state, lease epoch, live namespace의 입력
 - 같은 UUID와 불변 payload가 새 offset에 다시 오면, 보존 중에는 hash/UUID로 중복 제거한다. ledger 삭제 뒤에는 원래 receivedAt 입력 하한으로 거부한다. live 복구 경로는 기존 OUTSIDE_LIVE_RETENTION DLQ·품질 계약을 사용한다.
 - plain apply에도 입력 하한을 적용한다. ledger INSERT와 bucket·progress는 같은 transaction이다.
 - **삭제한 UUID에 최근 receivedAt/다른 payload를 붙인 재발행의 영구 충돌 탐지는 보장하지 않는다.** 현재 입력 계약은 eventId와 payload가 불변인 재전달이다. 무한 충돌 탐지를 위해 ID/hash를 영구히 보관한다고 주장하지 않는다.
-- category/report/관측/알림의 기존 시간 필터도 단조 하한과 함께 적용한다. category/report/관측의 오래된 입력은 기존대로 skip하고 progress를 전진시킨다. 알림은 7일 조회 범위보다 오래된 입력을 저장하지 않는다.
+- category/report/관측/알림의 기존 시간 필터도 단조 하한과 함께 적용한다. category/report/관측의 오래된 입력은 기존대로 skip하고 progress를 전진시킨다. 알림은 7일 조회 범위 밖이라도 해당 outbox가 남아 있으면 수신 확인을 저장한다. 오래 밀린 첫 발행도 outbox 정리가 완료될 수 있으며, 피드에는 다시 노출하지 않는다. outbox가 사라진 오래된 재전달은 저장하지 않는다.
 
 `retention_window` 행을 집계 transaction은 FOR SHARE, 하한 전진은 UPDATE로 잠근다. 따라서 전진 전에 시작된 집계가 끝나거나 정리 잠금 예산이 끝난 뒤 다음 주기에 재시도한다. ranking/trend는 먼저 하한을 commit하고 ledger와 bucket을 각각 제한된 transaction에서 지운다. 중간 실패 후에도 하한은 남아 과거 재집계를 막고 다음 batch가 남은 행을 다시 찾는다.
 

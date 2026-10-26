@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 2 && ( "$1" == storage || "$1" == kafka ) ]] || {
+  echo '사용법: ./scripts/retention-experiment <storage|kafka> <새 결과.json>'
+  exit 2
+}
+[[ ! -e "$2" ]] || { echo 'RETENTION_OUTPUT_EXISTS'; exit 2; }
+if [[ "$1" == storage ]]; then ./scripts/infra up >&2; fi
+exec ./gradlew --console=plain :server:retentionExperiment \
+  -PretentionProfile="$1" -PretentionOutput="$2"

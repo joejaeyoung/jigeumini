@@ -674,3 +674,9 @@ origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #6
 ### #65 완료 게이트
 
 최종2f5f64d Claude APPROVE(이전 전체 코드 검토와 문서 보완 delta), Standards/Spec0건, push40389325212/PR40389332785 SUCCESS를 확인했다. 두 XML은179/142 실패·오류·skip0, job log는하네스38/웹29/Chromium31이다. PR71을cca9877로develop 병합하고 #65와보드를완료처리했다. 미실행개별계측/VM전체는#49에명시이관했다. 최종게이트파일은다음작업#63에기록해승인HEAD를뒤에서수정하지않았다.
+
+### #63 경계 리뷰 보완
+
+고정 cd4dd43의 Standards/Spec 리뷰에서 report 부모1,000행 한도 진단과 오래된 pending outbox 첫 수신 누락을 발견했다. CleanupBatch로 각 삭제 한도 도달을 보존하고, 소비 인터페이스에서 정리 책임을 분리했다. 알림은 현재 outbox가 존재하는 경우 기간 밖에서도 receipt를 남기되 feed7일 조회는 유지한다. 실제 Kafka의8일 지연 첫 발행·소비와 자식 없는 부모1,001개 정리를 추가해13개 경계 테스트가 통과했다. 새 DB/WAL·Kafka segment 하네스는 측정 전 구현 단계다.
+
+#65의 squash commit과 승인 HEAD 전체 트리가 동일함을 확인한 뒤 동일 내용의 develop 이력을 연결했다. 기능 내용을 폐기하는 merge에는 사용하지 않았다. 다른 worktree는 변경하지 않았다.

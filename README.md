@@ -350,3 +350,13 @@ python3 scripts/product-load-summary.py work/product-load-soak work/product-load
 ## 보존과 저장 용량 진단
 
 분석기의 자동 정리·입력 하한·replay 결과 만료·보호 자료와 경보/입력 제한 절차는 [보존 계약](docs/pipeline/RETENTION.md)을 따른다. `./scripts/replay cleanup`은 종료 replay의 한정 batch를 수동 정리한다. `./scripts/ops retention-status`는 관계/색인 크기·WAL 생성 누계·정리 실패·protected 자료를 읽는다. live ledger72시간과 bucket8일의 합계는 보존 창이 달라 누적 동등성 검사에 사용할 수 없다.
+
+
+F01/F08/F10/F16 → T02/T04/T08/T16, #63의 합성 보존 측정은 새 결과 경로로 실행한다. 성능 실험·빌드·통합 테스트와 겹치지 않게 실행한다.
+
+```bash
+./scripts/retention-experiment storage work/retention-storage.json
+./scripts/retention-experiment kafka work/retention-kafka.json
+```
+
+`storage`는 로컬 PostgreSQL의 새 schema에서 60,000행/집계 × 3회 삽입·정리, 500건/s 목표의 두 집계 동시 입력, V14 색인·관계·WAL·잠금·VACUUM 재사용을 측정하고 schema를 제거한다. 전체 제품 부하나 며칠간의 soak가 아니다. `kafka`는 1 CPU/768MiB의 별도 소유 broker와 volume을 만들고 시간 만료·256MiB 크기 만료의 실제 offset·segment 파일을 기록한 뒤 정리한다. 원래 broker를 변경하지 않는다. 검사/파일 삭제 주기를 각각1초로 줄인 가속 시험이며 24시간 운영 복구 창을 입증하지 않는다.

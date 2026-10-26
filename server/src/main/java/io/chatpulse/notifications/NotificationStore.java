@@ -26,7 +26,9 @@ public final class NotificationStore {
             Instant oldest=retention.lock().eventFrom(clock.instant().minusSeconds(7*86400));
             for(var record:records) {
                 var e=SpikeDetected.decode(record.key(),record.value());
-                if(e.runId().equals(run)&&!e.evaluatedAt().isBefore(oldest)) {
+                // 오래 지연된 outbox도 소비 확인은 남긴다. 피드 기간 밖의 확인은 outbox 정리까지 보존한다.
+                if(e.runId().equals(run)&&(!e.evaluatedAt().isBefore(oldest)||Boolean.TRUE.equals(jdbc.queryForObject(
+                        "SELECT EXISTS(SELECT 1 FROM spike_outbox WHERE run_id=? AND spike_id=?)",Boolean.class,run,e.spikeId())))) {
                     String canonical=new String(e.encode(),java.nio.charset.StandardCharsets.UTF_8);
                     int inserted=jdbc.update("""
                             INSERT INTO notification_event(run_id,spike_id,channel_id,evaluated_at,received_at,payload)

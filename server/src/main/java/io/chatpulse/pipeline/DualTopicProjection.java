@@ -12,5 +12,4 @@ public interface DualTopicProjection {
     void apply(List<ConsumerRecord<String,byte[]>> records);
     void observe(TopicPartition partition,long end,Instant observedAt,Instant pollAt,boolean blocked);
     void unavailable(Collection<TopicPartition> partitions);
-    int cleanup();
 }

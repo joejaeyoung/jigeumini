@@ -54,6 +54,8 @@ class ProductLoad(module.Rehearsal):
         result['testNetwork']={'apiNetworksInternal':True,'jmxPublished':any((info['NetworkSettings']['Ports'] or {}).values()),'apiJvmArguments':info['Config']['Entrypoint'][1:3],
             'probeHeapMaxBytes':384*1024**2,'apiMemoryLimitBytes':info['HostConfig']['Memory'],'apiNanoCpus':info['HostConfig']['NanoCpus']}
         return result
+    def storage(self):
+        return json.loads(self.sql("SELECT json_build_object('databaseBytes',pg_database_size(current_database()),'relations',(SELECT json_object_agg(relname,json_build_object('totalBytes',pg_total_relation_size(oid),'heapBytes',pg_relation_size(oid),'indexBytes',pg_indexes_size(oid))) FROM pg_class WHERE relnamespace='public'::regnamespace AND relkind='r'))").stdout)
     def resources(self):
         sample={'at':self.now()};ids=[];roles={}
         for service in ['api','kafka','postgres']:
@@ -102,8 +104,10 @@ class ProductLoad(module.Rehearsal):
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('PROBE_OWNER_MISMATCH')
         if any((info['NetworkSettings']['Ports'] or {}).values()) or not all(n['Internal'] for n in json.loads(self.command(['docker','network','inspect',*info['NetworkSettings']['Networks']]).stdout)):raise RuntimeError('PROBE_EXTERNAL_NETWORK')
+        self.result.setdefault('fixtureResources',{})[service]={k:info['HostConfig'][k] for k in ('Memory','NanoCpus','PidsLimit')}
         return info['Id']
     def load(self):
+        self.result['storageBefore']=self.storage()
         if self.plan['sourceMode']=='WEBSOCKET':self.source_id=self.start_fixture('synthetic-source','io.chatpulse.operations.ProductLoadSocketServer',['/load-plan.json','/output/source.json'],self.source_output,'128m')
         self.probe_id=self.start_fixture('load-probe','io.chatpulse.operations.ProductLoadProbe',['/load-plan.json','/output/load.json'],self.output,'384m')
         if not self.capacity_mode or self.fault_at>=0:self.clock_bracket('START')
@@ -131,6 +135,11 @@ class ProductLoad(module.Rehearsal):
             time.sleep(1)
         else:raise RuntimeError('LOAD_PROCESS_TIMEOUT')
         self.result['load']=progress;self.result['probeExitCode']=info['State']['ExitCode'];self.result['probeOomKilled']=info['State']['OOMKilled']
+        self.result['storageAfter']=self.storage()
+        self.result['productProcesses']={}
+        for service in ('api','kafka','postgres'):
+            _,state=self.owned(service)
+            self.result['productProcesses'][service]={**{k:state['State'][k] for k in ('Status','ExitCode','OOMKilled')},**{k:state['HostConfig'][k] for k in ('Memory','NanoCpus','PidsLimit')}}
         source_file=self.source_output/'source.json'
         if source_file.exists():self.result['syntheticSourceSnapshot']=json.loads(source_file.read_text())
         if self.source_id:

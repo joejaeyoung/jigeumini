@@ -18,6 +18,10 @@ V9의 `report_*` namespace는 live ledger·순위·알림을 수정하지 않는
 
 한 배치의 새 입력·세션 계산·관측 귀속·채팅 재배정·bucket 증감·버전·진행 위치는 같은 DB 트랜잭션이다. 채널 잠금을 정렬해 획득하고 bucket 증감도 정렬한다. 같은 ID의 동일 payload는 재증가하지 않으며 충돌/SQL 실패는 전체 rollback이다. 관측이 늦게 도착하면 `[observedAt, observedAt+120초)`와 변경된 관측 ID에 붙은 보존 이벤트를 다시 배정한다. 긴 ID 목록은 PostgreSQL uuid 배열 한 개로 전달한다.
 
+#65는 새 관측의 세션·별칭과 기존 채팅 보정을 먼저 처리하고, 새 채팅은 그 최종 관측 귀속으로 바로 삽입한다.
+새 관측 없는 채팅 배치에서는 전체 세션 이력을 다시 계산하지 않는다. 기존 세션의 마지막 관측·TTL로 저장 상태를
+갱신해 state/revision/updatedAt 계약을 유지한다. 중복만 들어온 배치는 저장 버전을 올리지 않는다.
+
 `receivedAt-eventTime>=120초`를 late로 센다. 최근7일 eventTime의 과거 bucket과 리포트를 고치지만 실시간 spike/outbox를 생성하지 않는다. 리포트는 최근7일 eventTime을 기준으로 미처리 입력을 반영하며 receivedAt의48시간 live-age 제한을 적용하지 않는다. 따라서48시간 이상 중단 뒤에도 잔존 입력을 이어갈 수 있다. receivedAt이현재보다5초 초과인 입력은 차단한다. 운영 ranking/trend의48시간 계약은 그대로다. eventTime7일 밖 입력은 결과 부활 방지를 위해 배정하지 않고 진행 위치만 반영한다. 이미 삭제된 입력/관측·Kafka 만료분을 재생성할 수 있다는 뜻이 아니다.
 
 ## 독립 소비와 품질

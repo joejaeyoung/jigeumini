@@ -86,13 +86,20 @@ public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProje
                 var event=input.chat(); if(event.eventTime().isBefore(oldest)) continue;
                 codec.validateLiveAge(event,now);
                 Instant eventTime=event.eventTime().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
-                String category=categoryAt(event.channelId(),eventTime), digest=codec.hash(event);
-                int inserted=jdbc.update("INSERT INTO category_event(run_id,event_id,channel_id,event_time,payload_hash,category_key) VALUES (?,?,?,?,?,?) ON CONFLICT DO NOTHING",
-                        run,event.eventId(),event.channelId(),ts(eventTime),digest,category);
-                if(inserted==0) {
+                String digest=codec.hash(event);
+                var assigned=jdbc.query("""
+                        INSERT INTO category_event(run_id,event_id,channel_id,event_time,payload_hash,category_key)
+                        VALUES (?,?,?,?,?,coalesce((
+                          SELECT CASE WHEN ?<observed_at+make_interval(secs=>ttl_seconds) THEN category_key ELSE 'unknown' END
+                          FROM category_observation WHERE run_id=? AND channel_id=? AND observed_at<=?
+                          ORDER BY observed_at DESC,event_id DESC LIMIT 1),'unknown'))
+                        ON CONFLICT DO NOTHING RETURNING category_key
+                        """,(rs,n)->rs.getString(1),run,event.eventId(),event.channelId(),ts(eventTime),digest,
+                        ts(eventTime),run,event.channelId(),ts(eventTime));
+                if(assigned.isEmpty()) {
                     if(!digest.equals(jdbc.queryForObject("SELECT payload_hash FROM category_event WHERE run_id=? AND event_id=?",String.class,run,event.eventId())))
                         throw new IllegalArgumentException("CATEGORY_EVENT_CONFLICT");
-                } else { delta(changes,category,event.channelId(),eventTime,1); changed=true; }
+                } else { delta(changes,assigned.getFirst(),event.channelId(),eventTime,1); changed=true; }
             }
             for(var sample:added) {
                 // 모든 새 관측을 먼저 넣어 입력 순서와 무관하게 최종 시각 배정을 계산한다.
@@ -125,21 +132,16 @@ public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProje
                         change.getValue(),run,key.category(),key.channel(),ts(key.bucket()))!=1) throw new IllegalStateException("CATEGORY_BUCKET_MISSING");
             }
             if(changed) jdbc.update("INSERT INTO category_revision VALUES (?,1) ON CONFLICT(run_id) DO UPDATE SET revision=category_revision.revision+1",run);
-            for(var input:inputs) jdbc.update("""
+            var progress=new TreeMap<TopicPartition,Long>(Comparator.comparing(TopicPartition::topic).thenComparingInt(TopicPartition::partition));
+            for(var input:inputs)progress.merge(new TopicPartition(input.record().topic(),input.record().partition()),input.record().offset()+1,Math::max);
+            progress.forEach((partition,offset)->jdbc.update("""
                     INSERT INTO category_progress VALUES (?,?,?,?,?) ON CONFLICT(run_id,topic,partition)
                     DO UPDATE SET next_offset=greatest(category_progress.next_offset,excluded.next_offset),updated_at=excluded.updated_at
-                    """,run,input.record().topic(),input.record().partition(),input.record().offset()+1,ts(now));
+                    """,run,partition.topic(),partition.partition(),offset,ts(now)));
         });
     }
     private static void delta(Map<Delta,Long> changes,String category,String channel,Instant time,long amount) {
         changes.merge(new Delta(category,channel,Instant.ofEpochSecond(Math.floorDiv(time.getEpochSecond(),10)*10)),amount,Long::sum);
-    }
-    private String categoryAt(String channel, Instant at) {
-        var values=jdbc.query("""
-                SELECT CASE WHEN ?<observed_at+make_interval(secs=>ttl_seconds) THEN category_key ELSE 'unknown' END
-                FROM category_observation WHERE run_id=? AND channel_id=? AND observed_at<=? ORDER BY observed_at DESC,event_id DESC LIMIT 1
-                """,(rs,n)->rs.getString(1),ts(at),run,channel,ts(at));
-        return values.isEmpty()?UNKNOWN:values.getFirst();
     }
     public void observe(TopicPartition partition,long end,Instant observedAt,Instant pollAt,boolean blocked) {
         jdbc.update("""

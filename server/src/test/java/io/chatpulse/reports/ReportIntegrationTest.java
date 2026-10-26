@@ -56,6 +56,24 @@ class ReportIntegrationTest {
     private ConsumerRecord<String,byte[]> record(ChatEvent event,long offset) { return new ConsumerRecord<>(chat,0,offset,CHANNEL,codec.encode(event)); }
     private long total(UUID report) { return store.detail(report).minutes().stream().mapToLong(ReportStore.Minute::count).sum(); }
     private UUID source(String source) { return store.list(CHANNEL).reports().stream().filter(s->Objects.equals(source,s.session().sourceBroadcastId())).findFirst().orElseThrow().session().id(); }
+    @Test void chatOnlyBatchesPreserveStoredTtlStateRevisionAndUnknownObservations() {
+        Instant at=Instant.parse("2026-10-27T09:00:00Z");store=store(Clock.fixed(at.plusSeconds(30),ZoneOffset.UTC));
+        store.apply(List.of(record(live(at,"123"),0),record(event(at.plusSeconds(10),at.plusSeconds(11)),0)));
+        UUID id=source("123");var initial=store.detail(id).stored();assertEquals("LIVE",initial.session().state());
+        store=store(Clock.fixed(at.plusSeconds(121),ZoneOffset.UTC));var late=event(at.plusSeconds(20),at.plusSeconds(21));
+        store.apply(List.of(record(late,1)));var expired=store.detail(id).stored();
+        assertEquals("UNKNOWN",expired.session().state());assertEquals(initial.revision()+2,expired.revision());
+        assertEquals(at.plusSeconds(121),expired.updatedAt());assertEquals(2,total(id));
+        store.apply(List.of(record(late,2)));assertEquals(expired,store.detail(id).stored());
+        // 벽시계가 되돌아가도 이전 derive와 같은 저장 상태를 유지한다.
+        store=store(Clock.fixed(at.plusSeconds(60),ZoneOffset.UTC));
+        store.apply(List.of(record(event(at.plusSeconds(30),at.plusSeconds(31)),3)));
+        var live=store.detail(id).stored();assertEquals("LIVE",live.session().state());assertEquals(expired.revision()+2,live.revision());
+        store.apply(List.of(record(sample(at.plusSeconds(40),null,BroadcastMetadata.LiveStatus.UNKNOWN,null),1)));
+        var unknown=store.detail(id).stored();assertEquals("UNKNOWN",unknown.session().state());
+        store.apply(List.of(record(event(at.plusSeconds(45),at.plusSeconds(46)),4)));
+        assertEquals(unknown,store.detail(id).stored());assertEquals(3,total(id));assertEquals(1,store.list(CHANNEL).unassigned());
+    }
     @Test void knownBroadcastsKeepMidnightHistoryAndLateMetadataReassignsWithoutDuplicateCounts() {
         Instant at=Instant.parse("2026-10-25T23:58:00Z");store=store(Clock.fixed(at.plusSeconds(600),ZoneOffset.UTC));
         var initial=live(at,"123");var first=event(at.plusSeconds(10),at.plusSeconds(11));var second=event(at.plusSeconds(150),at.plusSeconds(400));

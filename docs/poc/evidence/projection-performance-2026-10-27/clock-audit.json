@@ -1,0 +1,250 @@
+{
+  "scope": "RETROSPECTIVE_SLOW_PROBE_SAMPLES; NOT_CLOCK_CAUSE",
+  "thresholdMillis": 250,
+  "runs": [
+    {
+      "path": "work/capacity-limits/socket-rate2000/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.615,
+      "maxResidualMillis": 0.577,
+      "sourceSha256": "109be68531f9b581a4f25255ba62817fea4b72790d7d544675dfa771b3ec604c"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate2000-hot/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 30,
+      "minResidualMillis": 0.171,
+      "maxResidualMillis": 2.464,
+      "sourceSha256": "98cf7d7ded2f3c8bea1815319813c3491da1e94165bbaeb77efc14899759dd83"
+    },
+    {
+      "path": "work/capacity-limits/socket-channels150/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.717,
+      "maxResidualMillis": 0.366,
+      "sourceSha256": "9b7501d35d1f71c7177e97590578a267c4b5409b0e265ec4675136fd6e61492a"
+    },
+    {
+      "path": "work/capacity-limits/socket-operating100-safe/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 58,
+      "minResidualMillis": 0.13,
+      "maxResidualMillis": 8.113,
+      "sourceSha256": "43954ef4d04c54f9c78257fbfdc2c1a0ccee7aae8b3869dcc989e81f2713e801"
+    },
+    {
+      "path": "work/capacity-limits/direct-smoke/result.json",
+      "sourceMode": "DIRECT",
+      "classification": "WITHIN_SLO",
+      "samples": 6,
+      "minResidualMillis": -0.039,
+      "maxResidualMillis": 1.118,
+      "sourceSha256": "a48ff3774fef77c80f4d958b349688583d1d79b0a20ab5c218e25504906b1b59"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate3000/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 21,
+      "minResidualMillis": -0.426,
+      "maxResidualMillis": 1.784,
+      "sourceSha256": "e2f73cc78f8f08d7689bb29393ad32a4499705b45120c2cb0bf4cf53c59e2c66"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate-ramp/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 30,
+      "minResidualMillis": -0.447,
+      "maxResidualMillis": 1.796,
+      "sourceSha256": "1bb9998719057d529bd6784ace241cef3977c8deaa596a4e49d14e4e71b2fdc6"
+    },
+    {
+      "path": "work/capacity-limits/socket-operating100/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 58,
+      "minResidualMillis": -0.307,
+      "maxResidualMillis": 8.708,
+      "sourceSha256": "0c714606b7d1cbb1b255a4556b868d07821008dee329ea5a773d3fec724b0643"
+    },
+    {
+      "path": "work/capacity-limits/socket-api200-wide/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 15,
+      "minResidualMillis": 0.046,
+      "maxResidualMillis": 1.14,
+      "sourceSha256": "db74e123a6bd74937161a146c7c626199713dc9070e261e2bd65a31abf8dfc87"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate2000-repeat/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 28,
+      "minResidualMillis": -0.304,
+      "maxResidualMillis": 1.036,
+      "sourceSha256": "9897e8893f0240bbbce2c0c700d692075a76a1734b97e24132ddb65f545421c1"
+    },
+    {
+      "path": "work/capacity-limits/socket-api200/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 18,
+      "minResidualMillis": 0.172,
+      "maxResidualMillis": 1.237,
+      "sourceSha256": "879690fad9ae47876f4ca376f894774df0b164cc413e309247972afc576f4fb9"
+    },
+    {
+      "path": "work/capacity-limits/socket-channels100/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.401,
+      "maxResidualMillis": 0.739,
+      "sourceSha256": "fe3491e08f0fdc22bd7248ea2fc5b5efe5941632e0d3b3d9710be5eed1fd7f9b"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate2500-repeat/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 19,
+      "minResidualMillis": -0.331,
+      "maxResidualMillis": 2.176,
+      "sourceSha256": "c0f95a0e229b86ca59b612aa48de99057aa5caaefb0c77d6838f76f962256964"
+    },
+    {
+      "path": "work/capacity-limits/socket-smoke-v2/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.35,
+      "maxResidualMillis": 1.078,
+      "sourceSha256": "a585509b52aa49f8874ad2e660d5dde59805483cde479bd0455aa64c1bf53931"
+    },
+    {
+      "path": "work/capacity-limits/socket-channels150-repeat/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.672,
+      "maxResidualMillis": 0.463,
+      "sourceSha256": "fb90e1cfd87f0f1b217be792adb065de22a01a062af1f767360a8f93dbe2df7a"
+    },
+    {
+      "path": "work/capacity-limits/socket-api100/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.331,
+      "maxResidualMillis": 2.979,
+      "sourceSha256": "9d1a8b9d17e2ee6f64aa1137016060f7a0f2ad898801ec3e33dfdacd499544f0"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate2500/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 21,
+      "minResidualMillis": 0.072,
+      "maxResidualMillis": 1.412,
+      "sourceSha256": "e415407820967aba2544c7e7efc31708107f09137e84edd950dcfd01074576b3"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate3000-db2/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 20,
+      "minResidualMillis": -7.768,
+      "maxResidualMillis": 0.691,
+      "sourceSha256": "16c4e42ea95af2cd6434c4cb3658bf57689bc201aa34dbaa08ad224718caf6e4"
+    },
+    {
+      "path": "work/capacity-limits/socket-rate3000-both2/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 19,
+      "minResidualMillis": 0.33,
+      "maxResidualMillis": 0.597,
+      "sourceSha256": "5968386a4476e1e80f2038f0442f6971cfc7c319fc7e0fab92de41fb29299b9b"
+    },
+    {
+      "path": "work/collector-memory-64/candidate450-soak/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 59,
+      "minResidualMillis": -1.976,
+      "maxResidualMillis": 0.311,
+      "sourceSha256": "7c92052c89b60f9976247e3edce589b1fd9157ab5025ad61a19d303654448885"
+    },
+    {
+      "path": "work/collector-memory-64/candidate-operating100/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 59,
+      "minResidualMillis": -1.691,
+      "maxResidualMillis": 0.281,
+      "sourceSha256": "1ac112e82134451adc2c4ebfb157024c8dd8c027a3947d7e2c019b94ca9b6a5c"
+    },
+    {
+      "path": "work/collector-memory-64/candidate450/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.492,
+      "maxResidualMillis": 0.572,
+      "sourceSha256": "23028773e7e6133a0ce3379f2de02c3151a8ebc55fb3ffae0059813c44de5703"
+    },
+    {
+      "path": "work/collector-memory-64/candidate600/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "EXCEEDS_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.822,
+      "maxResidualMillis": 0.212,
+      "sourceSha256": "e0b810d8682dcbd93526f7ce27017cc36f036928fce9f7882466cdaa72341b22"
+    },
+    {
+      "path": "work/collector-memory-64/candidate600-repeat/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "MEASUREMENT_INCOMPLETE",
+      "samples": 18,
+      "minResidualMillis": -2045.234,
+      "maxResidualMillis": 0.296,
+      "sourceSha256": "c522b4e507481c595234c689ceeb96487c7e73229f307e4f481c8ef2356b65fc"
+    },
+    {
+      "path": "work/collector-memory-64/candidate300/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -1.406,
+      "maxResidualMillis": -0.069,
+      "sourceSha256": "99265b6aef0628d6c04e7850a94176503e9a6a674dfac404291e0fffda601427"
+    },
+    {
+      "path": "work/collector-memory-64/candidate180/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "WITHIN_SLO",
+      "samples": 18,
+      "minResidualMillis": -0.297,
+      "maxResidualMillis": 0.645,
+      "sourceSha256": "b843a90c67a8f9e342715690b041c096526ecaa6c280255082415e7e2a05630d"
+    },
+    {
+      "path": "work/projection-performance-65/baseline-rate2500/result.json",
+      "sourceMode": "WEBSOCKET",
+      "classification": "MEASUREMENT_INCOMPLETE",
+      "samples": 9,
+      "minResidualMillis": -0.026,
+      "maxResidualMillis": 2044.068,
+      "sourceSha256": "8fcd5f8f0b7af6ba42d6e682b80fbe69e210c84a2caaa06f760ffecdeb4aed5d"
+    }
+  ],
+  "exceededRuns": 2
+}

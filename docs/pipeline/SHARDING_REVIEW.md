@@ -70,7 +70,7 @@ routing version·shard를 전달하는 header와 불변 정책 이력을 후보�
 
 ## 실험과 제품 채택 조건
 
-[정본 명령](EXPERIMENTS.md)의 shard-control-1/3과 shard-explicit-1/3을 사용한다. 두 producer·20채널·80% 편향·1% 중복·2,000건/s·15초·P3/RF1·동일 eventTime 기준이다. C3 비교는 실행 순서를 반대로 한 반복을 포함한다. 실제 hot 분포·배정 불일치·고유/물리/DB/replay·p95/p99·표본 lag/자원·정리를 기록한다. 품질/category/report/API가 없는 단순 projection 실험이며 전체 제품·실원천·HA·지속 용량을 검증하지 않는다.
+[정본 명령](EXPERIMENTS.md)의 shard-control-1/3과 shard-explicit-1/3을 사용한다. 두 producer·20채널·80% 편향·1% 중복·2,000건/s·15초·P3/RF1·동일 eventTime 기준이다. C3 비교는 실행 순서를 반대로 한 반복을 포함한다. 이 실험은 모든20채널에 S3을 적용하며 제품 후보인 hot S3/일반 S1은 별도 검증 대상이다. 실제 hot 분포·배정 불일치·고유/물리/DB/replay·p95/p99·표본 lag/자원·정리를 기록한다. 품질/category/report/API가 없는 단순 projection 실험이며 전체 제품·실원천·HA·지속 용량을 검증하지 않는다.
 
 제품 채택에는 다음이 모두 필요하다.
 

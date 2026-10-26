@@ -117,7 +117,7 @@ public final class LoadExperiment {
             else if(plan.serial())serial=ExperimentBufferedPublisher.legacy(kafka,topic,1000);else async=new ExperimentPublisher(kafka,topic,1000,plan.routing());
             if(plan.twoProducers()) {secondFactory=KafkaSupport.producerFactory(BOOTSTRAP);secondKafka=new KafkaTemplate<>(secondFactory);secondAsync=new ExperimentPublisher(secondKafka,topic,1000,plan.routing());}
             for(int i=0;i<plan.consumers();i++)add(false);if(plan.independent())add(true);
-            until(30,()->assigned(consumersA)==3&&(!plan.independent()||assigned(consumersB)==3));
+            until(30,()->fullyAssigned(consumersA)&&(!plan.independent()||fullyAssigned(consumersB)));
             if(plan.name().equals("heartbeat")) {
                 child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath",System.getProperty("java.class.path")),ExperimentPausedConsumer.class.getName(),schema,topic,groupA).redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
                 until(30,()->child.isAlive()&&assigned(consumersA)>0&&assigned(consumersA)<3);
@@ -297,6 +297,11 @@ public final class LoadExperiment {
 
     }
     private static int assigned(List<ProjectionConsumer> consumers){return consumers.stream().mapToInt(c->((Number)c.status().get("assignedPartitions")).intValue()).sum();}
+    private static boolean fullyAssigned(List<ProjectionConsumer> consumers) {
+        var counts=consumers.stream().map(c->((Number)c.status().get("assignedPartitions")).intValue()).toList();
+        return counts.stream().mapToInt(Integer::intValue).sum()==ExperimentRouting.PARTITIONS
+                && counts.stream().filter(n->n>0).count()==Math.min(consumers.size(),ExperimentRouting.PARTITIONS);
+    }
     private static UUID uuid(String value){return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));}
     private static void sleep(long millis){try{Thread.sleep(millis);}catch(InterruptedException interrupted){Thread.currentThread().interrupt();}}
     @FunctionalInterface interface Condition{boolean check() throws Exception;}

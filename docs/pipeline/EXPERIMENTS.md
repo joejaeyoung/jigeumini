@@ -51,7 +51,7 @@ seed20261025, eventId=`UUID(seed/index)`, eventTime=`base+index/rate`이며 매1
 
 실제 `ProjectionConsumer`·`ProjectionStore`의 BATCH·동기 commit·DB 멱등 트랜잭션을 사용한다. DB commit 직후 seam에서 receivedAt→DB p50/p95/p99를 기록한다. broker ACK는 DB 완료를 뜻하지 않는다. 입력 시도=수락+거절, 수락=ACK+미확인을 검사한다. 중복 때문에 ACK unique 하한은 `ACK-(acceptedPhysical-acceptedUnique)`이며 DB가 그 하한과 acceptedUnique 상한 사이인지 확인한다. ACK가 전부 확인되면 별도 생성기 기대 bucket과 DB가 정확히 같아야 한다.
 
-모든 소비 종료 뒤 topic ID와 partition별 시작/끝을 고정한다. 운영 offset commit 없이 별도 UUID replay projection에 같은 범위를 읽고 FULL JOIN으로 bucket 차이를 센다. 오래된/변경된 topic·partition·offset gap은 성공으로 처리하지 않는다. shard 후보는 실험 전용 key 정규화 어댑터를 거친다. 운영 replay CLI가 shard key를 지원한다는 뜻이 아니다.
+모든 소비 종료 뒤 topic ID와 partition별 시작/끝을 고정한다. 운영 offset commit 없이 별도 UUID replay projection에 같은 범위를 읽고 FULL JOIN으로 bucket 차이를 센다. 오래된/변경된 topic·partition·offset gap은 성공으로 처리하지 않는다. SUFFIX_HASH인 sharded-3만 실험 전용 key 정규화 어댑터를 거친다. EXPLICIT_EVENT_ID는 원래 channelId 키로 decoder/replay를 그대로 사용한다. 운영 replay CLI가 suffix key를 지원한다는 뜻이 아니다.
 
 동일 채널/partition의 append 순서에서 eventTime이 앞선 최대 시각보다 작은 횟수와 채널별 실제 partition 집합을 기록한다. 늦은 시각/다중 producer가 있어도 eventTime bucket 합계는 재처리와 같아야 한다. `PartitionExpansionIntegrationTest`는 실제3→6증설에서 한 키 이동·기존 manifest 거부·새 범위 중복 집계2건 유지를 검증한다. 운영3partition 설정은 바꾸지 않는다.
 
@@ -70,3 +70,5 @@ seed20261025, eventId=`UUID(seed/index)`, eventTime=`base+index/rate`이며 매1
 producer의 request-rate/record-send-rate는 Kafka client의 시간 창 평균이다. 짧은 실패 실행과30초 완료 실행의 raw rate를 직접 처리량으로 비교하지 않는다. `producerSettledSeconds`와 `acknowledgedPerSecondIncludingDrain`은 생성 시작부터 producer close 뒤 ACK 계수가 확정된 시각까지를 사용한다. 그 필드가 없는 초기 실행에는 사후 추정값을 채우지 않는다. `pendingObservedAfterRejection`은 거절 직후 읽은 값이며 그 사이 ACK가 진행될 수 있다. 주기적으로 표본한 highWater와 실제 최댓값을 구분한다.
 
 계측은 ExperimentSampler가 실행 중 sample을 최대15초 기다리고 종료한다. 실제 실패는 abort와 고정 이벤트로 기록하고 producer/DB drain 뒤에도 확인한다. 이전 자료의 RESOURCE_OR_SAMPLE_FAILED는 정제 보고서에서 verificationComplete=false다. broker STOP은 콜백 조기 실패 때문에 상한30 이전 거절이 가능하므로 실제 수락/거절·한도 이내를 확인하고, PAUSE는30 도달을 요구한다.
+
+명시 분할 실험은 hot 방송뿐 아니라 모든20채널을 S3으로 배정한다. 제품 후보인 hot S3/일반 S1은 후속 전체 제품 대조 범위다. 생성 시작 전에 총할당3개와 실제 할당을 받은 consumer 수=min(consumer수,3)을 확인해 C1/C3 대조의 초기 할당을 검사한다.

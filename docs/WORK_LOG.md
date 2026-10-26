@@ -686,3 +686,5 @@ origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #6
 Kafka 대조에서16KiB segment의 InvalidConfigurationException을 실제broker로 확인했다. 다음 실행은 초기30건 ACK/manifest 확보 후 BusyBox find가 GNU -printf를 지원하지 않아 파일 관측에서 실패했다. 소유 자원 정리를 확인하고 stat 조합으로 교체했다. Standards의 생성 직후 조회 지적도 반영해 사용자 지정 실험 설정을 기존 KafkaSupport의 공통기한·한정 재시도 경로로 검사하도록 정리했다. 제품 설정의 최소보존 제한을 완화하지 않았다.
 
 세 번째 Kafka 실행은 ACK120건·전partition 최초offset0→40과.deleted 파일89,295bytes를 관측했으나30초 예산 마지막에 도달해 파일 제거 확인까지 완료하지 못했다. 4.1.2 LogManager의 초기작업지연과1초 파일삭제·연속표본을 대조해 관측 예산을45초로 설정했다. 실패자료를 보존하며 삭제실패/성공을 혼동하지 않는다.
+
+12c0c3e에서 시간 만료는3partition 모두40→40으로 배출되고 파일 제거와 RETENTION_EXPIRED를 확인했다. 크기 만료 기대는 잘못 세웠다. hot296,820,471bytes의 초과28,385,015bytes가 첫segment33,511,699bytes보다 작아 실제코드의 삭제조건을 충족하지 않았다. 45초 미삭제를 실패근거로 보존하고, fixed24h/256MiB/32MiB 설정 그대로 합성입력을500,000→600,000건으로 늘려 충분한segment초과를 만든다. 설정상 byte값을 엄격한파일상한으로 해석하지 않는다.

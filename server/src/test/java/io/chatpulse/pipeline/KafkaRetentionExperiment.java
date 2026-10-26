@@ -91,7 +91,7 @@ public final class KafkaRetentionExperiment implements AutoCloseable {
             for(int p=0;p<3;p++)for(int i=0;i<10;i++)producer.send(new ProducerRecord<>(topic,p,System.currentTimeMillis(),"a".repeat(32),payload),receipt);producer.flush();
             require(failures.get()==0&&acknowledged.get(0)+acknowledged.get(1)+acknowledged.get(2)==30,"RETENTION_INITIAL_ACK_MISMATCH");
             var manifest=source.capture(null,null);row.put("captured",manifest.partitions());row.put("initial",snapshot(topic));
-            int target=bytes?500000:90;long began=System.nanoTime(),firstTimestamp=System.currentTimeMillis();
+            int target=bytes?600000:90;long began=System.nanoTime(),firstTimestamp=System.currentTimeMillis();
             for(int i=0;i<target;i++) {
                 int p=bytes?(i%10<8?0:i%10-7):i%3;
                 producer.send(new ProducerRecord<>(topic,p,System.currentTimeMillis(),"a".repeat(32),payload),receipt);

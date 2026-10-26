@@ -263,3 +263,12 @@ F07/F09 → T03/T08/T10. PR51 `44615d0`의 PR CI40254943726에서 거부 예외�
 F13 → T08/T14. PR51 push40254127191과 PR53 push40258124001의 기존 두 수집기 인계 시험이 연결2/실제1로 실패했다. PR53 최종65ff2d7은 Claude APPROVE와 PR CI 성공(실제119개)이지만 push 실패로 병합하지 않았다. 실패 시 한 자식의 정상 보고서만 있어 생성자 예외인지 실행 중 상실인지 아직 확정하지 않는다.
 
 수집기 fixture에 시작 단계·단조 경과 시간·예외 타입 체인·허용 코드만 쓰는 진단을 추가하고, 부모는 종료코드와 보고서 유무를 함께 남긴다. 기존 인계 시험을 독립 topic/schema5회로 관측한다. producer 최초 metadata 조회2초 제한은 가설이며 실제 실패 진단 전 제품 timeout/재시도 정책을 바꾸지 않는다. #43의 30분 부하 측정 중에는 로컬 중량 빌드를 겹치지 않고 원격 CI로 관측한다.
+
+
+### #54 실제 초기 bootstrap 차단과 제한 재시도
+
+2026-10-26 · F13 → T08/T14. `ae01064`에서 실제 Kafka bootstrap TCP 응답을 버려 metadata2,008ms timeout·자식 종료1·보고서 누락을 재현했다. `ea3eb34`는 임대 전 TimeoutException만 최대5회 시도한다. 경로 복구 후 ACK10/ledger 일치와 영구 차단 후 timeout5회·임대/원천0을 확인했다. 과거 CI의 내부 원인은 계속 미확정이며 동일 원인으로 단정하지 않는다.
+
+`./scripts/check` 단위151·하네스20·JAR와 실제 Fleet13개(독립 인계5회)가 통과했다. 시작02:45:55.384 UTC·85.412초다. [조사](research/FLEET_STARTUP.md)와 [근거](poc/evidence/fleet-startup-2026-10-26.json)에 실패/성공 revision을 분리했다. Spec 지적0, Standards P2의 진단 오류로 cleanup 누락 가능성은 `f0b2fcf`에서 진단 오류 격리와 process/report 등록 순서로 수정했다. 제품 metadata 경계만 작게 추출하며 실행 중 발행 한도를 변경하지 않았다.
+
+후속 `f0b2fcf`도 단위151·하네스20·JAR 통과, Standards 재검토 차단0이다. 실제 Fleet13 실행 revision은 ea3eb34로 유지한다. 최종 Claude·push/PR CI 확인 뒤 PR55에 포함된 #52까지 통합한다.

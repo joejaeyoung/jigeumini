@@ -1,0 +1,1433 @@
+{
+  "issue": 54,
+  "features": [
+    "F13"
+  ],
+  "technicalGoals": [
+    "T08",
+    "T14"
+  ],
+  "executedDate": "2026-10-26",
+  "scope": "LOCAL_SYNTHETIC_KAFKA_POSTGRES",
+  "commands": [
+    "./scripts/check",
+    "./gradlew --console=plain :server:integrationTest --tests 'io.chatpulse.fleet.FleetIntegrationTest.initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission'",
+    "./gradlew --console=plain :server:integrationTest --tests 'io.chatpulse.fleet.FleetIntegrationTest'"
+  ],
+  "originalCi": {
+    "runs": [
+      40254127191,
+      40258124001
+    ],
+    "symptom": "expected 2 connected leases, actual 1; one child report missing",
+    "rootCause": "UNCONFIRMED"
+  },
+  "baseline": {
+    "revision": "ae0106425b81e7b8a2935e7d5d898359b8992ec5",
+    "startedAt": "2026-10-26T02:43:48.107Z",
+    "tests": 1,
+    "failures": 1,
+    "errors": 0,
+    "elapsedSeconds": 28.52,
+    "xmlSha256": "92c128bedd0700d35d505fda4bb91b6bf3648068a3203da00e627c55dd0b5a66",
+    "cases": [
+      {
+        "name": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission()",
+        "seconds": 28.447,
+        "passed": false
+      }
+    ],
+    "diagnostics": [
+      {
+        "startup": {
+          "codes": [
+            "FLEET_KAFKA_NOT_READY"
+          ],
+          "exceptionTypes": [
+            "java.lang.IllegalStateException",
+            "org.apache.kafka.common.errors.TimeoutException"
+          ],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 277
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 291
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 293
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 409
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 2417
+            }
+          ]
+        },
+        "child": 0,
+        "exitCode": 1,
+        "scenario": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission",
+        "reportPresent": false
+      }
+    ]
+  },
+  "fixed": {
+    "revision": "ea3eb34570264d8c36c6d9bfba78cc93c44b3427",
+    "startedAt": "2026-10-26T02:45:55.384Z",
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "elapsedSeconds": 85.412,
+    "xmlSha256": "aafbaa4746d54e46f8a99969d0145847ffbf5ed0c061a20e0cfc02b8a94b3724",
+    "cases": [
+      {
+        "name": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff()",
+        "seconds": 15.511,
+        "passed": true
+      },
+      {
+        "name": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission()",
+        "seconds": 4.949,
+        "passed": true
+      },
+      {
+        "name": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile()",
+        "seconds": 7.617,
+        "passed": true
+      },
+      {
+        "name": "selectionRemovalAndPlanExpiryDoNotRenewAnOldLease()",
+        "seconds": 0.354,
+        "passed": true
+      },
+      {
+        "name": "unavailableKafkaStartupExitsAfterBoundedMetadataAttemptsWithoutClaimingLease()",
+        "seconds": 13.504,
+        "passed": true
+      },
+      {
+        "name": "repetition 1 of 5",
+        "seconds": 5.603,
+        "passed": true
+      },
+      {
+        "name": "repetition 2 of 5",
+        "seconds": 5.382,
+        "passed": true
+      },
+      {
+        "name": "repetition 3 of 5",
+        "seconds": 5.61,
+        "passed": true
+      },
+      {
+        "name": "repetition 4 of 5",
+        "seconds": 5.509,
+        "passed": true
+      },
+      {
+        "name": "repetition 5 of 5",
+        "seconds": 5.448,
+        "passed": true
+      },
+      {
+        "name": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver()",
+        "seconds": 9.928,
+        "passed": true
+      },
+      {
+        "name": "concurrentClaimsRespectUniqueOwnerCapacityAndOldEpochCannotRenewOrReleaseNewOwner()",
+        "seconds": 0.339,
+        "passed": true
+      },
+      {
+        "name": "slowProducerStartupCompletesBeforeLeaseAndSourceAdmission()",
+        "seconds": 5.594,
+        "passed": true
+      }
+    ],
+    "diagnostics": [
+      {
+        "acknowledged": 46,
+        "complete": false,
+        "accepted": 46,
+        "failureCode": "COLLECTION_LEASE_LOST",
+        "deliveryCode": "NONE",
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 10,
+        "complete": true,
+        "accepted": 10,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 0,
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 285
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 298
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 301
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 424
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 569
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 572
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 8711
+            }
+          ]
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 256
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 267
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 269
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 358
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 474
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 477
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 1654
+            }
+          ]
+        }
+      },
+      {
+        "acknowledged": 10,
+        "complete": true,
+        "accepted": 10,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 258,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 271,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 273,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 366,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 2375,
+              "phase": "METADATA_TIMEOUT"
+            },
+            {
+              "elapsedMs": 2377,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 2557,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 2560,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 3816,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": []
+        }
+      },
+      {
+        "acknowledged": 8,
+        "complete": true,
+        "accepted": 8,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 253
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 265
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 266
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 351
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 467
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 471
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 6585
+            }
+          ]
+        }
+      },
+      {
+        "child": 0,
+        "exitCode": 1,
+        "scenario": "unavailableKafkaStartupExitsAfterBoundedMetadataAttemptsWithoutClaimingLease",
+        "reportPresent": false,
+        "startup": {
+          "codes": [
+            "FLEET_KAFKA_NOT_READY"
+          ],
+          "exceptionTypes": [
+            "java.lang.IllegalStateException",
+            "org.apache.kafka.common.errors.TimeoutException"
+          ],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 266
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 277
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 280
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 367
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 2380
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 2383
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 4392
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 4396
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 6409
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 6411
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 8422
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 8425
+            },
+            {
+              "phase": "METADATA_TIMEOUT",
+              "elapsedMs": 10437
+            }
+          ]
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 14,
+        "complete": true,
+        "accepted": 14,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 16,
+        "complete": true,
+        "accepted": 16,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "exceptionTypes": [],
+          "codes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 302
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 317
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 320
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 432
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 580
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 584
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 1780
+            }
+          ]
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 301
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 315
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 318
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 428
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 572
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 576
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 2284
+            }
+          ],
+          "codes": []
+        }
+      },
+      {
+        "child": 2,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 294,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 307,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 310,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 412,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 539,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 543,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1792,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": []
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 14,
+        "complete": true,
+        "accepted": 14,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 16,
+        "complete": true,
+        "accepted": 16,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 280,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 293,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 296,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 405,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 539,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 542,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1732,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 281
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 294
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 296
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 406
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 538
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 542
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 2274
+            }
+          ]
+        }
+      },
+      {
+        "child": 2,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 250,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 261,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 263,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 350,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 465,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 468,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1624,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 13,
+        "complete": true,
+        "accepted": 13,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 17,
+        "complete": true,
+        "accepted": 17,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 325
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 337
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 341
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 444
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 581
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 584
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 1735
+            }
+          ],
+          "codes": []
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 326
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 339
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 342
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 446
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 584
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 588
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 2190
+            }
+          ]
+        }
+      },
+      {
+        "child": 2,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 279,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 291,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 293,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 387,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 527,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 531,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1769,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 14,
+        "complete": true,
+        "accepted": 14,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 17,
+        "complete": true,
+        "accepted": 17,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 322,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 338,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 340,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 460,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 599,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 603,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1766,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 322,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 338,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 340,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 469,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 612,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 615,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 2301,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": []
+        }
+      },
+      {
+        "child": 2,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 255,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 266,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 268,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 356,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 470,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 472,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1708,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 14,
+        "complete": true,
+        "accepted": 14,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 16,
+        "complete": true,
+        "accepted": 16,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 293,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 307,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 309,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 419,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 550,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 554,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 1738,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 291
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 305
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 308
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 410
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 546
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 549
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 2252
+            }
+          ]
+        }
+      },
+      {
+        "child": 2,
+        "exitCode": 143,
+        "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+        "reportPresent": true,
+        "startup": {
+          "codes": [],
+          "exceptionTypes": [],
+          "phases": [
+            {
+              "phase": "STARTING",
+              "elapsedMs": 0
+            },
+            {
+              "phase": "DATABASE_OPEN",
+              "elapsedMs": 261
+            },
+            {
+              "phase": "KAFKA_TEMPLATE_READY",
+              "elapsedMs": 273
+            },
+            {
+              "phase": "WORKER_CONSTRUCTING",
+              "elapsedMs": 275
+            },
+            {
+              "phase": "METADATA_REQUEST",
+              "elapsedMs": 372
+            },
+            {
+              "phase": "METADATA_READY",
+              "elapsedMs": 506
+            },
+            {
+              "phase": "WORKER_READY",
+              "elapsedMs": 509
+            },
+            {
+              "phase": "REPORT_COMPLETE",
+              "elapsedMs": 1654
+            }
+          ]
+        }
+      },
+      {
+        "acknowledged": 12,
+        "complete": false,
+        "accepted": 12,
+        "failureCode": "COLLECTION_LEASE_OR_DELIVERY_LOST",
+        "deliveryCode": "NONE",
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "rejected": 0
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 0,
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 274,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 285,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 288,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 387,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 508,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 511,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 7725,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "child": 1,
+        "exitCode": 143,
+        "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 305,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 319,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 321,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 423,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 549,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 552,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 6803,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      },
+      {
+        "acknowledged": 9,
+        "complete": true,
+        "accepted": 9,
+        "failureCode": "NONE",
+        "deliveryCode": "NONE",
+        "scenario": "slowProducerStartupCompletesBeforeLeaseAndSourceAdmission",
+        "rejected": 0
+      },
+      {
+        "child": 0,
+        "exitCode": 143,
+        "scenario": "slowProducerStartupCompletesBeforeLeaseAndSourceAdmission",
+        "reportPresent": true,
+        "startup": {
+          "phases": [
+            {
+              "elapsedMs": 0,
+              "phase": "STARTING"
+            },
+            {
+              "elapsedMs": 260,
+              "phase": "DATABASE_OPEN"
+            },
+            {
+              "elapsedMs": 271,
+              "phase": "KAFKA_TEMPLATE_READY"
+            },
+            {
+              "elapsedMs": 273,
+              "phase": "WORKER_CONSTRUCTING"
+            },
+            {
+              "elapsedMs": 3370,
+              "phase": "METADATA_REQUEST"
+            },
+            {
+              "elapsedMs": 3378,
+              "phase": "METADATA_READY"
+            },
+            {
+              "elapsedMs": 3381,
+              "phase": "WORKER_READY"
+            },
+            {
+              "elapsedMs": 4553,
+              "phase": "REPORT_COMPLETE"
+            }
+          ],
+          "exceptionTypes": [],
+          "codes": []
+        }
+      }
+    ]
+  },
+  "localCheck": {
+    "revision": "ea3eb34570264d8c36c6d9bfba78cc93c44b3427",
+    "unitTests": 151,
+    "harnessTests": 20,
+    "jarBuild": "PASS"
+  },
+  "limits": [
+    "초기 bootstrap TCP 통신 전체 차단이며 특정 Kafka protocol 응답만 차단하지 않음",
+    "실제 재현한 timeout 경계와 과거 CI 원인 동일성은 미확정",
+    "metadata 최대5회이며 producer 생성과 OS scheduling을 포함한 절대 constructor 기한은 아님",
+    "단일 호스트 개발 Kafka/PostgreSQL·합성 WebSocket 입력",
+    "후속 진단 cleanup 변경과 최종 문서 HEAD는 별도 check/CI/리뷰 게이트"
+  ],
+  "cleanupCheck": {
+    "revision": "f0b2fcfa6d7af5804d1a4a2c13b34fee902d5e0f",
+    "unitTests": 151,
+    "harnessTests": 20,
+    "jarBuild": "PASS",
+    "scope": "diagnostic cleanup only; actual Fleet13 ran at ea3eb34"
+  },
+  "staticReview": {
+    "standards": "P2 fixed at f0b2fcf; zero remaining",
+    "spec": "zero findings for 65ff2d7..ea3eb34"
+  }
+}

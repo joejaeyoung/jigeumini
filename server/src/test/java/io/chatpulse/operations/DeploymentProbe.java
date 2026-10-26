@@ -62,6 +62,18 @@ public final class DeploymentProbe {
                 data.put("notificationCount",jdbc.queryForObject("SELECT count(*) FROM notification_event WHERE run_id=?",Long.class,config.runId()));
                 data.put("pendingOutbox",jdbc.queryForObject("SELECT count(*) FROM spike_outbox WHERE run_id=? AND published_at IS NULL",Long.class,config.runId()));
                 result=data;
+            } else if(args[0].equals("trim-retained-chat")) {
+                // 이번 리허설의 합성 topic/partition0 범위만 대상으로 실제 retention gap을 만든다.
+                if(!config.runId().equals("deploy-v1")||!config.topic().equals("chat.received.v1"))throw new IllegalArgumentException("SYNTHETIC_TRIM_SCOPE");
+                try(var admin=org.apache.kafka.clients.admin.Admin.create(Map.of("bootstrap.servers",config.bootstrap()))) {
+                    var partition=new org.apache.kafka.common.TopicPartition(config.topic(),0);
+                    long begin=admin.listOffsets(Map.of(partition,org.apache.kafka.clients.admin.OffsetSpec.earliest())).all().get(10,TimeUnit.SECONDS).get(partition).offset();
+                    long end=admin.listOffsets(Map.of(partition,org.apache.kafka.clients.admin.OffsetSpec.latest())).all().get(10,TimeUnit.SECONDS).get(partition).offset();
+                    if(begin!=0||end!=20)throw new IllegalStateException("SYNTHETIC_TRIM_BOUNDS");
+                    long low=admin.deleteRecords(Map.of(partition,org.apache.kafka.clients.admin.RecordsToDelete.beforeOffset(11))).lowWatermarks().get(partition).get(10,TimeUnit.SECONDS).lowWatermark();
+                    if(low!=11)throw new IllegalStateException("SYNTHETIC_TRIM_WATERMARK");
+                    result=Map.of("partition",0,"previousBegin",begin,"end",end,"lowWatermark",low);
+                }
             }else throw new IllegalArgumentException("SYNTHETIC_COMMAND");
             System.out.println(JsonMapper.builder().build().writeValueAsString(result));
         }

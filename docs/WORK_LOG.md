@@ -263,3 +263,12 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - Standards의 초기heuristic1건과 Spec의 초기차단1건을 해소했고 bc2ff5b는 둘 다 남은지적0이다. Claude 정적리뷰도 APPROVE다. 비차단의10초JDBC timeout/느린호스트 kill창, 코드에서 파생된설정값/결과, 실제SQLSTATE미수집·marker판정범위를 검증문서에 명시한다. 최종문서HEAD Claude/push/PR CI는 PR51게이트에서 확인한다. T16은 WAL PITR·외부운영 등이남아 부분검증을 유지한다.
 
 - #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.
+
+
+### 2026-10-26 PostgreSQL physical PITR 하네스 #46
+
+F16/F08 → T02/T04/T16. origin/develop에서 technicaltest/postgres-pitr를 분기하고 선행 #42의 공통 리허설을 통합했다. #43의30분 부하 종료 전에는 로컬 중량 빌드/DB 실험을 겹치지 않고 CI 컴파일부터 확인한다.
+
+base/T/C·named target pause/쓰기거부·resume/새timeline·Kafka 새group 초기offset/최종업무대조·필수WAL누락FATAL·retentiongap거부를 순차 검사한다. 원본 physical backup/archive와 모든 복구 PGDATA를 소유 volume으로 분리하고 성공/실패 모두 공통 정리 수명으로 회수한다. 새로운 overlay 쓰기도 run의 PREPARE 단계로 옮겨 파일 생성 실패 뒤 비밀 정리가 가능하도록 했다.
+
+사전 Spec/Standards는 동적 import의 pyc가 clean preflight를 깨는 문제, WAL helper0644 실행 모드, 새group 초기offset 독립 검사 공백을 찾아 수정했다. import bytecode 억제·100755·최초 offset 없음→DB next==commit 직접 관측을 반영했다. 테스트용 DeploymentProbe만 실제 deleteRecords 음성 시나리오를 추가하고 제품 복구/소비 코드는 재사용했다. 정적 리뷰와 실제 성공을 구분하며 실행 결과는 후속 근거로 기록한다.

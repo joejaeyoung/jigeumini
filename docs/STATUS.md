@@ -14,7 +14,7 @@
 | [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
 | [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
 | [#45 Kafka 디스크 영구 손실](https://github.com/joejaeyoung/jigeumini/issues/45) | T04/T10/T15 | 대기: 소유한 격리 replica 데이터 손실·새 디스크 복구 |
-| [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 대기: base backup/WAL·복원 목표·Kafka 위치 정렬 |
+| [#46 PostgreSQL 시점 복구](https://github.com/joejaeyoung/jigeumini/issues/46) | T02/T04/T16 | 진행: physical base/WAL·named target pause·promotion·새group offset 정렬·누락 WAL/retention gap 음성 하네스 구현. 컴파일·실제 실행 대기; [범위](POSTGRES_PITR_VERIFICATION.md) |
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |
 | [#48 실제 다중 호스트/AZ](https://github.com/joejaeyoung/jigeumini/issues/48) | T08/T10/T15 | #43/#45 및 외부 계정·리전·AZ·예산 필요 |
 | [#49 외부 배포·운영 복구](https://github.com/joejaeyoung/jigeumini/issues/49) | T08/T13/T15/T16 | #42/#43/#46/#47/#48 및 배포 대상·도메인·운영 목표 필요 |

@@ -269,3 +269,7 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 ```
 
 각 출력 경로는 새 경로를 사용한다. 리허설은 자체 Compose/DB/Kafka만 만들고 기존 개발 인프라를 변경하지 않는다. V12 백업→실패/중단 rollback→V13 적용/새 입력→구 이미지 거부→새 DB V12 복원/새 group 재생→실제 웹 대조 후 소유 자원·secret·dump를 정리한다. 같은 코드 commit의 다른 migration 이미지이며, build ID·SQL hash·실제 image ID로 구분한다. 실행 결과와 미검증 범위는 [진행 상태](docs/STATUS.md)에 기록한다. 생성한 Docker 이미지는 manifest와 함께 로컬에 남고 자동 정리 대상에 포함되지 않는다.
+
+## PostgreSQL physical 시점 복구 #46
+
+`./scripts/postgres-pitr <같은 commit의 이미지 manifest.json> <새 결과 디렉터리>`는 base backup/WAL→named target pause→쓰기 재개→Kafka 위치 정렬·재생, 필수 WAL 누락과 retention gap을 확인한다. `./scripts/deploy-images`로 이미지 manifest를 먼저 준비한다. [실행·검증 범위](docs/POSTGRES_PITR_VERIFICATION.md)를 따른다. 현재 하네스 구현 단계이며 실제 성공 근거는 실행 후 기록한다. 생성한 소유 volume과 비밀은 종료 시 정리한다.

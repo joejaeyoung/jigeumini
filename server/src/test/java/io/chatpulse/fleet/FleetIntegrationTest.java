@@ -44,12 +44,12 @@ class FleetIntegrationTest {
                     "failureCode",report.path("failureCode").asText(),"deliveryCode",delivery.path("failureCode").asText(),"accepted",delivery.path("accepted").asLong(),
                     "acknowledged",delivery.path("acknowledged").asLong(),"rejected",delivery.path("rejected").asLong())));
         } catch(java.io.IOException|RuntimeException invalidReport){System.out.println("FLEET_CHILD_REPORT_INVALID");}
-        for(int index=0;index<reports.size();index++){
+        for(int index=0;index<reports.size();index++)try {
             Path path=Path.of(reports.get(index)+".diagnostic.json");
             if(Files.exists(path))System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"child",index,
                     "reportPresent",Files.exists(reports.get(index)),"exitCode",children.get(index).exitValue(),"startup",JSON.readTree(Files.readString(path)))));
             else System.out.println(JSON.writeValueAsString(Map.of("scenario",scenario,"child",index,"startupDiagnosticPresent",false,"exitCode",children.get(index).exitValue())));
-        }
+        }catch(java.io.IOException|RuntimeException invalidDiagnostic){System.out.println("FLEET_CHILD_STARTUP_DIAGNOSTIC_INVALID");}
         if(source!=null)source.close();if(ds!=null)ds.close();
         if(root!=null){new JdbcTemplate(root).execute("DROP SCHEMA "+schema+" CASCADE");root.close();}
         try(var admin=Admin.create(Map.of("bootstrap.servers","localhost:19092"))){if(admin.listTopics().names().get(10,TimeUnit.SECONDS).contains(topic))admin.deleteTopics(List.of(topic)).all().get(10,TimeUnit.SECONDS);try{admin.deleteConsumerGroups(List.of(group)).all().get(10,TimeUnit.SECONDS);}catch(ExecutionException ignored){}}
@@ -156,11 +156,13 @@ class FleetIntegrationTest {
         return start(dbPort,capacity,fixtureMode,null);
     }
     private Process start(int dbPort,int capacity,String fixtureMode,String bootstrap) throws Exception {
-        Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();reports.add(report);
+        Path report=Path.of("build","fleet-"+schema+"-"+reports.size()+".json").toAbsolutePath();
         var command=new ArrayList<>(List.of(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath"),FleetWorkerProcess.class.getName(),url(dbPort),topic,Integer.toString(source.getPort()),Integer.toString(capacity),report.toString()));
         if(fixtureMode!=null)command.add(fixtureMode);
         if(bootstrap!=null)command.add(bootstrap);
-        var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();children.add(child);return child;
+        var child=new ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD).redirectError(ProcessBuilder.Redirect.DISCARD).start();
+        // 시작에 성공한 process/report만 함께 등록하여 진단이 소유 자원 정리를 막지 않게 한다.
+        children.add(child);reports.add(report);return child;
     }
     private void stop(Process process) throws Exception {process.destroy();assertTrue(process.waitFor(35,TimeUnit.SECONDS));}
     private static void signal(Process process,String name) throws Exception {if(process.isAlive())assertEquals(0,new ProcessBuilder("kill","-"+name,Long.toString(process.pid())).start().waitFor());}

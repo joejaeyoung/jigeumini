@@ -111,5 +111,5 @@ tasks.register('diskLossExperiment', JavaExec) {
     mainClass = 'io.chatpulse.pipeline.KafkaDiskLossExperiment'
     workingDir = rootProject.projectDir
     maxHeapSize = '256m'
-    args providers.gradleProperty('diskScenario').get(), providers.gradleProperty('diskOutput').get()
+    if (project.hasProperty('diskScenario') && project.hasProperty('diskOutput')) args(project.property('diskScenario'), project.property('diskOutput'))
 }

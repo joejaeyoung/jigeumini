@@ -255,3 +255,8 @@ F15/F11 → T04/T10/T15. origin/develop에서 technicaltest/kafka-disk-loss를 �
 recover와 last-copy는 새 cluster를 각각 사용한다. 전자는 ISR2 지속·새 replica 내용 대조·ISR1의 실제 ACK all 거부·최종 ledger 집합을 확인한다. 후자는 stale BASE 디스크를 보존하며 TAIL을 가진 두 최신 디스크의 실제 내용 확인→각각 삭제→empty 상태를 연결한다. stale/빈 disk 복귀의 metadata·ELR·Replay 결과는 관측대로 보존하고, source 조회 불가를0건 복구로 바꾸지 않는다.
 
 사전 Standards/Spec 리뷰는 serializer 누락과 재기동 중 metadata 조회 오류가 후속 복귀를 중단하는 문제를 찾아 수정했다. helper128MiB 예산·고정class/hash를 포함했다. 재리뷰 차단0이며 컴파일/실제 실험 통과를 뜻하지 않는다. 리팩토링 검토에서 소유 cluster 수명·디스크 읽기·시나리오의 책임을 분리하고 제품 producer/소비 계약은 재사용했다.
+
+
+### #45 진입 리뷰 보완
+
+Claude43b3474 진입 리뷰는 REQUEST_CHANGES였다. 불충분 ISR은 직접 KafkaTopicPolicy.NotReady 확인과 TOPIC_VISIBILITY_DEADLINE 원인을 함께 요구하고, 마지막 복사본 손실은 3개 실제 container Running/OOM 상태와 Admin 등록 broker ID1/2/3을 확인한 뒤 판정한다. SOURCE_UNAVAILABLE/OFFSET_TRUNCATED만 허용하고 다른 실패를 복구 불가 증거로 취급하지 않는다. readonly 디스크 helper도 소유 project/name으로 정리하고 실행 classpath는 고정한다. 빈 partition 초기 commit 지적은 기존 BatchConsumers.initialOffsets가 모두 commit하므로 해당 소스를 추가 제공해 재검토한다. 실제 손실 실험 전 진입 재검토를 수행하며 아직 결과를 PASS로 표시하지 않는다.

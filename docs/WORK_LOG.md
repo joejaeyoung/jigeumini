@@ -636,3 +636,11 @@ PR70 최종129a46d는 Claude 후속 APPROVE, push40360372869/PR40360383027 성�
 DIRECT 저율 시험의 과거최대지연805.7ms는 발생tick이 없어STOP/GC/side-input과 인과를 구분할 수 없었다. side-input의관측ACK/outbox시간과 최대pacing의예정초/tick을 숫자로 기록하도록 보완한다. wire message나사용자정보는 저장하지 않는다. 현재 검사·이미지·재측정·최종Claude/CI는 별도 게이트다.
 
 #49의 선행#47을 공식 인증 경로를 선택할 때의 조건부 의존으로 정리했다. 익명READ의 공식앱 등록은 필수가 아니며, 공개목록조사 완료를 실제전체수신·장기quota 검증으로 보지 않는다. 외부배포/유료자원은 실행하지 않았다. #63의사전계약 검토는gitignored초안에만 남겼다.
+
+### #65 실패 확정 경합과1,000채널 경계 확인
+
+0cfa701 Spec리뷰에서 ended 조회와 fail 사이에 transport callback이 먼저 완료하면 observer와예외의 코드가 갈리는 P2를 확인했다. 통계 보고 중 다른 thread가 WS_TRANSPORT를 확정하는 회귀가 수정 전 HANDSHAKE_TIMEOUT_OR_CONNECT로 실패했다. fail이 원자적으로 처음 확정된 동일 실패를 반환하고 ready에도 전달하도록 보완했다. 원본 red/green 로그·XML은 보존한다. 이전cleanup가림과이번경합은 별도 재현이며 최초실제WS종료의원인을 확정하지 않는다.
+
+1,000채널은 연결준비오류0·9000수신/9090ACK·최종전체대조/24lag0이지만 readiness503 3회와category/report watermark30.425/28.410초로 실패했다. 부하API600개 자체는모두200·p95197ms다. 준비/입력전실패나수신상한으로부르지 않는다. 직렬실행기가후속복합시험을중단했으며 소유자원정리/기존8container보존을 확인했다.
+
+보완 뒤 `./scripts/check`는 단위179·하네스38·실행JAR를 통과했다. 연결 관련12개 회귀도 실패/오류0이다. 최종부하·Claude·CI승인과구분한다.

@@ -98,12 +98,10 @@ final class ChatConnection implements AutoCloseable {
             waitingForApproval = true;
             ready.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
-            // 정리 close callback이 원래 연결/승인 실패를 가리지 않게 먼저 보관한다.
-            SourceFailure failure = ended.getNow(null);
+            // 다른 callback과 경쟁하더라도 처음 확정된 실패를 예외·관측에 함께 쓴다.
             Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null ? e.getCause() : e;
             stats.handshakeFailed(waitingForApproval, cause instanceof java.util.concurrent.TimeoutException);
-            if (failure == null) failure = new SourceFailure("HANDSHAKE_TIMEOUT_OR_CONNECT", false);
-            fail(failure);
+            SourceFailure failure = fail(new SourceFailure("HANDSHAKE_TIMEOUT_OR_CONNECT", false));
             stats.disconnected();
             connecting.thenAccept(session -> { try { session.close(); } catch (Exception ignored) { } });
             closeSocket();
@@ -135,7 +133,7 @@ final class ChatConnection implements AutoCloseable {
         }
     }
 
-    private void fail(SourceFailure failure) {
+    private SourceFailure fail(SourceFailure failure) {
         active.set(false);
         incoming.clear();
         if (ended.complete(failure)) {
@@ -144,7 +142,9 @@ final class ChatConnection implements AutoCloseable {
                 observer.loss(channel, lastAlive, clock.instant(), failure.getMessage());
             }
         }
-        ready.completeExceptionally(failure);
+        SourceFailure confirmed = ended.join();
+        ready.completeExceptionally(confirmed);
+        return confirmed;
     }
 
     SourceFailure failure() { return ended.getNow(null); }

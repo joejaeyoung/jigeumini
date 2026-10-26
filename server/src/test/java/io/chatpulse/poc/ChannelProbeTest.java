@@ -79,14 +79,20 @@ class ChannelProbeTest {
     }
 
     @Test void handshakeFailureIsNotReplacedByTheCloseCallbackDuringCleanup() throws Exception {
-        assertHandshakeFailure(false,"HANDSHAKE_TIMEOUT_OR_CONNECT");
+        assertHandshakeFailure(TransportFailureTiming.NONE,"HANDSHAKE_TIMEOUT_OR_CONNECT");
     }
 
     @Test void observedTransportFailureIsPreservedDuringHandshakeCleanup() throws Exception {
-        assertHandshakeFailure(true,"WS_TRANSPORT");
+        assertHandshakeFailure(TransportFailureTiming.BEFORE_WAIT,"WS_TRANSPORT");
     }
 
-    private void assertHandshakeFailure(boolean transportFailure,String expected) throws Exception {
+    @Test void concurrentTransportFailureUsesTheSameReasonForTheExceptionAndObserver() throws Exception {
+        assertHandshakeFailure(TransportFailureTiming.DURING_FAILURE_REPORT,"WS_TRANSPORT");
+    }
+
+    private enum TransportFailureTiming { NONE, BEFORE_WAIT, DURING_FAILURE_REPORT }
+
+    private void assertHandshakeFailure(TransportFailureTiming timing,String expected) throws Exception {
         var client=org.mockito.Mockito.mock(ChatSocketClient.class);
         var socket=org.mockito.Mockito.mock(org.springframework.web.socket.WebSocketSession.class);
         var handler=new java.util.concurrent.atomic.AtomicReference<org.springframework.web.socket.WebSocketHandler>();
@@ -97,13 +103,23 @@ class ChannelProbeTest {
         }).when(socket).close(org.mockito.ArgumentMatchers.any(org.springframework.web.socket.CloseStatus.class));
         org.mockito.Mockito.when(client.connect(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any())).thenAnswer(call->{
             handler.set(call.getArgument(0));handler.get().afterConnectionEstablished(socket);
-            if(transportFailure) {
+            if(timing==TransportFailureTiming.BEFORE_WAIT) {
                 handler.get().handleTransportError(socket,new java.io.IOException("SYNTHETIC_TRANSPORT"));
                 return java.util.concurrent.CompletableFuture.completedFuture(socket);
             }
             return java.util.concurrent.CompletableFuture.failedFuture(new java.util.concurrent.TimeoutException());
         });
-        var stats=new ProbeStats("a".repeat(32));var endedReasons=new CopyOnWriteArrayList<String>();
+        var stats=org.mockito.Mockito.spy(new ProbeStats("a".repeat(32)));var endedReasons=new CopyOnWriteArrayList<String>();
+        if(timing==TransportFailureTiming.DURING_FAILURE_REPORT) {
+            org.mockito.Mockito.doAnswer(call->{
+                // 대기 실패를 처리하는 동안 다른 transport thread가 먼저 원인을 확정한다.
+                java.util.concurrent.CompletableFuture.runAsync(()->{
+                    try { handler.get().handleTransportError(socket,new java.io.IOException("SYNTHETIC_TRANSPORT")); }
+                    catch(Exception e) { throw new java.util.concurrent.CompletionException(e); }
+                }).get(5,TimeUnit.SECONDS);
+                return call.callRealMethod();
+            }).when(stats).handshakeFailed(org.mockito.ArgumentMatchers.anyBoolean(),org.mockito.ArgumentMatchers.anyBoolean());
+        }
         var tracked=new CollectionObserver(){@Override public void ended(java.util.UUID session,java.time.Instant at,String reason){endedReasons.add(reason);}};
         try(var scheduler=java.util.concurrent.Executors.newSingleThreadScheduledExecutor()) {
             assertThatThrownBy(()->new ChatConnection(client,scheduler,URI.create("ws://fixture.invalid"),"a".repeat(32),
@@ -113,7 +129,7 @@ class ChannelProbeTest {
         }
         assertThat(open).isFalse();assertThat(endedReasons).containsExactly(expected);
         assertThat(stats.snapshot(false).get("closeCodes")).isEqualTo(Map.of("1000",1L));
-        assertThat(stats.snapshot(false).get("handshakeFailures")).isEqualTo(Map.of(transportFailure?"APPROVAL_FAILURE":"CONNECT_TIMEOUT",1L));
+        assertThat(stats.snapshot(false).get("handshakeFailures")).isEqualTo(Map.of(timing==TransportFailureTiming.BEFORE_WAIT?"APPROVAL_FAILURE":"CONNECT_TIMEOUT",1L));
     }
 
     @Test

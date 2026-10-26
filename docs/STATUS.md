@@ -16,6 +16,8 @@ Claude 구현 리뷰 8a0fb76은 APPROVE·차단 0건이다. 추가 의견으로 
 
 7998bed의 push40372282990/PR40372291574는 단위176·실제142·하네스38·웹29·Chromium31 통과다. V13→시험V14→새DB V13 복원16단계도 통과했다. 450/600채널 총100건/s·API10의5분과600단기2회,100채널500건/s·1KiB·80%편향5분은 유효 시계·전체 대조·최종24개lag0이다. 100채널1,000건/s는 준비 중 WS_CLOSED1회를 입력 종료 뒤 발견해 실패했으며, 수신255,000/ACK257,550은 확인했지만 최종DB대조는 수행하지 못했다. 이를 처리량 한계로 쓰지 않는다. 원래 연결 대기 실패가 cleanup callback에 가려지는 별도 결함을 재현해 수정하고, 원인 구분용 숫자 진단·준비 실패의 조기 거부·입력 스케줄 시간 계측을 보완 중이다. 해당 연결 종료 자체의 원인은 미확정이다.
 
+0cfa701의1,000채널·총100건/s90초는 정상 시계·고유9,000/물리9,090·전체DB대조·최종24개lag0이지만 정상 구간readiness503 3회와category/report watermark30.425/28.410초로 실패했다. 600채널5분 통과와 구분하며 정확한 최대는 미확정이다. Spec리뷰가 발견한 동시transport callback의 실패원인 경합도 재현해 처음 확정된 실패를 예외·ready·observer에 공유하도록 보완했다. [재현 근거](poc/evidence/projection-performance-2026-10-27/handshake-race.json).
+
 ## 수집 연결 메모리·종료 자원 #64
 
 `fix/collector-text-buffer` · [이슈 #64](https://github.com/joejaeyoung/jigeumini/issues/64) · F01/F13/F14 → T02/T08/T11/T12/T14. 기준은 #67 병합 `5048d88`이다.

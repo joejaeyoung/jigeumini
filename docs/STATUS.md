@@ -9,7 +9,7 @@
 
 | 이슈 | 기술 목표 | 상태·선행 조건 |
 |---|---|---|
-| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 진행 중: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50), 보강 `43bedc2`의 단위147·하네스20·실제100개와 Claude APPROVE; [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[정제 근거](poc/evidence/trend-recovery-2026-10-26.json), 최종 문서 HEAD 리뷰/CI 대기 |
+| [#41 trend SQL rollback·재전달](https://github.com/joejaeyoung/jigeumini/issues/41) | T02/T03/T05/T08 | 완료: [PR #50](https://github.com/joejaeyoung/jigeumini/pull/50) 최종 `bde3a47` Claude APPROVE·push40253684968/PR40253689010 성공 후 `c2aeffc`로 병합. [검증](pipeline/TREND_RECOVERY_VERIFICATION.md)·[정제 근거](poc/evidence/trend-recovery-2026-10-26.json) |
 | [#42 새 migration 릴리스 복구](https://github.com/joejaeyoung/jigeumini/issues/42) | T04/T16 | [PR #51](https://github.com/joejaeyoung/jigeumini/pull/51) `44615d0` Claude APPROVE·push40254939425 성공, PR40254943726 Outbox 시험 실패로 병합 대기(#52). V13 복구16단계와 V12 회귀17단계 통과; 근거는 PR51 문서 |
 | [#43 전체 집계 동시 부하·지속 실행](https://github.com/joejaeyoung/jigeumini/issues/43) | T02/T07/T08/T11/T12 | 대기: #41 뒤 실제 분석기 전체 집계·API·최소30분 지속 부하 |
 | [#44 수집기 시계·네트워크 분리](https://github.com/joejaeyoung/jigeumini/issues/44) | T02/T11/T14 | 대기: 두 프로세스와 독립 DB/원천 단절·오래된 소유자 재개 |
@@ -18,7 +18,7 @@
 | [#47 실제 공식 인증·동의 수집](https://github.com/joejaeyoung/jigeumini/issues/47) | T13/T14 | 외부 조건 필요: 공식 앱·동의 채널·안전한 자격 증명 주입 경로 |
 | [#48 실제 다중 호스트/AZ](https://github.com/joejaeyoung/jigeumini/issues/48) | T08/T10/T15 | #43/#45 및 외부 계정·리전·AZ·예산 필요 |
 | [#49 외부 배포·운영 복구](https://github.com/joejaeyoung/jigeumini/issues/49) | T08/T13/T15/T16 | #42/#43/#46/#47/#48 및 배포 대상·도메인·운영 목표 필요 |
-| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | 진행 중: PR51 CI40254943726 예상 예외 미발생, 같은 HEAD push 성공·로컬40회 미재현. 생성 시 제한·실제 broker 제어 발행·복구 대기와20회 독립 대조 보강; [조사](research/OUTBOX_READINESS.md) |
+| [#52 Outbox 거부 시험 준비·CI 안정화](https://github.com/joejaeyoung/jigeumini/issues/52) | T03/T08/T10 | 로컬 보완 검증 완료: `cb098c0` 단위147·하네스20·실제 broker 독립20회 통과. Standards/Spec 차단0. [조사](research/OUTBOX_READINESS.md)·[근거](poc/evidence/outbox-readiness-2026-10-26.json). 원래 CI 원인은 미확정이며 최종 Claude·push/PR CI·병합 대기 |
 
 공개 원천과 외부 자원은 준비 조건을 별도로 확인한다. 로컬 검증은 합성 입력과 해당 실행 소유 자원만 사용한다.
 이번 검증을 위해 개발 Kafka/PostgreSQL을 다시 기동했다. 다른 worktree와 서비스는 변경하지 않는다.

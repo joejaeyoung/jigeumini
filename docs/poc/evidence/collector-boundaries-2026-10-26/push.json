@@ -1,0 +1,1355 @@
+{
+  "run": 40260027568,
+  "event": "push",
+  "fleet": {
+    "tests": "14",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-26T02:40:16.002Z",
+    "time": "143.817"
+  },
+  "xmlSha256": "c6e1e251aef780f1085d34368d39963b27af0ba0a9ae3f53d6225be80c89ff84",
+  "cases": [
+    {
+      "scenario": "oppositeWallClocksAndRuntimeJumpsKeepDatabaseLeaseEpochWhileReceiptErrorsRemainVisible",
+      "recordedAt": "2026-10-26T02:41:26.216007252Z",
+      "accepted": 5,
+      "acknowledged": 5,
+      "unconfirmed": 0,
+      "brokerPhysical": 5,
+      "brokerUnique": 5,
+      "databaseUnique": 2,
+      "quarantinedSourceRecords": 3,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 5,
+      "producerAcknowledgedUnique": 5,
+      "acknowledgedMissingFromBroker": 0,
+      "boundaries": {
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbReceiptOffsetMillis1792978873994": -299999,
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaReceiptOffsetMillis1792978873994": 300001,
+        "worker0ClockApplied": {
+          "offsetSeconds": -300,
+          "workerInstant": "2026-10-26T02:36:21.894256624Z",
+          "sequence": 1,
+          "appliedAt": "2026-10-26T02:41:21.894218400Z"
+        },
+        "worker1ClockApplied": {
+          "appliedAt": "2026-10-26T02:41:21.984818211Z",
+          "sequence": 1,
+          "workerInstant": "2026-10-26T02:46:21.984856529Z",
+          "offsetSeconds": 300
+        },
+        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbReceiptOffsetMillis1792978873995": 300001,
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaReceiptOffsetMillis1792978873995": -299999,
+        "initialLeases": [
+          {
+            "databaseNow": "2026-10-26T02:41:20.908156Z",
+            "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "owner": "80ea92da-8e66-45da-8cb7-9c6702c67ff6",
+            "expiresAt": "2026-10-26T02:41:25.916045Z",
+            "epoch": 1
+          },
+          {
+            "databaseNow": "2026-10-26T02:41:20.908160Z",
+            "channel": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "owner": "b1a45cfd-d80a-48de-976f-34602b80a788",
+            "expiresAt": "2026-10-26T02:41:26.898670Z",
+            "epoch": 1
+          }
+        ],
+        "postClockBaseline": [
+          {
+            "databaseNow": "2026-10-26T02:41:22.085069Z",
+            "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "owner": "80ea92da-8e66-45da-8cb7-9c6702c67ff6",
+            "expiresAt": "2026-10-26T02:41:27.967269Z",
+            "epoch": 1
+          },
+          {
+            "databaseNow": "2026-10-26T02:41:22.085074Z",
+            "channel": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "owner": "b1a45cfd-d80a-48de-976f-34602b80a788",
+            "expiresAt": "2026-10-26T02:41:27.907734Z",
+            "epoch": 1
+          }
+        ],
+        "renewedLeases": [
+          {
+            "databaseNow": "2026-10-26T02:41:24.389521Z",
+            "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "owner": "80ea92da-8e66-45da-8cb7-9c6702c67ff6",
+            "expiresAt": "2026-10-26T02:41:29.985219Z",
+            "epoch": 1
+          },
+          {
+            "databaseNow": "2026-10-26T02:41:24.389529Z",
+            "channel": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "owner": "b1a45cfd-d80a-48de-976f-34602b80a788",
+            "expiresAt": "2026-10-26T02:41:29.926323Z",
+            "epoch": 1
+          }
+        ],
+        "clockOffsetsSeconds": [
+          300,
+          -300
+        ],
+        "clockJumpsSeconds": [
+          -600,
+          600
+        ],
+        "currentTimestampInvalidTime": 1,
+        "markerEventCounts": [
+          2,
+          1,
+          2
+        ]
+      },
+      "children": [
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": -300,
+          "delivery": {
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 3,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 3,
+            "accepted": 3
+          },
+          "leases": [
+            {
+              "epoch": 1,
+              "stats": {
+                "startedAt": "2026-10-26T02:46:16.720340099Z",
+                "state": "CANCELLED",
+                "verdict": "FAIL",
+                "checks": {
+                  "handshake": true,
+                  "liveChat": true,
+                  "reconnectRequired": false,
+                  "heartbeatPong": false,
+                  "chatAfterReconnect": false
+                },
+                "elapsedSeconds": 7.707893001,
+                "connectedSeconds": 6.997728975,
+                "connectionTimeRatio": 0.9078653497255521,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 3,
+                "chatAfterReconnect": 0,
+                "frames": 4,
+                "receivedFrameBytes": 309,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "CANCELLED": 1
+                },
+                "firstEventTime": "2026-10-26T01:41:13.994Z",
+                "lastEventTime": "2026-10-26T02:41:21.540Z",
+                "lateMessagesOver120s": 3,
+                "meanSourceToReceiveMillis": 2505641.3333333335,
+                "maxSourceToReceiveMillis": 3906916
+              }
+            }
+          ],
+          "producerSent": 3,
+          "producerAcknowledged": 3
+        },
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": 300,
+          "delivery": {
+            "failedUnconfirmed": 0,
+            "complete": true,
+            "accepted": 2,
+            "acknowledged": 2,
+            "peakPending": 1,
+            "rejected": 0,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 2,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "queued": 0,
+            "failureCode": "NONE",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA"
+          },
+          "leases": [
+            {
+              "epoch": 1,
+              "stats": {
+                "startedAt": "2026-10-26T02:36:19.888018799Z",
+                "state": "CANCELLED",
+                "verdict": "FAIL",
+                "checks": {
+                  "chatAfterReconnect": false,
+                  "heartbeatPong": false,
+                  "reconnectRequired": false,
+                  "liveChat": true,
+                  "handshake": true
+                },
+                "elapsedSeconds": 4.986830193,
+                "connectedSeconds": 4.736539408,
+                "connectionTimeRatio": 0.949809643538428,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 2,
+                "chatAfterReconnect": 0,
+                "frames": 4,
+                "receivedFrameBytes": 309,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {
+                  "INVALID_TIME": 1
+                },
+                "reasons": {
+                  "CANCELLED": 1
+                },
+                "firstEventTime": "2026-10-26T01:41:13.994Z",
+                "lastEventTime": "2026-10-26T01:41:13.995Z",
+                "lateMessagesOver120s": 2,
+                "meanSourceToReceiveMillis": 3608462.0,
+                "maxSourceToReceiveMillis": 3910009
+              }
+            }
+          ],
+          "producerSent": 2,
+          "producerAcknowledged": 2
+        }
+      ],
+      "sourceSha256": "515c58da0ffa13c8a34c247ffe659c7228035903f660a69f97346c97ca48da99"
+    },
+    {
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "recordedAt": "2026-10-26T02:40:51.301264704Z",
+      "accepted": 3,
+      "acknowledged": 3,
+      "unconfirmed": 0,
+      "brokerPhysical": 3,
+      "brokerUnique": 3,
+      "databaseUnique": 3,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 3,
+      "producerAcknowledgedUnique": 3,
+      "acknowledgedMissingFromBroker": 0,
+      "boundaries": {
+        "beforeBlackhole": {
+          "databaseNow": "2026-10-26T02:40:42.154146Z",
+          "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "owner": "211e0ec4-a475-4615-a204-bf90624a0564",
+          "expiresAt": "2026-10-26T02:40:47.739519Z",
+          "epoch": 1
+        },
+        "takeoverSeconds": 6.081840325,
+        "previousProcessAliveAtTakeover": true,
+        "databaseDiscardedBytes": 32,
+        "sourceForwardedBytesDuringBlackhole": 100,
+        "oldSessionPostTakeoverMarker": 0,
+        "backendObservations": [
+          {
+            "databaseNow": "2026-10-26T02:40:42.157952Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:42.865667Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.232284Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.335647Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.438037Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.541424Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.645940Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.748115Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.850914Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:43.953059Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.055708Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.158545Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.260325Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.362060Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.464867Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.568869Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.673653Z",
+            "rows": 8,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.776483Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.879343Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:44.981814Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.084317Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.186220Z",
+            "rows": 7,
+            "transactionOpen": 1,
+            "blockingRows": 0,
+            "states": [
+              "active",
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.289462Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.392003Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.493982Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.595864Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.700295Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.801959Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:45.903975Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.005297Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.106584Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.208368Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.309778Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.410934Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.512152Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.614590Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.715866Z",
+            "rows": 7,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.816900Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:46.918020Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.019742Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.120906Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.221981Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.323178Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.424396Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.525549Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.626649Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.727953Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.829075Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:47.930320Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:48.031402Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:48.134044Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          },
+          {
+            "databaseNow": "2026-10-26T02:40:48.235678Z",
+            "rows": 6,
+            "transactionOpen": 0,
+            "blockingRows": 0,
+            "states": [
+              "idle"
+            ]
+          }
+        ]
+      },
+      "children": [
+        {
+          "complete": false,
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "fixtureClockOffsetSeconds": 0,
+          "delivery": {
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 2,
+            "accepted": 2,
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 2,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN"
+          },
+          "leases": [
+            {
+              "epoch": 1,
+              "stats": {
+                "startedAt": "2026-10-26T02:40:38.635329200Z",
+                "state": "COLLECTION_LEASE_LOST",
+                "verdict": "FAIL",
+                "checks": {
+                  "liveChat": true,
+                  "reconnectRequired": false,
+                  "heartbeatPong": false,
+                  "chatAfterReconnect": false,
+                  "handshake": true
+                },
+                "elapsedSeconds": 11.122511479,
+                "connectedSeconds": 6.959174522,
+                "connectionTimeRatio": 0.6256837347517562,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 2,
+                "chatAfterReconnect": 0,
+                "frames": 3,
+                "receivedFrameBytes": 223,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "COLLECTION_LEASE_LOST": 1
+                },
+                "firstEventTime": "2026-10-26T01:40:35.129Z",
+                "lastEventTime": "2026-10-26T01:40:35.130Z",
+                "lateMessagesOver120s": 2,
+                "meanSourceToReceiveMillis": 3606169.5,
+                "maxSourceToReceiveMillis": 3607740
+              }
+            }
+          ],
+          "producerSent": 2,
+          "producerAcknowledged": 2
+        },
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": 0,
+          "delivery": {
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 1,
+            "accepted": 1,
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0
+          },
+          "leases": [
+            {
+              "epoch": 2,
+              "stats": {
+                "startedAt": "2026-10-26T02:40:48.223971185Z",
+                "state": "CANCELLED",
+                "verdict": "FAIL",
+                "checks": {
+                  "liveChat": true,
+                  "reconnectRequired": false,
+                  "heartbeatPong": false,
+                  "chatAfterReconnect": false,
+                  "handshake": true
+                },
+                "elapsedSeconds": 2.034093206,
+                "connectedSeconds": 1.807522103,
+                "connectionTimeRatio": 0.8886132148066376,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 1,
+                "chatAfterReconnect": 0,
+                "frames": 2,
+                "receivedFrameBytes": 137,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "CANCELLED": 1
+                },
+                "firstEventTime": "2026-10-26T01:40:35.131Z",
+                "lastEventTime": "2026-10-26T01:40:35.131Z",
+                "lateMessagesOver120s": 1,
+                "meanSourceToReceiveMillis": 3614122.0,
+                "maxSourceToReceiveMillis": 3614122
+              }
+            }
+          ],
+          "producerSent": 1,
+          "producerAcknowledged": 1
+        }
+      ],
+      "sourceSha256": "611f16379153e3434284d0caac4b3bb2ea365b8aa42974a4eff275e0006199c8"
+    },
+    {
+      "scenario": "websocketOnlyDisconnectionKeepsLeaseAndReconnectsWithoutRecoveringSourceGap",
+      "recordedAt": "2026-10-26T02:41:13.479026290Z",
+      "accepted": 2,
+      "acknowledged": 2,
+      "unconfirmed": 0,
+      "brokerPhysical": 2,
+      "brokerUnique": 2,
+      "databaseUnique": 2,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 2,
+      "producerAcknowledgedUnique": 2,
+      "acknowledgedMissingFromBroker": 0,
+      "boundaries": {
+        "leasesBefore": [
+          {
+            "databaseNow": "2026-10-26T02:41:09.801727Z",
+            "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "owner": "7cfdd34b-1e82-4309-bbba-9b775d525aa5",
+            "expiresAt": "2026-10-26T02:41:14.866397Z",
+            "epoch": 1
+          }
+        ],
+        "leasesDuringSourceCut": [
+          {
+            "databaseNow": "2026-10-26T02:41:10.924358Z",
+            "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "owner": "7cfdd34b-1e82-4309-bbba-9b775d525aa5",
+            "expiresAt": "2026-10-26T02:41:16.918159Z",
+            "epoch": 1
+          }
+        ],
+        "syntheticSourceGap": 1,
+        "replayedGap": 0
+      },
+      "children": [
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": 0,
+          "delivery": {
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 2,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 2,
+            "accepted": 2
+          },
+          "leases": [
+            {
+              "epoch": 1,
+              "stats": {
+                "startedAt": "2026-10-26T02:41:04.814060413Z",
+                "state": "CANCELLED",
+                "verdict": "FAIL",
+                "checks": {
+                  "handshake": true,
+                  "liveChat": true,
+                  "reconnectRequired": false,
+                  "heartbeatPong": false,
+                  "chatAfterReconnect": true
+                },
+                "elapsedSeconds": 7.652819675,
+                "connectedSeconds": 6.292737823,
+                "connectionTimeRatio": 0.8222770286299735,
+                "attempts": 2,
+                "connections": 2,
+                "chatCount": 2,
+                "chatAfterReconnect": 1,
+                "frames": 4,
+                "receivedFrameBytes": 274,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "CANCELLED": 1,
+                  "WS_CLOSED": 1
+                },
+                "firstEventTime": "2026-10-26T01:41:02.796Z",
+                "lastEventTime": "2026-10-26T01:41:02.798Z",
+                "lateMessagesOver120s": 2,
+                "meanSourceToReceiveMillis": 3606146.0,
+                "maxSourceToReceiveMillis": 3609240
+              }
+            }
+          ],
+          "producerSent": 2,
+          "producerAcknowledged": 2
+        },
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": 0,
+          "delivery": {
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "queued": 0,
+            "failureCode": "NONE",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 0,
+            "complete": true,
+            "accepted": 0,
+            "acknowledged": 0,
+            "peakPending": 0,
+            "rejected": 0,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 0
+          },
+          "leases": [],
+          "producerSent": 0,
+          "producerAcknowledged": 0
+        }
+      ],
+      "sourceSha256": "53d5354245a66a33e3d1453e2a4f406f5e65824279f0a051243c543dc1a4bad0"
+    },
+    {
+      "scenario": "stoppedSkewedOwnerCannotAdmitPostTakeoverSocketMarkerWhenResumed",
+      "recordedAt": "2026-10-26T02:42:05.579357702Z",
+      "accepted": 2,
+      "acknowledged": 2,
+      "unconfirmed": 0,
+      "brokerPhysical": 2,
+      "brokerUnique": 2,
+      "databaseUnique": 1,
+      "quarantinedSourceRecords": 1,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 2,
+      "producerAcknowledgedUnique": 2,
+      "acknowledgedMissingFromBroker": 0,
+      "boundaries": {
+        "takeoverLease": {
+          "databaseNow": "2026-10-26T02:42:03.427200Z",
+          "channel": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "owner": "0e132c1e-864d-4b0e-9e08-26611f7c970c",
+          "expiresAt": "2026-10-26T02:42:09.312950Z",
+          "epoch": 2
+        },
+        "physicalSocketsAtMarker": 2,
+        "markerBrokerCount": 1,
+        "oldSessionPostTakeoverMarker": 0
+      },
+      "children": [
+        {
+          "complete": false,
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "fixtureClockOffsetSeconds": 300,
+          "delivery": {
+            "complete": true,
+            "failedUnconfirmed": 0,
+            "mode": "KAFKA",
+            "inFlight": 0,
+            "failedCallbacks": 0,
+            "failureCode": "NONE",
+            "queued": 0,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "attempted": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "peakInFlight": 1,
+            "untrackedRejected": 0,
+            "unconfirmed": 0,
+            "rejected": 0,
+            "peakPending": 1,
+            "acknowledged": 1,
+            "accepted": 1
+          },
+          "leases": [
+            {
+              "epoch": 1,
+              "stats": {
+                "startedAt": "2026-10-26T02:46:52.829758020Z",
+                "state": "COLLECTION_LEASE_LOST",
+                "verdict": "FAIL",
+                "checks": {
+                  "handshake": true,
+                  "liveChat": true,
+                  "reconnectRequired": false,
+                  "heartbeatPong": false,
+                  "chatAfterReconnect": false
+                },
+                "elapsedSeconds": 10.867776287,
+                "connectedSeconds": 10.614806531,
+                "connectionTimeRatio": 0.9767229514742034,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 2,
+                "chatAfterReconnect": 0,
+                "frames": 3,
+                "receivedFrameBytes": 223,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "COLLECTION_LEASE_LOST": 1
+                },
+                "firstEventTime": "2026-10-26T01:41:49.729Z",
+                "lastEventTime": "2026-10-26T01:41:49.730Z",
+                "lateMessagesOver120s": 2,
+                "meanSourceToReceiveMillis": 3909046.5,
+                "maxSourceToReceiveMillis": 3913946
+              }
+            }
+          ],
+          "producerSent": 1,
+          "producerAcknowledged": 1
+        },
+        {
+          "complete": true,
+          "failureCode": "NONE",
+          "fixtureClockOffsetSeconds": -300,
+          "delivery": {
+            "failureCode": "NONE",
+            "failedCallbacks": 0,
+            "inFlight": 0,
+            "mode": "KAFKA",
+            "failedUnconfirmed": 0,
+            "complete": true,
+            "accepted": 1,
+            "acknowledged": 1,
+            "peakPending": 1,
+            "rejected": 0,
+            "unconfirmed": 0,
+            "untrackedRejected": 0,
+            "peakInFlight": 1,
+            "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+            "attempted": 1,
+            "limits": {
+              "capacity": 30,
+              "channelCapacity": 20,
+              "maxInFlight": 4
+            },
+            "queued": 0
+          },
+          "leases": [
+            {
+              "epoch": 2,
+              "stats": {
+                "startedAt": "2026-10-26T02:37:02.305288584Z",
+                "state": "CANCELLED",
+                "verdict": "FAIL",
+                "checks": {
+                  "chatAfterReconnect": false,
+                  "heartbeatPong": false,
+                  "reconnectRequired": false,
+                  "liveChat": true,
+                  "handshake": true
+                },
+                "elapsedSeconds": 1.836421736,
+                "connectedSeconds": 1.609098272,
+                "connectionTimeRatio": 0.8762139112472365,
+                "attempts": 1,
+                "connections": 1,
+                "chatCount": 1,
+                "chatAfterReconnect": 0,
+                "frames": 2,
+                "receivedFrameBytes": 137,
+                "maxFrameBytes": 86,
+                "clientPings": 0,
+                "serverPongs": 0,
+                "skipped": {},
+                "reasons": {
+                  "CANCELLED": 1
+                },
+                "firstEventTime": "2026-10-26T01:41:49.730Z",
+                "lastEventTime": "2026-10-26T01:41:49.730Z",
+                "lateMessagesOver120s": 1,
+                "meanSourceToReceiveMillis": 3313697.0,
+                "maxSourceToReceiveMillis": 3313697
+              }
+            }
+          ],
+          "producerSent": 1,
+          "producerAcknowledged": 1
+        }
+      ],
+      "sourceSha256": "4920eb3e02d685b1114ea05eeb00f2d3584fb2f95d614696a622a4c7a536a6c3"
+    }
+  ],
+  "publishBoundaries": [
+    {
+      "boundary": "AFTER_PERMIT_BEFORE_SEND",
+      "recordedAt": "2026-10-26T02:41:41.646258102Z",
+      "oldLeaseExpiresAt": "2026-10-26T02:41:41.179714Z",
+      "takeoverDatabaseNow": "2026-10-26T02:41:41.234870Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 0,
+      "delivery": {
+        "accepted": 1,
+        "acknowledged": 1,
+        "peakPending": 1,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 1,
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 1,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 1,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "complete": true
+      },
+      "producerProbe": {
+        "sentEventIds": [
+          "3193a512-d46d-482f-844f-88392315ac4e"
+        ],
+        "brokerAcknowledgedEventIds": [
+          "3193a512-d46d-482f-844f-88392315ac4e"
+        ]
+      },
+      "brokerUnique": 1,
+      "databaseUnique": 1,
+      "setDifference": 0,
+      "sourceSha256": "315116872a4e7b03fb650187e5393056034ba45a0efd45cbcb401f1c0b737585"
+    },
+    {
+      "boundary": "BROKER_ACK_BEFORE_CALLBACK",
+      "recordedAt": "2026-10-26T02:41:48.956634958Z",
+      "oldLeaseExpiresAt": "2026-10-26T02:41:48.606375Z",
+      "takeoverDatabaseNow": "2026-10-26T02:41:48.635052Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 1,
+      "delivery": {
+        "accepted": 1,
+        "acknowledged": 1,
+        "peakPending": 1,
+        "rejected": 0,
+        "unconfirmed": 0,
+        "untrackedRejected": 0,
+        "peakInFlight": 1,
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 1,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 1,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "queued": 0,
+        "failureCode": "NONE",
+        "failedCallbacks": 0,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 0,
+        "complete": true
+      },
+      "producerProbe": {
+        "sentEventIds": [
+          "b4ab1033-d6b6-406f-b42a-749c431d3241"
+        ],
+        "brokerAcknowledgedEventIds": [
+          "b4ab1033-d6b6-406f-b42a-749c431d3241"
+        ]
+      },
+      "brokerUnique": 1,
+      "databaseUnique": 1,
+      "setDifference": 0,
+      "sourceSha256": "e66ade13df3459fe85aa4a2f6f7b9fc13d92e2a97158c162756662a1af081691"
+    },
+    {
+      "boundary": "QUEUED_BEFORE_FINAL_PERMIT",
+      "recordedAt": "2026-10-26T02:41:34.101790894Z",
+      "oldLeaseExpiresAt": "2026-10-26T02:41:33.841355Z",
+      "takeoverDatabaseNow": "2026-10-26T02:41:33.900692Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 0,
+      "delivery": {
+        "accepted": 1,
+        "acknowledged": 0,
+        "peakPending": 1,
+        "rejected": 0,
+        "unconfirmed": 1,
+        "untrackedRejected": 0,
+        "peakInFlight": 1,
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 0,
+            "rejected": 0,
+            "pending": 1,
+            "oldest": "2026-10-26T02:41:27.849915111Z",
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "attempted": 1,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "queued": 0,
+        "failureCode": "PUBLISH_AUTHORITY_LOST",
+        "failedCallbacks": 1,
+        "inFlight": 0,
+        "mode": "KAFKA",
+        "failedUnconfirmed": 1,
+        "complete": false
+      },
+      "producerProbe": {
+        "sentEventIds": [],
+        "brokerAcknowledgedEventIds": []
+      },
+      "brokerUnique": 0,
+      "databaseUnique": 0,
+      "setDifference": 0,
+      "sourceSha256": "d80a431b02c2232331fa57e16b659f96ea7697f4a541926f1472011f33aae062"
+    }
+  ]
+}

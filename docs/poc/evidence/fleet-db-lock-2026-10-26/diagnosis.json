@@ -1,0 +1,232 @@
+{
+  "technicalGoals": [
+    "T02",
+    "T08",
+    "T11",
+    "T14"
+  ],
+  "experiments": [
+    {
+      "recordedAt": "2026-10-26T04:15:21.444776+00:00",
+      "baseRevision": "f37a4c01f87a7c93b6e180dee087ae5487277a4c",
+      "fixtureUncommitted": true,
+      "tests": 1,
+      "failures": 1,
+      "timestamp": "2026-10-26T04:00:52.569Z",
+      "durationSeconds": 495.508,
+      "expectedEpoch": 2,
+      "observedEpoch": 1,
+      "backendSampleCount": 67,
+      "states": [
+        {
+          "workerIndex": "0",
+          "state": "idle",
+          "waitType": "Client",
+          "waitEvent": "ClientRead",
+          "transactionOpen": false,
+          "blockingPids": "{}",
+          "samples": 202
+        },
+        {
+          "workerIndex": "1",
+          "state": "idle",
+          "waitType": "Client",
+          "waitEvent": "ClientRead",
+          "transactionOpen": false,
+          "blockingPids": "{}",
+          "samples": 73
+        },
+        {
+          "workerIndex": "0",
+          "state": "idle in transaction",
+          "waitType": "Client",
+          "waitEvent": "ClientRead",
+          "transactionOpen": true,
+          "blockingPids": "{}",
+          "samples": 66
+        },
+        {
+          "workerIndex": "1",
+          "state": "active",
+          "waitType": "Lock",
+          "waitEvent": "transactionid",
+          "transactionOpen": true,
+          "blockingPids": "{1420}",
+          "samples": 19
+        }
+      ],
+      "files": {
+        "TEST-io.chatpulse.fleet.FleetIntegrationTest.xml": "be33839968a7d2e58d359ff98fdb7933010254e3e1e6b291c7537d9a9b8743fc",
+        "fleet-observed-databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver.json": "e00f362b81e25d3fbd8170fbf939937672f339abf868e48aa3c16b4ce57001f7",
+        "fleet-lock-controlled-red.log": "af4c7b0c28d10c874a01e07e97ab8b31ecad37fe33b19556829a2d13936aa693"
+      },
+      "limitation": "DB 표본 시각에 수분 공백이 있어 이번 실행의 소요 시간을 성능·복구 상한으로 해석하지 않는다. 호스트 중단 원인은 확인하지 않았다.",
+      "runLabel": "red-01",
+      "fixtureEquivalentRevision": "d1ee36dd47a67f13142bf48d4e9069cf491478f5"
+    },
+    {
+      "recordedAt": "2026-10-26T04:16:07.402885+00:00",
+      "revision": "d1ee36dd47a67f13142bf48d4e9069cf491478f5",
+      "tests": 1,
+      "failures": 1,
+      "timestamp": "2026-10-26T04:15:25.046Z",
+      "durationSeconds": 19.063,
+      "files": {
+        "TEST-io.chatpulse.fleet.FleetIntegrationTest.xml": "ad198feef3a15817a75d678aef695332739a752b3c541d94e1f5e4b90605f787",
+        "fleet-lock-controlled-red-02.log": "9725f5c293d260771c0a2a51a670ba91dbba9639cb72c238ad941a521765ff95"
+      },
+      "outcome": "FIXTURE_PRECONDITION_FAILED",
+      "failure": "수집기 A가 장애 주입 전에 종료해 owner가 null이었다. leaseViews 진단 읽기에서 NullPointerException이 발생했다.",
+      "observationsExcluded": "fleet-observed 파일은 첫 실행의 잔여 파일로 두 번째 실행의 근거가 아니다.",
+      "runLabel": "red-02"
+    },
+    {
+      "recordedAt": "2026-10-26T04:18:58.376325+00:00",
+      "revision": "d1ee36dd47a67f13142bf48d4e9069cf491478f5",
+      "modifiedProduction": "CollectorLeases.lock의 SET LOCAL idle_in_transaction_session_timeout=2s만 추가",
+      "tests": 1,
+      "failures": 1,
+      "timestamp": "2026-10-26T04:17:55.967Z",
+      "durationSeconds": 39.867,
+      "failure": "org.opentest4j.AssertionFailedError: expected: <2> but was: <1>",
+      "backendSampleCount": 74,
+      "idleTransactionSamples": 3,
+      "lockedBackendInLastSample": false,
+      "blockedSamples": 3,
+      "firstSample": "2026-10-26T04:18:19.147464Z",
+      "lastSample": "2026-10-26T04:18:30.222234Z",
+      "children": [
+        {
+          "complete": false,
+          "acknowledged": 2,
+          "worker": "82991c06-9837-479f-b4bc-fcc98ea18cad",
+          "rejected": 0,
+          "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+          "deliveryCode": "NONE",
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "accepted": 2
+        },
+        {
+          "complete": false,
+          "acknowledged": 0,
+          "worker": "c16cdd63-9713-4152-8765-122329e9b434",
+          "rejected": 0,
+          "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+          "deliveryCode": "NONE",
+          "failureCode": "COLLECTION_LEASE_LOST",
+          "accepted": 0
+        },
+        {
+          "child": 0,
+          "startup": {
+            "phases": [
+              {
+                "elapsedMs": 0,
+                "phase": "STARTING"
+              },
+              {
+                "elapsedMs": 3095,
+                "phase": "DATABASE_OPEN"
+              },
+              {
+                "elapsedMs": 3570,
+                "phase": "KAFKA_TEMPLATE_READY"
+              },
+              {
+                "elapsedMs": 3651,
+                "phase": "WORKER_CONSTRUCTING"
+              },
+              {
+                "elapsedMs": 5296,
+                "phase": "METADATA_REQUEST"
+              },
+              {
+                "elapsedMs": 7623,
+                "phase": "METADATA_TIMEOUT"
+              },
+              {
+                "elapsedMs": 7630,
+                "phase": "METADATA_REQUEST"
+              },
+              {
+                "elapsedMs": 8625,
+                "phase": "METADATA_READY"
+              },
+              {
+                "elapsedMs": 8675,
+                "phase": "WORKER_READY"
+              },
+              {
+                "elapsedMs": 30247,
+                "phase": "PERSISTING"
+              },
+              {
+                "elapsedMs": 30300,
+                "phase": "REPORT_COMPLETE"
+              }
+            ],
+            "exceptionTypes": [],
+            "codes": []
+          },
+          "reportPresent": true,
+          "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+          "exitCode": 143
+        },
+        {
+          "child": 1,
+          "startup": {
+            "exceptionTypes": [],
+            "phases": [
+              {
+                "phase": "STARTING",
+                "elapsedMs": 0
+              },
+              {
+                "phase": "DATABASE_OPEN",
+                "elapsedMs": 956
+              },
+              {
+                "phase": "KAFKA_TEMPLATE_READY",
+                "elapsedMs": 1029
+              },
+              {
+                "phase": "WORKER_CONSTRUCTING",
+                "elapsedMs": 1044
+              },
+              {
+                "phase": "METADATA_REQUEST",
+                "elapsedMs": 2071
+              },
+              {
+                "phase": "METADATA_READY",
+                "elapsedMs": 2996
+              },
+              {
+                "phase": "WORKER_READY",
+                "elapsedMs": 3053
+              },
+              {
+                "phase": "PERSISTING",
+                "elapsedMs": 7050
+              },
+              {
+                "phase": "REPORT_COMPLETE",
+                "elapsedMs": 7079
+              }
+            ],
+            "codes": []
+          },
+          "reportPresent": true,
+          "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+          "exitCode": 0
+        }
+      ],
+      "files": {
+        "fleet-observed-databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver.json": "817dab31aece3957d3e516ccfef2000f02dffe503de4a9607efa3f6c51945d98",
+        "fleet-lock-idle-only.log": "64f4ceed7b6275744d36fedf8fd31172258b64b09fe2716ccf6cf16d9b077b9d",
+        "TEST-io.chatpulse.fleet.FleetIntegrationTest.xml": "14c3d246de6c7575134f2128ed4527eece24eaf84ae2580db94d0c1f5111efc5"
+      },
+      "runLabel": "idle-only"
+    }
+  ]
+}

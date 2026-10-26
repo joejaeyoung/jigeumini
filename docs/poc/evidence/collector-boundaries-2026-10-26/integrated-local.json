@@ -1,0 +1,360 @@
+{
+  "revision": "34e824ef3db461cb8474d0be779bd7c148409d8b",
+  "scope": "LOCAL_REAL_KAFKA_POSTGRES_SYNTHETIC_SOURCE_AFTER_42_43_52_54_INTEGRATION",
+  "commands": [
+    "./scripts/check",
+    "./gradlew --console=plain :server:integrationTest --tests 'io.chatpulse.fleet.FleetIntegrationTest'"
+  ],
+  "check": {
+    "unit": 152,
+    "harness": 24,
+    "jar": "PASS"
+  },
+  "fleet": {
+    "tests": "20",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "timestamp": "2026-10-26T03:07:57.672Z",
+    "time": "143.251"
+  },
+  "xmlSha256": "201e7e50475f613848c57f73cf5c256ac6ff9299d6175622d39a4e9104f93f4c",
+  "cases": [
+    {
+      "scenario": "actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff",
+      "recordedAt": "2026-10-26T03:08:13.300341Z",
+      "accepted": 55,
+      "acknowledged": 55,
+      "unconfirmed": 0,
+      "brokerPhysical": 55,
+      "brokerUnique": 55,
+      "databaseUnique": 55,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 55,
+      "producerAcknowledgedUnique": 55,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-actualDatabaseSocketDisconnectionFencesWorkerAndAllowsExpiryHandoff.json",
+      "sha256": "dc7b65e497b038069c85c4e1c6c9fe1bbb664f0e7243f9fe9d44e74f3961eff2"
+    },
+    {
+      "scenario": "databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver",
+      "recordedAt": "2026-10-26T03:08:29.281972Z",
+      "accepted": 3,
+      "acknowledged": 3,
+      "unconfirmed": 0,
+      "brokerPhysical": 3,
+      "brokerUnique": 3,
+      "databaseUnique": 3,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 3,
+      "producerAcknowledgedUnique": 3,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-databaseBlackholeExpiresLocalPermitWhileSourcePathLivesAndSecondProcessTakesOver.json",
+      "sha256": "875966b4c761fa97efcb9827baf53d3e5e82141a4d1b22f87953c004685bb34a"
+    },
+    {
+      "scenario": "initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission",
+      "recordedAt": "2026-10-26T03:08:18.462444Z",
+      "accepted": 9,
+      "acknowledged": 9,
+      "unconfirmed": 0,
+      "brokerPhysical": 9,
+      "brokerUnique": 9,
+      "databaseUnique": 9,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 9,
+      "producerAcknowledgedUnique": 9,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-initialKafkaMetadataTimeoutCanRecoverBeforeLeaseAndSourceAdmission.json",
+      "sha256": "fd3a0f100654d54c80deb7b7b1ce7b72ed97faf35e83b41ac83b3536100a5abb"
+    },
+    {
+      "scenario": "oppositeWallClocksAndRuntimeJumpsKeepDatabaseLeaseEpochWhileReceiptErrorsRemainVisible",
+      "recordedAt": "2026-10-26T03:08:50.922915Z",
+      "accepted": 5,
+      "acknowledged": 5,
+      "unconfirmed": 0,
+      "brokerPhysical": 5,
+      "brokerUnique": 5,
+      "databaseUnique": 2,
+      "quarantinedSourceRecords": 3,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 5,
+      "producerAcknowledgedUnique": 5,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-oppositeWallClocksAndRuntimeJumpsKeepDatabaseLeaseEpochWhileReceiptErrorsRemainVisible.json",
+      "sha256": "b60fe538caa568d2dcf0e9b883ebb3013f9b14682af0f0286f554632893f5b11"
+    },
+    {
+      "scenario": "sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile",
+      "recordedAt": "2026-10-26T03:08:37.109692Z",
+      "accepted": 9,
+      "acknowledged": 9,
+      "unconfirmed": 0,
+      "brokerPhysical": 9,
+      "brokerUnique": 9,
+      "databaseUnique": 9,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 9,
+      "producerAcknowledgedUnique": 9,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-sigtermDuringMainReportWriteWaitsForCompletedDiagnosticFile.json",
+      "sha256": "518ceb59bbdaf5dd8bcb1434975f9daf70aeac99b35f9c0b737ceee994aae937"
+    },
+    {
+      "scenario": "slowProducerStartupCompletesBeforeLeaseAndSourceAdmission",
+      "recordedAt": "2026-10-26T03:10:20.836036Z",
+      "accepted": 9,
+      "acknowledged": 9,
+      "unconfirmed": 0,
+      "brokerPhysical": 9,
+      "brokerUnique": 9,
+      "databaseUnique": 9,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 9,
+      "producerAcknowledgedUnique": 9,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-slowProducerStartupCompletesBeforeLeaseAndSourceAdmission.json",
+      "sha256": "0cfa032219a13ddd628eb51f7ade08b7d8f187e24ccab5fedd9b0c1e88797c11"
+    },
+    {
+      "scenario": "stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver",
+      "recordedAt": "2026-10-26T03:10:14.731746Z",
+      "accepted": 22,
+      "acknowledged": 22,
+      "unconfirmed": 0,
+      "brokerPhysical": 22,
+      "brokerUnique": 22,
+      "databaseUnique": 22,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 22,
+      "producerAcknowledgedUnique": 22,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-stoppedProcessExpiresAndCannotPublishItsQueuedSocketInputAfterAnotherProcessTakesOver.json",
+      "sha256": "9c0e12270ae6da0ce620cef94fb6855d91f434fd589c58dd32edc8029f870817"
+    },
+    {
+      "scenario": "stoppedSkewedOwnerCannotAdmitPostTakeoverSocketMarkerWhenResumed",
+      "recordedAt": "2026-10-26T03:09:36.834010Z",
+      "accepted": 2,
+      "acknowledged": 2,
+      "unconfirmed": 0,
+      "brokerPhysical": 2,
+      "brokerUnique": 2,
+      "databaseUnique": 1,
+      "quarantinedSourceRecords": 1,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 2,
+      "producerAcknowledgedUnique": 2,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-stoppedSkewedOwnerCannotAdmitPostTakeoverSocketMarkerWhenResumed.json",
+      "sha256": "2873b0fd7f24e94291ccb6d2a315666250cd00c4c903b0de1d3dccf9b67858f9"
+    },
+    {
+      "scenario": "twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts",
+      "recordedAt": "2026-10-26T03:10:04.595366Z",
+      "accepted": 39,
+      "acknowledged": 39,
+      "unconfirmed": 0,
+      "brokerPhysical": 39,
+      "brokerUnique": 39,
+      "databaseUnique": 39,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 39,
+      "producerAcknowledgedUnique": 39,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-twoProcessesCollectDisjointChannelsAndGracefulHandoffPreservesAcknowledgedDatabaseCounts.json",
+      "sha256": "6bf8ace62892e42487c44bae039cba3ab805a6026b6b59ebba116d5c6a648055"
+    },
+    {
+      "scenario": "websocketOnlyDisconnectionKeepsLeaseAndReconnectsWithoutRecoveringSourceGap",
+      "recordedAt": "2026-10-26T03:08:44.064793Z",
+      "accepted": 2,
+      "acknowledged": 2,
+      "unconfirmed": 0,
+      "brokerPhysical": 2,
+      "brokerUnique": 2,
+      "databaseUnique": 2,
+      "quarantinedSourceRecords": 0,
+      "brokerDatabaseResolvedDifference": 0,
+      "producerSentUnique": 2,
+      "producerAcknowledgedUnique": 2,
+      "acknowledgedMissingFromBroker": 0,
+      "file": "fleet-evidence-websocketOnlyDisconnectionKeepsLeaseAndReconnectsWithoutRecoveringSourceGap.json",
+      "sha256": "4e65bc3ad3c917862a259a80cead7559e44c355259a7eef2732006f5c445b22b"
+    }
+  ],
+  "publishBoundaries": [
+    {
+      "boundary": "AFTER_PERMIT_BEFORE_SEND",
+      "recordedAt": "2026-10-26T03:09:04.490864Z",
+      "oldLeaseExpiresAt": "2026-10-26T03:09:04.175771Z",
+      "takeoverDatabaseNow": "2026-10-26T03:09:04.216684Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 0,
+      "delivery": {
+        "inFlight": 0,
+        "failedCallbacks": 0,
+        "failureCode": "NONE",
+        "queued": 0,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "attempted": 1,
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 1,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "peakInFlight": 1,
+        "untrackedRejected": 0,
+        "unconfirmed": 0,
+        "rejected": 0,
+        "peakPending": 1,
+        "acknowledged": 1,
+        "accepted": 1,
+        "complete": true,
+        "failedUnconfirmed": 0,
+        "mode": "KAFKA"
+      },
+      "producerProbe": {
+        "brokerAcknowledgedEventIds": [
+          "bae5bcef-99d9-4f85-9b31-1dbfa7047871"
+        ],
+        "sentEventIds": [
+          "bae5bcef-99d9-4f85-9b31-1dbfa7047871"
+        ]
+      },
+      "brokerUnique": 1,
+      "databaseUnique": 1,
+      "setDifference": 0
+    },
+    {
+      "boundary": "BROKER_ACK_BEFORE_CALLBACK",
+      "recordedAt": "2026-10-26T03:09:11.231375Z",
+      "oldLeaseExpiresAt": "2026-10-26T03:09:10.866924Z",
+      "takeoverDatabaseNow": "2026-10-26T03:09:10.965183Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 1,
+      "delivery": {
+        "inFlight": 0,
+        "failedCallbacks": 0,
+        "failureCode": "NONE",
+        "queued": 0,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "attempted": 1,
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 1,
+            "rejected": 0,
+            "pending": 0,
+            "oldest": null,
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "peakInFlight": 1,
+        "untrackedRejected": 0,
+        "unconfirmed": 0,
+        "rejected": 0,
+        "peakPending": 1,
+        "acknowledged": 1,
+        "accepted": 1,
+        "complete": true,
+        "failedUnconfirmed": 0,
+        "mode": "KAFKA"
+      },
+      "producerProbe": {
+        "brokerAcknowledgedEventIds": [
+          "2b7e5eb1-828b-4db8-8f0a-829aa3fa46ba"
+        ],
+        "sentEventIds": [
+          "2b7e5eb1-828b-4db8-8f0a-829aa3fa46ba"
+        ]
+      },
+      "brokerUnique": 1,
+      "databaseUnique": 1,
+      "setDifference": 0
+    },
+    {
+      "boundary": "QUEUED_BEFORE_FINAL_PERMIT",
+      "recordedAt": "2026-10-26T03:08:57.846861Z",
+      "oldLeaseExpiresAt": "2026-10-26T03:08:57.596018Z",
+      "takeoverDatabaseNow": "2026-10-26T03:08:57.694344Z",
+      "takeoverEpoch": 2,
+      "brokerBeforeTakeover": 0,
+      "delivery": {
+        "inFlight": 0,
+        "failedCallbacks": 1,
+        "failureCode": "PUBLISH_AUTHORITY_LOST",
+        "queued": 0,
+        "limits": {
+          "capacity": 4,
+          "channelCapacity": 4,
+          "maxInFlight": 1
+        },
+        "attempted": 1,
+        "strategy": "BOUNDED_ASYNC_ROUND_ROBIN",
+        "channels": {
+          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+            "accepted": 1,
+            "acknowledged": 0,
+            "rejected": 0,
+            "pending": 1,
+            "oldest": "2026-10-26T03:08:51.608489Z",
+            "stopped": false,
+            "reason": "NONE"
+          }
+        },
+        "peakInFlight": 1,
+        "untrackedRejected": 0,
+        "unconfirmed": 1,
+        "rejected": 0,
+        "peakPending": 1,
+        "acknowledged": 0,
+        "accepted": 1,
+        "complete": false,
+        "failedUnconfirmed": 1,
+        "mode": "KAFKA"
+      },
+      "producerProbe": {
+        "brokerAcknowledgedEventIds": [],
+        "sentEventIds": []
+      },
+      "brokerUnique": 0,
+      "databaseUnique": 0,
+      "setDifference": 0
+    }
+  ],
+  "staticReview": {
+    "standards": "0 findings / 0 blocking",
+    "spec": "0 findings / 0 blocking",
+    "range": "420efa3..34e824e"
+  },
+  "logs": {
+    "collector-boundaries-integrated-check.log": "fd6308c4af648eb42d69d00383546229be0bdca10dc814026d612b7da427313e",
+    "collector-boundaries-integrated-integration.log": "c896dc1335ec37d6ea5b262e6f5d4bb6c8ccd8b6ed064047675e78d8c75525c2"
+  }
+}

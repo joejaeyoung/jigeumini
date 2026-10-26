@@ -245,6 +245,14 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 
 - 보강 `43bedc2`의 `./scripts/check` 단위147·하네스20·JAR, `./scripts/integration` 실제100개가 모두 통과했다. 정제 근거에 suite/XML·명령 로그 hash·JAR/build ID와 실제 시각을 연결했다. Standards/Spec 각각 지적0·차단0이며 Claude 보강 재리뷰도 APPROVE다. session timeout6초와 Gradle classpath를 확인하고 partition 범위·이전 문단의 회복 순서를 정정했다. T02는 이 합성/로컬 장애 범위에서 검증됨으로 바꾸며, 원천 중복·전체 Exactly-once와 운영 장애는 확장하지 않는다. 최종 문서 HEAD 승인·push/PR CI·병합은 PR #50 통합 게이트에 남긴다.
 
+### 2026-10-26 수집기 장애 경계 #44 구현
+
+F13 → T02/T11/T14. `origin/develop` c2aeffc에서 `technicaltest/collector-boundaries`를 분기했다. #43 soak의 이미지·probe class를 고정한 뒤 로컬 부하 시험을 겹치지 않고 구현한다. 공식 시간 API·PostgreSQL 시각과 기존 임대 경계를 [조사](research/COLLECTOR_FAILURE_BOUNDARIES.md)에 기록했다.
+
+수신/관측/보고 Clock을 연결하고 기본 systemUTC를 유지한다. 임대 DB clock_timestamp와 System.nanoTime 기한은 그대로다. 합성 source marker로 부모와 skew된 child의 receivedAt을 직접 비교하던 인과 판정을 보완한다. 시계가 앞선 입력의 live 격리도 broker→정상 ledger/격리 offset 집합으로 구분할 계획이다. 독립 loopback DB/WS proxy와 실제 producer ID 관측은 테스트 내부에 둔다. 최종 permit 이전, permit 이후 send 이전, broker ACK 이후 callback 이전을 별도 실제 broker/DB 사례로 구현한다. 실행·리뷰 전 초안이며 결과로 주장하지 않는다.
+
+사전 Standards/Spec 정적 검토에서 차단0을 확인했다. Spec의 시계 인과 장벽2건은 음수 Clock worker의 실제 INVALID_MESSAGE 관측 파일과 양쪽 Clock 적용 뒤 새 lease 기준값으로 보완했다. DB blackhole이 열린 transaction의 plan 행 잠금을 남길 가능성은 실제 backend state/transaction/차단 PID와 child 고정 진단을 기록해 판별한다. 새 장애 시험 실행 전이며 간헐 통과로 원인 해소를 주장하지 않는다.
+
 ## 2026-10-26 새 migration 복구 시험 #42
 
 - F16/F08 → T04/T16. fetch한 origin/develop에서 새 `technicaltest/migration-recovery`를 만들고, 최종 CI 중인 #41의 검증 commit을 fast-forward로 포함했다. #41 게이트를 확인해 develop 병합 후 기준을 통합한다. 다른 worktree는 변경하지 않았다.
@@ -336,6 +344,31 @@ PR55 최종cb20ca6 Claude APPROVE·push40261118857/PR40261121946 성공, 두CI �
 
 개별근거의files/partitions/apiLatencyMillis/memoryBytes/minuteSamples를색인에명시했다. 해당데이터와원본hash는기존파일에있었으나이전리뷰에첨부되지않았다. 사용한정제스크립트를scripts로보존하고원본5개실행에서공유JSON과동일한지대조한다. 순위/증가율·해시알고리즘자체·알림중복은독립검증에서제외한다. DB count7개는계측부하이며docker stats메모리와VmRSS도구분했다. #42 c34dc2b에포함된#52/#54를통합했으며문서충돌은양쪽이력을보존했다.
 
+
+### #44 실제 경계 근거와 시작 진단 통합
+
+94da3ad의push40260027568·PR40260031297에서실제Fleet14개(새경계7개)가모두통과했다. 전자는전체성공, 후자는기존Outbox1개실패였다. [검증](fleet/FAILURE_BOUNDARIES_VERIFICATION.md)·[근거](poc/evidence/collector-boundaries-2026-10-26/summary.json)에실제2JVM시계/분리장애와별도같은JVM의permit/send/ACK경합을구분했다. DBblackhole인계6.082초·이전프로세스생존·이전sessionmarker0, WS공백1/복원0, 검사후send는ACK가능을기록했다.
+
+#43의420efa3(선행#42/#52/#54포함)을통합했다. Clockargs와bootstrapargs충돌은 mode/clock/bootstrap 위치를통일하고, 2종시작진단을#54의phase/예외타입/허용코드진단으로합쳤다. 실제producer관측과clock제어는보존한다. 진단쓰기실패가cleanup을막지않게했고 성공한process/report만함께등록한다. 제품Clock전달과임대전metadata재시도경계를모두유지하고기존한도는바꾸지않았다. 새통합HEAD의20개Fleet회귀와최종리뷰/CI를확인한다.
+
+통합 `34e824e`에서 단위152·하네스24·JAR, 실제 Kafka/DB Fleet20개가 143.251초에 실패0으로 통과했다. XML·각 진단 hash와 permit 경계3개 결과를 보존했다. Standards/Spec은 각각 지적0·차단0이다. 원래 CI14개 수치와 로컬 통합20개 수치를 혼합하지 않는다.
+
 ### #43 환경 한계·통계 범위 재검토
 
 최종 근거 리뷰420efa3의 문서 차단2건을 반영했다. CPU138개 점 표본·Kafka1CPU 한도 접근·입력 pacing 최대692.672ms와 계측8회 논리 Admin 호출을 명시한다. throttling/시간 상관과 지속 가능 용량은 미검증이다. partition분포는 STOP/catch-up을 포함한 전체 phase라고 한정했다. 분단위 메모리 항목, 중복의 한 채널 집중, SQL percentile_cont와 정제 계산의 출처도 구별했다. curator는 누락 containers 표본을 허용하며 harnessRevision/자체hash/재구성 명령 출처를 기록한다. 원본5개를 재정제하여 메타데이터 외 모든 숫자·원본hash가 기존과 일치함을 단언했다. 부하 하네스와 제품 실행 코드는 변경하지 않아 30분 재실행은 하지 않는다. 420efa3 check는 단위151·하네스24·JAR 통과다.
+
+
+### #60 유휴 plan 잠금 실패 재현
+
+F13 → T02/T08/T11/T14. PR58 e90dc32 push40263102345 성공/PR40263104263 실패를 확인하고 병합을 보류했다. 원래 실패의80개 DB 표본에서 이전 PID의 idle in transaction, 대기 PID의 transactionid 잠금17개 표본을 확인했다. 최종 SQLSTATE는 당시 보고서에 없어 확정하지 않는다.
+
+실제 plan 행 FOR UPDATE 응답 직후 클라이언트를 멈추는 시험 전용 장벽을 넣고 대기 worker 등록 후 DB blackhole을 주입했다. 수정 전 로컬1개가 epoch2 기대/실제1로 실패했다. 표본 사이 수분 공백이 있어 이 실행의495초를 복구 시간으로 사용하지 않는다. 원본·hash는 work/remaining-validation/fleet-lock-red-01에 보존했다. 가설은 유휴 transaction 잠금 유지, 대기 worker 시작 지연, 단순 실행 속도 저하 순서이며 등록/잠금/대기 상태를 따로 확인한다.
+
+
+#60의 두 번째 수정 전 실행은 장애 주입 전에 A가 종료하여 owner가 null인 진단 전제 실패였다. 첫 실행의 잔여 observed 파일을 두 번째 결과로 사용하지 않는다. 이어 유휴 timeout만 추가한 대조에서는 이전 잠금 PID가 사라졌으나 대기 worker가 이미 종료하여 epoch2 기대/실제1로 다시 실패했다(39.867초, 잠금 대기3개 표본). 이 분리는 유휴 잠금 제한과 미배정 충돌 재시도가 모두 필요함을 보여준다. 최초 CI에서 실제 SQLSTATE를 기록하지 않은 한계는 유지한다.
+
+잠금 분류는 CollectorLeases의 transaction 완료 경계, 미배정 재시도 횟수와 기한은 CollectorWorker에 둔다. 보유 임대·연결/SQL취소·불확정 transaction을 동일하게 재시도하는 범용 도구를 만들지 않았다. 실제2JVM blackhole, 실제 대기/영구잠금/보유임대와 JDBC rollback 실패·불확정 commit의 합성 경계를 추가한다.
+
+수정 후 집중 검증은 JDBC/worker 단위7개와 실제 Kafka/DB4개가 모두 통과했다. blackhole의 유휴 잠금 해제·epoch2 인계, 미배정 잠금 해제 후 수집, 영구 충돌5회 제한, 보유 임대 충돌의 재시도0을 확인했다. 이후 깨끗한 revision에서 check와 Fleet 전체 회귀를 실행해 통합 영향을 확인한다.
+
+고정 ea7da9b의 check(단위159·하네스24·JAR)와 실제 Fleet23개가 385.072초에 실패0으로 통과했다. 기존 시계/분리 장애·발행 경합·인계5회·초기 metadata와 새 잠금 회귀를 함께 실행했다. Standards 하드/heuristic/차단0, Spec 지적/차단0이다. 원래 CI와 대조·전제 실패를 [검증 기록](fleet/DB_LOCK_VERIFICATION.md)에 보존했다. 이후 docs만 추가하며 최종 정확한 HEAD의 Claude·push/PR CI를 확인한다.

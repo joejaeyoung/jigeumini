@@ -36,7 +36,7 @@
 }
 ```
 
-`sourceMode=DIRECT`는 수집기 없이 정규화 이벤트부터 부하를 넣는 대조다. `resourceProfile`은 `BASELINE`, `API_2_CPU`, `DB_2_CPU`, `KAFKA_2_CPU`, `COLLECTOR_2_CPU`다. 한 시험은 최대 30분·고유 30만 건이며 실제 측정 단계는 30초 이상이다. 1% 동일 UUID 재전달, 30초 간격 채널 관측·outbox도 함께 입력한다.
+`sourceMode=DIRECT`는 수집기 없이 정규화 이벤트부터 부하를 넣는 대조다. `resourceProfile`은 `BASELINE`, `API_2_CPU`, `DB_2_CPU`, `KAFKA_2_CPU`, `COLLECTOR_2_CPU`다. DB만 늘린 뒤 API 한도가 이어지는지 대조할 때 `API_DB_2_CPU`로 API와 DB를 각각 2 CPU로 고정한다. 한 시험은 최대 30분·고유 30만 건이며 실제 측정 단계는 30초 이상이다. 1% 동일 UUID 재전달, 30초 간격 채널 관측·outbox도 함께 입력한다.
 
 ## 임시 연구 기준과 해석
 

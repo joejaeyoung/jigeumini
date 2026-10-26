@@ -19,7 +19,7 @@ record ProductLoadPlan(String name, int channels, List<Stage> stages, int faultA
                 || stages==null || stages.isEmpty() || stages.size()>10 || sourceMode==null
                 || !Set.of("DIRECT","WEBSOCKET").contains(sourceMode)
                 || apiRequestsPerSecond<0 || apiRequestsPerSecond>200 || apiMaxInFlight<1 || apiMaxInFlight>100
-                || resourceProfile==null || !Set.of("BASELINE","API_2_CPU","DB_2_CPU","KAFKA_2_CPU","COLLECTOR_2_CPU").contains(resourceProfile))
+                || resourceProfile==null || !Set.of("BASELINE","API_2_CPU","DB_2_CPU","API_DB_2_CPU","KAFKA_2_CPU","COLLECTOR_2_CPU").contains(resourceProfile))
             throw new IllegalArgumentException("LOAD_PLAN");
         stages=List.copyOf(stages);
         int seconds=stages.stream().mapToInt(Stage::seconds).sum();

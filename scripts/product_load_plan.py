@@ -1,7 +1,7 @@
 """유한 부하 계획. 제품 설정과 실험 전용 원천·조회 예산을 구분한다."""
 import json,pathlib,re
 
-RESOURCE_PROFILES={'BASELINE':{},'API_2_CPU':{'api':2},'DB_2_CPU':{'postgres':2},'KAFKA_2_CPU':{'kafka':2},'COLLECTOR_2_CPU':{'load-probe':2}}
+RESOURCE_PROFILES={'BASELINE':{},'API_2_CPU':{'api':2},'DB_2_CPU':{'postgres':2},'API_DB_2_CPU':{'api':2,'postgres':2},'KAFKA_2_CPU':{'kafka':2},'COLLECTOR_2_CPU':{'load-probe':2}}
 
 def validate(plan):
     required={'name','channels','stages','faultAtSeconds','faultSeconds','sourceMode','apiRequestsPerSecond','apiMaxInFlight','resourceProfile'}

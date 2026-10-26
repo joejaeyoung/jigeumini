@@ -38,7 +38,7 @@ class ProductLoad(module.Rehearsal):
         network_ids=list(info['NetworkSettings']['Networks'])
         networks=json.loads(self.command(['docker','network','inspect',*network_ids]).stdout)
         if not all(n['Internal'] and n['Labels'].get('io.jigeumini.deployment.owner')==self.owner for n in networks):raise RuntimeError('LOAD_EXTERNAL_NETWORK')
-        result['testNetwork']={'apiNetworksInternal':True,'jmxPublished':False,'apiJvmArguments':info['Config']['Entrypoint'][1:3],
+        result['testNetwork']={'apiNetworksInternal':True,'jmxPublished':any((info['NetworkSettings']['Ports'] or {}).values()),'apiJvmArguments':info['Config']['Entrypoint'][1:3],
             'probeHeapMaxBytes':384*1024**2,'apiMemoryLimitBytes':info['HostConfig']['Memory'],'apiNanoCpus':info['HostConfig']['NanoCpus']}
         return result
     def resources(self):
@@ -46,16 +46,30 @@ class ProductLoad(module.Rehearsal):
         for service in ['api','kafka','postgres']:
             cid,_=self.owned(service);ids.append(cid)
             if service=='api':
-                status=self.command(['docker','exec',cid,'cat','/proc/1/status']).stdout
-                match=re.search(r'^VmRSS:\s+(\d+) kB$',status,re.M)
-                if not match:raise RuntimeError('ANALYZER_RSS_UNAVAILABLE')
-                sample['analyzerRssBytes']=int(match[1])*1024
+                try:
+                    status=self.command(['docker','exec',cid,'cat','/proc/1/status']).stdout
+                    match=re.search(r'^VmRSS:\s+(\d+) kB$',status,re.M)
+                    if not match:raise RuntimeError('ANALYZER_RSS_UNAVAILABLE')
+                    sample['analyzerRssBytes']=int(match[1])*1024
+                except Exception as error:sample['analyzerRssError']=type(error).__name__
         ids.append(self.probe_id)
-        values=self.command(['docker','stats','--no-stream','--format','{{json .}}',*ids],timeout=10).stdout
-        sample['containers']=[json.loads(line) for line in values.splitlines()]
+        try:
+            values=self.command(['docker','stats','--no-stream','--format','{{json .}}',*ids],timeout=10).stdout
+            sample['containers']=[json.loads(line) for line in values.splitlines()]
+        except Exception as error:sample['containerStatsError']=type(error).__name__
         sample['hostFreeDiskBytes']=shutil.disk_usage(ROOT).free
-        if sample['hostFreeDiskBytes']<2*1024**3:raise RuntimeError('LOAD_DISK_LIMIT')
         self.result['resourceSamples'].append(sample);self.checkpoint()
+        if sample['hostFreeDiskBytes']<2*1024**3:raise RuntimeError('LOAD_DISK_LIMIT')
+    def clock_bracket(self,phase):
+        before=time.time_ns()//1_000_000
+        remote=int(self.command(['docker','exec','-e','JAVA_TOOL_OPTIONS=',self.probe_id,'java','-Xmx32m','-cp','/app/classes:/app/lib/*:/probe','io.chatpulse.operations.ProductLoadProbe','clock'],timeout=10).stdout.strip())
+        after=time.time_ns()//1_000_000
+        sample={'phase':phase,'hostBeforeEpochMillis':before,'hostAfterEpochMillis':after,'probeEpochMillis':remote,
+            'skewLowerMillis':remote-after,'skewUpperMillis':remote-before,'uncertaintyMillis':after-before}
+        self.result.setdefault('clockBrackets',[]).append(sample);self.checkpoint()
+        # 같은 호스트 시험에서 초 단위 복구값을 읽기 위한 한도다. 실제 bracket을 근거에 남긴다.
+        if after-before>1000 or sample['skewLowerMillis']>250 or sample['skewUpperMillis']<-250:raise RuntimeError('LOAD_CLOCK_REFERENCE_UNALIGNED')
+        return sample
     def load(self):
         name=self.project+'-probe'
         self.compose('run','-d','--no-deps','--name',name,'--entrypoint','java','-e','JAVA_TOOL_OPTIONS=',
@@ -65,7 +79,7 @@ class ProductLoad(module.Rehearsal):
         info=json.loads(self.command(['docker','inspect',name]).stdout)[0]
         if info['Config']['Labels'].get('io.jigeumini.deployment.owner')!=self.owner:raise RuntimeError('PROBE_OWNER_MISMATCH')
         if any((info['NetworkSettings']['Ports'] or {}).values()) or not all(n['Internal'] for n in json.loads(self.command(['docker','network','inspect',*info['NetworkSettings']['Networks']]).stdout)):raise RuntimeError('PROBE_EXTERNAL_NETWORK')
-        self.probe_id=info['Id'];api,_=self.owned('api');fault=None;last_sample=0
+        self.probe_id=info['Id'];self.clock_bracket('START');api,_=self.owned('api');fault=None;last_sample=0
         while time.monotonic()<self.deadline-90:
             info=json.loads(self.command(['docker','inspect',self.probe_id]).stdout)[0]
             path=self.output/'progress.json'
@@ -84,8 +98,8 @@ class ProductLoad(module.Rehearsal):
                 self.result['fault']=fault;self.checkpoint()
             if self.paused and time.monotonic()-fault['monotonicStop']>=self.fault_seconds:
                 self.command(['docker','kill','--signal','CONT',api]);self.paused=False
-                fault.update({'resumedAt':self.now(),'resumedAtEpochMillis':time.time_ns()//1_000_000,'actualStoppedSeconds':time.monotonic()-fault['monotonicStop']});self.checkpoint()
-            if time.monotonic()-last_sample>=10:self.resources();last_sample=time.monotonic()
+                fault.update({'resumedAt':self.now(),'resumedAtEpochMillis':time.time_ns()//1_000_000,'actualStoppedSeconds':time.monotonic()-fault['monotonicStop']});self.checkpoint();self.clock_bracket('RESUME')
+            if time.monotonic()-last_sample>=10 and (not self.paused or self.fault_seconds-(time.monotonic()-fault['monotonicStop'])>10):self.resources();last_sample=time.monotonic()
             time.sleep(1)
         else:raise RuntimeError('LOAD_PROCESS_TIMEOUT')
         self.result['load']=progress;self.result['probeExitCode']=info['State']['ExitCode'];self.result['probeOomKilled']=info['State']['OOMKilled']
@@ -95,8 +109,7 @@ class ProductLoad(module.Rehearsal):
         self.result['analysis']=analyze(progress,self.output/'offsets.jsonl',fault,self.result['resourceSamples'],self.duration)
         if fault:fault.pop('monotonicStop',None)
         self.checkpoint()
-        if not self.result['analysis']['measurementCoverage']['evidenceComplete']:raise RuntimeError('LOAD_EVIDENCE_INCOMPLETE')
-        if not self.result['analysis']['api']['healthyOutsideFault']:raise RuntimeError('LOAD_API_ERRORS_OUTSIDE_FAULT')
+        if self.result['analysis']['failures']:raise RuntimeError(self.result['analysis']['failures'][0])
         return {'correct':True,'unique':progress['expectedUnique'],'physical':progress['expectedPhysical'],'inputSeconds':progress['inputSeconds'],'drainSeconds':progress['drainSeconds']}
     def scenarios(self):
         self.phase('PREPARE_PROBE',self.prepare);self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize)

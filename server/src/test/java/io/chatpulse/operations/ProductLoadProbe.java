@@ -30,6 +30,7 @@ public final class ProductLoadProbe {
     private ProductLoadProbe(Path output) {this.output=output;}
     public static void main(String[] args) throws Exception {
         if(org.slf4j.LoggerFactory.getILoggerFactory() instanceof ch.qos.logback.classic.LoggerContext c)c.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).setLevel(ch.qos.logback.classic.Level.OFF);
+        if(args.length==1&&args[0].equals("clock")){System.out.println(System.currentTimeMillis());return;}
         var probe=new ProductLoadProbe(Path.of(args[1]));
         System.exit(probe.run(Plan.named(args[0]))?0:2);
     }
@@ -50,6 +51,7 @@ public final class ProductLoadProbe {
                 scheduler.scheduleWithFixedDelay(()->{
                     try {
                         var sample=measurements.sample(phase,elapsed());
+                        Files.writeString(output.resolveSibling("samples.jsonl"),JsonMapper.builder().build().writeValueAsString(sample)+"\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
                         synchronized(this){samples.add(sample);checkpoint();}
                     } catch(Exception failure) {samplerFailure.compareAndSet(null,failure.getClass().getSimpleName());}
                 },0,5,TimeUnit.SECONDS);

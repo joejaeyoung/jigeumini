@@ -244,3 +244,14 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - 보강 집중5개가 통과했다. 공식 PostgreSQL16 [constraint trigger](https://www.postgresql.org/docs/16/sql-createtrigger.html)와 [sequence](https://www.postgresql.org/docs/16/functions-sequence.html) 문서(2026-10-26 조회)로 commit 시점 검사와 abort 후 sequence 유지의 계측 범위를 확인했다. sequence를 DB 장애 후 영속 증거로 확장하지 않는다. 보강 commit의 전체 회귀·최종 리뷰/CI는 이어 확인한다.
 
 - 보강 `43bedc2`의 `./scripts/check` 단위147·하네스20·JAR, `./scripts/integration` 실제100개가 모두 통과했다. 정제 근거에 suite/XML·명령 로그 hash·JAR/build ID와 실제 시각을 연결했다. Standards/Spec 각각 지적0·차단0이며 Claude 보강 재리뷰도 APPROVE다. session timeout6초와 Gradle classpath를 확인하고 partition 범위·이전 문단의 회복 순서를 정정했다. T02는 이 합성/로컬 장애 범위에서 검증됨으로 바꾸며, 원천 중복·전체 Exactly-once와 운영 장애는 확장하지 않는다. 최종 문서 HEAD 승인·push/PR CI·병합은 PR #50 통합 게이트에 남긴다.
+
+
+### 2026-10-26 Kafka 디스크 영구 손실 하네스 #45
+
+F15/F11 → T04/T10/T15. origin/develop에서 technicaltest/kafka-disk-loss를 분기했다. #43의30분 실행 동안 원격 CI 컴파일부터 확인하고 소유6노드 실험은 그 종료 뒤 실행한다. raw source를 사용하지 않는다.
+
+기존 LocalKafkaCluster의 owner/project/service/volume mount/다른 참조 검사를 통과한 정지 broker 데이터 volume만 삭제·빈 volume으로 재생성한다. KafkaDiskProbe는 readonly mount에서 FileRecords CRC·offset·leader epoch·key/value digest와 안전한 metadata ID만 기록한다. 실제 classpath class를 실행별 복사/hash하고 매 probe 앞에 대조한다.
+
+recover와 last-copy는 새 cluster를 각각 사용한다. 전자는 ISR2 지속·새 replica 내용 대조·ISR1의 실제 ACK all 거부·최종 ledger 집합을 확인한다. 후자는 stale BASE 디스크를 보존하며 TAIL을 가진 두 최신 디스크의 실제 내용 확인→각각 삭제→empty 상태를 연결한다. stale/빈 disk 복귀의 metadata·ELR·Replay 결과는 관측대로 보존하고, source 조회 불가를0건 복구로 바꾸지 않는다.
+
+사전 Standards/Spec 리뷰는 serializer 누락과 재기동 중 metadata 조회 오류가 후속 복귀를 중단하는 문제를 찾아 수정했다. helper128MiB 예산·고정class/hash를 포함했다. 재리뷰 차단0이며 컴파일/실제 실험 통과를 뜻하지 않는다. 리팩토링 검토에서 소유 cluster 수명·디스크 읽기·시나리오의 책임을 분리하고 제품 producer/소비 계약은 재사용했다.

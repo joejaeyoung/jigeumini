@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.common.Uuid;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 /** #29/#31만 쓰는 소유권이 있는6노드 리허설. 공유 Compose 프로젝트와 이름·네트워크가 다르다. */
 final class LocalKafkaCluster implements AutoCloseable {
@@ -19,6 +21,7 @@ final class LocalKafkaCluster implements AutoCloseable {
     private final Path compose;
     private final List<Integer> ports = new ArrayList<>();
     private boolean started, cleaned;
+    private Path diskProbeClasses;private String diskProbeHash;
     private final Thread cleanupHook = new Thread(this::close, "ha-owned-cleanup");
     LocalKafkaCluster(Path repository) throws Exception {
         compose = repository.resolve("infra/kafka-ha.compose.yaml").toAbsolutePath();
@@ -51,7 +54,7 @@ final class LocalKafkaCluster implements AutoCloseable {
             int power=switch(match.group(2)){case "B"->0;case "kB","KB","KiB"->1;case "MB","MiB"->2;case "GB","GiB"->3;case "TB","TiB"->4;default->throw new IllegalStateException("HA_MEMORY_UNIT");};
             used+=Double.parseDouble(match.group(1))*Math.pow(match.group(2).contains("i")?1024:1000,power);
         }
-        if(used+MAX_CONTAINER_MEMORY>memory*.9)throw new IllegalStateException("HA_MEMORY_HEADROOM");
+        if(used+MAX_CONTAINER_MEMORY+(diskProbeClasses==null?0:128L*1024*1024)>memory*.9)throw new IllegalStateException("HA_MEMORY_HEADROOM");
         // UUID project 충돌을 확인한 뒤 자기 자원만 생성한다.
         if(!compose("ps","--all","--quiet").isBlank()) throw new IllegalStateException("HA_PROJECT_EXISTS");
         started=true;Runtime.getRuntime().addShutdownHook(cleanupHook);
@@ -75,6 +78,72 @@ final class LocalKafkaCluster implements AutoCloseable {
     void startBroker(int id) throws Exception { service("start", "broker",id); }
     void stopController(int id) throws Exception { service("stop", "controller",id); }
     void startController(int id) throws Exception { service("start", "controller",id); }
+    Map<String,Object> freezeDiskProbe(Path directory) throws Exception {
+        if(started||diskProbeClasses!=null)throw new IllegalStateException("HA_DISK_PROBE_ALREADY_PREPARED");
+        diskProbeClasses=Files.createDirectory(directory.toAbsolutePath());
+        Path target=diskProbeClasses.resolve("io/chatpulse/pipeline/KafkaDiskProbe.class");Files.createDirectories(target.getParent());
+        try(var input=KafkaDiskProbe.class.getResourceAsStream("KafkaDiskProbe.class")) {
+            if(input==null)throw new IllegalStateException("HA_DISK_PROBE_MISSING");Files.copy(input,target);
+        }
+        diskProbeHash=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(target)));
+        return Map.of("class","io.chatpulse.pipeline.KafkaDiskProbe","sha256",diskProbeHash,"bytes",Files.size(target));
+    }
+    Map<String,Object> diskSnapshot(int id,String topic) throws Exception {
+        var info=stoppedBroker(id);return probeVolume(volume(info,id),topic,id);
+    }
+    Map<String,Object> eraseBrokerDisk(int id,String topic) throws Exception {
+        var info=stoppedBroker(id);String name=volume(info,id),container=info.path("Id").asText();
+        String references=command(List.of("docker","ps","-a","--no-trunc","--filter","volume="+name,"--format","{{.ID}}"),Map.of(),Duration.ofSeconds(10)).strip();
+        if(!references.equals(container))throw new IllegalStateException("HA_DISK_REFERENCED_ELSEWHERE");
+        compose("rm","-f","broker"+id);
+        command(List.of("docker","volume","rm",name),Map.of(),Duration.ofSeconds(10));
+        if(!command(List.of("docker","volume","ls","--filter","name=^"+name+"$","--format","{{.Name}}"),Map.of(),Duration.ofSeconds(10)).isBlank())throw new IllegalStateException("HA_DISK_DELETE_UNCONFIRMED");
+        command(List.of("docker","volume","create","--label","io.chatpulse.ha.owner="+owner,"--label","com.docker.compose.project="+project,"--label","com.docker.compose.volume=broker"+id+"-data",name),Map.of(),Duration.ofSeconds(10));
+        var empty=probeVolume(name,topic,id);
+        if(((Number)empty.get("directoryEntries")).longValue()!=0||!((Map<?,?>)empty.get("metadata")).isEmpty())throw new IllegalStateException("HA_NEW_DISK_NOT_EMPTY");
+        return Map.of("broker",id,"volume",name,"deletionConfirmed",true,"emptyBeforeFormat",empty);
+    }
+    void recreateBroker(int id) throws Exception {
+        if(!started||id<1||id>3)throw new IllegalArgumentException("HA_NODE");
+        assertOwned();checkVolume(project+"_broker"+id+"-data",id);
+        compose("up","-d","--no-deps","--no-build","--pull","never","broker"+id);
+    }
+    private JsonNode stoppedBroker(int id) throws Exception {
+        if(!started||id<1||id>3)throw new IllegalArgumentException("HA_NODE");assertOwned();
+        String cid=compose("ps","--all","--quiet","broker"+id).strip();if(!cid.matches("[a-f0-9]{64}"))throw new IllegalStateException("HA_DISK_CONTAINER_MISSING");
+        var info=JsonMapper.builder().build().readTree(command(List.of("docker","inspect",cid),Map.of(),Duration.ofSeconds(10))).get(0);
+        var labels=info.path("Config").path("Labels");
+        if(!owner.equals(labels.path("io.chatpulse.ha.owner").asText())||!project.equals(labels.path("com.docker.compose.project").asText())
+            ||!("broker"+id).equals(labels.path("com.docker.compose.service").asText())||info.path("State").path("Running").asBoolean())throw new IllegalStateException("HA_DISK_CONTAINER_SCOPE");
+        return info;
+    }
+    private String volume(JsonNode info,int id) throws Exception {
+        String name=null;
+        for(var mount:info.path("Mounts"))if(mount.path("Destination").asText().equals("/var/lib/kafka/data")) {
+            if(name!=null||!mount.path("Type").asText().equals("volume"))throw new IllegalStateException("HA_DISK_MOUNT_SCOPE");name=mount.path("Name").asText();
+        }
+        checkVolume(name,id);return name;
+    }
+    private void checkVolume(String name,int id) throws Exception {
+        if(!(project+"_broker"+id+"-data").equals(name))throw new IllegalStateException("HA_DISK_VOLUME_SCOPE");
+        var labels=JsonMapper.builder().build().readTree(command(List.of("docker","volume","inspect",name),Map.of(),Duration.ofSeconds(10))).get(0).path("Labels");
+        if(!owner.equals(labels.path("io.chatpulse.ha.owner").asText())||!project.equals(labels.path("com.docker.compose.project").asText())
+            ||!("broker"+id+"-data").equals(labels.path("com.docker.compose.volume").asText()))throw new IllegalStateException("HA_DISK_VOLUME_OWNER");
+    }
+    @SuppressWarnings("unchecked")
+    private Map<String,Object> probeVolume(String name,String topic,int id) throws Exception {
+        checkVolume(name,id);String helper=project+"-disk-probe-"+id;
+        Path classes=diskProbeClasses;
+        if(classes==null||!diskProbeHash.equals(HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(classes.resolve("io/chatpulse/pipeline/KafkaDiskProbe.class"))))))throw new IllegalStateException("HA_DISK_PROBE_CHANGED");
+        try {
+            String output=command(List.of("docker","run","--name",helper,"--label","io.chatpulse.ha.owner="+owner,"--network","none","--read-only","--memory","128m","--cpus","0.5",
+                "--mount","type=volume,src="+name+",dst=/data,readonly","--mount","type=bind,src="+classes+",dst=/probe,readonly","--entrypoint","java","apache/kafka:4.1.2","-Xmx64m","-cp","/opt/kafka/libs/*:/probe","io.chatpulse.pipeline.KafkaDiskProbe","/data",topic),Map.of(),Duration.ofSeconds(30));
+            return JsonMapper.builder().build().readValue(output,Map.class);
+        } finally {
+            String ids=command(List.of("docker","ps","-a","--filter","name=^/"+helper+"$","--filter","label=io.chatpulse.ha.owner="+owner,"--format","{{.ID}}"),Map.of(),Duration.ofSeconds(10)).strip();
+            if(!ids.isBlank())command(List.of("docker","rm","-f",helper),Map.of(),Duration.ofSeconds(10));
+        }
+    }
     private void service(String operation,String kind,int id) throws Exception {
         if(!started||id<1||id>3)throw new IllegalArgumentException("HA_NODE");
         assertOwned();

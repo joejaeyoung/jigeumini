@@ -257,3 +257,14 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 ## 로컬 배포 패키지
 
 `./scripts/deploy-images work/images.json`은 clean commit의 비특권 서버/웹 이미지를 만들고 실제 image ID를 기록한다. 비밀 주입·내부망·migration·readiness·복구 시작 검사는 [배포 계약](deploy/README.md)을 따른다. 외부 배포나 registry push를 하지 않는다.
+
+## Kafka 디스크 영구 손실 검증 #45
+
+```sh
+./scripts/kafka-disk-loss recover work/disk-recover.json
+./scripts/kafka-disk-loss last-copy work/disk-last-copy.json
+```
+
+F15/F11 → T04/T10/T15. 각 실행은 신규 소유6노드·합성 입력으로만 진행한다. `recover`는 follower 디스크 삭제·빈 디스크 재복제·ISR1의 ACK 거부·DB 대조, `last-copy`는 stale baseline 디스크를 보존한 채 최신 tail이 있던 두 디스크를 실제 삭제하여 복구 불가 경계를 확인한다. 소유 label·service·volume mount·다른 container 참조를 확인한 뒤 해당 volume만 삭제한다. 공용/외부 broker에는 실행하지 않는다. class 고정/hash와 stopped replica CRC·offset·payload digest를 기록하며 종료 시 이번 실행 자원을 정리한다.
+
+기존 HA 사전 자원 검사에 readonly probe128MiB를 추가한다. 결과 JSON과 `.probe-classes` 디렉터리는 새 경로여야 한다. [조사·실험 판정](docs/research/KAFKA_DISK_LOSS.md)을 따른다. 실제 실행 결과는 아직 없으며 단일 호스트 volume 삭제를 AZ/power-loss 보장으로 확장하지 않는다.

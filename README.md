@@ -146,6 +146,17 @@ curl --fail http://127.0.0.1:18080/api/operations/observations
 
 표준 출력은 JSON이고 빌드 출력은 stderr다. 실패는 종료 코드 2와 고정 오류 코드로 알린다. 비교 불일치도 코드 2이며 결과의 `equal=false`와 bucket 차이를 확인한다. manifest의 끝 이후 입력과 이미 삭제된 입력은 포함하지 못한다. 실패·취소 run은 자동 재개하지 않으며 새 run으로 다시 실행한다. `status`/`reap`가 죽은 worker의 30초 heartbeat 만료를 확인한다. 자세한 종료 한도·부분 결과·비교 제한은 계약 문서를 따른다. `./scripts/integration`은 실행 JAR를 만들고 실제 Kafka/DB와 별도 JVM으로 이 경로를 검증한다.
 
+## 수집 연결 메모리 진단
+
+F01/F13/F14 → T02/T08/T11/T12/T14, 이슈 #64. 별도 Xmx64MiB JVM에서 합성 loopback READ/heartbeat 연결만 사용한다. Kafka·DB·API 부하·기대 이벤트 저장소 없이 연결 메모리와 종료 후 공유 IO group 등록 수를 검사한다. 공개 원천을 호출하지 않는다.
+
+```bash
+./scripts/collector-memory connections work/collector-connections.json
+./scripts/collector-memory lifecycle work/collector-lifecycle.json
+```
+
+connections는32개 연결2회, lifecycle은8개 연결3회다. 고정 Tomcat 버전의 시험용 내부 계수, GC 관측 heap·스레드·FD 숫자만 기록한다. JVM heap 종료로 완성하지 못한 JSON은 성공 근거가 아니다. 전체 제품 용량은 `scripts/product-load`의 고정 자원 계획으로 별도 확인한다.
+
 ## Kafka 없이 수신만 검사
 
 ```bash

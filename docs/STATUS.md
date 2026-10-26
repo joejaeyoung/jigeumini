@@ -1,12 +1,20 @@
 # 진행 상태
 
-2026-10-26 · 방송 내부 샤딩 재검증·인프라 아키텍처 #67
+2026-10-27 · 수집 연결 메모리·종료 자원 #64
+
+## 수집 연결 메모리·종료 자원 #64
+
+`fix/collector-text-buffer` · [이슈 #64](https://github.com/joejaeyoung/jigeumini/issues/64) · F01/F13/F14 → T02/T08/T11/T12/T14. 기준은 #67 병합 `5048d88`이다.
+
+진행 중. Xmx384MiB/collector640MiB의 기존180채널 계획을 다시 실행해 최고172연결·입력0·JAVA_HEAP_SPACE/exit3을 재현했다. 소유 자원을 정리하고 기존8개 container를 보존했다. 별도 Xmx64MiB·Kafka/DB/기대 이벤트 저장소가 없는 loopback에서도32연결 heap 실패를 재현했다.8연결3회 종료 뒤 Tomcat 공유 IO group 등록 수가0→8→16→24로 남는 별도 수명 문제도 관측했다.
+
+[조사와 진단](research/COLLECTOR_TEXT_MEMORY.md)에 원인 가설·실제 라이브러리 계약·수신1MiB 보존 조건을 기록한다. 작은 청크·유한 전체 메시지 조립과 소유 transport 종료를 보완한 뒤 같은 피드백 루프·전체 제품/연결 경계·회귀를 검증한다. 공개 수집 상한은 변경하지 않는다.
 
 ## 방송 내부 샤딩·인프라 아키텍처 #67
 
 `technicaltest/sharding-architecture` · [이슈 #67](https://github.com/joejaeyoung/jigeumini/issues/67) · F01/F05/F06/F08/F10/F15/F16 → T02/T04/T06/T07/T08/T15/T16.
 
-설계·로컬 재검증 완료. 정확한 최종 HEAD의 Claude 승인·push/PR CI·develop 병합 기록은 #67에 연결된 PR 댓글에서 확인한다. 기존 `sharded-3`의 hot 방송이 실제로 partition2에만 있었음을 확인해 지연 개선의 원인을 샤딩으로 설명한 해석을 정정했다. [공식 조사·원본 감사](research/KAFKA_SHARDING_SOURCES.md), [기존 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md). 원본 계수·p95·DB/replay 대조는 보존하되 인기 방송 분산 효과로 사용하지 않는다.
+완료: [PR #69](https://github.com/joejaeyoung/jigeumini/pull/69)의 최종d7fc0ba Claude APPROVE·push40345203463/PR40345333950 SUCCESS 뒤5048d88로 develop 병합했다. 최종 서버167·실제Kafka/DB136·하네스34·웹29·Chromium31과 exact HEAD는 [게이트 기록](https://github.com/joejaeyoung/jigeumini/pull/69#issuecomment-6419728908)을 따른다. 기존 `sharded-3`의 hot 방송이 실제로 partition2에만 있었음을 확인해 지연 개선의 원인을 샤딩으로 설명한 해석을 정정했다. [공식 조사·원본 감사](research/KAFKA_SHARDING_SOURCES.md), [기존 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md). 원본 계수·p95·DB/replay 대조는 보존하되 인기 방송 분산 효과로 사용하지 않는다.
 
 `96d2cf4`의 [6회 재검증](poc/evidence/sharding-2026-10-26/report/summary.json)은 각 고유30,000·물리30,300·DB30,000·replay 차이0·정리를 통과했다. hot 물리24,300건을8,047/8,117/8,136건으로 실제 분산했다. 소비자3명 반복의 p95는 기존331/660ms, 명시 분할45/52ms였다. 소비자1명 단회는1,259→3,240ms로 악화됐다. 2,000건/s·15초·20채널 전체S3·단순 bucket/P3/RF1 범위이며 운영 최대치로 환산하지 않는다. [명령·환경·검증](poc/evidence/sharding-2026-10-26/execution.json).
 

@@ -559,3 +559,11 @@ hot 물리 24,300건을 8,047/8,117/8,136으로 실제 분산했고 배정 불�
 초기 구현 상태(cda9a19와 같은 source)의 로컬 실제 Kafka/DB 136개가 통과했다. 소비자별 초기 할당 검사를 보완한 상태(96d2cf4와 같은 source)에서 단위 167·하네스 34·JAR 빌드와 실제 LoadExperiment 4개를 통과했다. 실행당 HEAD/작업 트리 검증 범위는 근거 파일에서 구분한다. 리팩토링은 ExperimentRouting에 배정/분포 검사를 모으고 기존 생성·집계·replay·정리 수명을 재사용하는 범위다. 제품 main/web/deploy source는 변경하지 않았다. 최종 HEAD의 Claude 승인·push/PR CI·develop 병합은 PR 댓글로 연결한다.
 
 2026-10-27 KST 최종 Spec 검토는 지적 0건이다. Standards의 비차단 지적 1건을 반영해 공통 보고서의 C4 유휴 할당 문구를 실제 consumer 할당 표본을 확인하는 일반 안내로 고쳤다. 이번 C1/C3 실행에 C4 검증을 포함한 것으로 읽히지 않게 했고 보고서를 정본 정제기로 다시 생성했다. 원본 수치와 summary hash는 동일하다.
+
+## 2026-10-27 · 수집 연결 메모리 재현 #64
+
+사용자의 남은 이슈 처리 요청을 이어 #67을 마무리했다. PR69 최종d7fc0ba의 Claude APPROVE와 push40345203463/PR40345333950 SUCCESS, 양쪽 XML 단위167·실제136·실패/오류/skip0 및 하네스34·웹29·Chromium31을 확인했다. develop의5048d88로 병합하고 #67/보드를 완료했다. 다른 worktree는 변경하지 않았다.
+
+origin/develop에서 fix/collector-text-buffer를 만들고 #64를 진행 중으로 옮겼다. F01/F13/F14 → T02/T08/T11/T12/T14. 깨끗한5048d88의180채널 전체 제품 계획은 최고172연결·입력0·JAVA_HEAP_SPACE·exit3을 재현했다. 실행 소유 자원과 생성 비밀은 정리했고 기존8개 container는 보존했다. 준비한 독립 Xmx64MiB loopback은32연결 heap 실패,8연결3회 종료 뒤 IO group 등록0→8→16→24를 재현했다. 하네스/기대 이벤트 비용과 분리한 실패 경계다.
+
+`diagnose`의 피드백 루프에 따라 큰 문자 버퍼·container 수명·부대 비용의 가설을 분리했다. [공식 source 조사](research/COLLECTOR_TEXT_MEMORY.md)에 partial 수신과 전체 메시지 한도, destroy/공유 group 계약을 기록한다. 청크 버퍼와 완성 메시지 조립을 분리하되1MiB·READ/heartbeat·개인정보 비저장 계약을 유지하고, 종료 자원 문제를 별도로 회귀 검증한다.

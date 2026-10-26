@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+[[ $# == 2 && ( "$1" == connections || "$1" == lifecycle ) ]] || {
+  echo '사용법: ./scripts/collector-memory <connections|lifecycle> <새 결과.json>'
+  exit 2
+}
+[[ ! -e "$2" ]] || { echo 'COLLECTOR_MEMORY_OUTPUT_EXISTS'; exit 2; }
+exec ./gradlew --console=plain :server:collectorMemoryExperiment \
+  -PcollectorMemoryProfile="$1" -PcollectorMemoryOutput="$2"

@@ -1,0 +1,69 @@
+{
+  "scope": "LOCAL_PHYSICAL_PITR_NAMED_TARGET_AND_KAFKA_REALIGNMENT",
+  "owner": "2a6d51b9582842279b9f55ecd202e149",
+  "project": "jigeumini-deploy-2a6d51b9582842279b9f55ecd202e149",
+  "startedAt": "2026-10-26T02:59:08.888952+00:00",
+  "baseline": {
+    "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:b83839d3b337e220b6a43f02e5df365d8bd85952c2678de293134b47a7e08da1",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:4e9f90c417dfdaf234ad0ac9993a28df389db6b2908ddd76e899e3c8cdadfb0a",
+        "sizeBytes": 26068440,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "candidate": {
+    "revision": "4a6b7a82af1396ba80207dd3698687bc35ac0714",
+    "workingTreeDirty": false,
+    "jarSha256": "2207777dbd02d4bb7fbee947211f982e4c4a1f1dcdfeb00309ae2e89fbfa32fb",
+    "buildId": "243a57ad30a6ae551cf76d4147ea1540b26d6db4ef9913fcf75d0f61e49ae0e7",
+    "images": {
+      "server": {
+        "tag": "jigeumini/server:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:b83839d3b337e220b6a43f02e5df365d8bd85952c2678de293134b47a7e08da1",
+        "sizeBytes": 140749855,
+        "user": "10001:10001"
+      },
+      "web": {
+        "tag": "jigeumini/web:4a6b7a82af1396ba80207dd3698687bc35ac0714",
+        "id": "sha256:4e9f90c417dfdaf234ad0ac9993a28df389db6b2908ddd76e899e3c8cdadfb0a",
+        "sizeBytes": 26068440,
+        "user": "101:101"
+      }
+    },
+    "scope": "LOCAL_IMAGES_NO_REGISTRY_PUSH"
+  },
+  "phases": [
+    {
+      "name": "PREPARE",
+      "startedAt": "2026-10-26T02:59:08.889713+00:00",
+      "passed": true,
+      "seconds": 9.975000284612179e-05
+    },
+    {
+      "name": "PREFLIGHT",
+      "startedAt": "2026-10-26T02:59:08.889959+00:00",
+      "passed": false,
+      "seconds": 5.0429784579901025
+    }
+  ],
+  "targetName": "pitr_2a6d51b9582842279b9f55ecd202e149_target",
+  "correct": false,
+  "failureType": "AssertionError",
+  "sensitiveArtifactsRemoved": true,
+  "cleanupComplete": true,
+  "physicalBackupAndArchiveVolumesRemoved": true,
+  "finishedAt": "2026-10-26T02:59:14.002314+00:00"
+}

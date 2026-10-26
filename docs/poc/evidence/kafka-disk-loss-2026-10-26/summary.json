@@ -1,0 +1,82 @@
+{
+  "issue": 45,
+  "featureIds": [
+    "F15",
+    "F11"
+  ],
+  "technicalIds": [
+    "T04",
+    "T10",
+    "T15"
+  ],
+  "scope": "SINGLE_HOST_OWNED_VOLUME_PERMANENT_REMOVAL",
+  "runs": [
+    {
+      "scenario": "recover",
+      "revision": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+      "startedAt": "2026-10-26T02:53:08.474892Z",
+      "finishedAt": "2026-10-26T02:54:24.958684Z",
+      "evidence": "recover.json",
+      "sha256": "11bf08b8214ed79f50f9ab025f8e771da1b9d6c42fe20c397a316a1810508285",
+      "command": "./scripts/kafka-disk-loss recover work/remaining-validation/kafka-disk-recover-01.json",
+      "phasesPassed": 7,
+      "correct": true,
+      "cleanupComplete": true
+    },
+    {
+      "scenario": "last-copy",
+      "revision": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+      "startedAt": "2026-10-26T02:54:35.985606Z",
+      "finishedAt": "2026-10-26T02:57:01.955887Z",
+      "evidence": "last-copy.json",
+      "sha256": "286fd411441f3c2344890d759bb122f89ba3c36524de1c915bd5df985e3bfa19",
+      "command": "./scripts/kafka-disk-loss last-copy work/remaining-validation/kafka-disk-last-copy-01.json",
+      "phasesPassed": 6,
+      "correct": true,
+      "cleanupComplete": true
+    }
+  ],
+  "recovery": {
+    "attempted": 34,
+    "acknowledged": 32,
+    "brokerPhysical": 32,
+    "databaseUnique": 32,
+    "missingAcknowledged": 0,
+    "setDifference": 0,
+    "newDirectoryId": true
+  },
+  "lastCopyLoss": {
+    "baselinePhysicalCopies": 3,
+    "baselineEvents": 10,
+    "tailEvents": 10,
+    "tailPhysicalCopiesBeforeDeletion": 2,
+    "tailPhysicalCopiesAfterDeletion": 0,
+    "allBrokersReturned": true,
+    "metadataTopicIdPreserved": true,
+    "sourceAvailable": false,
+    "captureAndOldManifestCode": "SOURCE_UNAVAILABLE",
+    "databaseUniqueRetained": 20,
+    "sourceRecoverySucceeded": false,
+    "brokerPhysical": null
+  },
+  "limitations": [
+    "소유 volume 삭제가 모델이며 SSD I/O·정전·bit 손상·AZ 장애는 미검증",
+    "마지막 복사본 유실 뒤60초 fullISR 대기와 실제 source 조회 범위; 영원히 leader가 생기지 않는다고 단정하지 않음",
+    "sourceUnavailable를0건 읽기로 기록하지 않으며 읽기 가능한 log의 OFFSET_TRUNCATED 결과는 이번 실행에서 관측하지 않음",
+    "broker incarnation/등록 epoch는 측정하지 않음; 기록된 record leaderEpoch·directoryId·topicId와 구분",
+    "단일 실행·합성32/20건은 운영 처리 용량/복구 SLA가 아님"
+  ],
+  "localCheck": {
+    "revision": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469",
+    "unitTests": 147,
+    "harnessTests": 20,
+    "jarBuild": "PASS"
+  },
+  "integratedCheck": {
+    "revision": "7e0ca6f0d37a7de25e24a9bff2b248738251dc93",
+    "unitTests": 152,
+    "harnessTests": 24,
+    "jarBuild": "PASS",
+    "executedDiskCodeUnchangedFrom": "f992ef12a9e6cbe47b85ff6ca04fd352fd902469"
+  }
+}

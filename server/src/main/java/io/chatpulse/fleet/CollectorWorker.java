@@ -22,6 +22,7 @@ public final class CollectorWorker implements AutoCloseable {
     }
     private record Active(CollectorLeases.Lease lease,ProbeStats stats,Future<?> task) { }
     private final UUID owner=UUID.randomUUID();private final CollectorLeases leases;private final SourceMode mode;private final Limits limits;
+    private final Clock clock;
     private final LeaseAuthority authority=new LeaseAuthority();private final BudgetedChatSource source;
     private final BufferedKafkaPublisher publisher;private final CollectionObserver observer;
     private final AtomicBoolean stop=new AtomicBoolean();private final Set<String> connected=ConcurrentHashMap.newKeySet();
@@ -39,6 +40,12 @@ public final class CollectorWorker implements AutoCloseable {
     }
     public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
                            java.util.function.BiFunction<BufferedKafkaPublisher,BudgetedChatSource,CollectionObserver> observerFactory) {
+        this(leases,mode,limits,source,kafka,topic,observerFactory,Clock.systemUTC());
+    }
+    // 벽시계는 수신·보고 시각에만 사용하며 소유권 기한은 DB 시각과 nanoTime으로 판정한다.
+    public CollectorWorker(CollectorLeases leases,SourceMode mode,Limits limits,ChatSource source,KafkaTemplate<String,byte[]> kafka,String topic,
+                           java.util.function.BiFunction<BufferedKafkaPublisher,BudgetedChatSource,CollectionObserver> observerFactory,Clock clock) {
+        this.clock=Objects.requireNonNull(clock);
         this.leases=leases;this.mode=mode;this.limits=limits;
         if(mode==SourceMode.OFFICIAL_AUTHORIZED||mode==SourceMode.UNOFFICIAL_POC&&limits.capacity()>3)throw new IllegalArgumentException("FLEET_SOURCE_MODE");
         // producer 생성/metadata 대기는 수신 큐를 차지하거나 임대 시간을 소비하기 전에 끝낸다.
@@ -63,7 +70,7 @@ public final class CollectorWorker implements AutoCloseable {
     public UUID owner(){return owner;}
     public Map<String,Object> run() {return run(ignored->{ });}
     public Map<String,Object> run(java.util.function.Consumer<Map<String,Object>> persist) {
-        startedAt=Instant.now();
+        startedAt=clock.instant();
         var hook=new Thread(()->{close();persistResult(persist);},"collector-graceful-stop");Runtime.getRuntime().addShutdownHook(hook);
         long deadline=System.nanoTime()+limits.duration().toNanos();
         try {
@@ -94,7 +101,7 @@ public final class CollectorWorker implements AutoCloseable {
             authority.update(grant,began);
             if(closing)return;
             for(var lease:grant.leases())if(!active.containsKey(lease.channelId())) {
-                var stats=new ProbeStats(lease.channelId());String channel=lease.channelId();
+                var stats=new ProbeStats(lease.channelId(),clock);String channel=lease.channelId();
                 EventSink guarded=new EventSink(){
                     public void accept(List<ChatEvent> events){authority.acquire(channel).check();publisher.accept(events);}
                     public void checkHealthy(){if(stop.get())throw new SourceFailure("COLLECTOR_STOPPING",true);authority.acquire(channel).check();publisher.checkHealthy();}
@@ -105,7 +112,7 @@ public final class CollectorWorker implements AutoCloseable {
                     public void state(String id,String state){if(!state.equals("CONNECTED"))connected.remove(id);}
                     public void ended(UUID session,Instant at,String reason){connected.remove(channel);}
                 }));
-                var task=connections.submit(()->new ChannelProbe(source,guarded,tracking).run(channel,limits.duration(),Duration.ZERO,stats,stop));
+                var task=connections.submit(()->new ChannelProbe(source,guarded,tracking,clock).run(channel,limits.duration(),Duration.ZERO,stats,stop));
                 active.put(channel,new Active(lease,stats,task));
             }
         }
@@ -126,7 +133,7 @@ public final class CollectorWorker implements AutoCloseable {
             boolean released=false;Map<String,Long> held;synchronized(lock){held=held();closed=true;}
             authority.revoke();try{leases.release(owner,held,!failureCode.equals("NONE"));released=true;}catch(Exception failure){if(failureCode.equals("NONE"))failureCode="LEASE_RELEASE_FAILED";}
             var result=new LinkedHashMap<String,Object>();result.put("workerId",owner);result.put("sourceMode",mode);result.put("failureCode",failureCode);
-            result.put("delivery",delivery);result.put("released",released);result.put("httpRequests",source.requests());result.put("completedAt",Instant.now());result.put("startedAt",startedAt==null?Instant.now():startedAt);
+            result.put("delivery",delivery);result.put("released",released);result.put("httpRequests",source.requests());result.put("completedAt",clock.instant());result.put("startedAt",startedAt==null?clock.instant():startedAt);
             result.put("leases",active.values().stream().map(a->Map.of("channelId",a.lease().channelId(),"epoch",a.lease().epoch(),"policyVersion",a.lease().policyVersion(),"stats",a.stats().snapshot(false))).toList());
             result.put("complete",failureCode.equals("NONE")&&Boolean.TRUE.equals(delivery.get("complete"))&&released);finalReport=Map.copyOf(result);
         }

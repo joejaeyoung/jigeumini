@@ -102,3 +102,14 @@ tasks.register('ackExperiment', JavaExec) {
     maxHeapSize = '256m'
     if (project.hasProperty('ackOutput')) args(project.property('ackOutput'))
 }
+
+tasks.register('diskLossExperiment', JavaExec) {
+    description = '소유 Kafka replica 디스크 교체·마지막 복사본 손실 검증'
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.chatpulse.pipeline.KafkaDiskLossExperiment'
+    workingDir = rootProject.projectDir
+    maxHeapSize = '256m'
+    if (project.hasProperty('diskScenario') && project.hasProperty('diskOutput')) args(project.property('diskScenario'), project.property('diskOutput'))
+}

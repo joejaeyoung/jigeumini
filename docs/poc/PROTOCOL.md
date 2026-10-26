@@ -51,6 +51,9 @@ msgTime/messageTime의 정수 epoch milliseconds를 사용한다. 현재보다 5
   PoC는 소수 채널·유한 실행이므로 jitter·공통 rate limiter는 후속 collector에서 추가한다.
 - OFFLINE, 연령 제한, HTTP 4xx/API 접근 거절은 중단한다. 토큰·로그인 경로를 바꿔 재시도하지 않는다.
 - 통계는 합계·최댓값·제한된 종류별 counter만 보관한다. 이벤트 목록을 장기 보관하지 않는다.
+  연결/승인 대기 실패는 원래 실패를 확정한 뒤 소켓을 정리한다. 정리 callback의 WS_CLOSED로 원인을 덮지 않는다.
+  close code는 숫자 최대32종과 OTHER, handshake 실패는 CONNECT/APPROVAL과 TIMEOUT/FAILURE의4종으로 집계한다.
+  외부 close reason·예외 본문·토큰은 보관하지 않는다. 종료 code 자체만으로 종료 원인을 확정하지 않는다.
 - `scripts/poc`는 저장소 루트의 `work/poc.lock`으로 중복 실행을 막는다. 직접 JAR를 실행할 때는 작업 디렉터리 기준이다. 다른 디렉터리·호스트의 lease/fencing은 범위 밖이다.
 
 성공은 실제 관측한 채팅·heartbeat·재접속의 기능 검증이다. 알려지지 않은 원천 누락과 재전송, 강제 재접속 공백을 없애는 보장은 없다.

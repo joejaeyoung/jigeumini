@@ -87,22 +87,27 @@ final class ChatConnection implements AutoCloseable {
             }
             @Override
             public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+                stats.socketClosed(status.getCode());
                 fail(new SourceFailure("WS_CLOSED", false));
             }
         };
         var connecting = client.connect(handler, uri);
+        boolean waitingForApproval = false;
         try {
             socket = connecting.get(10, TimeUnit.SECONDS);
+            waitingForApproval = true;
             ready.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
-            active.set(false);
-            incoming.clear();
+            // 정리 close callback이 원래 연결/승인 실패를 가리지 않게 먼저 보관한다.
+            SourceFailure failure = ended.getNow(null);
+            Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null ? e.getCause() : e;
+            stats.handshakeFailed(waitingForApproval, cause instanceof java.util.concurrent.TimeoutException);
+            if (failure == null) failure = new SourceFailure("HANDSHAKE_TIMEOUT_OR_CONNECT", false);
+            fail(failure);
             stats.disconnected();
             connecting.thenAccept(session -> { try { session.close(); } catch (Exception ignored) { } });
             closeSocket();
-            SourceFailure failure = ended.getNow(null);
-            if (failure != null) throw failure;
-            throw new SourceFailure("HANDSHAKE_TIMEOUT_OR_CONNECT", false);
+            throw failure;
         }
         heartbeat = scheduler.scheduleAtFixedRate(this::tick, 100, 100, TimeUnit.MILLISECONDS);
     }

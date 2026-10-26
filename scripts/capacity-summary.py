@@ -38,7 +38,7 @@ def summarize(directory):
     result['reconciliation']=load.get('reconciliation')
     result['measurementErrors']=run.get('measurementErrors',[])
     source=run.get('syntheticSourceSnapshot',{})
-    result['source']={k:source[k] for k in ('peakConnections','sent','wireBytes','finished','failure','actualSeconds','maximumPacingDelayMillis','protocolErrors','socketErrors','duplicateConnections','statusRequests','tokenRequests','clientPings','clockReference') if k in source}
+    result['source']={k:source[k] for k in ('peakConnections','sent','wireBytes','finished','failure','actualSeconds','maximumPacingDelayMillis','protocolErrors','socketErrors','duplicateConnections','statusRequests','tokenRequests','clientPings','clockReference','closeCodes') if k in source}
     samples=load.get('samples',[])
     fields=('generatorHeapUsedBytes','generatorRssBytes','probeThreadCount','probeOpenFileDescriptors','probeGcMillis','analyzerHeapUsedBytes')
     result['inputMeasurementPeaks']={k:max((s[k] for s in samples if k in s and s.get('phase') in {p['name'] for p in plan['stages']}),default=None) for k in fields}
@@ -46,6 +46,7 @@ def summarize(directory):
     result['databaseCountQueryMillis']={'samples':len(db_queries),'maximum':max(db_queries,default=None),'scope':'PERIODIC_COUNTS_ONLY_WHEN_ENABLED; FINAL_RECONCILIATION_ALWAYS_RETAINED'}
     result['jvmRuntime']={role:next((s[role] for s in samples if role in s),None) for role in ('probeRuntime','analyzerRuntime')}
     result['maximumSampledBufferAgeMillis']=max((s.get('publisher',{}).get('oldestAgeMillis',0) for s in samples),default=None)
+    result['collectorStartup']=load.get('collectorStartup')
     resources=run.get('resourceSamples',[]);cpu={}
     for a,b in zip(resources,resources[1:]):
         seconds=(datetime.datetime.fromisoformat(b['at'])-datetime.datetime.fromisoformat(a['at'])).total_seconds()

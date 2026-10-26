@@ -43,6 +43,9 @@ def summarize(directory):
     result['coverage']=raw.get('analysis',{}).get('measurementCoverage')
     result['clockTimeline']=[{k:sample.get(k) for k in ('phase','startedAtEpochMillis','elapsedSeconds','probeGcMillis','probeThreadCount','generatorHeapUsedBytes','generatorRssBytes','analyzerHeapUsedBytes')} for sample in load.get('samples',[])]
     result['inputStartedAtEpochMillis']=load.get('inputStartedAtEpochMillis')
+    result['sideInputTimings']=[{k:row.get(k) for k in ('scheduledSecond','startedElapsedSeconds','finishedElapsedSeconds','observationAckMillis','outboxMillis')} for row in load.get('sideInputTimings',[])]
+    location=load.get('maximumPacingLocation')
+    result['maximumPacingLocation']={k:location.get(k) for k in ('scheduledSecond','tick','elapsedSeconds','delayMillis','phase')} if location else None
     return result
 
 def main(root,output):

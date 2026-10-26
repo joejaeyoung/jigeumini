@@ -25,6 +25,7 @@ public final class ProductLoadSocketServer {
     private final AtomicLong startAt=new AtomicLong();
     private final AtomicInteger peak=new AtomicInteger(),protocolErrors=new AtomicInteger(),socketErrors=new AtomicInteger(),duplicates=new AtomicInteger();
     private final LongAdder statusRequests=new LongAdder(),tokenRequests=new LongAdder(),pings=new LongAdder();
+    private final ConcurrentMap<String,LongAdder> closeCodes=new ConcurrentHashMap<>();
     private volatile boolean finished;
     private volatile String failure="NONE";
     private volatile double maximumPacingDelay;
@@ -43,7 +44,11 @@ public final class ProductLoadSocketServer {
             @Override public void onOpen(WebSocket connection,ClientHandshake request) { }
             @Override public void onStart() { }
             @Override public void onError(WebSocket connection,Exception error){socketErrors.incrementAndGet();}
-            @Override public void onClose(WebSocket connection,int code,String reason,boolean remote){String channel=connection.getAttachment();if(channel!=null)connections.remove(channel,connection);}
+            @Override public void onClose(WebSocket connection,int code,String reason,boolean remote){
+                String key=(code>=1000&&code<=4999?Integer.toString(code):"OTHER")+"/"+(remote?"REMOTE":"LOCAL")+"/"+(startAt.get()==0?"BEFORE_START_REQUEST":finished?"AFTER_FINISH":"AFTER_START_REQUEST");
+                synchronized(closeCodes){if(!closeCodes.containsKey(key)&&closeCodes.size()>=32)key="OTHER";closeCodes.computeIfAbsent(key,ignored->new LongAdder()).increment();}
+                String channel=connection.getAttachment();if(channel!=null)connections.remove(channel,connection);
+            }
             @Override public void onMessage(WebSocket connection,String text) {
                 try {
                     var message=json.readTree(text);int command=message.path("cmd").asInt();
@@ -120,6 +125,7 @@ public final class ProductLoadSocketServer {
         result.put("clockReference",Map.of("samples",clockSamples,"minimumResidualMillis",minimumClockResidual,"maximumResidualMillis",maximumClockResidual));
         result.put("protocolErrors",protocolErrors.get());result.put("socketErrors",socketErrors.get());result.put("duplicateConnections",duplicates.get());
         result.put("statusRequests",statusRequests.sum());result.put("tokenRequests",tokenRequests.sum());result.put("clientPings",pings.sum());
+        result.put("closeCodes",closeCodes.entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,e->e.getValue().sum())));
         result.put("bufferedConnections",connections.values().stream().filter(WebSocket::hasBufferedData).count());return result;
     }
     private void respond(HttpExchange exchange,int status,Object value) throws java.io.IOException {

@@ -78,6 +78,44 @@ class ChannelProbeTest {
         org.mockito.Mockito.verifyNoInteractions(never);assertThat(((Map<?,?>)stats.snapshot(false).get("reasons")).containsKey("COLLECTION_LEASE_LOST")).isTrue();
     }
 
+    @Test void handshakeFailureIsNotReplacedByTheCloseCallbackDuringCleanup() throws Exception {
+        assertHandshakeFailure(false,"HANDSHAKE_TIMEOUT_OR_CONNECT");
+    }
+
+    @Test void observedTransportFailureIsPreservedDuringHandshakeCleanup() throws Exception {
+        assertHandshakeFailure(true,"WS_TRANSPORT");
+    }
+
+    private void assertHandshakeFailure(boolean transportFailure,String expected) throws Exception {
+        var client=org.mockito.Mockito.mock(ChatSocketClient.class);
+        var socket=org.mockito.Mockito.mock(org.springframework.web.socket.WebSocketSession.class);
+        var handler=new java.util.concurrent.atomic.AtomicReference<org.springframework.web.socket.WebSocketHandler>();
+        var open=new AtomicBoolean(true);
+        org.mockito.Mockito.when(socket.isOpen()).thenAnswer(ignored->open.get());
+        org.mockito.Mockito.doAnswer(call->{
+            open.set(false);handler.get().afterConnectionClosed(socket,org.springframework.web.socket.CloseStatus.NORMAL);return null;
+        }).when(socket).close(org.mockito.ArgumentMatchers.any(org.springframework.web.socket.CloseStatus.class));
+        org.mockito.Mockito.when(client.connect(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any())).thenAnswer(call->{
+            handler.set(call.getArgument(0));handler.get().afterConnectionEstablished(socket);
+            if(transportFailure) {
+                handler.get().handleTransportError(socket,new java.io.IOException("SYNTHETIC_TRANSPORT"));
+                return java.util.concurrent.CompletableFuture.completedFuture(socket);
+            }
+            return java.util.concurrent.CompletableFuture.failedFuture(new java.util.concurrent.TimeoutException());
+        });
+        var stats=new ProbeStats("a".repeat(32));var endedReasons=new CopyOnWriteArrayList<String>();
+        var tracked=new CollectionObserver(){@Override public void ended(java.util.UUID session,java.time.Instant at,String reason){endedReasons.add(reason);}};
+        try(var scheduler=java.util.concurrent.Executors.newSingleThreadScheduledExecutor()) {
+            assertThatThrownBy(()->new ChatConnection(client,scheduler,URI.create("ws://fixture.invalid"),"a".repeat(32),
+                    "room","TEST_ONLY_TOKEN",stats,Duration.ofSeconds(20),Duration.ofSeconds(10),
+                    events->{},tracked,java.time.Clock.systemUTC()))
+                    .isInstanceOf(SourceFailure.class).hasMessage(expected);
+        }
+        assertThat(open).isFalse();assertThat(endedReasons).containsExactly(expected);
+        assertThat(stats.snapshot(false).get("closeCodes")).isEqualTo(Map.of("1000",1L));
+        assertThat(stats.snapshot(false).get("handshakeFailures")).isEqualTo(Map.of(transportFailure?"APPROVAL_FAILURE":"CONNECT_TIMEOUT",1L));
+    }
+
     @Test
     void realWebSocketHandshakeHeartbeatsAndForcedReconnectStayReadOnly() throws Exception {
         server = new FixtureServer(true, false);

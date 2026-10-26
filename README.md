@@ -236,6 +236,8 @@ java -Dloader.path=server/build/classes/java/test \
 `pg_stat_statements`를 켜고 고정 SQL 분류·실행 횟수·시간·블록·WAL 및 JVM 스레드 위치 개수를 남긴다.
 SQL 텍스트·값·스레드 이름·원본 stack은 결과에 넣지 않는다. 진단 자체의 비용은 동일 설정 대조로 해석한다.
 probe 벽시계/단조시계 잔차의 절댓값이 250ms를 넘거나 측정이 없으면 용량 통과로 판정하지 않는다.
+부하 생성기의 `sideInputTimings`는 관측 발행 ACK/outbox 저장 시간, `maximumPacingLocation`은 최대 지연의 예정 초·tick을 기록한다.
+합성 원천과 수집기는 숫자 close code와 고정 단계만 남긴다. 준비 중 연결 오류가 있으면 부하 입력 전에 거부한다.
 [조사와 가설](docs/research/PROJECTION_PERFORMANCE.md)에 계측 범위와 해석 한계를 정리했다.
 로컬 개발 DB의 임시 테이블로 최신 리포트 관측 조회를 대조하려면 `python3 scripts/report-index-probe.py work/report-index.json`을 실행한다. 20,160개 합성 행과 EXPLAIN 숫자만 기록하고 transaction을 rollback한다. 제품 테이블은 변경하지 않는다.
 

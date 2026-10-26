@@ -62,6 +62,7 @@ final class ProductLoadWebSockets implements AutoCloseable {
             Thread.sleep(20); // 연결 시작률 50개/s. 무제한 동시 handshake와 구분한다.
         }
         while(System.nanoTime()<deadline) {
+            check(stats.stream().allMatch(s->((Map<?,?>)s.snapshot(false).get("reasons")).isEmpty()),"COLLECTOR_STARTUP_FAILURE");
             if(stats.stream().allMatch(s->((Number)s.snapshot(false).get("connections")).intValue()==1)) {connectionSeconds=(System.nanoTime()-begin)/1e9;return;}
             check(tasks.stream().noneMatch(Future::isDone),"COLLECTOR_EARLY_EXIT");Thread.sleep(100);
         }
@@ -87,13 +88,16 @@ final class ProductLoadWebSockets implements AutoCloseable {
         return source;
     }
     Map<String,Object> snapshot() {
-        var reasons=new TreeMap<String,Long>();long pongs=0,frames=0,bytes=0;int connected=0;
+        var reasons=new TreeMap<String,Long>();var closeCodes=new TreeMap<String,Long>();var handshakeFailures=new TreeMap<String,Long>();long pongs=0,frames=0,bytes=0;int connected=0;
         for(var state:stats){var value=state.snapshot(false);if(((Number)value.get("connections")).longValue()==1)connected++;
             pongs+=((Number)value.get("serverPongs")).longValue();frames+=((Number)value.get("frames")).longValue();bytes+=((Number)value.get("receivedFrameBytes")).longValue();
-            ((Map<?,?>)value.get("reasons")).forEach((k,v)->reasons.merge(k.toString(),((Number)v).longValue(),Long::sum));}
+            ((Map<?,?>)value.get("reasons")).forEach((k,v)->reasons.merge(k.toString(),((Number)v).longValue(),Long::sum));
+            ((Map<?,?>)value.get("closeCodes")).forEach((k,v)->closeCodes.merge(k.toString(),((Number)v).longValue(),Long::sum));
+            ((Map<?,?>)value.get("handshakeFailures")).forEach((k,v)->handshakeFailures.merge(k.toString(),((Number)v).longValue(),Long::sum));}
         var result=new LinkedHashMap<String,Object>();
         result.putAll(Map.of("requestedChannels",plan.channels(),"connectedOnce",connected,"connectionSeconds",connectionSeconds,"connectionStartsPerSecond",50,"received",received.get(),"serverPongs",pongs,"frames",frames,"frameBytes",bytes,"reasons",reasons));
         result.put("sourceClockErrors",sourceClockErrors.get());
+        result.put("closeCodes",closeCodes);result.put("handshakeFailures",handshakeFailures);
         result.put("sourceScheduledToReceived",sourceDelays.entrySet().stream().collect(java.util.stream.Collectors.toMap(Map.Entry::getKey,e->e.getValue().snapshot())));return result;
     }
     @Override public void close() throws InterruptedException {

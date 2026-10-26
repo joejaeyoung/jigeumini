@@ -48,7 +48,7 @@ named restore point로 고정한 목표이며 임의 timestamp target은 실행�
 
 pg_stat_archiver의 archived_count6·failed_count4를 함께 기록했다. 이번 실행은 필요한segment3개를 모두 확보하고 실제사용·hash를 확인했으나, 앞선archive실패의 원인 로그는 수집하지 않아 미확정이다. archive오류0회나 장기 archive 안정성을 주장하지 않는다.
 
-physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접근 권한0700의 실행 디렉터리 아래 임시 secrets 파일에 두고 Compose secrets로 주입했으며 종료 시 삭제했다. volume·container·비밀 제거를 확인했고 공유 근거는 설정/LSN/파일명/hash/count/코드만 남겼다. 실행 코드 `4a6b7a8`의 `./scripts/check`는 단위147·하네스20·JAR가 통과했다. 통합 `44449cd`의 check는 단위152·하네스24·JAR 통과이며 별도 실행이다.
+physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접근 권한0700의 실행 디렉터리·secrets 디렉터리 아래 권한0444인 임시 파일에 두고 Compose secrets로 주입했으며 종료 시 삭제했다. volume·container·비밀 제거를 확인했고 공유 근거는 설정/LSN/파일명/hash/count/코드만 남겼다. 실행 코드 `4a6b7a8`의 `./scripts/check`는 단위147·하네스20·JAR가 통과했다. 통합 `44449cd`의 check는 단위152·하네스24·JAR 통과이며 별도 실행이다.
 
 ## 리팩토링·리뷰
 
@@ -61,4 +61,4 @@ physical base/archive/PGDATA는 소유 volume에 두었다. 생성 비밀은 접
 4a6b7a8 대비 통합3986b15의 main resources·deploy 전체(DB 초기화/Dockerfile 포함)·이미지 생성 스크립트·web·루트 Gradle 설정도 불변이다. server/build.gradle은 디스크 시험용 JavaExec task만 추가했고 제품 의존성은 바꾸지 않았다. 44449cd→3986b15는 문서/근거만 변경됐다. 이 경로별 대조는 통합 JAR와 실제 실행한4a6b7a8 이미지의 byte 동일성을 주장하지 않는다.
 
 
-#60 통합과 문서 보완을 포함한 `4e16f50a172afcf975d36f88e5629df4f997c62e`의 [기본 검사](poc/evidence/postgres-pitr-2026-10-26/integrated-check.json)는 단위159·하네스24·JAR 통과다. [경로 감사](poc/evidence/postgres-pitr-2026-10-26/path-audit.json)에 실제 실행4a6b7a8 대비 PITR/배포 실행기·deploy·DeploymentProbe·PocApplication·operations/pipeline/db·resources/web·루트Gradle 불변을 기록했다. #60의 fleet 임대 경로는 이 analyzer/recovery 시나리오와 구분한다. 새 이미지로 PITR를 다시 실행하거나 JAR 전체의 byte 동일성을 확인한 것은 아니다.
+#60 통합과 문서 보완을 포함한 `4e16f50a172afcf975d36f88e5629df4f997c62e`의 [기본 검사](poc/evidence/postgres-pitr-2026-10-26/integrated-check.json)는 단위159·하네스24·JAR 통과다. [경로 감사](poc/evidence/postgres-pitr-2026-10-26/path-audit.json)에 실제 실행4a6b7a8 대비 PITR/배포 실행기·deploy·DeploymentProbe·PocApplication·operations/pipeline/db·quality/categories/reports/notifications/observations/replay·resources/web·루트Gradle·wrapper 불변을 기록했다. server/build.gradle의 차이는 디스크 시험 JavaExec task 추가이며 제품 의존성은 바뀌지 않았다. 전체 main source 변경 파일은 fleet의 CollectorLeases/CollectorWorker와 poc의 ChannelProbe/ChatConnection/ProbeStats다. 나열한 감사 경로 밖의 이 변경을 분석기 전체 또는 JAR 전체의 불변으로 확대하지 않는다. #60의 fleet 임대 경로는 이 analyzer/recovery 시나리오와 구분한다. 새 이미지로 PITR를 다시 실행하거나 JAR 전체의 byte 동일성을 확인한 것은 아니다.

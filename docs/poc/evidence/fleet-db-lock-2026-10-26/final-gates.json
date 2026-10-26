@@ -1,0 +1,55 @@
+{
+  "issue": 60,
+  "pr": 58,
+  "head": "14816f892d2aca61ae3398675718c2ea1ad48338",
+  "reviewSession": "5bbf2a23-44d7-4b37-ac44-5a1d8f71af54",
+  "runs": [
+    {
+      "event": "push",
+      "run": 40269412503,
+      "conclusion": "SUCCESS",
+      "suites": {
+        "test": {
+          "tests": 159,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "integrationTest": {
+          "tests": 135,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    },
+    {
+      "event": "pr",
+      "run": 40269417146,
+      "conclusion": "SUCCESS",
+      "suites": {
+        "test": {
+          "tests": 159,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        "integrationTest": {
+          "tests": 135,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      }
+    }
+  ],
+  "merge": {
+    "mergeCommit": {
+      "oid": "0b46c814914529a8d7a593b93bcfc2d61bf3cbf2"
+    },
+    "mergedAt": "2026-10-26T06:21:21Z",
+    "state": "MERGED"
+  },
+  "sharedGateWithIssue": 44,
+  "xmlHashEvidence": "../collector-boundaries-2026-10-26/final-gates.json"
+}

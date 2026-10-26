@@ -1,0 +1,17 @@
+{
+  "run": 40269809554,
+  "head": "4e16f50a172afcf975d36f88e5629df4f997c62e",
+  "matchedLogLines": [
+    "tech-goals\tUNKNOWN STEP\t2026-10-26T04:35:04.7602664Z Ran 24 tests in 1.415s",
+    "web\tUNKNOWN STEP\t2026-10-26T04:35:16.4053442Z  Test Files  10 passed (10)",
+    "web\tUNKNOWN STEP\t2026-10-26T04:35:16.4063724Z       Tests  29 passed (29)",
+    "web\tUNKNOWN STEP\t2026-10-26T04:36:33.0125152Z   31 passed (55.2s)",
+    "server\tUNKNOWN STEP\t2026-10-26T04:35:07.9600556Z Ran 24 tests in 0.885s"
+  ],
+  "counts": {
+    "harness": 24,
+    "webUnit": 29,
+    "chromium": 31
+  },
+  "scope": "PR57 최종 HEAD의 GitHub Actions 로그에서 완료 행만 정제했다. 새 실방송 또는 운영 환경 검증이 아니다."
+}

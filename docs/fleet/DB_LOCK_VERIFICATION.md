@@ -38,3 +38,9 @@ DB SQLSTATE 분류는 CollectorLeases의 transaction 완료 경계에 모으고,
 `f37a4c0...ea7da9b`의 읽기 전용 Standards는 하드/heuristic/차단0, Spec은 지적/차단0이었다. 두 리뷰는 코드·명세·원본 hash를 검사했으며 직접 테스트를 실행하거나 최종 CI 성공을 판정한 기록은 아니다.
 
 DB backend 표본은 최대100개로 제한한다. 표본 수를 지속 시간으로 환산하지 않으며 인계 시간은 별도 nanoTime 경계로 측정한다. 최초 표본 수 차이만으로 실행 간 부하나 복구 속도를 비교하지 않는다.
+
+## 최종 리뷰의 진단 해석
+
+- SQL 사이에 JVM이2초 넘게 정지하면 정상 worker의 transaction도 서버 유휴 제한으로 종료될 수 있다. 보유 임대는 실패 종료하며 재시도 허용 목록은55P03 하나다. 유휴 종료 오류를 별도로 합성 주입한 단위 시험은 없다.
+- 미배정 worker의 잠금 충돌 재시도 소진도 `COLLECTION_LEASE_LOST`로 보고한다. 이 코드만으로 이전 임대 보유를 추론하지 않는다.
+- `apply`·`tick`·`release`가 모두 같은 `lock()`을 호출하는 것을 확인했다. 충돌 재시도 분류는 transaction 종료 뒤 `tick`에만 있다.

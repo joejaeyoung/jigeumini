@@ -1,0 +1,168 @@
+{
+  "formatVersion": 1,
+  "scope": "LOCAL_SYNTHETIC_SIMPLE_PROJECTION_ROUTING_COMPARISON",
+  "startedAt": "2026-10-26T14:49:58.599853+00:00",
+  "finishedAt": "2026-10-26T14:54:08.811960+00:00",
+  "codeCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+  "mainTree": "10e2f9a905573a03e13e1df94b345e9aa9269c91",
+  "webTree": "b70abf96847bbb822e40a259c5e948c3f905f7a1",
+  "runtimeClassesSha256": "847e9430c6e34ccb05db49b8f4a7e34f2746d1e1aa9936a9f8696551ac1fdf76",
+  "eventTimeBase": "2026-10-26T14:49:56Z",
+  "environment": {
+    "dockerVmCpu": 8,
+    "dockerVmMemoryBytes": 8217145344,
+    "client": {
+      "maxHeapBytes": 805306368,
+      "replicationFactor": 1,
+      "postgresql": "16.14",
+      "processors": 15,
+      "os": "Mac OS X",
+      "architecture": "aarch64",
+      "brokers": 1,
+      "java": "21.0.11",
+      "kafka": "4.1.2",
+      "acks": "all",
+      "kafkaMaxInFlight": 1,
+      "poolMaximum": 4
+    },
+    "sharedHost": true,
+    "sharedHostOtherLoadMeasured": false
+  },
+  "executionSourceSha256": "1182ba3fce7b23be7df9fda08d4315a02e070a8c1bf1ab00429d8af759c42752",
+  "runnerSha256": "bd5b6b09c8c12f349375b1ed3e283865e268f80b4437161fcbe6a7e6636f44bf",
+  "commands": [
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-control-3",
+        "work/sharding-67/00-shard-control-3.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "00-shard-control-3.json",
+      "sha256": "909ee81d91ab0a476432e343ce9a13534ee7bcbedb5192874c17a5489575c277"
+    },
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-explicit-3",
+        "work/sharding-67/01-shard-explicit-3.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "01-shard-explicit-3.json",
+      "sha256": "a7fa4a28e010efcc3974017bf790ec745a82d869e3dc9335960af8227a4bd2cc"
+    },
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-explicit-3",
+        "work/sharding-67/02-shard-explicit-3.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "02-shard-explicit-3.json",
+      "sha256": "67ec087f01019672d081fbaf22ed63c94b6dfb82e2b17c2d013c8418be11a864"
+    },
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-control-3",
+        "work/sharding-67/03-shard-control-3.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "03-shard-control-3.json",
+      "sha256": "3a98ace58595eeaf0383d821554716c3b2e2e8c5c1edb0a56dbf0c8fc60ba68f"
+    },
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-control-1",
+        "work/sharding-67/04-shard-control-1.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "04-shard-control-1.json",
+      "sha256": "827930b81d32230b8b5b5f8ff9399f11a8dfbb33ca2e6f2c45830e0682f6d012"
+    },
+    {
+      "command": [
+        "./scripts/experiment",
+        "shard-explicit-1",
+        "work/sharding-67/05-shard-explicit-1.json",
+        "2026-10-26T14:49:56Z"
+      ],
+      "exitCode": 0,
+      "file": "05-shard-explicit-1.json",
+      "sha256": "283a2b590fb07fa456fbf26d19a498d5405c53a735a7a070f1213a57377598e6"
+    }
+  ],
+  "reportCuration": {
+    "command": [
+      "python3",
+      "scripts/summarize-experiments.py",
+      "docs/poc/evidence/sharding-2026-10-26/report",
+      "work/sharding-67/00-shard-control-3.json",
+      "work/sharding-67/01-shard-explicit-3.json",
+      "work/sharding-67/02-shard-explicit-3.json",
+      "work/sharding-67/03-shard-control-3.json",
+      "work/sharding-67/04-shard-control-1.json",
+      "work/sharding-67/05-shard-explicit-1.json"
+    ],
+    "curatorSha256": "922763b212e49af70a0f4c7d72dde87bd8797836ba01ba143b43d8253b24c4d2",
+    "summarySha256": "cf542617472d285bafd8933c97a7ca07aafec98ced18728b5b87ae9d54409a74",
+    "provenance": "report/* is produced by the listed canonical curator; this execution metadata is a manually selected summary of execution.json and local verification records"
+  },
+  "cleanup": {
+    "ownedRunResourcesRemoved": true,
+    "runCount": 6,
+    "preexistingRunningContainerCountBefore": 8,
+    "preexistingRunningContainerCountAfter": 8,
+    "preexistingIdsAndNamesPreserved": true,
+    "beforeSnapshotSha256": "d308c8d1849380eba8dcff4716c8cfb032648aae1c0d4f1c92de3ecf8a475d0f",
+    "afterSnapshotSha256": "d308c8d1849380eba8dcff4716c8cfb032648aae1c0d4f1c92de3ecf8a475d0f"
+  },
+  "validation": [
+    {
+      "command": "./scripts/check",
+      "unitTests": 167,
+      "harnessTests": 34,
+      "jarBuilt": true,
+      "logSha256": "d1e545bc45e78a004bd75bfcdd2a7c3ada8df31e5a622ab58128df0dc76926bc",
+      "sourceState": "WORKING_TREE_BEFORE_RECORDING_COMMIT",
+      "sourceMatchesCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "scope": "local tests; exact final committed HEAD is verified separately by CI"
+    },
+    {
+      "command": "./scripts/integration",
+      "integrationTests": 136,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "logSha256": "08baeb3cbeb9b0d8304fc05e7472a4addd55007cf7ba18afc3f42e5c53a719ab",
+      "sourceState": "WORKING_TREE_BEFORE_RECORDING_COMMIT",
+      "sourceMatchesCommit": "cda9a19b45ad76c3b6f1c78d880fee8d3d147c59",
+      "scope": "local tests; exact final committed HEAD is verified separately by CI"
+    },
+    {
+      "command": "./gradlew --console=plain :server:integrationTest --tests io.chatpulse.pipeline.LoadExperimentIntegrationTest",
+      "integrationTests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "logSha256": "a7b01e972ac601ef941b395265f6fa1bffc404ab3cfb072b3cb05ad3eb57aee1",
+      "sourceState": "WORKING_TREE_BEFORE_RECORDING_COMMIT",
+      "sourceMatchesCommit": "96d2cf4592bb8c1b7142e12c965dfaf6c8674fcd",
+      "scope": "local tests; exact final committed HEAD is verified separately by CI"
+    }
+  ],
+  "limitations": [
+    "15-second simple bucket projection; not all product projections/API/collector",
+    "All 20 synthetic channels use S3; mixed hot S3/ordinary S1 is not tested",
+    "C3 two repetitions per routing with reverse second-pair order; C1 one run per routing",
+    "One broker/RF1/shared PostgreSQL and host; external/HA/long-duration capacity not established",
+    "Lag/resource snapshots 3 or 4 per run; snapshot cost about 2.7-2.8 seconds; maxima between snapshots unknown",
+    "No new live source connections or external deployment"
+  ]
+}

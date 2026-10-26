@@ -43,7 +43,7 @@ def summarize(path):
                metricsAScope=data.get('metricsAScope', 'ALL_GROUP_MEMBERS'), postInputDrainSeconds=data.get('postInputDrainSeconds'),
                expectedBucketsMatch=data.get('expectedBucketsMatch'), replayManifest=data.get('replayManifest'),
                replayBucketDifferences=data.get('replayBucketDifferences'), replaySeconds=data.get('replaySeconds'),
-               appendOrderAudit=data.get('appendOrderAudit'), events=data.get('events'), failureCode=data.get('failureCode'))
+               appendOrderAudit=data.get('appendOrderAudit'), routingAudit=data.get('routingAudit'), events=data.get('events'), failureCode=data.get('failureCode'))
     row['countConservation'] = (data.get('attemptedRecords') == producer.get('accepted', 0) + producer.get('rejected', 0)
                                and producer.get('accepted') == producer.get('acknowledged', 0) + producer.get('unconfirmed', 0))
     row['resourcePeaks'] = {k: maximum(samples, k) for k in ['clientHeapUsedBytes', 'clientRssBytes', 'clientCpuLoad',
@@ -117,7 +117,7 @@ def main():
         '입력률/commit률은 표본 차분이다. Kafka·DB 조회는 원자적 snapshot이 아니며 표본 간 비용과 오차가 있다.',
         '회복 시간은 재개 뒤 최초 0 lag 표본까지의 관측 상한이다. 표본 사이 순간 최대 lag/정확한 회복 시각은 모른다.',
         'JVM 메모리는 계측용 eventId/지연 표본도 포함한다. Docker CPU/메모리/IO는 공유 서비스 전체 값이다.',
-        '균등 채널이 균등 partition을 뜻하지 않는다. 3 partitions에서 4번째 consumer의 유휴 할당을 실제 표본으로 확인한다.',
+        '균등 채널이 균등 partition을 뜻하지 않는다. consumer 수와 실제 partition 할당은 groupMeasurements의 관측 표본에서 확인한다.',
         '복제 HA·외부 네트워크·다중 호스트·실방송·장기 디스크 보존·전체 제품 projection의 동시 비용은 검증하지 않았다.',
     ]
     totals = f"전체 {len(rows)}회 · 원본 입력 목표 완료 {sum(r['outcome']=='TARGET_INPUT_COMPLETED' for r in rows)}회 · 목표 미달 {sum(r['outcome']=='TARGET_INPUT_NOT_COMPLETED' for r in rows)}회 · 대조 실패 {sum(not r['correct'] or not r['cleanupComplete'] for r in rows)}회 · 계측 확인 필요 {sum(bool(r['measurementIssueCodes']) for r in rows)}회 · 볼륨 정리 근거 없음 {sum(bool(r['cleanupIssueCodes']) for r in rows)}회"

@@ -7,6 +7,24 @@ import static org.assertj.core.api.Assertions.*;
 
 @Tag("integration")
 class LoadExperimentIntegrationTest {
+    @Test void explicitShardsActuallySplitTheHotChannelAndReplayWithoutKeyRewriting() throws Exception {
+        Path output=Path.of("../work/shard-test-"+UUID.randomUUID()+".json");LoadExperiment.quiet();
+        try {
+            var result=LoadExperiment.run(ExperimentPlan.named("shard-smoke"),output,null,false);
+            assertThat(result.get("correct")).as("sanitized experiment result: %s",result).isEqualTo(true);
+            assertThat(result.get("cleanupComplete")).isEqualTo(true);
+            assertThat(result.get("generatedUnique")).isEqualTo(200L);
+            assertThat(result.get("attemptedRecords")).isEqualTo(202L);
+            assertThat(result.get("replayBucketDifferences")).isEqualTo(0L);
+            assertThat(result.get("replayKeyNormalization")).isEqualTo("NONE");
+            var audit=(Map<?,?>)result.get("routingAudit");
+            assertThat(audit.get("splitVerified")).isEqualTo(true);
+            assertThat(audit.get("hotPartitionCount")).isEqualTo(3L);
+            assertThat(audit.get("misplacedRecords")).isEqualTo(0L);
+            assertThat(((Map<?,?>)result.get("databaseA")).get("processedEvents")).isEqualTo(200L);
+        } finally {Files.deleteIfExists(output);Files.deleteIfExists(output.resolveSibling(output.getFileName()+".html"));Files.deleteIfExists(output.resolveSibling(output.getFileName()+".progress.json"));}
+    }
+
     @Test void liveBaselineReadsMissingAndPartialTablesWithoutMigratingThem() {
         String schema="exp_empty_"+UUID.randomUUID().toString().replace("-","");
         var root=new org.springframework.jdbc.core.JdbcTemplate(IntegrationSupport.ds("public"));root.execute("CREATE SCHEMA "+schema);

@@ -1,6 +1,16 @@
 # 진행 상태
 
-2026-10-26 · 수집·집계·조회 용량 경계 #62 실측·운영 후보 정리
+2026-10-26 · 방송 내부 샤딩 재검증·인프라 아키텍처 #67
+
+## 방송 내부 샤딩·인프라 아키텍처 #67
+
+`technicaltest/sharding-architecture` · [이슈 #67](https://github.com/joejaeyoung/jigeumini/issues/67) · F01/F05/F06/F08/F10/F15/F16 → T02/T04/T06/T07/T08/T15/T16.
+
+설계·로컬 재검증 완료. 정확한 최종 HEAD의 Claude 승인·push/PR CI·develop 병합 기록은 #67에 연결된 PR 댓글에서 확인한다. 기존 `sharded-3`의 hot 방송이 실제로 partition2에만 있었음을 확인해 지연 개선의 원인을 샤딩으로 설명한 해석을 정정했다. [공식 조사·원본 감사](research/KAFKA_SHARDING_SOURCES.md), [기존 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md). 원본 계수·p95·DB/replay 대조는 보존하되 인기 방송 분산 효과로 사용하지 않는다.
+
+`96d2cf4`의 [6회 재검증](poc/evidence/sharding-2026-10-26/report/summary.json)은 각 고유30,000·물리30,300·DB30,000·replay 차이0·정리를 통과했다. hot 물리24,300건을8,047/8,117/8,136건으로 실제 분산했다. 소비자3명 반복의 p95는 기존331/660ms, 명시 분할45/52ms였다. 소비자1명 단회는1,259→3,240ms로 악화됐다. 2,000건/s·15초·20채널 전체S3·단순 bucket/P3/RF1 범위이며 운영 최대치로 환산하지 않는다. [명령·환경·검증](poc/evidence/sharding-2026-10-26/execution.json).
+
+[도입 검토](pipeline/SHARDING_REVIEW.md)에 key·전체 shard 품질·consumer 병렬화·채널 잠금·전환·replay/복구 계약을 정리했다. 제품 후보는 hot S3/일반 S1이며 #65 병목 진단 뒤 [#68 전체 제품 검증](https://github.com/joejaeyoung/jigeumini/issues/68)에서 채택을 판단한다. 제품 샤딩은 활성화하지 않았다. [인프라 아키텍처](design/INFRASTRUCTURE.md)는 현재 배치·HA 후보·용량 근거를 연결하며 운영 사양/비용·서비스 전체 HA와 #48/#49 외부 검증은 미확정이다.
 
 ## 수집·집계·조회 용량 경계 #62
 
@@ -184,7 +194,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T04 | 검증됨 | [이전 schema 복원·보존 입력 재생](DEPLOYMENT_MIGRATION_VERIFICATION.md), [재처리 후속 진단](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md), [리포트 active 보호·정리](api/REPORTS_VERIFICATION.md), [관측7일 보존](api/OBSERVATIONS_VERIFICATION.md), [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [실제 디스크 유실](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md) , [physical PITR](POSTGRES_PITR_VERIFICATION.md) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변  #45 단일 replica 삭제/재구성·ISR1 ACK거부·최신tail copy0의 SOURCE_UNAVAILABLE 확인.  #46 named target pause/승격·새6group 재정렬·보존입력10건 재생·선택 snapshot차이0·WAL누락/retention gap 거부. | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
 | T05 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 검증됨 | [고정/증설·복수 producer·늦은 시각](pipeline/EXPERIMENTS_VERIFICATION.md), [카테고리 결합](api/CATEGORIES_VERIFICATION.md) | 로컬3partition에서 채널 배치·append/eventTime 차이, 동일UUID 재전달·두producer bucket 정합성, 실제3→6증설의 키 이동·기존manifest 거부 | 실방송 전역 순서/외부 원천 중복 제거 보장이 아님; 운영 증설은 별도 이행 |
-| T07 | 검증됨 | [균등/80% 편향·shard 대조](pipeline/EXPERIMENTS_VERIFICATION.md) , [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md) | 동일입력30000/물리30300, channelId/shard3의 partition·lag·p95/p99·DB/replay 대조; 현재 제품키 channelId 유지 결정  전체 제품 uniform/hot100/s120초의 partition별 분포와 tail 지연 관측. #62 균등 2,000/s는 60/120초 단기 기준을 통과했으나 lag 증가 추세다. 80% 편향 2,000/s는 적체됐다. | 단일호스트·단회 측정. shard는 품질/offset 계약 이행 전 제품 채택 안 함 |
+| T07 | 부분 검증 | [편향 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md), [샤딩 재검증·도입 검토](pipeline/SHARDING_REVIEW.md), [6회 근거](poc/evidence/sharding-2026-10-26/report/summary.json), [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md) | 기존 suffix의 hot 분산 해석을 철회. 명시 분할 실제3partition·DB/replay 일치. C3 p95 기존331/660ms·분할45/52ms, C1 단회1,259→3,240ms 악화. 전체 제품은2,000건/s 단기 통과에도 category lag 증가. | 15초 단순 bucket 결과로 운영 채택/최대치를 정하지 않음. #65 SQL/잠금/계측 진단과 #68 전체 shard 품질·관측·전환·복구/지속 부하 대조 뒤 판단 |
 | T08 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md); [시작 metadata 경계](research/FLEET_STARTUP.md), [용량 경계](CAPACITY_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한  그룹6개·API8경로·30분 지속, STOP 중 양수 lag와 CONT 후 고정 end/ready 회복 확인. #62 6개 group의 지속 증가·watermark와 동시 API 부하로 pass/fail 경계 측정. | 전체 제품 동시 부하는 #43 단일호스트·RF1 범위로 검증. 자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인. 장기 DB/실제 원천 용량은 별도. |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) , [실제 디스크 유실](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절  #45 단일 replica 삭제/재구성·ISR1 ACK거부·최신tail copy0의 SOURCE_UNAVAILABLE 확인. | 소유 volume 삭제·단일호스트 범위; 물리 정전/bit 손상·AZ 내구성 미검증 |

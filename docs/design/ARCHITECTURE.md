@@ -2,6 +2,8 @@
 
 2026-10-25 · v0.2 · 기술 기준: Spring Boot + Apache Kafka + PostgreSQL
 
+이 문서는 구현 전 기준선이다. 현재 P3·API/분석기 한 JVM·fleet·배포 패키지와 운영 HA 후보는 [현재 인프라 아키텍처](INFRASTRUCTURE.md)를 따른다. 아래 P6·실행 프로필·미구현 기능의 초안을 현재 구성으로 해석하지 않는다.
+
 ## 1. 시스템 개요
 
 ```mermaid

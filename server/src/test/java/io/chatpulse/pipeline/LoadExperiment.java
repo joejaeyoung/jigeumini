@@ -114,10 +114,10 @@ public final class LoadExperiment {
             admin=Admin.create(Map.of("bootstrap.servers",BOOTSTRAP,"default.api.timeout.ms",10000,"request.timeout.ms",5000));topicCreated=true;KafkaSupport.ensureTopic(BOOTSTRAP,topic);
             producerFactory=KafkaSupport.producerFactory(BOOTSTRAP);kafka=new KafkaTemplate<>(producerFactory);
             if(plan.product())serial=ExperimentBufferedPublisher.product(kafka,topic,1000);
-            else if(plan.serial())serial=ExperimentBufferedPublisher.legacy(kafka,topic,1000);else async=new ExperimentPublisher(kafka,topic,1000,plan.sharded());
-            if(plan.twoProducers()) {secondFactory=KafkaSupport.producerFactory(BOOTSTRAP);secondKafka=new KafkaTemplate<>(secondFactory);secondAsync=new ExperimentPublisher(secondKafka,topic,1000,plan.sharded());}
+            else if(plan.serial())serial=ExperimentBufferedPublisher.legacy(kafka,topic,1000);else async=new ExperimentPublisher(kafka,topic,1000,plan.routing());
+            if(plan.twoProducers()) {secondFactory=KafkaSupport.producerFactory(BOOTSTRAP);secondKafka=new KafkaTemplate<>(secondFactory);secondAsync=new ExperimentPublisher(secondKafka,topic,1000,plan.routing());}
             for(int i=0;i<plan.consumers();i++)add(false);if(plan.independent())add(true);
-            until(30,()->assigned(consumersA)==3&&(!plan.independent()||assigned(consumersB)==3));
+            until(30,()->fullyAssigned(consumersA)&&(!plan.independent()||fullyAssigned(consumersB)));
             if(plan.name().equals("heartbeat")) {
                 child=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin","java").toString(),"-Xmx128m","-cp",System.getProperty("integration.classpath",System.getProperty("java.class.path")),ExperimentPausedConsumer.class.getName(),schema,topic,groupA).redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
                 until(30,()->child.isAlive()&&assigned(consumersA)>0&&assigned(consumersA)<3);
@@ -126,7 +126,7 @@ public final class LoadExperiment {
         ProjectionStore store(String projection) {var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);return new ProjectionStore(jdbc,tx,codec,projection,"experiment");}
         void add(boolean independent) {
             var factory=KafkaSupport.consumerFactory(BOOTSTRAP,independent?groupB:groupA,"earliest");if(plan.pollStall())factory.updateConfigs(Map.of("max.poll.interval.ms",6000));
-            if(plan.sharded())factory.addPostProcessor(consumer->normalizePoll(consumer));
+            if(plan.routing()==ExperimentRouting.SUFFIX_HASH)factory.addPostProcessor(consumer->normalizePoll(consumer));
             var consumer=new ProjectionConsumer(factory,topic,store(independent?"load-b":"load-a"),records->{
                 (independent?metricsB:metricsA).committed(records);
                 if(!independent&&plan.pollStall()&&started>0&&elapsed()>8&&stalled.compareAndSet(false,true)) {event("POLL_STALL_BEGIN");sleep(8000);event("POLL_STALL_END");}
@@ -140,7 +140,7 @@ public final class LoadExperiment {
             });
         }
         ConsumerRecord<String,byte[]> normalize(ConsumerRecord<String,byte[]> record) {
-            if(!plan.sharded())return record;
+            if(plan.routing()!=ExperimentRouting.SUFFIX_HASH)return record;
             if(record.key()==null||!record.key().matches("[a-f0-9]{32}/[0-2]"))throw new IllegalArgumentException("EXPERIMENT_SHARD_KEY");
             return new ConsumerRecord<>(record.topic(),record.partition(),record.offset(),record.key().substring(0,32),record.value());
         }
@@ -235,14 +235,18 @@ public final class LoadExperiment {
             UUID id=UUID.randomUUID();long begin=System.nanoTime();
             var maximumEventTimes=new HashMap<String,Instant>();var keyPartitions=new TreeMap<String,Set<Integer>>();long regressions=0,recordsRead=0,nextResourceCheck=0;
             var replayResources=new ArrayList<Map<String,Object>>();
+            var hotCounts=new TreeMap<Integer,Long>();long misplacedRecords=0;
+            String hotChannel=input(0).channelId();
             try(var source=new ReplaySource(BOOTSTRAP,topic,id)) {
-                var manifest=source.capture(null,null);result.put("replayManifest",manifest);result.put("replayKeyNormalization",plan.sharded()?"EXPERIMENT_SHARD_PREFIX_REMOVAL":"NONE");source.assign(manifest);
+                var manifest=source.capture(null,null);result.put("replayManifest",manifest);result.put("replayKeyNormalization",plan.routing()==ExperimentRouting.SUFFIX_HASH?"EXPERIMENT_SHARD_PREFIX_REMOVAL":"NONE");source.assign(manifest);
                 var ranges=new HashMap<Integer,ReplayManifest.Range>();manifest.partitions().forEach(range->ranges.put(range.partition(),range));
                 var tx=new TransactionTemplate(new DataSourceTransactionManager(ds));tx.setTimeout(20);var replay=new ProjectionStore(jdbc,tx,codec,"replay",id.toString());var next=new HashMap<Integer,Long>();for(var range:manifest.partitions())next.put(range.partition(),range.start());
                 while(manifest.partitions().stream().anyMatch(r->next.get(r.partition())<r.end())) {
                     if((System.nanoTime()-begin)>TimeUnit.SECONDS.toNanos(300))throw new IllegalStateException("EXPERIMENT_REPLAY_TIMEOUT");if(guardResources&&System.nanoTime()>=nextResourceCheck){replayResources.add(ExperimentResources.sample(admin,topic,jdbc,schema,outputDirectory));nextResourceCheck=System.nanoTime()+TimeUnit.SECONDS.toNanos(10);}
                     source.validate(manifest);var batch=new ArrayList<ConsumerRecord<String,byte[]>>();
                     for(var record:source.poll()) {var range=ranges.get(record.partition());if(range==null)throw new IllegalStateException("EXPERIMENT_PARTITION_CHANGED");if(record.offset()>=range.end())continue;if(record.offset()!=next.get(record.partition()))throw new IllegalStateException("EXPERIMENT_OFFSET_GAP");var normalized=normalize(record);var event=codec.decode(normalized.value(),normalized.key());
+                        if(event.channelId().equals(hotChannel))hotCounts.merge(record.partition(),1L,Long::sum);
+                        if(plan.routing()==ExperimentRouting.EXPLICIT_EVENT_ID && record.partition()!=plan.routing().partition(event))misplacedRecords++;
                         String sequenceKey=event.channelId()+"/"+record.partition();Instant previous=maximumEventTimes.get(sequenceKey);
                         if(previous!=null&&event.eventTime().isBefore(previous))regressions++;
                         maximumEventTimes.merge(sequenceKey,event.eventTime(),(a,b)->a.isAfter(b)?a:b);
@@ -255,7 +259,9 @@ public final class LoadExperiment {
                         SELECT count(*) FROM (SELECT channel_id,bucket_start,chat_count FROM chat_bucket_10s WHERE projection='load-a' AND run_id='experiment') a
                         FULL JOIN (SELECT channel_id,bucket_start,chat_count FROM chat_bucket_10s WHERE projection='replay' AND run_id=?) b USING(channel_id,bucket_start)
                         WHERE a.chat_count IS DISTINCT FROM b.chat_count
-                        """,Long.class,id.toString());result.put("replayBucketDifferences",differences);return differences==0;
+                        """,Long.class,id.toString());result.put("replayBucketDifferences",differences);
+                var routingAudit=plan.routing().audit(hotCounts,misplacedRecords);result.put("routingAudit",routingAudit);
+                return differences==0 && Boolean.TRUE.equals(routingAudit.get("requiredDistributionPassed"));
             }
         }
         void signalChild(String signal) throws Exception {
@@ -291,6 +297,11 @@ public final class LoadExperiment {
 
     }
     private static int assigned(List<ProjectionConsumer> consumers){return consumers.stream().mapToInt(c->((Number)c.status().get("assignedPartitions")).intValue()).sum();}
+    private static boolean fullyAssigned(List<ProjectionConsumer> consumers) {
+        var counts=consumers.stream().map(c->((Number)c.status().get("assignedPartitions")).intValue()).toList();
+        return counts.stream().mapToInt(Integer::intValue).sum()==ExperimentRouting.PARTITIONS
+                && counts.stream().filter(n->n>0).count()==Math.min(consumers.size(),ExperimentRouting.PARTITIONS);
+    }
     private static UUID uuid(String value){return UUID.nameUUIDFromBytes(value.getBytes(StandardCharsets.UTF_8));}
     private static void sleep(long millis){try{Thread.sleep(millis);}catch(InterruptedException interrupted){Thread.currentThread().interrupt();}}
     @FunctionalInterface interface Condition{boolean check() throws Exception;}

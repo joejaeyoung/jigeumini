@@ -101,3 +101,10 @@ F01/F03/F04/F05/F06/F07/F08/F13/F16 → T01/T02/T03/T04/T05/T08/T11/T14/T16의 �
 같은 diff의 지적0·차단0건. 초기 commit/none, poll freshness, Fleet 종료·결과 저장, null/0·360분 절단·TTL 선 연결, shell 인자/종료의 보존을 확인했다. 두 리뷰는 정적 검토이며 실제 실행이나 최종 CI를 대신하지 않는다.
 
 Claude 초기 승인의 비차단 의견에서 강제형변환·null initializer 설명·자연 종료 시험·README를 보완했다. 반복 close와 지역 JsonMapper는 기존 실패/재시도 계약을 보존하기 위해 유지했다. 최종 HEAD 승인은 PR40 게이트에 연결한다.
+
+
+## 2026-10-26 · 샤딩 실험 경계 #67
+
+F01/F10 → T02/T04/T06/T07/T08. 기존 suffix 배정의 hash 충돌을 발견해 실제 분산 검사와 배정 책임을 `ExperimentRouting`에 모았다. `ExperimentPublisher`는 배정된 record를 유한 발행하고, `LoadExperiment`는 생성·소비·replay·정리를 계속 소유한다. 기존 suffix 프로필만 decode 전 정규화하며 명시 분할은 제품의 channelId 업무 key를 유지한다. 시작 준비 검사는 소비자 수에 맞는 실제 할당을 기다린다.
+
+제품 전용 routing 추상화나 부분 bucket은 이번 단순 실험에 도입하지 않았다. [제품 계약 검토](pipeline/SHARDING_REVIEW.md)의 `ChatRouting` 소유권·품질 기대 집합·정책 이력과 consumer 수명은 #68의 후속 설계다. [6회 근거](poc/evidence/sharding-2026-10-26/report/summary.json)에서 동일 eventId 배정·실제 분포·중복 제거·DB/replay 일치를 확인했다. 제품 `server/src/main`·web·deploy 파일은 변경하지 않았다.

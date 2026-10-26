@@ -202,6 +202,13 @@ java -jar server/build/libs/chat-pulse-poc.jar \
 ./scripts/product-load work/product-load-images.json soak work/product-load-soak
 # docs/CAPACITY_VERIFICATION.md의 JSON을 work/capacity-plan.json에 저장한 뒤:
 ./scripts/product-load work/product-load-images.json work/capacity-plan.json work/capacity-run
+# capacity 결과 root의 완료된 run과 environment.json을 숫자·hash 근거로 정제
+python3 scripts/capacity-summary.py work/capacity-limits work/capacity-summary.json
+# 현재 codec의 합성 이벤트 value 크기 (원문/식별자 값 출력 없음)
+./gradlew --console=plain :server:testClasses
+java -Dloader.path=server/build/classes/java/test \
+  -Dloader.main=io.chatpulse.poc.CapacityEventSizeProbe \
+  -cp server/build/libs/chat-pulse-poc.jar org.springframework.boot.loader.launch.PropertiesLauncher
 ```
 
 채널 수·입력률·조회량·합성 WebSocket·자원 대조를 지정하는 용량 계획과 판정 기준은 [용량 경계 측정](docs/CAPACITY_VERIFICATION.md)을 따른다. 사용자 지정 계획은 `capacityAnalysis`의 생성기/계측 한계와 SLO 통과 여부를 별도로 확인한다.

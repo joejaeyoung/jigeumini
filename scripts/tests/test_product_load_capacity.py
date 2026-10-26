@@ -55,6 +55,22 @@ class ProductLoadCapacityTest(unittest.TestCase):
         self.assertIn('steady:SOURCE_TO_RECEIVED_SLO',self.analyze({'finished':True,'maximumPacingDelayMillis':3})['sloViolations'])
         self.plan['sourceMode']='DIRECT';self.load['commitVisibility']['phases']['steady']['sampledByPartition']['2']=0
         self.assertEqual('MEASUREMENT_INCOMPLETE',self.analyze()['classification'])
+    def test_absent_metrics_are_not_evidence_of_a_slow_generator(self):
+        self.load.pop('maximumPacingDelayMillis')
+        self.load['apiTraffic']['phases']['steady']['scheduleDelay']={}
+        result=self.analyze()
+        self.assertEqual('MEASUREMENT_INCOMPLETE',result['classification'])
+        self.assertEqual([],result['generatorProblems'])
+        self.assertIn('DIRECT_PACING_UNRECORDED',result['measurementProblems'])
+        self.assertIn('steady:API_SCHEDULE_UNRECORDED',result['measurementProblems'])
+        self.load['maximumPacingDelayMillis']=3
+        self.load['apiTraffic']['phases']['steady']['scheduleDelay']={'samples':600,'above10000Millis':31,'p95UpperMillis':None}
+        result=self.analyze();self.assertEqual('GENERATOR_LIMITED',result['classification'])
+        self.assertEqual(['steady:API_SCHEDULER'],result['generatorProblems'])
+        self.plan['sourceMode']='WEBSOCKET';self.load={}
+        result=self.analyze({'finished':False})
+        self.assertEqual('MEASUREMENT_INCOMPLETE',result['classification'])
+        self.assertEqual([],result['generatorProblems'])
     def test_plan_budgets_and_original_profiles(self):
         self.assertEqual(90000,sum(s['seconds']*s['eventsPerSecond'] for s in plans.read('soak')[0]['stages']))
         for key,value in [('channels',1001),('channels',True),('apiRequestsPerSecond',201),('sourceMode','PUBLIC'),('resourceProfile','UNKNOWN'),('payloadProfile','UNKNOWN'),('payloadProfile','KOREAN_1K')]:

@@ -51,12 +51,14 @@ def analyze_capacity(plan,load,offset_file,source=None):
     else:offsets=[];invalid.append('OFFSET_FILE_MISSING')
     if plan['sourceMode']=='WEBSOCKET':
         if not source or not source.get('finished'):invalid.append('SOURCE_NOT_FINISHED')
-        elif source.get('maximumPacingDelayMillis',float('inf'))>LIMITS['generatorMaximumDelayMillis']:generator.append('SOURCE_PACING')
+        elif source.get('maximumPacingDelayMillis') is None:invalid.append('SOURCE_PACING_UNRECORDED')
+        elif source['maximumPacingDelayMillis']>LIMITS['generatorMaximumDelayMillis']:generator.append('SOURCE_PACING')
         collector=load.get('collector',{})
         if collector.get('connectedOnce')!=plan['channels']:failures.append('COLLECTOR_CONNECTIONS')
         if any(count for reason,count in collector.get('reasons',{}).items() if reason!='CANCELLED'):failures.append('COLLECTOR_UNEXPECTED_STOP')
         if collector.get('sourceClockErrors',0):invalid.append('SOURCE_CLOCK_REFERENCE')
-    elif load.get('maximumPacingDelayMillis',float('inf'))>LIMITS['generatorMaximumDelayMillis']:generator.append('DIRECT_GENERATOR_PACING')
+    elif load.get('maximumPacingDelayMillis') is None:invalid.append('DIRECT_PACING_UNRECORDED')
+    elif load['maximumPacingDelayMillis']>LIMITS['generatorMaximumDelayMillis']:generator.append('DIRECT_GENERATOR_PACING')
     begin=0
     for stage in plan['stages']:
         name=stage['name'];row={'name':name,'eventsPerSecond':stage['eventsPerSecond'],'hot':stage['hot'],'seconds':stage['seconds'],'warmup':name=='warmup'}
@@ -81,8 +83,10 @@ def analyze_capacity(plan,load,offset_file,source=None):
             api=load.get('apiTraffic',{}).get('phases',{}).get(name,{});row['api']=api
             expected=plan['apiRequestsPerSecond']*stage['seconds']
             if api.get('offered',0)<expected*0.95:stage_invalid.append('API_ARRIVAL_COUNT')
-            delay=api.get('scheduleDelay',{}).get('p95UpperMillis')
-            if delay is None or delay>LIMITS['apiScheduleP95Millis']:generator.append(name+':API_SCHEDULER')
+            schedule=api.get('scheduleDelay',{});delay=schedule.get('p95UpperMillis')
+            if schedule.get('samples',0)>0 and schedule.get('above10000Millis',0)>schedule['samples']*.05:generator.append(name+':API_SCHEDULER')
+            elif delay is None:stage_invalid.append('API_SCHEDULE_UNRECORDED')
+            elif delay>LIMITS['apiScheduleP95Millis']:generator.append(name+':API_SCHEDULER')
             latency=api.get('latency',{}).get('p95UpperMillis')
             if api.get('failed',0) or api.get('notIssuedConcurrentLimit',0) or latency is None or latency>LIMITS['apiP95Millis']:stage_failures.append('API_SLO')
             if api.get('successful',0)+api.get('failed',0)!=api.get('issued',0):stage_invalid.append('API_UNFINISHED')
@@ -98,3 +102,12 @@ def analyze_capacity(plan,load,offset_file,source=None):
     return {'classification':classification,'withinSlo':classification=='WITHIN_SLO','provisionalLimits':LIMITS,
             'scope':'THIS_FIXED_RESOURCE_PLAN_ONLY; RANKING_COMMIT_VISIBILITY; ALL_SIX_GROUP_LAG; NOT_CLOUD_OR_PUBLIC_SOURCE_CAPACITY',
             'generatorProblems':generator,'measurementProblems':invalid,'sloViolations':failures,'stages':stages}
+
+def include_runtime_diagnostics(analysis,errors,processes):
+    """입력 계측 뒤에 확인한 프로세스/저장량 실패를 통과 판정에 반영한다."""
+    analysis['measurementProblems'].extend(errors)
+    stopped=[role.upper()+'_PROCESS_EXITED' for role,state in processes.items() if state['Status']!='running' or state['OOMKilled']]
+    analysis['sloViolations'].extend(stopped)
+    if analysis['withinSlo'] and (errors or stopped):
+        analysis['classification']='MEASUREMENT_INCOMPLETE' if errors else 'EXCEEDS_SLO';analysis['withinSlo']=False
+    return analysis

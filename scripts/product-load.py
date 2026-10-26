@@ -4,7 +4,7 @@ import datetime,hashlib,importlib.util,json,pathlib,re,shutil,sys,time
 sys.dont_write_bytecode=True
 from product_load_results import analyze
 from product_load_plan import read as read_plan,RESOURCE_PROFILES
-from product_load_capacity import analyze_capacity
+from product_load_capacity import analyze_capacity,include_runtime_diagnostics
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('deployment_rehearsal',ROOT/'scripts/deploy-rehearsal.py')
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
@@ -138,25 +138,39 @@ class ProductLoad(module.Rehearsal):
         log=self.command(['docker','logs','--tail','50',self.probe_id],check=False)
         failures={'Java heap space':'JAVA_HEAP_SPACE','GC overhead limit exceeded':'GC_OVERHEAD_LIMIT','unable to create native thread':'NATIVE_THREAD_LIMIT','OutOfMemoryError: Metaspace':'METASPACE_LIMIT'}
         self.result['probeFailureCodes']=[code for marker,code in failures.items() if marker in log.stdout+log.stderr]
-        self.result['storageAfter']=self.storage()
-        self.result['productProcesses']={}
-        for service in ('api','kafka','postgres'):
-            _,state=self.owned(service)
-            self.result['productProcesses'][service]={**{k:state['State'][k] for k in ('Status','ExitCode','OOMKilled')},**{k:state['HostConfig'][k] for k in ('Memory','NanoCpus','PidsLimit')}}
-        source_file=self.source_output/'source.json'
-        if source_file.exists():self.result['syntheticSourceSnapshot']=json.loads(source_file.read_text())
-        if self.source_id:
-            source_info=json.loads(self.command(['docker','inspect',self.source_id]).stdout)[0]
-            self.result['sourceProcess']={k:source_info['State'][k] for k in ('Status','ExitCode','OOMKilled')}
-        if self.capacity_mode:self.result['capacityAnalysis']=analyze_capacity(self.plan,progress,self.output/'offsets.jsonl',self.result.get('syntheticSourceSnapshot'))
-        self.checkpoint()
+        self.final_observations(progress)
         if info['State']['ExitCode']!=0 or info['State']['OOMKilled'] or not progress.get('correct'):raise RuntimeError('LOAD_FAILED')
+        if self.result.get('measurementErrors'):raise RuntimeError('LOAD_EVIDENCE_INCOMPLETE')
+        if any(p.get('Status')!='running' or p.get('OOMKilled') for p in self.result['productProcesses'].values()):raise RuntimeError('PRODUCT_PROCESS_EXITED')
         if self.fault_at>=0 and (not fault or 'resumedAt' not in fault):raise RuntimeError('LOAD_FAULT_NOT_EXECUTED')
         self.result['analysis']=analyze(progress,self.output/'offsets.jsonl',fault,self.result['resourceSamples'],self.duration)
         if fault:fault.pop('monotonicStop',None)
         self.checkpoint()
         if self.result['analysis']['failures']:raise RuntimeError(self.result['analysis']['failures'][0])
         return {'correct':True,'unique':progress['expectedUnique'],'physical':progress['expectedPhysical'],'inputSeconds':progress['inputSeconds'],'drainSeconds':progress['drainSeconds']}
+    def final_observations(self,progress):
+        # DB가 이미 종료됐어도 프로세스/원천/offset 진단을 먼저 보존한다.
+        errors=self.result.setdefault('measurementErrors',[])
+        self.result['productProcesses']={}
+        for service in ('api','kafka','postgres'):
+            try:
+                _,state=self.owned(service)
+                self.result['productProcesses'][service]={**{k:state['State'][k] for k in ('Status','ExitCode','OOMKilled')},**{k:state['HostConfig'][k] for k in ('Memory','NanoCpus','PidsLimit')}}
+            except Exception:errors.append(service.upper()+'_STATE_UNAVAILABLE')
+        source_file=self.source_output/'source.json'
+        if self.source_id:
+            try:self.result['syntheticSourceSnapshot']=json.loads(source_file.read_text())
+            except Exception:errors.append('SOURCE_RESULT_UNAVAILABLE')
+            try:
+                source_info=json.loads(self.command(['docker','inspect',self.source_id]).stdout)[0]
+                self.result['sourceProcess']={k:source_info['State'][k] for k in ('Status','ExitCode','OOMKilled')}
+            except Exception:errors.append('SOURCE_STATE_UNAVAILABLE')
+        if self.capacity_mode:self.result['capacityAnalysis']=analyze_capacity(self.plan,progress,self.output/'offsets.jsonl',self.result.get('syntheticSourceSnapshot'))
+        self.checkpoint()
+        try:self.result['storageAfter']=self.storage()
+        except Exception:errors.append('STORAGE_AFTER_UNAVAILABLE')
+        if self.capacity_mode:include_runtime_diagnostics(self.result['capacityAnalysis'],errors,self.result['productProcesses'])
+        self.checkpoint()
     def scenarios(self):
         self.phase('PREPARE_PROBE',self.prepare);self.phase('PREFLIGHT',self.preflight);self.phase('INITIALIZE',self.initialize)
         self.phase('ANALYZER_IMAGE',lambda:self.up_apps(self.candidate));self.phase('RUNTIME_BOUNDARIES',self.audit)

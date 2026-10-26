@@ -259,7 +259,7 @@ a0283bc/5차 증거는 Claude APPROVE다. 후속 비차단 검토에서 hook의 
 - Standards의 자원 생성 순서 지적에 따라 실패/중단 manifest를 비밀 생성 전에 읽도록 옮겼다. Flyway history의 version·checksum·success도 snapshot에 포함해 기존 history와 복원 결과를 비교한다.
 
 - clean `bc2ff5b`의 V13 리허설16단계가 통과했다. 중단137/backend 종료/marker1, SQL 실패 뒤DDL/history복원, V13 backfill10/10, 구 V12 시작거부, 새DB V12복원·새group6개·집계20/알림2·기존group불변·선택snapshot차이0이다. 복원 관측25.163초, 실제웹8경로+리포트상세/26API200/JS오류0, 종료1.243초·OOM없음·소유Compose자원/secret/dump정리를 확인했다.
-- 공유 리허설의 복원 대상 선택을 앞당긴 영향은 기존 V12 17단계로 별도 확인했다(기준0227330→후보bc2ff5b). 하네스20개·문서/ID검사 통과. 두 최초실패와 성공 두 실행의 시각·manifest·hash를 정제근거에 보존했다. 생성 이미지는 로컬 manifest로 남기며 Compose 자원정리와 구분한다.
+- 공유 리허설의 복원 대상 선택을 앞당긴 영향은 기존 V12 17단계로 별도 확인했다(기준0227330→후보bc2ff5b). 하네스20개·문서/ID검사 통과. 두 최초실패의 commit·원인·로그 hash와 성공 두 실행의 시각·manifest·hash를 정제근거에 보존했다. 최초 실패 시각은 별도 계측하지 않았다. 생성 이미지는 로컬 manifest로 남기며 Compose 자원정리와 구분한다.
 - Standards의 초기heuristic1건과 Spec의 초기차단1건을 해소했고 bc2ff5b는 둘 다 남은지적0이다. Claude 정적리뷰도 APPROVE다. 비차단의10초JDBC timeout/느린호스트 kill창, 코드에서 파생된설정값/결과, 실제SQLSTATE미수집·marker판정범위를 검증문서에 명시한다. 최종문서HEAD Claude/push/PR CI는 PR51게이트에서 확인한다. T16은 WAL PITR·외부운영 등이남아 부분검증을 유지한다.
 
 - #41 최종 bde3a47은 Claude APPROVE와 push40253684968/PR40253689010 SUCCESS를 확인했다. 두 CI XML은 각각 단위147·실제100·실패/오류/skip0, PR웹29/Chromium31/하네스20이다. PR50에 정확한HEAD 통합게이트를 남기고 c2aeffc로 develop 병합했다. #41과 보드를 완료 처리한다.

@@ -153,7 +153,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T13 | 부분 검증 | [선정 검증](discovery/VERIFICATION.md) | 공식 명세 조사·합성 HTTP/정규화 선정16개·실행JAR 하한 민감도5개 | 실제 앱 인증·전체 목록·동의/공식 채팅 수신은 미검증. 수집기 임대 연결은 T14 근거 참조 |
 | T14 | 검증됨 | [임대 검증](fleet/VERIFICATION.md), [최종 CI](poc/evidence/fleet-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 단위134·통합88(임대7), 정상/만료 인계·DB 단절·SIGTERM 저장·producer 준비 전 무수집·재개 후 기존 session 입력0 | 협력 worker의 DB 임대·로컬 permit 범위. broker fencing/무공백/시계 drift는 미검증. 과거 Linux 실패와 재현 원인의 동일성은 미확정 |
 | T15 | 검증됨 | [실제6노드HA](pipeline/KAFKA_HA_VERIFICATION.md) | RF3/minISR2/ELR1의broker·quorum분리장애·RF1→3·ACK/broker/DB집합대조 | 로컬단일호스트범위. 실제AZ/디스크손상/장기부하는미검증 |
-| T16 | 부분 검증 | [새 V13 적용·V12 복원](DEPLOYMENT_MIGRATION_VERIFICATION.md), [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·관측6회17.105~24.188초(코드/검사강도 차이·운영RTO 아님) | 후속 #42에서 시험 V13 DDL 실패/중단 rollback·구 이미지 거부·V12 백업 복원/새6group재생·집계20/알림2 일치. 로컬RF1·합성 범위이며 일반 파괴적 migration·WAL PITR·외부배포/운영SLA는 미검증 |
+| T16 | 부분 검증 | [새 V13 적용·V12 복원](DEPLOYMENT_MIGRATION_VERIFICATION.md), [배포 검증](DEPLOYMENT_VERIFICATION.md), [정제 근거](poc/evidence/deployment-2026-10-26/summary.json), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 1bde2b7 clean 이미지17단계: 실패원인/DDL42501·기존offset불변·새DB6group복구·실제API/리포트20건·웹8경로+상세·선택집계차이0·후속 #42 포함 관측8회17.105~26.540초(코드/검사강도 차이·운영RTO 아님) | 후속 #42에서 시험 V13 DDL 실패/중단 rollback·구 이미지 거부·V12 백업 복원/새6group재생·집계20/알림2 일치. 로컬RF1·합성 범위이며 일반 파괴적 migration·WAL PITR·외부배포/운영SLA는 미검증 |
 <!-- tech-status:end -->
 
 하네스는 기술 ID·기능 연결·상태 행·검증 근거 누락과 기준 commit 대비 ID 삭제를 검사한다.

@@ -29,6 +29,8 @@ V13은 기존 ranking/trend의 합계를 별도 `release_migration_probe` 테이
 
 복원 측정25.163초는 API 정지 후 새DB 생성 직전부터 restore·위치 불일치 거부·새 group 준비·readiness·업무 대조까지다. 원래 V13 schema/backfill 확인을 포함한 전체 복원 phase는27.253초다. 장애 감지·사람 판단·외부 자원 생성 시간은 포함하지 않는다.
 
+복원된 pending outbox 재발행으로 공유 Kafka spikes partition2의 end는2→3으로 증가했다. 논리 피드는2개를 유지했고 기존 알림 group의 committed는2로 불변이다. 원래 group을 재시작하면 이 물리 중복을 추가 소비할 수 있다.
+
 중단 시험의 연결 검사1초는 `SET LOCAL`로 시험 transaction에만 적용했다. PostgreSQL 기본 설정의 즉시 단절 감지를 입증하지 않는다. 미커밋 DDL이 다른 연결에 보이지 않는다는 사실만으로 rollback을 선언하지 않고, 실제 backend 소멸을 먼저 대기한다. [PostgreSQL 연결 검사](https://www.postgresql.org/docs/16/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL)
 
 업무 snapshot은 `DeploymentProbe`가 선택한 ledger UUID/source offset·bucket·관측 ID·알림/outbox 상태의 hash와 총계다. 모든 DB 열의 동일성을 의미하지 않는다. 브라우저의503 UI/재시도는 요청 모의이며, API26개200은 복원된 실제 서버의 응답이다. 실패 후보의 SQLSTATE는 직접 수집하지 않았고, backfill 확인 후 marker 도달·migrate 비정상 종료·rollback을 함께 판정했다. `P1300`은 fixture에 지정한 주입 코드다. 결과 JSON의 연결 검사1000ms 등은 설정값 또는 단언에서 파생한 값이다. pgjdbc socket timeout10초 전에 kill해야 하므로 느린 호스트에서는 시험이 실패할 수 있으며, 그때 timeout을 중단137 성공으로 계산하지 않는다.
@@ -36,6 +38,8 @@ V13은 기존 ranking/trend의 합계를 별도 `release_migration_probe` 테이
 ## 기존 배포 절차 회귀와 초기 실패
 
 공유 리허설 변경을 확인하기 위해 V12 baseline `0227330`→V12 candidate `bc2ff5b`의 기존17단계도 통과했다. 두 이미지는 제품 build ID가 같고 Git revision은 다르다. 새 V13 시험과 별개로 기존 DB 장애·이미지 복귀·checksum 거부·새 DB 복원·브라우저·정리 경로를 보존했다. 하네스20개도 통과했다. `bc2ff5b`의 Claude 정적 리뷰는 APPROVE이며 리뷰어는 도구나 테스트를 실행하지 않았다.
+
+이 호환 실행의 복원 측정은26.540초, 전체 복원 phase는27.799초다. 이전 여섯 실행과 이번 두 실행은 코드·검사 강도가 달라 시간 동등성이나 지속적인 운영 RTO를 입증하지 않는다. 관측한 복원 측정8회의 범위는17.105~26.540초다.
 
 - 첫 `47d5659`는 fixture FROM에 로컬 image ID를 사용해 BuildKit이 외부 저장소 이름으로 해석했다. DB 실행 전 실패했다. 기록한 로컬 tag가 실제 ID와 같은지 빌드 전후 확인하도록 수정했다.
 - 두 번째 `0227330`는 dynamic import가 pyc를 만들어 clean-tree 사전 검사에서 거부됐다. DB 실행 전 중단했고 생성 secret은 정리했다. bytecode 생성을 끄고 소유 pyc만 제거했다.

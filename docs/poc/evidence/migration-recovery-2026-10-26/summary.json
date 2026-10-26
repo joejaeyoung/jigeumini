@@ -101,7 +101,9 @@
       "exitCode": 2,
       "reason": "BuildKit이 로컬 image ID를 docker.io/library/sha256 이름으로 해석",
       "databaseStarted": false,
-      "resolution": "기록한 local tag가 실제 ID와 같은지 빌드 전후 확인"
+      "resolution": "기록한 local tag가 실제 ID와 같은지 빌드 전후 확인",
+      "logFile": "migration-images-01.log",
+      "timestamps": "별도 시작·종료 시각 미계측"
     },
     {
       "commit": "0227330434754a8335bd6c8b880dd83fa8bc03d6",
@@ -111,7 +113,9 @@
       "databaseStarted": false,
       "cleanupComplete": true,
       "sensitiveArtifactsRemoved": true,
-      "resolution": "bytecode 생성 금지, 소유 pyc 제거"
+      "resolution": "bytecode 생성 금지, 소유 pyc 제거",
+      "logFile": "migration-run-02.log",
+      "timestamps": "별도 시작·종료 시각 미계측"
     }
   ],
   "staticReview": {
@@ -135,12 +139,19 @@
     "interrupted fixture에만 client_connection_check_interval=1s를 적용했다. 기본 설정의 즉시 단절 감지 보장을 뜻하지 않는다.",
     "복구25.163초는 API 종료 후 새DB생성 직전부터 선택 집계 확인까지의 한 표본이며 운영 RTO/SLA가 아니다.",
     "WAL PITR·다중AZ·실제 공식 원천·외부배포·비밀회전은 미검증이다.",
-    "최종 정확한 HEAD Claude승인·push/PR CI·병합은 PR51 통합 게이트를 따른다."
+    "최종 정확한 HEAD Claude승인·push/PR CI·병합은 PR51 통합 게이트를 따른다.",
+    "pgjdbc socket timeout10초 전에 kill해야 한다. 느린 호스트의 timeout을 중단137 성공으로 계산하지 않는다.",
+    "실제 SQLSTATE는 수집하지 않았다. P1300은 fixture 주입 코드이며 marker·비정상 종료·rollback으로 판정한다.",
+    "연결 검사1000ms 등 일부 결과 필드는 설정·단언에서 파생한 값이다.",
+    "생성 이미지는 로컬에 남는다. 자동 정리는 소유 Compose 자원·secret·dump에 한정한다.",
+    "호환 실행 복원26.540초를 포함한 서로 다른 검사8회의 범위17.105~26.540초는 시간 동등성이나 운영 SLA가 아니다.",
+    "복원 pending outbox 재발행으로 spikes partition2의 end2→3, 기존 group committed2 유지. 논리 피드는2개다."
   ],
   "claudeReview": {
     "head": "bc2ff5bc44a6809b52838507eb5bc2b6b4ba6434",
     "decision": "APPROVE",
-    "sessionId": "8c1936cd-5f1e-470c-bdc7-e2d36d1987d6",
     "method": "제공된 diff/소스의 정적 검토. 리뷰어 도구/시험 실행 없음. 최종 문서 HEAD는 PR51에서 재확인."
-  }
+  },
+  "evidenceHashScope": "runs의 sha256은 이 디렉터리에 커밋한 JSON 파일의 바이트 hash다. 로컬에서 두 파일과 대조했다.",
+  "logDirectory": "work/remaining-validation/ (gitignored)"
 }

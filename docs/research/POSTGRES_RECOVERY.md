@@ -4,6 +4,8 @@
 
 조사한 코드 기준은 `43bedc2c07922a2a30647d8050848175e9389f35`다. 이 문서는 공식 자료와 시험 설계이며 실행 통과 근거는 아니다. 실제 구현·실행·리뷰 결과는 [STATUS](../STATUS.md)와 [작업 로그](../WORK_LOG.md)에 연결한다. #42는 논리 백업으로 이전 schema를 복원하고, #46은 physical base backup과 이후 WAL로 복구 목표를 재현한다.
 
+§2는 #42 구현 전 설계다. 최종 구현은 같은 시험 DB에서 DDL/backfill 도달 marker·migrate 비정상 종료·rollback을 대조하며 실제 SQLSTATE를 수집하지 않는다. 아래의 `22012`·별도 실패 DB 제안은 채택하지 않았다. 실제 적용 범위는 [migration 검증](../DEPLOYMENT_MIGRATION_VERIFICATION.md)을 따른다. §3 이후의 PITR도 실행 전 설계다.
+
 외부 자료는 PostgreSQL 16와 Redgate Flyway 공식 문서만 조회했다. PostgreSQL 문서는 16 계열의 현재 문서이며 일부 표시는 16.15다. 실제 시험 이미지는 저장소의 16.14를 고정하고 `SELECT version()`·image ID·도구 버전을 기록해야 한다. Flyway 문서도 현재 배포본을 설명하므로 실행 JAR에 포함된 Flyway 버전을 별도 기록한다.
 
 ## 1. 현재 구현에서 재사용할 것과 남은 간격

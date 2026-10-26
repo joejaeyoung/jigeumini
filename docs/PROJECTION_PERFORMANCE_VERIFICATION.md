@@ -59,11 +59,15 @@ COUNT·du를 제거해도 균등 실패가 남았다. 계측 비용이0이라는
 |---|---:|---:|
 | CATEGORY_PROGRESS/INSERT | 181,986 → 6,779 | 2,452.481 → 95.638ms |
 | CATEGORY_OBSERVATION/SELECT | 182,115 → 299 | 1,412.605 → 5.575ms |
+| CATEGORY_EVENT/INSERT (관측 조회 병합) | 181,800 → 181,800 | 3,619.767 → 5,130.555ms |
 | REPORT_EVENT/CTE | 20,276 → 60 | 18,855.109 → 0.766ms |
 | REPORT_EVENT/INSERT | 181,800 → 181,800 | 4,010.908 → 5,823.448ms |
-| REPORT_SESSION/UPDATE | 20,276 → 34,240 | 177.899 → 334.387ms |
+| REPORT_OBSERVATION/CTE (세션 TTL 상태 갱신) | 0 → 34,180 | 0 → 708.347ms |
+| REPORT_SESSION/UPDATE (revision 증가) | 20,276 → 34,240 | 177.899 → 334.387ms |
 
-리포트 INSERT와 상태 UPDATE 비용은 늘었다. CTE와 INSERT의 합계 서버 시간은 약22.87초에서5.82초로 줄었지만 모든 transaction/JDBC/API 지연의 감소율을 뜻하지 않는다. 호출 수에는 probe·최종 oracle이 포함되고 SQL 값/원문은 남기지 않는다. 기존 CTE의 planner/JIT 내부가 원인이라고 확정하지 않았다.
+카테고리 관측 SELECT의 비용 일부는 병합 INSERT로 옮겨졌다. 위 SELECT+INSERT의 합계 서버 시간은5.032→5.136초로 늘었으며, 별도 JDBC 왕복 감소를 서버 계산의 소멸로 해석하지 않는다. 리포트는 위 EVENT/CTE·EVENT/INSERT·OBSERVATION/CTE·SESSION/UPDATE 네 행의 합계가23.044→6.867초다. 새 TTL 갱신 CTE `31297e91…`의708.347ms와 revision 증가 비용을 포함한 값이다. 분류기는 선두 WITH를CTE로, 첫 일치 테이블을family로 삼으므로 TTL 상태 갱신은 REPORT_SESSION/UPDATE에 포함되지 않는다. revision 호출 증가의 배치 수 관련성은 추정이며 별도로 원인을 분해하지 않았다.
+
+이 합계는 잠금·bucket 갱신 등 나머지 statement와 JDBC 왕복/대기를 제외하며 전체 transaction/API 지연의 감소율이 아니다. 호출 수에는 probe·최종 oracle이 포함되고 SQL 값/원문은 남기지 않는다. [보완 비용 근거](poc/evidence/projection-performance-2026-10-27/sql-cost-review.json)는 같은 원본 finalSqlStatements에서 재계산했다. 기존 CTE의 planner/JIT 내부가 원인이라고 확정하지 않았다. 종료 세션을 제외하는 TTL 갱신 축소는 후속 개선 후보이며 이번에는 구현·검증하지 않았다.
 
 SQL 순간 표본의 가장 오래된 transaction은 수정 전3,644.171ms, 색인 보완 후28.949ms였다. 두 실행 모두 풀 획득 위치가 관측됐으며 pg_stat_activity의 Lock 대기는 표본에서 발견하지 못했다. 최대40 frame·5초 간격 표본이므로 누적 잠금/풀 대기 시간이나 그 부재를 입증하지 않는다. 배치 진행 저장·불필요한 재귀속 호출 감소는 SQL 횟수와 코드 경로로 확인했고, 처리량 전체의 원인을 DB CPU 한 가지로 확정하지 않는다.
 
@@ -85,6 +89,7 @@ SQL 순간 표본의 가장 오래된 transaction은 수정 전3,644.171ms, 색�
 | after-no-counts `e4319e9` | 20채널·2500건/s·60초 | 통과 | 2.021/2.022 | 1050/98 |
 | after-hot `8a0fb76` | 20채널·2000건/s·60초·80%편향 | 통과 | 0/0 | 268/56 |
 | after-rate2000-soak `e4319e9` | 20채널·2000건/s·120초 | 통과 | 2.016/3.024 | 808/119 |
+| after-rate3000 `8a0fb76` | 20채널·3000건/s·60초 | SLO 초과·API 실패1 | 3.086/6.133 | 1989/146 |
 | reviewed-rate3000 `e4319e9` | 20채널·3000건/s·60초 | SLO 초과 | 5.07/13.14 | 3635/162 |
 | after-rate3000-api2 `e4319e9` | 20채널·3000건/s·60초 | SLO 초과 | 1.013/5.056 | 465/125 |
 | after-rate3000-kafka2 `e4319e9` | 20채널·3000건/s·60초 | SLO 초과 | 2.026/6.064 | 1479/142 |
@@ -109,6 +114,8 @@ SQL 순간 표본의 가장 오래된 transaction은 수정 전3,644.171ms, 색�
 | after-operating100-rate1000 `7998bed` | 100채널·1000건/s·240초·80%편향 | 최종 대조 미완료 | 0/0 | 221/67 |
 | after-operating100-rate1000-diag `e4319e9` | 100채널·1000건/s·240초·80%편향 | 통과 | 1.006/1.006 | 237/69 |
 
+`after-operating100-rate1000-diag`의 이름과 달리 실제 plan은 FULL·diagnostics=false다. 실행 조건은 디렉터리 이름이 아니라 정제 plan으로 판정한다.
+
 표의 시간은 warmup 뒤 측정 구간이다. watermark는 해당 group의 채팅·관측 토픽 중 최댓값이다. 순위 p95는 모든 선택 표본을 관측했을 때만 표시하며, 세부 미관측 건수·partition별 값·준비 구간은 JSON에 보존한다. DIRECT 기능 시험은 아래에서 별도 해석한다.
 
 ### 판정의 범위
@@ -119,7 +126,7 @@ SQL 순간 표본의 가장 오래된 transaction은 수정 전3,644.171ms, 색�
 - 같은 `e4319e9`, 20채널·2,500건/s·API10·진단false에서 FULL과 NO_COUNTS를 연속 대조했다. FULL의 순위/API p95는457/147ms, NO_COUNTS는1,050/98ms였다. NO_COUNTS의 category/report 채팅 기울기 +35.713/+70.106건/s·drain1.253초로, COUNT를 끄면 반드시 좋아진다는 근거가 없다. 모드별1회·공유 VM 변동·나머지 계측 비용이 남으며 “COUNT 비용0”으로 해석하지 않는다.
 - 2,000건/s FULL 120초는 형식 통과이나 category/report 채팅 기울기 +24.991/+38.427건/s, 최대lag5,054/5,678이 남았다. 3,000건/s 기본은 +299.571/+696.858건/s로 초과했다. 분석기/API JVM2CPU와 Kafka2CPU도 lag 증가 기준을 넘었다. DB2CPU 단회는 형식 통과이나 +13.574/+31.212건/s였다. consumer 병렬화나 operating SKU 확정은 별도다.
 - 80%단일채널 편향3,000건/s도60초에서 고유210,000/물리212,100·전체 대조·최종24개lag0·형식SLO 통과다. 채팅 category/report 기울기+3.275/+14.905건/s, 순위/API p95 383/99ms, source 최대6.766ms, 시계 잔차 최대95.766ms로250ms 기준 이내였다. 단순 bucket 샤딩과 달리 기존 S1/P3·group당1consumer의 전체 제품 결과이며, 더 긴 실행이나 S3 이득을 입증하지 않는다.
-- 600채널은 총100건/s의 두 단기·5분 모두 통과했고 450채널5분도 통과했다. 1,000채널은 수신9,000/ACK9,090·최종 전체 대조/24개lag0이지만 readiness503 세 번으로 실행 기준 실패다. 부하 API600개는 전부200이었다. report 최대 watermark는 채팅28.410초/관측29.418초이며 category 채팅30.425초다. 입력은 완료됐으므로 연결 실패로 분류하지 않는다.
+- 600채널은 총100건/s의 두 단기·5분 모두 통과했고 450채널5분도 통과했다. 1,000채널은 수신9,000/ACK9,090·최종 전체 대조/24개lag0이지만 readiness503 세 번으로 실행 기준 실패다. 부하 API600개는 전부200이었다. report 최대 watermark는 채팅28.410초/관측29.418초이며 category 채팅30.425초다. 입력은 완료됐으므로 연결 실패로 분류하지 않는다. 정제기의 `SUSTAINED_LAG_GROWTH` 사유는 기울기와 watermark 초과를 함께 묶은 이름이다. 이 실행의 모든 group은 sustainedGrowth=false이며 실제 초과는 watermark다. 30초에1,000채널 관측을 동기 발행한 직후 적체가 시작돼 관측 burst 영향도 후보로 남는다. 관측 시차 분산 대조와 배치별 재구성 시간은 아직 측정하지 않았다.
 - 이 예산에서 검증한 저부하 하한은600채널이다. 실패1,000 사이의 정확한 경계는 미확정이며 700~900 중간 단계 반복과 더 긴 실행·실제 원천/fleet·장기 DB에서 재개한다. 채널 수만으로 worker 대수나 인기 방송 수용량을 확정하지 않는다.
 - 100채널500/s·API10·1KiB·80%편향은5분 재통과했고, API10을 유지한1,000/s는30초 준비+240초 측정에서 순위/API p95 237/69ms, 고유255,000/물리257,550·최종24개lag0이었다. source 최대지연40.258ms·category/report 채팅 기울기 +0.600/+0.582건/s다. 앞선 준비 오류 실행은 제외하고 새 실행으로 따로 기록한다. 1,000/s는단회4분이며 초기 운영 비교는 반복 근거가 있는100채널500/s 후보를 유지한다.
 
@@ -138,6 +145,8 @@ STOP은 입력17.078초 표본 뒤 시작해20.935초 유지했다. 두 실행�
 
 
 ## 시계·계측·자원 해석
+
+진단 overlay는 PostgreSQL command를 지정해 pg_stat_statements를 preload한다. 현재 기본 deploy/compose.yaml의 postgres에는 command나 별도 -c 옵션이 없어 기존 설정을 덮어쓰는 차이는 없지만, 진단 extension과 조회 자체의 비용은 추가된다. SQL 비교는 같은 진단 모드끼리만 수행했다. 이후 기본 command를 추가하면 overlay의 설정 보존을 다시 확인해야 한다.
 
 과거600채널 실패의 DB 최대 throttle 비율99.26%는 입력10.851~24.314초의 준비 구간이었다. 리포트 watermark35.618초의 최대는66.398초에 관측됐으며 그 시각을 포함한64.810~78.243초의 DB 구간 평균은0.352CPU·throttle0이었다. readiness503은51.821/57.038초였다. 최대 throttle 하나로 해당 장애 시점의 원인을 확정하지 않는다. [공통 시간축 대조](poc/evidence/projection-performance-2026-10-27/alignment.json)는 독립 host/probe 표본의 근사 정렬이며 원자 계측이 아니다.
 
@@ -195,7 +204,7 @@ COUNT/du 생략·저율 입력·역할별 CPU 대조는 완료했다. **Kafka id
 
 새 계약2개는 개선 전후 모두 통과했다. 후속 TTL60/120/300초의 정확한 만료 경계, 별칭 후 채팅, SOURCE_CHANGED/OFFLINE_OBSERVED 종료 유지와 미래 입력 오류의 우선 판정을 실제 DB로 추가 검증했다.
 
-제품V13 이후 시험 migrationV14를 생성해 [16단계 복구 리허설](poc/evidence/projection-performance-2026-10-27/migration.json)을 통과했다. 중단/실패 시 DDL·backfill rollback, V13 이미지의 V14 strict VALIDATE 거부, 새 DB에V13 복원 후6개 새group 재정렬·보존 입력10건 재생·선택 snapshot차이0·기존group 불변을 확인했다. 복구 후웹8경로/리포트20건·API26응답200, page error0·retry 복구도 확인했다. catchup25.210초는 로컬 합성 실행의 값이며 운영RTO가 아니다. 이 시험은 V14 fixture의 복원 절차이고 운영 크기의 V12→V13 색인 생성 시간을 측정한 것은 아니다.
+`7998bed`에서 제품V13 이후 시험 migrationV14를 생성해 [16단계 복구 리허설](poc/evidence/projection-performance-2026-10-27/migration.json)을 통과했다. 중단/실패 시 DDL·backfill rollback, V13 이미지의 V14 strict VALIDATE 거부, 새 DB에V13 복원 후6개 새group 재정렬·보존 입력10건 재생·선택 snapshot차이0·기존group 불변을 확인했다. 복구 후웹8경로/리포트20건·API26응답200, page error0·retry 복구도 확인했다. catchup25.210초는 로컬 합성 실행의 값이며 운영RTO가 아니다. 7998bed 이후 현재까지 제품 migration과 migration-images/migration-rehearsal 스크립트의 git diff는 비어 있다. 이 시험은 V14 fixture의 복원 절차이고 운영 크기의 V12→V13 색인 생성 시간을 측정한 것은 아니다.
 
 파티션 사전 조건은 제품 초기화의 KafkaTopicPolicy.verify가 정확한P3을 검사한다. 합성 원천 서비스는 extends 없이 선언돼 비밀 환경을 상속하지 않으며, 실행 후 inspect의 secret mount/PIPELINE 환경0을 확인한다. 시작 전 resolved Compose 전체 검사 추가는 검토했지만 현재 직접 선언과 제품 검사·실행 후 검사에 별도 중복 검사를 늘리지 않았다.
 

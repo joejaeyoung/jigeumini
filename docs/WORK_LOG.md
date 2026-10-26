@@ -658,3 +658,9 @@ final-full2500은 승인20개 중19개·frame38·APPROVAL_TIMEOUT1에서 입력 
 Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.418초를 구분했다. STATUS 기술 목표7개, 현재 인프라와 과거 용량 문서, 제품V13/시험V14 복구 구분, 리팩토링 결정을 함께 갱신한다. #63의 보존·#68 샤딩 판단, 조건부 공식경로#47과 실제외부#48/#49는 남긴다.
 
 최종a536259의 Standards/Spec은 각각 차단0·비차단1이었다. V13이 새 채팅 귀속이 아니라 세션별 TTL 갱신의 최신 관측 조회를 돕는다고 정정했다. idle/fetch·1초 offset 비용과 VM 전체/동거 workload 관측은 미실행으로 구분하고, #49의 운영 SKU 확정 전 대조·재개 조건으로 명시했다. 과거 원본에 없는 계측을 완료로 처리하지 않았다. 보완 HEAD의 Claude/CI를 다시 확인한다.
+
+### #65 Claude 최종 문서 비용 보완
+
+a536259의 Claude 판정은 REQUEST_CHANGES다. 차단1건은 SQL 비용 표가 병합 INSERT와 새 TTL 상태 갱신 CTE를 누락하고 revision UPDATE를 상태 갱신으로 잘못 해석한 문제였다. 같은 원본 두 실행에서 CATEGORY_EVENT/INSERT와 REPORT_OBSERVATION/CTE를 재계산해 추가했다. category SELECT+INSERT5.032→5.136초, 지정 report 네 family23.044→6.867초로 범위를 한정하고 전체 transaction 감소율과 구분한다. 새 부하 실행 없이 원본 hash와 숫자만 정제했다.
+
+비차단 문서 의견도 반영했다. 8a0fb76의3,000/s 실패·API오류1을 표에 추가하고, 이름에diag가 붙은 실행의 실제FULL/진단false, 동기 관측 burst와 watermark 사유 코드의 한계, V13 maintenance·7998bed migration 실행과 후속diff 없음, 진단 overlay의 현 설정을 명시했다. 종료 세션 TTL 조회 축소·observer 시작 실패 회귀·최초seed pacing 분리와 계측 접근 규칙 정리는 후속 개선 후보로 기록하며 검증 완료로 세지 않는다. 최종 승인과CI는 보완HEAD에서 새로 확인한다.

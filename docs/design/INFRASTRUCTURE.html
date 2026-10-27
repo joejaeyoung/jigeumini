@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>지금이니 · 인프라 배치도</title>
+  <style>
+    :root{--bg:#0a1017;--surface:#101b25;--surface2:#142331;--line:#2b4050;--text:#eaf4f5;--muted:#98afb8;--mint:#64e6c2;--blue:#78baff;--amber:#ffd48a;--rose:#fb9ca5;--host:#b9cbe0;--docker:#65d6ef}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(1000px 700px at 15% -10%,#1b3b48 0%,transparent 65%),var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+    .shell{max-width:1500px;margin:auto;padding:36px 30px 70px}.topline{display:flex;justify-content:space-between;align-items:center;gap:20px;font:700 11px/1.2 ui-monospace,SFMono-Regular,monospace;letter-spacing:.16em;color:var(--mint);text-transform:uppercase}.topline .stamp{color:var(--muted);letter-spacing:.06em}
+    h1{font-size:clamp(31px,4vw,58px);line-height:1.12;letter-spacing:-.055em;margin:22px 0 14px;font-weight:760}.lead{color:var(--muted);font-size:17px;max-width:860px;margin:0 0 27px}.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-bottom:22px;border-bottom:1px solid var(--line)}
+    .tabs{display:inline-flex;padding:4px;border:1px solid #395363;border-radius:12px;background:#101d28}.tab{border:0;border-radius:9px;background:transparent;color:var(--muted);padding:10px 17px;cursor:pointer;font:700 13px/1.2 inherit}.tab[aria-selected="true"]{background:#214153;color:#e7fbf4;box-shadow:inset 0 0 0 1px #53897f}.tab:focus-visible,.host:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+    .legend{display:flex;gap:14px 20px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.legend span{display:inline-flex;align-items:center;gap:7px}.legend i{display:inline-block;width:17px;height:13px;border-radius:3px}.legend .ec2{border:2px solid var(--host)}.legend .docker{border:2px dashed var(--docker)}.legend .managed{border:2px solid var(--amber);background:#5a4221}
+    .view{display:none}.view.active{display:block}.callout{display:flex;gap:16px;align-items:flex-start;padding:16px 18px;margin:22px 0;border:1px solid #715a36;border-left:4px solid var(--amber);border-radius:10px;background:#33291e;color:#ffe6b9}.callout strong{white-space:nowrap}.callout span{font-size:13px;line-height:1.5}
+    .flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:25px 0 24px}.flow-step{position:relative;padding:13px 10px 12px 14px;min-height:76px;border:1px solid #35616a;border-radius:10px;background:#112b33}.flow-step:not(:last-child):after{content:"→";position:absolute;right:-15px;top:19px;z-index:2;color:var(--mint);font-size:24px;font-weight:700}.flow-step .num{display:block;color:var(--mint);font:800 10px/1.2 ui-monospace,monospace;letter-spacing:.12em}.flow-step b{display:block;margin-top:5px;font-size:13px}.flow-step small{display:block;color:var(--muted);font-size:11px}
+    .outside{border:1px solid #755c59;background:#241e24;border-radius:15px;padding:15px 18px;margin-bottom:15px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}.outside .tag{color:var(--rose);font:800 10px ui-monospace,monospace;letter-spacing:.14em}.outside .pill{border:1px solid #725562;border-radius:100px;padding:5px 11px;color:#f4d9d9;font-size:12px}.outside .hint{margin-left:auto;color:#baa6a9;font-size:12px}
+    .vpc{border:2px solid #406a79;border-radius:20px;background:linear-gradient(135deg,#10202a,#0d1721 70%);padding:20px}.vpc-head{display:flex;justify-content:space-between;gap:18px;align-items:baseline;border-bottom:1px solid #385667;padding-bottom:15px;margin-bottom:18px}.vpc h2{font-size:20px;letter-spacing:-.03em;margin:0}.vpc-head p{margin:0;color:var(--muted);font-size:12px}.section-title{display:flex;align-items:center;gap:8px;margin:8px 0 12px;color:#a7c5ce;font:800 11px/1.2 ui-monospace,monospace;letter-spacing:.11em;text-transform:uppercase}.section-title:after{content:"";height:1px;flex:1;background:#35505c}.grid{display:grid;gap:13px}.top-grid{grid-template-columns:1fr 1.3fr 1.1fr}.host{border:2px solid var(--host);border-radius:13px;background:#182838;padding:11px 12px 12px;min-width:0}.host:hover{border-color:#e4f2ff}.host-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:10px}.host-name{font-size:14px;font-weight:780;line-height:1.3}.host-type{flex:none;border:1px solid #a6b9d0;border-radius:5px;color:#d7e8f9;padding:2px 6px;font:800 10px/1.2 ui-monospace,monospace;letter-spacing:.06em}.host-sub{color:var(--muted);font-size:11px;line-height:1.4;margin-top:2px}.containers{display:grid;gap:7px}.container{border:1.5px dashed var(--docker);border-radius:8px;background:#10333e;padding:9px 10px}.container b{display:block;color:#e2fbff;font-size:12px;line-height:1.3}.container small{display:block;color:#a4c8d0;font-size:11px;margin-top:3px}.container .type{display:block;color:var(--docker);font:800 9px ui-monospace,monospace;letter-spacing:.12em;margin-bottom:3px}.host-note{margin:9px 0 0;color:#b0c1ca;font-size:11px}.segment{margin-top:21px}.az-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.az{border:1px solid #466274;border-radius:12px;padding:11px;background:#122331}.az h3{margin:0 0 10px;color:#9dcffb;font-size:12px;letter-spacing:.04em}.az .host+.host{margin-top:9px}.az .host{padding:9px}.az .host-head{margin-bottom:6px}.az .container{padding:7px 9px}.storage-grid{grid-template-columns:1fr 1fr .9fr}.service{border:2px solid var(--amber);border-radius:12px;background:#342a1b;padding:13px}.service b{font-size:13px;color:#ffe4b0}.service small{display:block;margin-top:5px;color:#dbcaa8;font-size:11px}.notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.note{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:14px}.note strong{display:block;font-size:13px;margin-bottom:5px}.note p{color:var(--muted);font-size:12px;margin:0}.footer{border-top:1px solid var(--line);margin-top:30px;padding-top:19px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:12px}.footer a{color:var(--mint);text-decoration:none}.footer a:hover{text-decoration:underline}
+    .local-host{max-width:1100px;margin:24px auto}.local-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.local-net{margin:17px 0 0;border:1px solid #49636a;border-radius:10px;background:#102b31;padding:14px;color:#c5e6e7;font-size:12px}.local-net b{color:var(--mint)}.local-flow{grid-template-columns:repeat(5,minmax(0,1fr))}
+    @media(max-width:960px){.top-grid,.storage-grid,.az-grid,.notes{grid-template-columns:1fr 1fr}.az-grid .az:last-child,.storage-grid .service{grid-column:1/-1}.flow{grid-template-columns:repeat(3,1fr)}.flow-step:nth-child(3):after{display:none}.local-flow{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:650px){.shell{padding:23px 16px 45px}.topline .stamp{display:none}.toolbar{align-items:flex-start}.top-grid,.storage-grid,.az-grid,.notes,.local-grid{grid-template-columns:1fr}.az-grid .az:last-child,.storage-grid .service{grid-column:auto}.flow,.local-flow{grid-template-columns:repeat(2,1fr)}.flow-step:nth-child(3):after{display:block}.flow-step:nth-child(even):after{display:none}.flow-step b{font-size:12px}.vpc{padding:12px}.vpc-head{display:block}.vpc-head p{margin-top:4px}.outside .hint{margin-left:0}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="topline"><span>JIGEUMINI / INFRASTRUCTURE MAP</span><span class="stamp">2026-10-27 · 설계 시각화</span></div>
+    <h1>호스트와 컨테이너를<br>분리해서 보는 배치도</h1>
+    <p class="lead">바깥 흰 테두리가 EC2 한 대, 안쪽 점선 블록이 그 호스트에서 실행하는 Docker 컨테이너입니다. 운영 후보와 현재 로컬 실행을 전환해 볼 수 있습니다.</p>
+    <div class="toolbar">
+      <div class="tabs" role="tablist" aria-label="배치 유형">
+        <button class="tab" role="tab" aria-controls="candidate" aria-selected="true" id="tab-candidate">EC2 운영 후보</button>
+        <button class="tab" role="tab" aria-controls="local" aria-selected="false" id="tab-local">현재 로컬 구성</button>
+      </div>
+      <div class="legend" aria-label="범례"><span><i class="ec2"></i> EC2 호스트 / VM</span><span><i class="docker"></i> Docker 컨테이너</span><span><i class="managed"></i> 관리형 서비스 후보</span></div>
+    </div>
+
+    <section class="view active" id="candidate" role="tabpanel" aria-labelledby="tab-candidate">
+      <div class="callout"><strong>설계 후보</strong><span>아래 EC2 배치는 장애 영역과 프로세스 경계를 설명하기 위한 예시입니다. 계정·리전·인스턴스 크기·월 비용은 정해지지 않았고, 외부 배포 및 AZ 장애 검증도 수행하지 않았습니다. Kafka는 AZ별 EC2 한 대에 broker와 전용 controller를 별도 컨테이너로 함께 둡니다. Kafka용 EC2는 총 3대입니다.</span></div>
+      <div class="flow" aria-label="주요 데이터 흐름">
+        <div class="flow-step"><span class="num">01 / SOURCE</span><b>치지직 공개 방송</b><small>HTTP + 익명 READ</small></div>
+        <div class="flow-step"><span class="num">02 / INGEST</span><b>Fleet worker</b><small>임대·유한 버퍼</small></div>
+        <div class="flow-step"><span class="num">03 / STREAM</span><b>Kafka</b><small>공용 topic · P3 / RF3</small></div>
+        <div class="flow-step"><span class="num">04 / PROCESS</span><b>Spring 분석기</b><small>6개 독립 소비 group</small></div>
+        <div class="flow-step"><span class="num">05 / STORE</span><b>PostgreSQL</b><small>집계·멱등·메타데이터</small></div>
+        <div class="flow-step"><span class="num">06 / SERVE</span><b>웹 / API</b><small>브라우저 조회</small></div>
+      </div>
+      <div class="outside"><span class="tag">VPC 밖</span><span class="pill">치지직 공개 HTTP·READ WebSocket</span><span class="pill">사용자 브라우저</span><span class="hint">원천 수집과 사용자 조회는 서로 다른 경로입니다.</span></div>
+      <div class="vpc">
+        <div class="vpc-head"><h2>AWS VPC · EC2 자체 운영 예시</h2><p>각 박스의 EC2와 컨테이너를 별도 실행 경계로 표시</p></div>
+        <div class="section-title">01 · 진입 및 애플리케이션 · 공개/사설 서브넷 분리</div>
+        <div class="grid top-grid">
+          <article class="host"><div class="host-head"><div><div class="host-name">웹 게이트웨이</div><div class="host-sub">공개 진입 · TLS 종료 위치는 후보</div></div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER</span><b>NGINX + React 정적 웹</b><small>브라우저에 UI 제공 · API 프록시</small></div></div><p class="host-note">현재 배포 패키지에는 웹 1개 컨테이너.</p></article>
+          <article class="host"><div class="host-head"><div><div class="host-name">애플리케이션 호스트</div><div class="host-sub">사설망 · 외부 직접 접근 없음</div></div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER</span><b>Spring API + 분석기</b><small>한 JVM · 6개 소비 group · scheduler</small></div><div class="container"><span class="type">DOCKER / 유지보수 시만</span><b>migration · recovery 명령</b><small>owner 권한 · 상시 실행 아님</small></div></div></article>
+          <article class="host"><div class="host-head"><div><div class="host-name">수집 호스트</div><div class="host-sub">허용된 원천 egress만 제공</div></div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER</span><b>Fleet worker</b><small>채널 임대 · 연결 · Kafka 발행</small></div></div><p class="host-note">명시적 apply/worker · 공개 최대 3채널/실행.</p></article>
+        </div>
+        <div class="segment"><div class="section-title">02 · Kafka 데이터 계층 · 3개 AZ / EC2 3대 / broker 3 + controller 3</div>
+          <div class="grid az-grid">
+            <div class="az"><h3>AZ A · 장애 영역 1</h3><div class="host"><div class="host-head"><div class="host-name">Kafka 호스트 1 · broker + controller</div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER / 데이터</span><b>broker 1</b><small>복제 데이터 · 별도 볼륨</small></div><div class="container"><span class="type">DOCKER / 메타데이터</span><b>KRaft controller 1</b><small>metadata quorum · 별도 볼륨</small></div></div></div></div>
+            <div class="az"><h3>AZ B · 장애 영역 2</h3><div class="host"><div class="host-head"><div class="host-name">Kafka 호스트 2 · broker + controller</div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER / 데이터</span><b>broker 2</b><small>RF3 복제본 · 별도 볼륨</small></div><div class="container"><span class="type">DOCKER / 메타데이터</span><b>KRaft controller 2</b><small>3개 중 과반 필요</small></div></div></div></div>
+            <div class="az"><h3>AZ C · 장애 영역 3</h3><div class="host"><div class="host-head"><div class="host-name">Kafka 호스트 3 · broker + controller</div><span class="host-type">EC2</span></div><div class="containers"><div class="container"><span class="type">DOCKER / 데이터</span><b>broker 3</b><small>acks=all · minISR2</small></div><div class="container"><span class="type">DOCKER / 메타데이터</span><b>KRaft controller 3</b><small>quorum 투표</small></div></div></div></div>
+          </div>
+        </div>
+        <div class="segment"><div class="section-title">03 · 데이터·복구 계층</div>
+          <div class="grid storage-grid">
+            <article class="host"><div class="host-head"><div><div class="host-name">PostgreSQL primary</div><div class="host-sub">사설망 · 집계·멱등 ledger</div></div><span class="host-type">EC2</span></div><div class="container"><span class="type">DOCKER</span><b>PostgreSQL primary</b><small>쓰기 주체 · 디스크/IOPS 별도 산정</small></div></article>
+            <article class="host"><div class="host-head"><div><div class="host-name">PostgreSQL standby</div><div class="host-sub">다른 AZ · 전환 방식 미확정</div></div><span class="host-type">EC2</span></div><div class="container"><span class="type">DOCKER</span><b>PostgreSQL standby</b><small>복제·승격·재연결 검증 필요</small></div></article>
+            <article class="service"><span class="host-type" style="border-color:var(--amber);color:var(--amber)">AWS SERVICE 후보</span><div style="height:10px"></div><b>S3 백업 · WAL 보관</b><small>호스트 밖 백업 저장소 예시. 복원과 보존 정책은 #49에서 검증.</small></article>
+          </div>
+        </div>
+      </div>
+      <div class="notes"><div class="note"><strong>Kafka HA 범위</strong><p>한 Kafka 호스트 손실은 broker와 controller 동시 손실입니다. 남은 ISR2·controller2와 복구 부하는 실제 AZ에서 검증해야 합니다.</p></div><div class="note"><strong>아직 단일 실행 단위</strong><p>Spring API·분석기·scheduler는 현재 한 JVM입니다. 이를 단순 복제하면 소비와 작업도 중복됩니다.</p></div><div class="note"><strong>미확정 운영 값</strong><p>EC2 SKU, 리전, ALB/TLS, PG 자동 전환, 중앙 경보, 저장량과 월 견적은 외부 검증 #48·#49의 결정 대상입니다.</p></div></div>
+    </section>
+
+    <section class="view" id="local" role="tabpanel" aria-labelledby="tab-local" hidden>
+      <div class="callout"><strong>현재 구현</strong><span>이 화면은 `deploy/compose.yaml`의 단일 호스트 배포 패키지를 나타냅니다. 웹·API·Kafka·PostgreSQL은 한 Docker 호스트에 있으며 Kafka는 combined broker/controller 1대, RF1입니다. fleet worker는 같은 서버 이미지의 별도 명령으로 실행하며 Compose 기본 서비스로 항상 켜져 있지 않습니다.</span></div>
+      <div class="flow local-flow"><div class="flow-step"><span class="num">01 / SOURCE</span><b>공개 방송</b><small>익명 READ</small></div><div class="flow-step"><span class="num">02 / WORKER</span><b>Fleet worker</b><small>별도 실행</small></div><div class="flow-step"><span class="num">03 / KAFKA</span><b>combined 1대</b><small>P3 / RF1</small></div><div class="flow-step"><span class="num">04 / SPRING</span><b>분석기 + API</b><small>한 JVM</small></div><div class="flow-step"><span class="num">05 / DATA</span><b>PostgreSQL</b><small>primary 1대</small></div></div>
+      <div class="host local-host"><div class="host-head"><div><div class="host-name" style="font-size:18px">로컬 Docker 호스트 · 단일 장애 영역</div><div class="host-sub">한 호스트 손실 시 웹·수집 경로·Kafka·DB가 함께 영향받음</div></div><span class="host-type">HOST / VM</span></div>
+        <div class="grid local-grid"><div class="container"><span class="type">DOCKER / 상시</span><b>web · NGINX + React</b><small>loopback 포트만 공개</small></div><div class="container"><span class="type">DOCKER / 상시</span><b>api · Spring 분석기 + HTTP</b><small>6개 소비 group · scheduler 포함</small></div><div class="container"><span class="type">DOCKER / 상시</span><b>kafka · broker + controller</b><small>combined 1노드 · P3 / RF1</small></div><div class="container"><span class="type">DOCKER / 상시</span><b>postgres · PostgreSQL</b><small>standby 없음</small></div><div class="container"><span class="type">DOCKER / 명령형</span><b>migrate · 관리 작업</b><small>owner 권한 · 실행 뒤 종료</small></div><div class="container"><span class="type">별도 실행 진입점</span><b>fleet worker</b><small>현재 Compose 기본 서비스 목록에는 없음</small></div></div>
+        <div class="local-net"><b>Compose 네트워크</b> · edge(웹 외부 진입) / service(웹↔API) / data(API↔Kafka·PG). data·service는 내부망입니다. 현재 단일 호스트 구성은 AZ·호스트 장애를 견디는 운영 HA가 아닙니다.</div>
+      </div>
+      <div class="notes"><div class="note"><strong>현재 검증</strong><p>로컬 단일 broker/DB의 기능·복구 리허설과 합성 부하 결과가 있습니다.</p></div><div class="note"><strong>현재 공개 수집</strong><p>익명 READ로 2채널 90초, 채팅 94건의 DB 반영을 확인했습니다. fleet의 장기 운영 검증은 아닙니다.</p></div><div class="note"><strong>운영 전 전환</strong><p>RF3 topic 재배치, PG standby·복원, 비밀/TLS, 경보, 실제 AZ 장애 시험이 필요합니다.</p></div></div>
+    </section>
+    <footer class="footer"><span>근거: docs/design/INFRASTRUCTURE.md · docs/DEPLOYMENT_OPERATIONS.md · docs/pipeline/KAFKA_HA.md · deploy/compose.yaml</span><span>호스트 배치는 설명용 예시 · 실제 AWS 자원 미생성</span></footer>
+  </main>
+  <script>
+    const tabs=[...document.querySelectorAll('.tab')];
+    tabs.forEach(tab=>tab.addEventListener('click',()=>{
+      tabs.forEach(item=>item.setAttribute('aria-selected',String(item===tab)));
+      document.querySelectorAll('.view').forEach(view=>{const active=view.id===tab.getAttribute('aria-controls');view.classList.toggle('active',active);view.hidden=!active});
+    }));
+  </script>
+</body>
+</html>

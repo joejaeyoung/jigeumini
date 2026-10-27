@@ -1,5 +1,9 @@
 # 진행 상태
 
+## 설계 변경: Kafka controller 동거 배치
+
+F15/F16 → T15/T16. 운영 HA 후보의 Kafka용 EC2를 AZ별1대·총3대로 정리하고, 각 호스트에 broker와 전용 controller를 별도 Docker 컨테이너로 함께 배치한다. [HTML 배치도](design/INFRASTRUCTURE.html), [인프라 설계](design/INFRASTRUCTURE.md), [HA 계약](pipeline/KAFKA_HA.md), [운영안](DEPLOYMENT_OPERATIONS.md)을 일치시켰다. 현재 로컬 단일 combined 노드와 운영 후보는 다르다. 로컬6컨테이너 검증은 broker/controller 동시 손실·실제 AZ 장애를 검증하지 않았다. #48/#49에서 한 호스트 손실·복귀 시 ISR2/quorum2·복구 부하와 비용을 확인한다.
+
 ## 완료: 공개 방송 fleet 활성화 #74
 
 `feat/public-fleet-activation`, [PR #75](https://github.com/joejaeyoung/jigeumini/pull/75), F13 → T13/T14/T11. 명시적 `apply`·`worker`에 중복으로 요구하던 `FLEET_LIVE_ENABLED`를 제거했다. [fleet 계약](fleet/README.md)의 공개 3채널·실행 30분·임대·Kafka 준비 경계는 유지한다. 플래그를 제거한 실행 JAR worker의 실제 Kafka/DB 통합 사례와 로컬 `./scripts/check` 단위 180·하네스 38, `./scripts/integration` 실제 DB/broker 155개가 통과했다. 최종 `76f8f09` Claude APPROVE·push40446695908/PR40446701299 SUCCESS 뒤 `0807adc`로 develop에 병합하고 이슈를 닫았다. 공개 목록 자동 순회·전체 방송 포괄률·장기 운영은 이 변경의 검증 범위가 아니다.

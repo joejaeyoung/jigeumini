@@ -67,6 +67,8 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 관리형 선택 시 공급자의 복제/백업 책임과 프로젝트의 Kafka 버전·ELR·인증·topic 정책·복원 검사 호환성을 확인한다. 공급자/SKU/리전은 미확정이다. [운영안·비용 항목](../DEPLOYMENT_OPERATIONS.md), [공식 조사](../research/KAFKA_DEPLOYMENT.md).
 
+2026-10-27에 이 배치를 GCP 서울 Compute Engine VM8대와 `pd-balanced` 1,760GiB로 환산한 [일 비용 초안](../research/GCP_DAILY_COST.md)을 작성했다. VM·할당 디스크 온디맨드 정가 **약 $35.38/일**이며 네트워크·LB·NAT·백업은 제외한다. 역할별 초기 사양과 계산은 해당 문서에 둔다. 실제 공급자·운영 SKU 확정이나 클라우드 처리량 검증을 뜻하지 않는다.
+
 ## 용량 설계의 기준
 
 | 근거 | 확인 범위 | 운영 산정 의미 |

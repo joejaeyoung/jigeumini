@@ -50,6 +50,8 @@ worker 수 식만으로 연결 수를 늘리지 않는다. 실제 권한·HTTP �
 
 견적 입력표에는 지역, 월 실행시간(예:730시간은 계산 가정), 각 역할 수/CPU/메모리, storage/IOPS, 압축·분포 실측, 모든 consumer group fetch, standby, 보존/백업 기간, 외부 전송·NAT·로그를 넣는다. 단가는 견적일의 공급자 계산기로 채우고 세금/환율/약정 조건을 따로 적는다. 아직 지역·예산·실측 원천 부하가 없으므로 월 금액을 확정하지 않는다.
 
+[GCP 서울 일 비용 초안](research/GCP_DAILY_COST.md)은 위 입력표에 임시 VM8대·디스크1,760GiB를 대입한 비교값이다. VM·할당 디스크만 약 $35.38/일이고 네트워크·LB·NAT·백업과 운영 계정의 실제 조건은 별도다. 공급자와 운영 SKU를 채택한 결정이 아니다.
+
 2026-10-26 공식 자료 추가 확인: [AWS MSK FAQ](https://aws.amazon.com/msk/faqs/)는 Standard broker의3개 영역 배치를 설명한다. [MSK 요금](https://aws.amazon.com/msk/pricing/)은 broker/저장/처리·전송 항목, [RDS PostgreSQL 요금](https://aws.amazon.com/rds/postgresql/pricing/)은 인스턴스/저장/백업/전송과 Multi-AZ 선택을 분리한다. [EC2 비용 구성](https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/amazon-ec2-cost-breakdown.html)은 compute 외 gateway·네트워크 비용도 포함한다. 관리형 선택이 현재 Kafka4.1.2/ELR1 설정과 호환된다는 검증은 수행하지 않았다.
 
 ## 경보와 확대 중단 기준

@@ -1,5 +1,9 @@
 # 진행 상태
 
+## 조사: GCP 서울 운영 후보 일 비용
+
+F16 → T08/T15/T16. [공식 단가·계산](research/GCP_DAILY_COST.md)에 EC2 역할을 GCP Compute Engine VM8대(웹1·API/분석1·fleet1·Kafka3·PG2)와 `pd-balanced` 1,760GiB로 환산했다. Kafka는 각 VM의 별도 broker/controller Docker 컨테이너로 직접 운영하며 관리형 Kafka는 비용 제약에 따른 사용자 결정으로 배포 후보에서 제외한다. 2026-10-27 서울 온디맨드 정가의 VM·할당 디스크 합계는 약 **$35.38/일**, 30일 $1,061.25다. 이 금액은 네트워크·LB·NAT·백업·세금·실제 할인 제외이며 운영 SKU 승인이나 24시간 500건/s 성능 검증이 아니다. #48/#49에서 실제 zone 장애·장기 DB/디스크·송신량·최종 견적을 재검증한다.
+
 ## 설계 변경: Kafka controller 동거 배치
 
 F15/F16 → T15/T16. 운영 HA 후보의 Kafka용 EC2를 AZ별1대·총3대로 정리하고, 각 호스트에 broker와 전용 controller를 별도 Docker 컨테이너로 함께 배치한다. [HTML 배치도](design/INFRASTRUCTURE.html), [인프라 설계](design/INFRASTRUCTURE.md), [HA 계약](pipeline/KAFKA_HA.md), [운영안](DEPLOYMENT_OPERATIONS.md)을 일치시켰다. 현재 로컬 단일 combined 노드와 운영 후보는 다르다. 로컬6컨테이너 검증은 broker/controller 동시 손실·실제 AZ 장애를 검증하지 않았다. #48/#49에서 한 호스트 손실·복귀 시 ISR2/quorum2·복구 부하와 비용을 확인한다.

@@ -8,7 +8,8 @@
 |---|---|---|
 | 로컬·단일 호스트 실험 | NGINX 웹1, Spring API/분석기1, 별도 유한 fleet worker, PostgreSQL1, combined Kafka1/RF1 | 현재 이미지·복구 리허설. 호스트 장애 허용 없음 |
 | 자체 운영 HA 후보 | gateway/정적 웹, API/분석기1, fleet worker별 임대·예산, AZ별 Kafka EC2 한 대 안에 별도 broker/controller 컨테이너 각1개(RF3/minISR2), PostgreSQL primary+standby·외부 백업 | Kafka용 EC2 총3대·프로세스6개. 한 호스트 손실은 broker와 controller 동시 손실이므로 결합 장애·복구 부하 검증 필요 |
-| 관리형 후보 | 앱 컨테이너/VM, 관리형 Kafka3개 영역, 관리형 PostgreSQL standby·백업 | 운영 인력과 복구 책임 축소 여부를 비용에 포함. 서비스가 지원하는 Kafka 버전·ELR·토픽 설정·인증을 별도 호환성 시험 |
+
+Kafka는 위 자체 운영 HA 후보처럼 VM의 Docker 컨테이너에서 실행한다. 관리형 Kafka는 비용 제약에 따른 사용자 결정으로 현재 배포 후보에서 제외한다. PostgreSQL의 관리형 여부는 이 결정에 포함하지 않았으며 현 비용 초안은 PostgreSQL도 VM에서 운영하는 값이다.
 
 현재 분석기와 HTTP API는 한 JVM이며 scheduler도 포함한다. 트래픽 증가 시 무조건 API 복제 수를 늘리지 않는다. 조회 전용 역할과 scheduler 중복/DB 경합 계약을 분리한 뒤 증설한다. 일반 consumer는 partition3개라 같은 group의 네 번째는 유휴가 될 수 있다. 원천별 worker는 임대가 중복 소유를 제한하며, #28의 검사/send 창·이미 전송한 입력·인계 공백 제한을 그대로 가진다.
 
@@ -50,7 +51,9 @@ worker 수 식만으로 연결 수를 늘리지 않는다. 실제 권한·HTTP �
 
 견적 입력표에는 지역, 월 실행시간(예:730시간은 계산 가정), 각 역할 수/CPU/메모리, storage/IOPS, 압축·분포 실측, 모든 consumer group fetch, standby, 보존/백업 기간, 외부 전송·NAT·로그를 넣는다. 단가는 견적일의 공급자 계산기로 채우고 세금/환율/약정 조건을 따로 적는다. 아직 지역·예산·실측 원천 부하가 없으므로 월 금액을 확정하지 않는다.
 
-2026-10-26 공식 자료 추가 확인: [AWS MSK FAQ](https://aws.amazon.com/msk/faqs/)는 Standard broker의3개 영역 배치를 설명한다. [MSK 요금](https://aws.amazon.com/msk/pricing/)은 broker/저장/처리·전송 항목, [RDS PostgreSQL 요금](https://aws.amazon.com/rds/postgresql/pricing/)은 인스턴스/저장/백업/전송과 Multi-AZ 선택을 분리한다. [EC2 비용 구성](https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/amazon-ec2-cost-breakdown.html)은 compute 외 gateway·네트워크 비용도 포함한다. 관리형 선택이 현재 Kafka4.1.2/ELR1 설정과 호환된다는 검증은 수행하지 않았다.
+[GCP 서울 일 비용 초안](research/GCP_DAILY_COST.md)은 위 입력표에 임시 VM8대·디스크1,760GiB를 대입한 비교값이다. VM·할당 디스크만 약 $35.38/일이고 네트워크·LB·NAT·백업과 운영 계정의 실제 조건은 별도다. 공급자와 운영 SKU를 채택한 결정이 아니다.
+
+2026-10-26 공식 자료 추가 확인 기록: [AWS MSK FAQ](https://aws.amazon.com/msk/faqs/)와 [MSK 요금](https://aws.amazon.com/msk/pricing/)은 관리형 후보를 비교할 때 읽은 자료이며 현재 배포안은 아니다. [RDS PostgreSQL 요금](https://aws.amazon.com/rds/postgresql/pricing/)과 [EC2 비용 구성](https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/amazon-ec2-cost-breakdown.html)도 초기 공급자 비교 근거다. 현재 Kafka4.1.2/ELR1과 관리형 서비스의 호환성은 검증하지 않았다.
 
 ## 경보와 확대 중단 기준
 

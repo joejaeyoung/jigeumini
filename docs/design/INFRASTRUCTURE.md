@@ -63,9 +63,11 @@ flowchart TB
 
 Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다. controller 과반수와 데이터 ISR는 별개다. 한 영역 손실 시 남은 영역의 처리·저장·복구 부하를 따로 시험한다. [HA 계약](../pipeline/KAFKA_HA.md), [로컬 장애](../pipeline/KAFKA_HA_VERIFICATION.md), [디스크 손실](../pipeline/KAFKA_DISK_LOSS_VERIFICATION.md).
 
-자체 운영 후보는 각 AZ의 EC2 한 대에 broker와 전용 controller를 별도 컨테이너로 함께 배치해 Kafka용 EC2를 총3대로 잡는다. 역할별 CPU·메모리·디스크·재시작은 구분하되, 한 호스트 손실은 해당 broker와 controller를 동시에 잃는다. 로컬6컨테이너 검증은 이 결합 장애나 실제 AZ 장애를 재현하지 않았으므로 한 영역 손실·복귀 때 ISR2와 controller2 유지, 복구 부하를 검증해야 한다. Kafka HA만으로 서비스 전체 HA가 완성되지는 않는다. 현재 API/분석기1·PG1은 단일 장애 지점이다. PG standby/자동 전환, API 조회 역할 분리·다중 인스턴스, scheduler 소유권/관측 집계와 전체 DB pool 예산은 추가 설계·검증이 필요하다. API를 복제하면 소비자와 scheduler도 함께 복제된다.
+자체 운영 후보는 각 장애 영역의 VM 한 대에 broker와 전용 controller를 별도 컨테이너로 함께 배치해 Kafka용 VM을 총3대로 잡는다. 역할별 CPU·메모리·저장 경로·재시작은 구분하되, 별도 물리 디스크는 비용 초안에 포함하지 않았고 한 호스트 손실은 해당 broker와 controller를 동시에 잃는다. 로컬6컨테이너 검증은 이 결합 장애나 실제 영역 장애를 재현하지 않았으므로 한 영역 손실·복귀 때 ISR2와 controller2 유지, 복구 부하를 검증해야 한다. Kafka HA만으로 서비스 전체 HA가 완성되지는 않는다. 현재 API/분석기1·PG1은 단일 장애 지점이다. PG standby/자동 전환, API 조회 역할 분리·다중 인스턴스, scheduler 소유권/관측 집계와 전체 DB pool 예산은 추가 설계·검증이 필요하다. API를 복제하면 소비자와 scheduler도 함께 복제된다.
 
-관리형 선택 시 공급자의 복제/백업 책임과 프로젝트의 Kafka 버전·ELR·인증·topic 정책·복원 검사 호환성을 확인한다. 공급자/SKU/리전은 미확정이다. [운영안·비용 항목](../DEPLOYMENT_OPERATIONS.md), [공식 조사](../research/KAFKA_DEPLOYMENT.md).
+Kafka는 EC2 또는 이에 해당하는 GCP Compute Engine VM 안의 Docker 컨테이너로 직접 운영한다. 관리형 Kafka는 현재 배포 후보에서 제외한다. VM 공급자·최종 SKU·리전은 실제 운영 전 확정한다. [운영안·비용 항목](../DEPLOYMENT_OPERATIONS.md), [이전 관리형 비교 조사](../research/KAFKA_DEPLOYMENT.md).
+
+2026-10-27에 이 배치를 GCP 서울 Compute Engine VM8대와 `pd-balanced` 1,760GiB로 환산한 [일 비용 초안](../research/GCP_DAILY_COST.md)을 작성했다. VM·할당 디스크 온디맨드 정가 **약 $35.38/일**이며 네트워크·LB·NAT·백업은 제외한다. 역할별 초기 사양과 계산은 해당 문서에 둔다. 실제 공급자·운영 SKU 확정이나 클라우드 처리량 검증을 뜻하지 않는다.
 
 ## 용량 설계의 기준
 

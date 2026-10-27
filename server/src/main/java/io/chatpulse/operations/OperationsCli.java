@@ -18,7 +18,7 @@ public final class OperationsCli {
                 var request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:8080/readyz")).timeout(Duration.ofSeconds(3)).GET().build();
                 try(var client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build()){return client.send(request,HttpResponse.BodyHandlers.discarding()).statusCode()==200?0:2;}
             }
-            if(args.length<1||!Set.of("migrate","bind-sources","initialize-groups","recovery-plan","recover-groups").contains(args[0])
+            if(args.length<1||!Set.of("migrate","bind-sources","initialize-groups","recovery-plan","recover-groups","retention-status").contains(args[0])
                     ||args.length!=(args[0].equals("recover-groups")?2:1))throw new IllegalArgumentException("OPS_ARGUMENTS");
             var env=System.getenv();var config=RuntimeEnvironment.from(env);Object result;
             if(args[0].equals("migrate")) {
@@ -30,6 +30,11 @@ public final class OperationsCli {
                         jdbc.execute("REVOKE INSERT,UPDATE,DELETE ON flyway_schema_history,deployment_source_identity FROM app_runtime");
                     }
                     result=Map.of("migrated",true);
+                }
+            } else if(args[0].equals("retention-status")) {
+                try(var ds=PostgresSupport.open(config.jdbcUrl(),config.user(),config.password(),true)) {
+                    var jdbc=new JdbcTemplate(ds);jdbc.setQueryTimeout(3);
+                    result=new io.chatpulse.retention.RetentionDiagnostics(jdbc).inspect(config.runId());
                 }
             } else {
                 boolean readOnly=args[0].equals("recovery-plan");

@@ -1,0 +1,570 @@
+{
+  "issue": 65,
+  "pullRequest": 71,
+  "targetBranch": "develop",
+  "head": "2f5f64dce47f573fa0e0751fc80d3af94374f2d9",
+  "mergeCommit": "cca98772927a5c8e42717c2df3128829e827f83f",
+  "mergedAt": "2026-10-26T20:01:05Z",
+  "claude": {
+    "verdict": "APPROVE",
+    "head": "2f5f64dce47f573fa0e0751fc80d3af94374f2d9",
+    "priorReviewHead": "a53625981266683f08ffd7b1ccf82b95c6acedd8",
+    "scope": "이전 전체 정적 코드 검토와 이후 문서 delta; 고정 제공 자료, 실제 raw 재실행 검토 아님",
+    "priorBlockingFindings": 1,
+    "remainingBlockingFindings": 0,
+    "reviewSha256": "422fdda5508957c561d091595baeda40be0938688baf2193102ea8efb84b8a09",
+    "promptSha256": "5340386b18a7723a017e66fde1f731dd8a6dbd362a73e8c00879584bb2245b1e"
+  },
+  "peerReviews": {
+    "standards": {
+      "hard": 0,
+      "judgment": 0
+    },
+    "spec": {
+      "blocking": 0,
+      "nonblocking": 0
+    },
+    "scope": "0dc8529...2f5f64d; raw2 hash/SQL12집계·migration동일 확인"
+  },
+  "ci": {
+    "head": "2f5f64dce47f573fa0e0751fc80d3af94374f2d9",
+    "runs": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-10-26T19:43:48Z",
+        "databaseId": 40389325212,
+        "event": "push",
+        "headSha": "2f5f64dce47f573fa0e0751fc80d3af94374f2d9",
+        "status": "completed",
+        "updatedAt": "2026-10-26T19:58:26Z",
+        "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40389325212",
+        "counts": {
+          "integrationTest": {
+            "tests": 142,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "test": {
+            "tests": 179,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "xmlManifest": [
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.categories.CategoryIntegrationTest.xml",
+            "sha256": "d0ac9b150f94ffed0094bf7a56340299a8045e1835589155e734d7797711e24a"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.fleet.FleetIntegrationTest.xml",
+            "sha256": "53a3f56c0e9871d32b3e74ef13d818bdf19ee16afccfbf77583cf7060d438b34"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.fleet.FleetRuntimeIntegrationTest.xml",
+            "sha256": "0b62fa4f7e60ae85d0422a5e024bd1e0babf943972a869d58f1dc637a603f55b"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml",
+            "sha256": "9e967bd88a7e9eb5875aa3f91d64d4f4dd7a232522e4f1dc9c4457787280eae3"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.observations.ObservationIntegrationTest.xml",
+            "sha256": "02d578bb5e9a4fe9bbef2b105c4994f3022cfde5a60405a4f85b48301d85f727"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.operations.RecoveryPlanIntegrationTest.xml",
+            "sha256": "458f3842f59e04fafb418a539b2b8c4e8858a697e7a0d4446020140fc8434eba"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.DeadLetterIntegrationTest.xml",
+            "sha256": "c9fa82083d66e794a7e8855bc63a97b043d9905f140304c79f0c92bee692ecb8"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.KafkaSupportIntegrationTest.xml",
+            "sha256": "f86ac5bef778b20db0331a8671f84d3577b54598be19401ccc8be1c01b19321f"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.LoadExperimentIntegrationTest.xml",
+            "sha256": "c0af66fba858e08e7f4b7bd9cefe6395e0658c75efcfa20b7faad803e779ddfc"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.PartitionExpansionIntegrationTest.xml",
+            "sha256": "0c5c390448c7ed017f1eb70caabc263c381f380ad8b8e2ee6dbdeb15b3d19d70"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.PipelineIntegrationTest.xml",
+            "sha256": "96985bc34f887623cee2d62e9943a09bbe844fb04cc021af544a16e2570d621e"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.RankingIntegrationTest.xml",
+            "sha256": "7c1456955f1f510f71b69c4cf19016496c68f5c413dbaa4b10a48ff0e2aada57"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.TrendRecoveryIntegrationTest.xml",
+            "sha256": "3f39b941e4e1b37688495ae9cf2ad401db95cda67cbd465063a0c434681c8448"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.replay.ReplayIntegrationTest.xml",
+            "sha256": "32ba87499c47a68d1238cfe42c71e010c4a22738497dae06c8dfee0482b2e6f7"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.reports.ReportIntegrationTest.xml",
+            "sha256": "db4cbe5b3c04b7b8d95fcc24f79b193e0ab4401cb555f4fe1a3b1947ff51d424"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.categories.CategoryQueriesTest.xml",
+            "sha256": "7e47c6fde0f5cc54eb5ab6d536570155d72ca161a4a1c6b2743a973b39668007"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.OfficialBroadcastCatalogTest.xml",
+            "sha256": "7369d1a78f2bc2ce509649dcaea8c6320b2264a5d8c0fc3e4cff1643114ea493"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.SelectionCliTest.xml",
+            "sha256": "3a734411adb6a8b5ff13cb49835ce836ff9a380f6856904c6e05fb0d2732e517"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.SelectionPolicyTest.xml",
+            "sha256": "21d50dd8dee614ca0bf5faa0757099ef180ab0f8cf4279e00a845fd730dff7db"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.CollectorLeaseFailureTest.xml",
+            "sha256": "e999321271a03eff668f56a4bc9ce6bc905b70ce30483413d26afc82e214f975"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.CollectorStartupTest.xml",
+            "sha256": "93a8a8ec5e93707ae2bde04b01942407a43a6419d3cf5eba2e39e6fa59053aed"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.FleetCliTest.xml",
+            "sha256": "a6acd66f2bcb68ea1c475b3f959dfa801ba629b72aedf823487a45931223d641"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.FleetPlanTest.xml",
+            "sha256": "c1c2246e4d3e6a2e05e69d7c500a526f6b11ebdfbfea8c6441776feb92af8346"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.LeaseAuthorityTest.xml",
+            "sha256": "766bcb1ae4e79283eb5a6ccb166341365caac0d33ae9753b65b49c11181fbdf4"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.LeasedObservationsTest.xml",
+            "sha256": "0054e87e1bbee7f8c9ff5d5b6694359b598fc22020395f944816aa61ce6ad6fb"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.ChzzkMetadataSourceTest.xml",
+            "sha256": "bbd4ec7d4293730885bd8d890c3ee07dc98671ff6ccaf5bf54dd79ee2097d80e"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.MetadataControllerTest.xml",
+            "sha256": "b6e2c6d6901efb00fa3cf1d932828bf1a759482067cc4d5c6b39181b5fa65bc0"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.MetadataServiceTest.xml",
+            "sha256": "b1408a64acdf0c23b1da5dbf28ab464022498ef5ce42b209d022450d282646ce"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.notifications.NotificationControllerTest.xml",
+            "sha256": "9bb5b7946d4ee70ea00cecf693a02b1744c97fd345ff3280c87e15f71863cfc4"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.notifications.SpikeDetectedTest.xml",
+            "sha256": "861d6b3f72c03e0902a3e2af828def4bcd86208362f17f77f4b0f3107230efda"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.BroadcastObservedTest.xml",
+            "sha256": "3577ab6422845679e44c7dc37af99d37a1a36d19c2c2e7687b8eb9c959bf2a07"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.ObservationCollectorTest.xml",
+            "sha256": "fed8953e6054905497242616706659ba6064f14f6753e11c82cb9b200da74507"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.ObservationControllerTest.xml",
+            "sha256": "c23f480453f8932b6fa09afb33db5c4539b934010be02096279f121ccd1ff31d"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.operations.ProductLoadHarnessTest.xml",
+            "sha256": "8a0803089ad9dbbebafa7e47e076f4df93d0826f4ae9b7bf2f259656ca9fa043"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.operations.RuntimeEnvironmentTest.xml",
+            "sha256": "4de7866573e24bcca8119af8aeac36300ad3ff02ce90e70da945bc77f279315e"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.BatchConsumersTest.xml",
+            "sha256": "ebea17a6b2afd6d910465a4b69e8d1059ee6b375f621e98f1b48d85a04d14b67"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.BufferedKafkaPublisherTest.xml",
+            "sha256": "4754db16a6b15c62c729dcf6f939e96421c6987e804da0614e97286cc76badf5"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.DeadLetterTest.xml",
+            "sha256": "7ce6911ad7475719c23da696506498eaf0e7f8cea450d45f9a5a0a75bbce7443"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.EventCodecTest.xml",
+            "sha256": "188287cf89897e7c84073bff93911e5d8361ce17ace83a9137286f36ec6d2651"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentPublisherTest.xml",
+            "sha256": "326568022267a5b91772887fea13b8d3cb6d89dbf7bb59e07a3a5e8e2747e283"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentRoutingTest.xml",
+            "sha256": "f8fefb7ca0cc3acfd3e50ceb87570730c6fa01d291847999278acf553eaabfcb"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentSamplerTest.xml",
+            "sha256": "ce581d76c8804ddbc2652b774171b0cebd9b9c4a38773405bbc6d5d6ef301d50"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.KafkaSupportTest.xml",
+            "sha256": "cbad4d86df6eb637799bd39c7d2a804c2ae94d96802563c2dd0956fae786bcb5"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.KafkaTopicPolicyTest.xml",
+            "sha256": "7c09fb31c5d14eb6c5a4982ac5fcc42959b8b2219417d96bcaf2cd54a885ba4f"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChannelProbeTest.xml",
+            "sha256": "b3bae6ed0fa67ad448e521d022156dda9a8fd000dc5a1bbbed9892a2e8eb26c4"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChannelProbeTextTest.xml",
+            "sha256": "affb5bcfaa4309f7880c0907f075df5cf8037aee18d6d8e8fccd10258980a53e"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChatProtocolTest.xml",
+            "sha256": "f2d3ef82e3e10b00e410957cbd360c2d5835d2fd2bfc0e64001f73bc72f4b595"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChatSocketClientTest.xml",
+            "sha256": "03d9d1ad43ae14f4b9a7e50431f654ca6d1309a3133c7c1a43eb2f716f0e235f"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChzzkHttpSourceTest.xml",
+            "sha256": "80dd6df5795c9b3798cd5e6fc5eb1aed8b5ef1e68e8423d6e0876c8f8517bb88"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.IncomingTextTest.xml",
+            "sha256": "c36ef497616395000b4a0d5450eb2f9af93d76834790b2c388ffdcc9122f90eb"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.QualityPolicyTest.xml",
+            "sha256": "489a9711da289d2fd77c35bd0c6f4cc10630517678d81ca4c45d97a5c16d4610"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.QualityScheduleTest.xml",
+            "sha256": "51b3e8de96df6a851f49af3e9da062922c198766637f84f63c328e8d6c42965e"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.RankingControllerTest.xml",
+            "sha256": "2d5f1a4302d3d614e8dec4d5e98a3983ae8cbf22298790bb4d103e14e2130255"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.TrendPolicyTest.xml",
+            "sha256": "ed72a6e717be43608bcc62a96b70dd050b4e123212c6a4c799aec93fedf359de"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.replay.ReplayManifestTest.xml",
+            "sha256": "31204f89cb230a1ff9b6cdf46ffef679f609aeed3d320233fb3cd4e28af34136"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.reports.ReportPolicyTest.xml",
+            "sha256": "dbdd235e51ac85095f18544b07bd57dda0a335c13dfcf21077b922a40a64aa09"
+          }
+        ],
+        "otherJobs": {
+          "web": {
+            "logSha256": "23bf09db6590d24b017e099ea9175d42021a1f871ea854b55d83a1ab6dd1a220",
+            "verifiedCounts": {
+              "unit": 29,
+              "chromium": 31
+            }
+          },
+          "tech-goals": {
+            "logSha256": "17c082a9893ed8b45dcb5974ba510f427edb62e1e19805b8873e33fbce5449e3",
+            "verifiedCounts": {
+              "harness": 38
+            }
+          }
+        }
+      },
+      {
+        "conclusion": "success",
+        "createdAt": "2026-10-26T19:43:51Z",
+        "databaseId": 40389332785,
+        "event": "pull_request",
+        "headSha": "2f5f64dce47f573fa0e0751fc80d3af94374f2d9",
+        "status": "completed",
+        "updatedAt": "2026-10-26T19:58:26Z",
+        "url": "https://github.com/joejaeyoung/jigeumini/actions/runs/40389332785",
+        "counts": {
+          "integrationTest": {
+            "tests": 142,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          },
+          "test": {
+            "tests": 179,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0
+          }
+        },
+        "xmlManifest": [
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.categories.CategoryIntegrationTest.xml",
+            "sha256": "3429e5118eda7ba3f62d6db5bcb77f84c1236b3784465157a458a5803e77fc2d"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.fleet.FleetIntegrationTest.xml",
+            "sha256": "5c6f4623f5b5136470d91b38cc79be6641d99c3c3e6ea363213ebeb91062ac31"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.fleet.FleetRuntimeIntegrationTest.xml",
+            "sha256": "eabaf12631e19eeb797de5c28b6ef162bf08fb216320b199f46fa09136d90ece"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.notifications.NotificationIntegrationTest.xml",
+            "sha256": "81995dad5e7bcc79ca7253bc5bbd10832614741455967d2b668cb24e6e878bdf"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.observations.ObservationIntegrationTest.xml",
+            "sha256": "456ec8ee6dc3f3c18489d63d7b6b990f414845e36166e68ff8ea4b4d98a6eebc"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.operations.RecoveryPlanIntegrationTest.xml",
+            "sha256": "965c215eb9d80be0d7d40f74af0f7ec6906471a811295617dbfbca7afb37d1a3"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.DeadLetterIntegrationTest.xml",
+            "sha256": "46c798294b7d02af0285af7b4965ff2978efd905f9af34ce3cccd4974856ae58"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.KafkaSupportIntegrationTest.xml",
+            "sha256": "c6c7f9024f4772aa498bafc48c67cf25af6419ab5eeb791eacd3e8111690e0df"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.LoadExperimentIntegrationTest.xml",
+            "sha256": "47aa23ac404017c9ffdb0e76e53cbc9d8d884d3d3cd36d1abb31886798beba39"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.PartitionExpansionIntegrationTest.xml",
+            "sha256": "1d11afd4111831970d16906bdad0faee2e070d7e66210f2fd12bdfd1d0c16c72"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.PipelineIntegrationTest.xml",
+            "sha256": "804ac978af91f5a8e43cbef91f7e109068d6d1430c55bbe4460158d5b40cec61"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.RankingIntegrationTest.xml",
+            "sha256": "4807c8be0c5dd8870b960d02a4dbb36ef2eb53ed36d0f042f7f4b33adca421dc"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.pipeline.TrendRecoveryIntegrationTest.xml",
+            "sha256": "30cb9b295bb3ce8146340260ec80ed9c030c395fd397dccba9449ccc7c74a4f3"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.replay.ReplayIntegrationTest.xml",
+            "sha256": "1d007fb09a8754e58c99f1601b41516fe3ef10b1caf71c1cd5eea6acac4abfa8"
+          },
+          {
+            "file": "test-results/integrationTest/TEST-io.chatpulse.reports.ReportIntegrationTest.xml",
+            "sha256": "c9cfb1503706a110ee8a2ca2902fd7b13bf26928fcd1efdc8656d572e4b1e973"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.categories.CategoryQueriesTest.xml",
+            "sha256": "78fa0c19251ed88b1db5085c5dc396729a346c9817bec90f3f3ec04220de056a"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.OfficialBroadcastCatalogTest.xml",
+            "sha256": "f1afc03b2de3d534d59bb77bf32bd98945e6191a05eafc64f1d0fd47390d4b3f"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.SelectionCliTest.xml",
+            "sha256": "f4175a4eb306a2d39f2b620b7ecbb14802e14ec92b3174f75046180fa07c2be6"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.discovery.SelectionPolicyTest.xml",
+            "sha256": "fd0f7c515db5394dd914a2162ef148c169f30699188fea3b84c0155744bd5d0d"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.CollectorLeaseFailureTest.xml",
+            "sha256": "66afc98e195a36064f849fb9c589e8c02b251797d0bd40a261e1087bdfc7eec7"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.CollectorStartupTest.xml",
+            "sha256": "3408adb18ae1da96557bfa3375486a6af27df8bac1f8bfe2fa89845305ca880c"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.FleetCliTest.xml",
+            "sha256": "3a088a9c6dbd85f11e3461ca64b11c658f7fdafaff3d63bc2856c01eaf0606a3"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.FleetPlanTest.xml",
+            "sha256": "6c2f422f62631bd746967149acb0b752a04458b4895d415dc059b4071c421ea7"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.LeaseAuthorityTest.xml",
+            "sha256": "2956f2890590697e4dcc7a5f1ae2746684d624f792d5450398f5ae23341d5656"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.fleet.LeasedObservationsTest.xml",
+            "sha256": "46f0c851b3528e9d270f3b1dbdd5b40d14352aa4af62c6905447907d5ac1a411"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.ChzzkMetadataSourceTest.xml",
+            "sha256": "b1a41a35bd490967521b67e528375083258db1c7e605a9947de3d7f8ffc9ee40"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.MetadataControllerTest.xml",
+            "sha256": "fde55efc134275c1e15203b5a6a699ab94f3585cb03d3fc8c407b297cf6f14be"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.metadata.MetadataServiceTest.xml",
+            "sha256": "a757155656e427f9348c369bc95551c4ef2e07692f50e4c3f8aa6889051d1d2d"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.notifications.NotificationControllerTest.xml",
+            "sha256": "4aae9fc93a566f45335283a71ad462bf2256eba41d5919e7f6b74e79f1f018ea"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.notifications.SpikeDetectedTest.xml",
+            "sha256": "35f52f9b59395c8920998a0beba7752ed4d3080ddc1dbb5b490fb026a80bd72d"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.BroadcastObservedTest.xml",
+            "sha256": "6a0e7234fcf20ed1f79375a45aa43f0cf6c46e18ad314d9771542c81b696a283"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.ObservationCollectorTest.xml",
+            "sha256": "bdbe4a1a0b3a73dd2e05162690258994bb147cb1419fc2d3dab07eebd3d78c88"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.observations.ObservationControllerTest.xml",
+            "sha256": "87017b3728ff606ea51d72b1b5a8c703f8f89ce536995a0068bd9272ba46551c"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.operations.ProductLoadHarnessTest.xml",
+            "sha256": "bcc5cbab273ff5516f7fa70d4e7d5b417a84accd675b64bea3aab3354434bb10"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.operations.RuntimeEnvironmentTest.xml",
+            "sha256": "624729fd3683ec3f9cdf258f322c4ccc767412a8f6d86ed71fb4c5961f7065fa"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.BatchConsumersTest.xml",
+            "sha256": "7fdf61b4bc6d3e212f18ab2453c8f5b23efa226c43ea73baea826d2041204ef0"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.BufferedKafkaPublisherTest.xml",
+            "sha256": "7c7345de8161ff31125adf18d3a9b1f296a5714ad126729c602fad40302e378b"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.DeadLetterTest.xml",
+            "sha256": "1dc44d01e8cbd83eaa0dc7b18eaf877b3b94c9c75443d78fa9b766c9dfe89b9f"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.EventCodecTest.xml",
+            "sha256": "060475f6793cd7f35170b59597a8493f347e7b5ed20ad3a125ad8dad14cfc2c5"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentPublisherTest.xml",
+            "sha256": "04acae11c3042577208bae8a3543842df1350dba0af6a5dcd957be582f2f2a24"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentRoutingTest.xml",
+            "sha256": "66154c0999e6dba4107421f06845723b16f5a646f6ab352ee8b1fdf5bec4a1d3"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.ExperimentSamplerTest.xml",
+            "sha256": "6d5b204e5cf00b2de8e45d14a936f1426dc2d8c4d6db7a335088d2e185064a3c"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.KafkaSupportTest.xml",
+            "sha256": "444d81a25f5a40d76bd89e05a74ac75ce94437a07181fe5229ad55765d9abfa0"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.pipeline.KafkaTopicPolicyTest.xml",
+            "sha256": "8594a8dee18d6098d582229d20616031922468ad6ff8edbf410a1f1d0754e6c1"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChannelProbeTest.xml",
+            "sha256": "c6c1a4df5a4d0dd8fc007f7badb1f1ca346637c15aba50fad712aafcf5d5c88c"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChannelProbeTextTest.xml",
+            "sha256": "f492278dc390f0bf5fafc47175c5b9f165ed6f00852c83f046eb7a8b12f0e888"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChatProtocolTest.xml",
+            "sha256": "113df25e4c25fe5f6810cb2cb6a107435d9475aa3287a4d41d805a462043a4b5"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChatSocketClientTest.xml",
+            "sha256": "196cbb5b35a0676a272df2dfa8f0a347a7b7060d5033adcf3b61585151847546"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.ChzzkHttpSourceTest.xml",
+            "sha256": "aa208ed374b3406d9864a6702033692693e77cfd885c71b5a935c8f7eda6c26b"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.poc.IncomingTextTest.xml",
+            "sha256": "d19b8aa341f55cdd932e68c0bf64ab9dfde124d319572448fd4627d9618bf8c3"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.QualityPolicyTest.xml",
+            "sha256": "0ba4d8e2542ffdf00d9363056023ce926e3c975a1bce1fcd1df5912b6d1943af"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.QualityScheduleTest.xml",
+            "sha256": "8a3e90f8b8c43bf114eb8657c4ff3babf8d04b74d11c13964305a84a85ee4e8b"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.RankingControllerTest.xml",
+            "sha256": "087cddd7db2b31676d661cf58621c4ef3ba16f80951be4b0a30c2b557874545c"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.quality.TrendPolicyTest.xml",
+            "sha256": "1f9cc086fe70756b3f6f18cbef0a88b32cc85bef789e71e96129e61f9220f6e1"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.replay.ReplayManifestTest.xml",
+            "sha256": "dc96818e025a8f8eae88e56effd769c10b6339a5bd6942d737726473986bb453"
+          },
+          {
+            "file": "test-results/test/TEST-io.chatpulse.reports.ReportPolicyTest.xml",
+            "sha256": "4180a6dfa9794d2e568814631a452193b78228330655e5f4f4d167aaaa655476"
+          }
+        ],
+        "otherJobs": {
+          "tech-goals": {
+            "logSha256": "1e25651fcd39d27a11de164c2b02c97052ebb6f5912d212af9901c7baed6ae53",
+            "verifiedCounts": {
+              "harness": 38
+            }
+          },
+          "web": {
+            "logSha256": "46570c00628e7886d6dca4f3a8a88d2216d6b99fdf12891883d1cf94977f1964",
+            "verifiedCounts": {
+              "unit": 29,
+              "chromium": 31
+            }
+          }
+        }
+      }
+    ]
+  },
+  "gateComment": "https://github.com/joejaeyoung/jigeumini/pull/71#issuecomment-6425999957",
+  "limitations": [
+    "미실행 idle/fetch/offset 비용·VM 전체 관측은#49로 명시 이관",
+    "단일호스트 합성·fresh DB 범위이며 운영최대/실제원천/다중AZ를 확정하지 않음",
+    "main 릴리스와 외부배포를 실행하지 않음"
+  ]
+}

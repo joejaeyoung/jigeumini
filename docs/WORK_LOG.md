@@ -664,3 +664,45 @@ Standards의 watermark 범위 지적을 반영해 채팅28.410초와 관측29.41
 a536259의 Claude 판정은 REQUEST_CHANGES다. 차단1건은 SQL 비용 표가 병합 INSERT와 새 TTL 상태 갱신 CTE를 누락하고 revision UPDATE를 상태 갱신으로 잘못 해석한 문제였다. 같은 원본 두 실행에서 CATEGORY_EVENT/INSERT와 REPORT_OBSERVATION/CTE를 재계산해 추가했다. category SELECT+INSERT5.032→5.136초, 지정 report 네 family23.044→6.867초로 범위를 한정하고 전체 transaction 감소율과 구분한다. 새 부하 실행 없이 원본 hash와 숫자만 정제했다.
 
 비차단 문서 의견도 반영했다. 8a0fb76의3,000/s 실패·API오류1을 표에 추가하고, 이름에diag가 붙은 실행의 실제FULL/진단false, 동기 관측 burst와 watermark 사유 코드의 한계, V13 maintenance·7998bed migration 실행과 후속diff 없음, 진단 overlay의 현 설정을 명시했다. 종료 세션 TTL 조회 축소·observer 시작 실패 회귀·최초seed pacing 분리와 계측 접근 규칙 정리는 후속 개선 후보로 기록하며 검증 완료로 세지 않는다. 최종 승인과CI는 보완HEAD에서 새로 확인한다.
+
+## 2026-10-27 보존·용량 상한 #63 구현 시작
+
+origin/develop 기반 새 feat/retention-bounds 작업 복사본을 만들고 #65 의존 변경을 로컬 통합했다. 다른 기존 worktree는 변경하지 않았다. RetentionWindow의 단조 하한과 live/replay 부모 잠금, 유한 정리·보호 참조·진단을 구현했다. 72h ledger/8d bucket, terminal replay7d/metadata30d와 유한 UUID 충돌 보장 범위를 문서화했다. active report가 품질 snapshot/loss를 참조하고 outbox가 feed 수신 이력에 의존함을 확인해 먼저 보호한다.
+
+초기 단위179·하네스38/JAR 확인 뒤 실제 Kafka/PostgreSQL 새 경계8개가 통과했다. 이후 보호 이력·batch 상한·진단 회귀를 추가 중이며 전체 통합/저장량/잠금·Kafka segment 근거는 아직 미완료다. 자동 경보·클라우드 차단기나 절대 byte cap을 구현했다고 주장하지 않는다.
+
+### #65 완료 게이트
+
+최종2f5f64d Claude APPROVE(이전 전체 코드 검토와 문서 보완 delta), Standards/Spec0건, push40389325212/PR40389332785 SUCCESS를 확인했다. 두 XML은179/142 실패·오류·skip0, job log는하네스38/웹29/Chromium31이다. PR71을cca9877로develop 병합하고 #65와보드를완료처리했다. 미실행개별계측/VM전체는#49에명시이관했다. 최종게이트파일은다음작업#63에기록해승인HEAD를뒤에서수정하지않았다.
+
+### #63 경계 리뷰 보완
+
+고정 cd4dd43의 Standards/Spec 리뷰에서 report 부모1,000행 한도 진단과 오래된 pending outbox 첫 수신 누락을 발견했다. CleanupBatch로 각 삭제 한도 도달을 보존하고, 소비 인터페이스에서 정리 책임을 분리했다. 알림은 현재 outbox가 존재하는 경우 기간 밖에서도 receipt를 남기되 feed7일 조회는 유지한다. 실제 Kafka의8일 지연 첫 발행·소비와 자식 없는 부모1,001개 정리를 추가해13개 경계 테스트가 통과했다. 새 DB/WAL·Kafka segment 하네스는 측정 전 구현 단계다.
+
+#65의 squash commit과 승인 HEAD 전체 트리가 동일함을 확인한 뒤 동일 내용의 develop 이력을 연결했다. 기능 내용을 폐기하는 merge에는 사용하지 않았다. 다른 worktree는 변경하지 않았다.
+
+보존 하네스93cf16f의 DB 측정은 정합/cleanup 통과다. 각 집계60,000행×3회·동시10,000건을 대조했고 shared floor 대기는119ms였다. 500/s 목표 입력은 최대pacing1.783초로 밀려 처리율 보장으로 세지 않는다. Kafka 첫 실행은 topic 생성 단계에서 종료했고 소유 자원을 정리했다. 원인은 최초 결과에서 cause를 누락해 확정하지 않았으며, 16KiB segment가 공식4.1 최소1MiB 미만인 설정을 찾아 최소값으로 수정하고 동일broker의 InvalidConfigurationException 대조를 추가했다.
+
+Kafka 대조에서16KiB segment의 InvalidConfigurationException을 실제broker로 확인했다. 다음 실행은 초기30건 ACK/manifest 확보 후 BusyBox find가 GNU -printf를 지원하지 않아 파일 관측에서 실패했다. 소유 자원 정리를 확인하고 stat 조합으로 교체했다. Standards의 생성 직후 조회 지적도 반영해 사용자 지정 실험 설정을 기존 KafkaSupport의 공통기한·한정 재시도 경로로 검사하도록 정리했다. 제품 설정의 최소보존 제한을 완화하지 않았다.
+
+세 번째 Kafka 실행은 ACK120건·전partition 최초offset0→40과.deleted 파일89,295bytes를 관측했으나30초 예산 마지막에 도달해 파일 제거 확인까지 완료하지 못했다. 4.1.2 LogManager의 초기작업지연과1초 파일삭제·연속표본을 대조해 관측 예산을45초로 설정했다. 실패자료를 보존하며 삭제실패/성공을 혼동하지 않는다.
+
+12c0c3e에서 시간 만료는3partition 모두40→40으로 배출되고 파일 제거와 RETENTION_EXPIRED를 확인했다. 크기 만료 기대는 잘못 세웠다. hot296,820,471bytes의 초과28,385,015bytes가 첫segment33,511,699bytes보다 작아 실제코드의 삭제조건을 충족하지 않았다. 45초 미삭제를 실패근거로 보존하고, fixed24h/256MiB/32MiB 설정 그대로 합성입력을500,000→600,000건으로 늘려 충분한segment초과를 만든다. 설정상 byte값을 엄격한파일상한으로 해석하지 않는다.
+
+901a7c0은 시간만료 통과 후 크기시험의 파일조회 명령에서 HA_COMMAND_FAILED로 중단했다. stderr가보존되지않아그실행의직접원인은미확정이다. 삭제동시find/stat사이파일이사라질수있는경계를확인해, stat실패뒤실제파일부재인경우만계수하고기타오류는실패로남긴다. 각partition의활성log존재와3개연속안정표본을요구한다. 원본실패결과를덮어쓰지않는다.
+
+### #63 보존 경계·저장 실측과 로컬 회귀
+
+8624c04의 Kafka 시간·크기 보존 대조는 실제 offset prefix·파일 제거·만료 manifest 거부와 소유 자원 정리를 통과했다. 시간 4초 시험의 관측 완료에는 초기 정리 지연 약 30초가 포함된다. 24시간/256MiB 크기 대조는 hot earliest 90,314와 log 289,167,144bytes를 확인했고, segment 단위 보존을 엄격한 byte cap으로 설명하지 않는다. 앞선 5회 실패·관측 예산/입력량/파일 조회 보완을 정제 근거에 모두 보존했다.
+
+전체 회귀는 단위 179개·하네스 38개·실제 Kafka/DB 155개, 실패/오류/skip 0이다. Claude의 고정 12c0c3e 정적 구현 리뷰는 APPROVE였다. 비차단 의견에서 오래된 알림/replay 문구를 수정했고, 오류 격리 이력·spike FK 분기를 기존 테스트에 추가해 보존 13개를 다시 확인했다. 실제 단일 consumer·trend namespace·기존 bucket 색인을 확인했다. 장기 DB의 반복 timeout과 다중 writer의 정리율은 별도 검증 범위로 남긴다. 고유 schema의 CLI 진단/terminal 정리·재실행도 통과하고 schema를 정리했다.
+
+PR72 첫 push/PR CI는 GitHub 계정 결제 또는 사용 한도 문제로 runner가 시작되지 않았다. 사용자에게 Billing & plans 확인을 요청했다. 테스트 실패로 세거나 CI 게이트를 생략하지 않으며, 최종 HEAD 승인/CI 전에는 병합하지 않는다.
+
+### #63 전체 제품 회귀
+
+d4aa22c의 깨끗한 이미지로 기존 100채널·500건/s·API10·1KiB·80% 편향·5분 계획을 실행했다. 고유150,000/물리151,500·관측1,000·outbox10의 전체 대조, 최종24개 lag0과 WITHIN_SLO를 확인했다. steady 순위/API p95 236/62ms, category/report 채팅 lag 기울기 −0.014/−0.030건/s다. 입력118초의 app_runtime 진단 한 번에서 정리9종 SUCCEEDED·실패0·live 하한 존재를 확인했다. 오래된 자료가 없는 fresh DB의 동작 확인이므로 실제 만료 삭제가 겹친 장기 처리율로 세지 않는다. 소유 자원을 정리하고 기존8개container를 보존했다.
+
+Standards의 d4aa22c delta 검토는 규칙 위반0·판단 지적0이다. Spec은 차단0·비차단P3 1건으로, 알림 문서의 남은 cleanup 상태 미지원 문구를 수정해 publisher 진단 한계와 보존 작업 진단을 구분했다.
+
+부하 종료 후 웹 check(단위29·타입·제품빌드)와 Chromium31이 통과했다. 기존 API18080/웹18082는 HTTP200을 유지한다. 최종 CI 계정 문제는 해결 확인 전이며 성공 게이트를 유지한다.

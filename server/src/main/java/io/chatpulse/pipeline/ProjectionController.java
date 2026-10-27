@@ -23,7 +23,7 @@ public class ProjectionController {
     @GetMapping("/api/status")
     public Map<String, Object> status() {
         return Map.of("asOf", Instant.now().toString(), "consumer", consumer.status(), "totals", store.totals(),
-                "progress", store.progress(), "scope", "COLLECTED_CHANNELS_ONLY", "coverageMeasured", false);
+                "progress", store.progress(), "retention",store.retention(), "scope", "COLLECTED_CHANNELS_ONLY", "coverageMeasured", false);
     }
     @GetMapping("/api/buckets")
     public Map<String, Object> buckets(@RequestParam(defaultValue="") String channelId,

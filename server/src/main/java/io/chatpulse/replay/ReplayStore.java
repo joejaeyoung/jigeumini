@@ -26,6 +26,10 @@ public final class ReplayStore {
     public UUID create(ReplayManifest manifest) {
         UUID id=UUID.randomUUID();
         tx.executeWithoutResult(status->{
+            jdbc.execute("SET LOCAL lock_timeout='3s'");
+            jdbc.queryForObject("SELECT pg_advisory_xact_lock(hashtext(current_schema()),9372)",Object.class);
+            if(jdbc.queryForObject("SELECT count(*) FROM replay_run WHERE state IN ('QUEUED','RUNNING')",Long.class)>=32)
+                throw new ReplayFailure(QUEUE_FULL);
             jdbc.update("INSERT INTO replay_run(run_id,manifest,state,created_build) VALUES (?,?::jsonb,'QUEUED',?)",id,manifest.json(),ReplayBuild.id());
             var projection=projection(id);
             manifest.partitions().forEach(r->projection.initializeProgress(manifest.topic(),r.partition(),r.start()));
@@ -141,7 +145,10 @@ public final class ReplayStore {
             var result=new LinkedHashMap<String,Object>();result.put("runId",id.toString());result.put("state",job.state());
             result.put("manifest",job.manifest());result.put("consumerGroup","replay-"+id);result.put("projection","replay");
             result.put("metrics",jdbc.queryForMap("SELECT read_count,filtered_count,unique_count,duplicate_count,error_count,reason,cancel_requested,created_at,started_at,heartbeat_at,finished_at,created_build,worker_build FROM replay_run WHERE run_id=?",id));
-            result.put("totals",projection(id).totals());result.put("progress",projection(id).progress());
+            var retention=jdbc.queryForMap("SELECT result_expired_at,result_purged_at FROM replay_run WHERE run_id=?",id);
+            boolean expired=retention.get("result_expired_at")!=null;
+            result.put("resultState",expired?"EXPIRED":"AVAILABLE");result.put("retention",retention);
+            result.put("totals",expired?null:projection(id).totals());result.put("progress",expired?null:projection(id).progress());
             result.put("limitations",List.of("RETAINED_OFFSETS_ONLY","NO_FUTURE_LATE_INPUT","NO_LIVE_SNAPSHOT_OR_ALERT_REPLAY","DUPLICATES_COUNTED_WITHIN_TIME_FILTER"));
             return result;
         });
@@ -150,6 +157,8 @@ public final class ReplayStore {
         if(left.equals(right))throw new ReplayFailure(INCOMPATIBLE_RUNS);
         return readTx.execute(transaction->{
             var a=get(left);var b=get(right);
+            if(jdbc.queryForObject("SELECT count(*) FROM replay_run WHERE run_id IN (?,?) AND result_expired_at IS NOT NULL",Long.class,left,right)>0)
+                throw new ReplayFailure(RESULT_EXPIRED);
             if(!a.state().equals("COMPLETED") || !b.state().equals("COMPLETED") || !a.manifest().sameInput(b.manifest())) throw new ReplayFailure(INCOMPATIBLE_RUNS);
             String build=jdbc.queryForObject("SELECT worker_build FROM replay_run WHERE run_id=?",String.class,left);
             if(build==null || !build.matches("[a-f0-9]{64}") || !build.equals(jdbc.queryForObject("SELECT worker_build FROM replay_run WHERE run_id=?",String.class,right)))throw new ReplayFailure(INCOMPATIBLE_RUNS);

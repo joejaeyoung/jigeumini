@@ -134,3 +134,20 @@ tasks.register('productLoadFixtures', Sync) {
     from(configurations.testRuntimeClasspath) { include 'Java-WebSocket-*.jar' }
     into layout.buildDirectory.dir('product-load-libs')
 }
+
+tasks.register('retentionExperiment', JavaExec) {
+    description = '합성 DB 보존·공간 재사용 또는 소유 Kafka segment 보존 측정'
+    group = 'verification'
+    dependsOn testClasses, bootJar
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = providers.gradleProperty('retentionProfile').map {
+        switch (it) {
+            case 'storage': return 'io.chatpulse.pipeline.RetentionStorageExperiment'
+            case 'kafka': return 'io.chatpulse.pipeline.KafkaRetentionExperiment'
+            default: throw new GradleException('RETENTION_PROFILE_INVALID')
+        }
+    }
+    maxHeapSize = '512m'
+    workingDir = rootProject.projectDir
+    if (providers.gradleProperty('retentionOutput').isPresent()) args providers.gradleProperty('retentionOutput').get()
+}

@@ -8,7 +8,7 @@ F07 · 이슈 #8 · T02/T03/T08/T10.
 
 publisher는 `(created_at, spike_id)` 오름차순으로 미전달 행 하나를 잠그고 Kafka ACK를 기다린 뒤 `published_at`을 기록한다. ACK 전 실패는 전달 미완료로 남고 1초 간격으로 재시도한다. 트랜잭션 한도 20초, SQL 5초, ACK 대기 10초다. ACK 직후 종료나 DB commit 실패는 같은 spike를 다시 보낼 수 있다. 발행은 at-least-once이고 전체 Exactly-once를 보장하지 않는다. `SKIP LOCKED`를 쓰므로 여러 publisher 사이의 전역 발행 순서는 보장하지 않는다. 피드는 `evaluatedAt, spikeId`로 정렬한다.
 
-단일 publisher에서 선두 행의 영구 계약 오류도 계속 재시도하며 이후 행을 막는다. 임의로 버리거나 완료로 표시하지 않는다. 운영자는 `outbox.state=RETRYING`, pending 증가·마지막 ACK 정체로 확인하고 원본 판정/코드를 수정한 뒤 다시 실행한다. 행별 오류 코드·연속 실패 횟수와 cleanup 전용 상태는 아직 없다. ACK 대기 중 DB 연결 하나와 행 잠금을 유지하므로 공유 풀/DB의 자원 비용이 있다.
+단일 publisher에서 선두 행의 영구 계약 오류도 계속 재시도하며 이후 행을 막는다. 임의로 버리거나 완료로 표시하지 않는다. 운영자는 `outbox.state=RETRYING`, pending 증가·마지막 ACK 정체로 확인하고 원본 판정/코드를 수정한 뒤 다시 실행한다. 행별 publisher 오류 코드·연속 실패 횟수는 아직 없다. 정리 작업의 상태·실패 횟수는 별도로 `retention_task`와 `ops retention-status`에 기록한다. ACK 대기 중 DB 연결 하나와 행 잠금을 유지하므로 공유 풀/DB의 자원 비용이 있다.
 
 기본 토픽은 `<pipeline.topic>.spikes`(기본 `chat.received.v1.spikes`), 이벤트 종류는 `spike.detected.v1`이다. `notifications.topic`으로 전용 토픽명을 지정할 수 있다. 채팅 토픽과 같을 수 없다. key=channelId, CreateTime=evaluatedAt, 3 partition, RF=1, ACK=all, idempotent producer이며 보존은 24시간/partition당 256MiB/segment 32MiB다. ACK는 복제 HA나 feed 저장 완료를 뜻하지 않는다.
 
@@ -37,7 +37,9 @@ schemaVersion=1, spikeId, runId, channelId, evaluatedAt, algorithmVersion, count
 
 ## 정리와 한계
 
-전달 완료 후 7일이 지났고 feed에 반영된 outbox만 매시간 삭제한다. pending·미소비 행과 feed ledger·원본 spike는 삭제하지 않는다. 피드 조회는 7일로 제한하지만 멱등 ledger 자동 정리는 별도 용량 정책이 필요하다. Kafka 보존 만료 뒤에 ACK된 미소비 이벤트를 outbox가 자동 재발행하지 않으며 운영자가 손실을 확인해야 한다. 실험과 정제 실행 근거는 STATUS에 연결한다.
+[#63 보존 계약](RETENTION.md)에 따라 전용 worker가 약 10초 간격으로 유한 정리를 순회한다. 전달 완료 후 7일이 지났고 feed에 반영된 outbox만 삭제한다. pending·미소비 outbox는 보호하며, 알림 수신 이력은 evaluatedAt 7일 이후에도 해당 outbox가 남아 있으면 보존한다. outbox가 사라진 뒤 알림 수신 이력을 정리하고, 원본 spike는 8일 이후 연결된 outbox가 없을 때 정리한다.
+
+피드 조회는 7일로 제한한다. 7일을 넘긴 첫 수신도 해당 outbox가 존재하면 receipt를 저장해 전달 확인과 후속 정리가 가능하게 하되, 피드에 다시 노출하지 않는다. outbox가 없는 오래된 재전달은 저장하지 않는다. 정리 시도·성공·실패·상한 도달은 `retention_task`와 `ops retention-status`에서 확인한다. Kafka 보존 만료 뒤 ACK된 미소비 이벤트를 outbox가 자동 재발행하지는 않는다. 실험과 정제 실행 근거는 STATUS에 연결한다.
 
 CreateTime은 발행 시각이 아니라 evaluatedAt이다. 24시간을 넘긴 outbox 적체를 뒤늦게 발행하면 보존 기한이 이미 지난 시각으로 들어가며 segment 정리 때 일찍 삭제될 수 있다. ACK만으로 소비 가능한 24시간이 새로 확보되지는 않는다.
 

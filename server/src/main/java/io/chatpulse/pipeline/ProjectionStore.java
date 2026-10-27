@@ -1,6 +1,8 @@
 package io.chatpulse.pipeline;
 
 import io.chatpulse.poc.ChatEvent;
+import io.chatpulse.retention.RetentionWindow;
+import io.chatpulse.replay.ReplayRetention;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.Clock;
@@ -24,6 +26,7 @@ public final class ProjectionStore {
     private final String projection;
     private final String runId;
     private final Clock clock;
+    private final RetentionWindow retention;
 
     public ProjectionStore(JdbcTemplate jdbc, TransactionTemplate tx, EventCodec codec, String projection, String runId) {
         this(jdbc,tx,codec,projection,runId,Clock.systemUTC());
@@ -35,12 +38,21 @@ public final class ProjectionStore {
         this.codec = codec;
         this.projection = projection;
         this.runId = runId;
+        retention="replay".equals(projection)?null:new RetentionWindow(jdbc,"projection/"+projection,runId);
     }
     public void initializeProgress(String topic, int partition, long position) {
+        if(retention==null) {
+            tx.executeWithoutResult(status->{ReplayRetention.requireInitializable(jdbc,UUID.fromString(runId));insertProgress(topic,partition,position);});
+        } else insertProgress(topic,partition,position);
+    }
+    private void insertProgress(String topic,int partition,long position) {
         jdbc.update("INSERT INTO projection_progress(projection,run_id,topic,partition,next_resolved_offset) VALUES (?,?,?,?,?) ON CONFLICT DO NOTHING",
                 projection, runId, topic, partition, position);
     }
-    public long apply(List<ConsumerRecord<String, byte[]>> records) { return apply(records,true,null); }
+    public long apply(List<ConsumerRecord<String, byte[]>> records) {
+        if(retention==null)throw new IllegalArgumentException("LIVE_NAMESPACE_REQUIRED");
+        return apply(records,true,null);
+    }
     public long applyRecovering(List<ConsumerRecord<String, byte[]>> records, DeadLetterRecovery recovery) {
         if ("replay".equals(projection)) throw new IllegalArgumentException("LIVE_NAMESPACE_REQUIRED");
         recovery.checkSource(records);
@@ -56,6 +68,8 @@ public final class ProjectionStore {
         Long inserted = tx.execute(status -> {
             jdbc.execute("SET LOCAL lock_timeout = '3s'");
             jdbc.execute("SET LOCAL statement_timeout = '5s'");
+            var floors=live?retention.lock():null;
+            if(!live)ReplayRetention.requireWritable(jdbc,UUID.fromString(runId));
             if (recovery != null) recovery.bindSource();
             // 확정된 위치는 시각·배치 구성이 바뀌어도 다시 분류하지 않는다.
             var pending = recovery == null ? records : unresolved(records);
@@ -67,7 +81,10 @@ public final class ProjectionStore {
                 ChatEvent event = null;
                 try {
                     event = codec.decode(record.value(),record.key());
-                    if (live) codec.validateLiveAge(event,now);
+                    if (live) {
+                        codec.validateLiveAge(event,now);
+                        if(floors.excludes(event.receivedAt(),event.eventTime()))throw new EventContractException("OUTSIDE_LIVE_RETENTION");
+                    }
                     String hash = codec.hash(event);
                     String previous = hashes.putIfAbsent(event.eventId(),hash);
                     if (previous != null && !previous.equals(hash)) {
@@ -176,6 +193,12 @@ public final class ProjectionStore {
                 SELECT channel_id FROM chat_bucket_10s WHERE projection=? AND run_id=?
                 GROUP BY channel_id ORDER BY max(bucket_start) DESC, channel_id LIMIT ?
                 """, (rs, i) -> rs.getString(1), projection, runId, limit);
+    }
+    public Map<String,Object> retention() {
+        if(retention==null)throw new IllegalArgumentException("LIVE_NAMESPACE_REQUIRED");
+        var result=new java.util.LinkedHashMap<String,Object>(jdbc.queryForMap("SELECT received_floor,event_floor FROM retention_window WHERE scope=? AND run_id=?","projection/"+projection,runId));
+        result.put("ledgerHours",72);result.put("bucketDays",8);result.put("totalsScope","DIFFERENT_RETAINED_WINDOWS");
+        return result;
     }
     public List<Map<String, Object>> progress() {
         return jdbc.query("SELECT topic, partition, next_resolved_offset, checked_at FROM projection_progress WHERE projection=? AND run_id=? ORDER BY topic, partition",

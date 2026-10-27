@@ -6,6 +6,8 @@ import io.chatpulse.pipeline.*;
 import io.chatpulse.poc.ChatEvent;
 import io.chatpulse.quality.QualityPolicy;
 import java.sql.Timestamp;
+import io.chatpulse.retention.RetentionWindow;
+import io.chatpulse.retention.CleanupBatch;
 import java.time.*;
 import java.util.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,11 +31,14 @@ public final class ReportStore implements DualTopicProjection {
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx,read;
     private final String run,chatTopic,observationTopic;
+    private final TransactionTemplate cleanupTx;
     private final Clock clock;
+    private final RetentionWindow retention;
     private final EventCodec codec=new EventCodec();
     private static final JsonMapper JSON=JsonMapper.builder().build();
     public ReportStore(JdbcTemplate jdbc,TransactionTemplate tx,String run,String chatTopic,String observationTopic,Clock clock) {
-        this.jdbc=jdbc;this.tx=tx;this.run=run;this.chatTopic=chatTopic;this.observationTopic=observationTopic;this.clock=clock;
+        this.jdbc=jdbc;this.tx=tx;cleanupTx=new TransactionTemplate(tx.getTransactionManager());cleanupTx.setTimeout(8);this.run=run;this.chatTopic=chatTopic;this.observationTopic=observationTopic;this.clock=clock;
+        retention=new RetentionWindow(jdbc,"report",run);
         read=new TransactionTemplate(tx.getTransactionManager());read.setReadOnly(true);read.setTimeout(20);read.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
     }
     @Override public void bindSources(Map<String,String> identities) {
@@ -54,8 +59,8 @@ public final class ReportStore implements DualTopicProjection {
         }
         tx.executeWithoutResult(status->{
             jdbc.execute("SET LOCAL statement_timeout='5s'");jdbc.execute("SET LOCAL lock_timeout='3s'");
+            Instant now=clock.instant(),oldest=retention.lock().eventFrom(now.minusSeconds(7*86400));
             jdbc.queryForObject("SELECT pg_advisory_xact_lock_shared(hashtextextended(?,0))",Object.class,"report-cleanup/"+run);
-            Instant now=clock.instant(),oldest=now.minusSeconds(7*86400);
             for(String channel:inputs.stream().map(Input::channel).distinct().sorted().toList())
                 jdbc.queryForObject("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",Object.class,"report/"+run+"/"+channel);
             var affected=new TreeMap<String,Instant[]>();
@@ -236,23 +241,26 @@ public final class ReportStore implements DualTopicProjection {
             return new Detail(stored,minutes,intervals,unassigned(stored.session().channelId()),late,fresh());
         });
     }
-    @Override public void cleanup() {
-        tx.executeWithoutResult(status->{
-            jdbc.execute("SET LOCAL statement_timeout='5s'");Instant oldest=clock.instant().minusSeconds(7*86400);
-            if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT pg_try_advisory_xact_lock(hashtextextended(?,0))",Boolean.class,"report-cleanup/"+run)))return;
+    public CleanupBatch cleanup() {
+        return cleanupTx.execute(status->{
+            jdbc.execute("SET LOCAL statement_timeout='1s'");jdbc.execute("SET LOCAL lock_timeout='100ms'");
+            Instant oldest=retention.advance(null,clock.instant().minusSeconds(7*86400).truncatedTo(java.time.temporal.ChronoUnit.SECONDS)).event();
+            if(!Boolean.TRUE.equals(jdbc.queryForObject("SELECT pg_try_advisory_xact_lock(hashtextextended(?,0))",Boolean.class,"report-cleanup/"+run)))return CleanupBatch.empty();
+            var deleted=CleanupBatch.empty();
             // 미확정/활성 세션은 침묵만으로 삭제하지 않는다. 종료가 확인된 세션만 자식부터 한정 정리한다.
-            for(String table:List.of("report_event","report_observation","report_bucket"))jdbc.update("DELETE FROM "+table+" WHERE ctid IN (SELECT c.ctid FROM "+table+" c JOIN report_session s ON s.run_id=c.run_id AND s.report_id=c.report_id WHERE s.run_id=? AND s.ended_at<? LIMIT 10000)",run,ts(oldest));
-            jdbc.update("DELETE FROM report_event WHERE ctid IN (SELECT ctid FROM report_event WHERE run_id=? AND report_id IS NULL AND event_time<? LIMIT 10000)",run,ts(oldest));
-            jdbc.update("DELETE FROM report_observation WHERE ctid IN (SELECT ctid FROM report_observation WHERE run_id=? AND report_id IS NULL AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120)));
-            jdbc.update("DELETE FROM report_bucket WHERE ctid IN (SELECT ctid FROM report_bucket WHERE run_id=? AND message_count=0 LIMIT 10000)",run);
-            jdbc.update("""
-                    DELETE FROM report_session s WHERE run_id=? AND (ended_at<? OR EXISTS(SELECT 1 FROM report_alias a WHERE a.run_id=s.run_id AND a.alias_id=s.report_id)) AND NOT EXISTS(SELECT 1 FROM report_event e WHERE e.run_id=s.run_id AND e.report_id=s.report_id)
-                    AND NOT EXISTS(SELECT 1 FROM report_observation o WHERE o.run_id=s.run_id AND o.report_id=s.report_id) AND NOT EXISTS(SELECT 1 FROM report_bucket b WHERE b.run_id=s.run_id AND b.report_id=s.report_id)
-                    """,run,ts(oldest));
-            jdbc.update("""
-                    DELETE FROM report_alias a WHERE run_id=? AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=a.run_id AND s.report_id=a.canonical_id)
-                      AND NOT EXISTS(SELECT 1 FROM report_alias next WHERE next.run_id=a.run_id AND next.alias_id=a.canonical_id)
-                    """,run);
+            for(String table:List.of("report_event","report_observation","report_bucket"))deleted=deleted.add(jdbc.update("DELETE FROM "+table+" WHERE ctid IN (SELECT c.ctid FROM "+table+" c JOIN report_session s ON s.run_id=c.run_id AND s.report_id=c.report_id WHERE s.run_id=? AND s.ended_at<? LIMIT 10000)",run,ts(oldest)),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_event WHERE ctid IN (SELECT ctid FROM report_event WHERE run_id=? AND report_id IS NULL AND event_time<? LIMIT 10000)",run,ts(oldest)),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_observation WHERE ctid IN (SELECT ctid FROM report_observation WHERE run_id=? AND report_id IS NULL AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120))),10000);
+            deleted=deleted.add(jdbc.update("DELETE FROM report_bucket WHERE ctid IN (SELECT ctid FROM report_bucket WHERE run_id=? AND message_count=0 LIMIT 10000)",run),10000);
+            deleted=deleted.add(jdbc.update("""
+                    DELETE FROM report_session WHERE ctid IN (SELECT s.ctid FROM report_session s WHERE run_id=? AND (ended_at<? OR EXISTS(SELECT 1 FROM report_alias a WHERE a.run_id=s.run_id AND a.alias_id=s.report_id)) AND NOT EXISTS(SELECT 1 FROM report_event e WHERE e.run_id=s.run_id AND e.report_id=s.report_id)
+                    AND NOT EXISTS(SELECT 1 FROM report_observation o WHERE o.run_id=s.run_id AND o.report_id=s.report_id) AND NOT EXISTS(SELECT 1 FROM report_bucket b WHERE b.run_id=s.run_id AND b.report_id=s.report_id) LIMIT 1000)
+                    """,run,ts(oldest)),1000);
+            deleted=deleted.add(jdbc.update("""
+                    DELETE FROM report_alias WHERE ctid IN (SELECT a.ctid FROM report_alias a WHERE run_id=? AND NOT EXISTS(SELECT 1 FROM report_session s WHERE s.run_id=a.run_id AND s.report_id=a.canonical_id)
+                      AND NOT EXISTS(SELECT 1 FROM report_alias next WHERE next.run_id=a.run_id AND next.alias_id=a.canonical_id) LIMIT 1000)
+                    """,run),1000);
+            return deleted;
         });
     }
     private static Timestamp ts(Instant at) { return Timestamp.from(at); }

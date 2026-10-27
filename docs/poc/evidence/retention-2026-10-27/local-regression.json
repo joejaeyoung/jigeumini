@@ -1,0 +1,582 @@
+{
+  "codeHead": "8624c04a7b1daecff77fa97f224bfe8f5abcdbf5",
+  "recordedAt": "2026-10-26T20:33:50.246788+00:00",
+  "commands": [
+    "./scripts/check",
+    "./scripts/integration"
+  ],
+  "testSourceChangesAfterCompilation": "HistoryRetention failure/spike assertions added during execution; targeted follow-up required",
+  "suites": {
+    "test": {
+      "totals": {
+        "tests": 179,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "details": [
+        {
+          "suite": "io.chatpulse.categories.CategoryQueriesTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:32.989Z",
+          "sha256": "a9cac181206b81eeb5277268829f9587a51c4bb80cb8b095775b3213709100c7"
+        },
+        {
+          "suite": "io.chatpulse.discovery.OfficialBroadcastCatalogTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:33.779Z",
+          "sha256": "e90e32fef912640912fd74a2b1c8d95ec58b152b33cc0e2193193608e4d4bcf0"
+        },
+        {
+          "suite": "io.chatpulse.discovery.SelectionCliTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:34.972Z",
+          "sha256": "3e3648256b28d753a2873e64b363edd1f054808119313fd354576d7084d85a26"
+        },
+        {
+          "suite": "io.chatpulse.discovery.SelectionPolicyTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.016Z",
+          "sha256": "58305a052eecf93e6274e19326995fa7beb6c328cb79dcdb9f898b34dd936e00"
+        },
+        {
+          "suite": "io.chatpulse.fleet.CollectorLeaseFailureTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.024Z",
+          "sha256": "ffd229dda14c6c3f344a454df8bf65835640b25848a371a2d808c9d4f5456d0a"
+        },
+        {
+          "suite": "io.chatpulse.fleet.CollectorStartupTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.222Z",
+          "sha256": "880c3d7cf3f8506dc1050f004196c65c784ddf6176cf871d3e17097c9b6989bc"
+        },
+        {
+          "suite": "io.chatpulse.fleet.FleetCliTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.226Z",
+          "sha256": "d6e7c5eaac98c4a80fac2ebef63572633f48f1cf788dbecc9bd0f2a89ca87380"
+        },
+        {
+          "suite": "io.chatpulse.fleet.FleetPlanTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.240Z",
+          "sha256": "4697e58c40dcaeb956a34dd318137031cb35db3ce715ebda8b79e26a884a371c"
+        },
+        {
+          "suite": "io.chatpulse.fleet.LeaseAuthorityTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.241Z",
+          "sha256": "b8a15bcf935911974298417cb76ac50ccaa4cb40ae15b533e83bf60252e4b726"
+        },
+        {
+          "suite": "io.chatpulse.fleet.LeasedObservationsTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.244Z",
+          "sha256": "522eee5b83db27417000ab8bf9f7fc51207cc98f15358ea2467368f366c69f1f"
+        },
+        {
+          "suite": "io.chatpulse.metadata.ChzzkMetadataSourceTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.358Z",
+          "sha256": "d2c604637be59ceaaed5b2277594f3ff598a17a0a024d594e0d2110e937e1b82"
+        },
+        {
+          "suite": "io.chatpulse.metadata.MetadataControllerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.432Z",
+          "sha256": "862048cc1c5c0a0fc784626de3da50e429b453c51e3d7924f335f69dac24b277"
+        },
+        {
+          "suite": "io.chatpulse.metadata.MetadataServiceTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.468Z",
+          "sha256": "2e85cad495419b233df74db502d3a1c9f3cbd380b1291ecb7e5c1f391c0054b9"
+        },
+        {
+          "suite": "io.chatpulse.notifications.NotificationControllerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.474Z",
+          "sha256": "55ab8b58de0326b037f76d353285a385f3330196479dc9bb6e761e5117f2cc9d"
+        },
+        {
+          "suite": "io.chatpulse.notifications.SpikeDetectedTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.517Z",
+          "sha256": "61553a9e2ced541533cbe69039ede575265f9a12819b15c684d3321633bc0cf8"
+        },
+        {
+          "suite": "io.chatpulse.observations.BroadcastObservedTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.526Z",
+          "sha256": "0769ca92ca680ffef72fb5e689f17098d8890201fd4cfcd14b80606f92aa38aa"
+        },
+        {
+          "suite": "io.chatpulse.observations.ObservationCollectorTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.533Z",
+          "sha256": "8b704d672a389c3af2f833956c6f3d6043758f515d78b7d02c7e00146f4d3adb"
+        },
+        {
+          "suite": "io.chatpulse.observations.ObservationControllerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.535Z",
+          "sha256": "b9ae8d6575a3a0fda4f9a85dd097e2c3b664dd326fe2408f7a063c192c174f43"
+        },
+        {
+          "suite": "io.chatpulse.operations.ProductLoadHarnessTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.574Z",
+          "sha256": "62bc618afafd0d4a34aa9538930c04d5d25f3fda2143d26d4f0cbadc533dcb61"
+        },
+        {
+          "suite": "io.chatpulse.operations.RuntimeEnvironmentTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.710Z",
+          "sha256": "1e751f4e9833784d49653f607182e56e3bbb9604ce90798a4e154b848b506011"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.BatchConsumersTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.715Z",
+          "sha256": "e92e0c9f9442d568ff15966f6d19e0d0a71c1ac0230bc29e644dc6c33da27150"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.BufferedKafkaPublisherTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:35.741Z",
+          "sha256": "c59c753d6c886fe42d380b27d05fdccd30bb66bc291934cfefc1a75556f8f366"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.DeadLetterTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.148Z",
+          "sha256": "f939623159e74b6bd27a5ab2a86546f8aeee83bdf30a72f4746ea5eca8c51d51"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.EventCodecTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.152Z",
+          "sha256": "993403f3de11120c8756f0b57d3510506fdca4d221dba3d08a76331f40d5262e"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.ExperimentPublisherTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.158Z",
+          "sha256": "c23c46259fb9e1a4be05bd0fe5a9d1244b6203d5b5e51b09d7ecc25e0cd35140"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.ExperimentRoutingTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.161Z",
+          "sha256": "d6fa6d7d3c661538427a9342e61ab73f2a65d6875ec21d243e53e8e993d82378"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.ExperimentSamplerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.255Z",
+          "sha256": "a68f44aa3dc028386aef856b8595a82fc4b464f3916f4ceeb882104f547a1e26"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.KafkaSupportTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.316Z",
+          "sha256": "9a3fff47701171b3c1afadba71570d949d0e665ec396065940e48ae1eaed6d1d"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.KafkaTopicPolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.490Z",
+          "sha256": "434397000ba19ee1cd3f03c3d75a0ad8239cc8b33e7b4aabfa93cae09066244d"
+        },
+        {
+          "suite": "io.chatpulse.poc.ChannelProbeTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:36.492Z",
+          "sha256": "c28fd3787352728abf06ea6d9d3d0764dda8fd83966a8173bcf2cbf9056e8a05"
+        },
+        {
+          "suite": "io.chatpulse.poc.ChannelProbeTextTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:48.961Z",
+          "sha256": "e32fd67aed6d88528c9ef428188b12cfe4e8ab8eab51dd910f48b189518adbe2"
+        },
+        {
+          "suite": "io.chatpulse.poc.ChatProtocolTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:50.904Z",
+          "sha256": "662d52cbd15b6af7c8c63444baedad4d3cbec8d7699bcc42b6f47afcd6a5f806"
+        },
+        {
+          "suite": "io.chatpulse.poc.ChatSocketClientTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:50.944Z",
+          "sha256": "a0a9cbee630d76e7479426412c75d97d9b35dbae79c880284b2679d58d52435e"
+        },
+        {
+          "suite": "io.chatpulse.poc.ChzzkHttpSourceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.057Z",
+          "sha256": "59bcd35587c38a1fd5fd0f40519c8b78961c29247ba2949441d9cd3659ed3d88"
+        },
+        {
+          "suite": "io.chatpulse.poc.IncomingTextTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.070Z",
+          "sha256": "6ceeb9262a22c02224a30dafdf7e38a7c29a88aca43906dcb199635d084686e9"
+        },
+        {
+          "suite": "io.chatpulse.quality.QualityPolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.072Z",
+          "sha256": "349608d523ca875017d11eac0e333f7f6b9238921b9a655b960d6b15644255cf"
+        },
+        {
+          "suite": "io.chatpulse.quality.QualityScheduleTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.074Z",
+          "sha256": "65e8bc346388a6473c4acf910cde4ac5f44015ee5c7f72545c59eb4d81a3693b"
+        },
+        {
+          "suite": "io.chatpulse.quality.RankingControllerTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.077Z",
+          "sha256": "c5f2fde80cea417f215fa56ba0fe6f96f35b907ec97ba3f0e94b58667ec04d4c"
+        },
+        {
+          "suite": "io.chatpulse.quality.TrendPolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.098Z",
+          "sha256": "3070014975828edfc226e933d0d3b3dac5e0e93aa23a9d9b47ad255cea85c3a8"
+        },
+        {
+          "suite": "io.chatpulse.replay.ReplayManifestTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.098Z",
+          "sha256": "58b052f45f3622e3f61ace864a9494b9ea34f733fc60bb737edcb5ee1a415013"
+        },
+        {
+          "suite": "io.chatpulse.reports.ReportPolicyTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:51.106Z",
+          "sha256": "68be117e078cbbede0e49929bb9883756017e2f63c30a29d148c8cb33e08a69c"
+        }
+      ]
+    },
+    "integrationTest": {
+      "totals": {
+        "tests": 155,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "details": [
+        {
+          "suite": "io.chatpulse.categories.CategoryIntegrationTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:25:53.332Z",
+          "sha256": "bb56ee6cdf6c30d36513056cff78c5a3b639cf6d35d1cd1d8a97c3a49f99ed4b"
+        },
+        {
+          "suite": "io.chatpulse.fleet.FleetIntegrationTest",
+          "tests": 23,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:26:11.025Z",
+          "sha256": "9cc49c09faf22a4bacafad391200426d48201c2935f6c6a302d33ebb558480ba"
+        },
+        {
+          "suite": "io.chatpulse.fleet.FleetRuntimeIntegrationTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:29:05.589Z",
+          "sha256": "2c648c6b6476b9470ff9f4851a0674cffce1b313489425afc137ba3ee23a8824"
+        },
+        {
+          "suite": "io.chatpulse.notifications.NotificationIntegrationTest",
+          "tests": 24,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:29:15.815Z",
+          "sha256": "106a7f76ae5d1a094ae4ef663e66a884a2885a0611ed1930c0f70b86028eaf75"
+        },
+        {
+          "suite": "io.chatpulse.observations.ObservationIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:30:31.618Z",
+          "sha256": "a047f9cb4c675a89580cbc17a6a9f3c402f2b6e710b468cfa62f1b8dcaf2a173"
+        },
+        {
+          "suite": "io.chatpulse.operations.RecoveryPlanIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:30:44.491Z",
+          "sha256": "d67b177210324365593b420c0fbe1e73878510f0d46c8ed3e5e67782678d132e"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.DeadLetterIntegrationTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:30:51.555Z",
+          "sha256": "d35c998d054f0d933aa59fa40b6ff57ae9d0839cf81700245e0b8bfa23efbac4"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.KafkaSupportIntegrationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:31:39.364Z",
+          "sha256": "58b65ca06e2780ada9f9fad5dcc2f6d482d2a594b7b45eb3683fa13d76da7ab4"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.LoadExperimentIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:31:41.210Z",
+          "sha256": "be2173e83eab831494f5b111670ffeb55fbb6990f3564bb4f30e18c76c58858c"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.PartitionExpansionIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:31:50.160Z",
+          "sha256": "5f8b836428067462c34e188e7ec5936c65443f61b9dba380fe49f9b9ad9508c4"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.PipelineIntegrationTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:31:50.858Z",
+          "sha256": "2158be5cf8fdb2adee6017727747470c8a9295c877864547853e2c6e14d0c39e"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.RankingIntegrationTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:32:03.957Z",
+          "sha256": "f638b50d628b7f908c42ad8d172fb65b557463c7ab2237bff0038fa92e598839"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.RetentionIntegrationTest",
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:32:13.933Z",
+          "sha256": "67313c24ec23ebd0d69375c304e2e5c01ced3f84a3768ff032a4e8c41d04b450"
+        },
+        {
+          "suite": "io.chatpulse.pipeline.TrendRecoveryIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:32:20.417Z",
+          "sha256": "5b6fc2ee8f722a4ea580acf798593a629fd3d6ed64a09e68307cbdb59843089d"
+        },
+        {
+          "suite": "io.chatpulse.replay.ReplayIntegrationTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:32:33.209Z",
+          "sha256": "f8060bea54cc8e58a1fe5c0852d760c7011d9cb35817acc8f4c64b7488f17dd1"
+        },
+        {
+          "suite": "io.chatpulse.reports.ReportIntegrationTest",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "timestamp": "2026-10-26T20:33:05.539Z",
+          "sha256": "bfce2fc65e50ba900fdd93c05a749593420244afe109845417a6d31774521d21"
+        }
+      ]
+    }
+  },
+  "check-full": {
+    "sha256": "256400430f0135be6804a1bcf7ce4ed00924c97bbe1320cab8acbbcf134e8803",
+    "buildSuccessful": true
+  },
+  "integration-full": {
+    "sha256": "a0b6659cafdad41bee14c543849ad417c3d952f1caf0dbab70d2828baf8edfa5",
+    "buildSuccessful": true
+  },
+  "reviewFollowup": {
+    "command": "./gradlew --console=plain :server:integrationTest --tests io.chatpulse.pipeline.RetentionIntegrationTest",
+    "scope": "projection_failure impact/quarantine/report protection and spike_event/outbox FK branches added to existing cases",
+    "sourceSha256": "96869b35c839907a1cf65d399b0776a33b8084ab8f721dbc0ab6fdb4f93ae5e1",
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "timestamp": "2026-10-26T20:33:51.227Z",
+    "xmlSha256": "216861fdfdc8aaadbfcf15afcdb4f171bdfcab0ea2e68245f009d3f3bfa875ed"
+  },
+  "web": {
+    "command": "./scripts/web check",
+    "passed": 29,
+    "failures": 0,
+    "logSha256": "37f495ea1df37b7a923d83bb22c3a5ae46ecd68261d792f996390d42f20b027b",
+    "sourceChangedSinceD4aa22c": false
+  },
+  "chromium": {
+    "command": "./scripts/web test:e2e",
+    "passed": 31,
+    "failures": 0,
+    "logSha256": "3bfe6cea95789dfb13150feca52514958d69658ff363b5c9cc4202bb7bfcba51",
+    "sourceChangedSinceD4aa22c": false
+  },
+  "harness": {
+    "passed": 38,
+    "command": "./scripts/check",
+    "logSha256": "256400430f0135be6804a1bcf7ce4ed00924c97bbe1320cab8acbbcf134e8803"
+  }
+}

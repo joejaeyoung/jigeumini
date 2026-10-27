@@ -215,7 +215,9 @@ class ReplayIntegrationTest {
         var record=new ConsumerRecord<String,byte[]>(topic,0,0,CHANNEL,codec.encode(old));
         assertThatThrownBy(()->live.apply(List.of(record))).isInstanceOf(EventContractException.class);
         assertThatThrownBy(()->live.applyReplay(List.of(record))).hasMessage("REPLAY_NAMESPACE_REQUIRED");
-        var replay=new ProjectionStore(jdbc,tx,codec,"replay",UUID.randomUUID().toString());assertThat(replay.applyReplay(List.of(record))).isEqualTo(1);
+        var primitiveId=store.create(capture(null,null));var primitiveJob=store.claim(UUID.randomUUID());
+        var replay=new ProjectionStore(jdbc,tx,codec,"replay",primitiveId.toString());assertThat(replay.applyReplay(List.of(record))).isEqualTo(1);
+        store.fail(primitiveJob,ReplayFailure.Code.CANCELLED);
         var id=store.create(capture(null,null));var claimed=store.claim(UUID.randomUUID());
         jdbc.update("UPDATE replay_run SET heartbeat_at=now()-interval '31 seconds' WHERE run_id=?",id);
         try(var lock=store.tryWorkerLock()) {assertThat(lock).isNotNull();assertThat(store.reap()).isZero();assertThatThrownBy(()->new ReplayWorker(store,BOOTSTRAP,topic).runOne()).hasMessage("WORKER_BUSY");assertThat(store.get(id).state()).isEqualTo("RUNNING");}

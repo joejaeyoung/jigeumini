@@ -7,6 +7,7 @@ import io.chatpulse.poc.ChatEvent;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Timestamp;
+import io.chatpulse.retention.RetentionWindow;
 import java.time.*;
 import java.util.*;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,10 +32,13 @@ public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProje
     private final JdbcTemplate jdbc;
     private final TransactionTemplate tx, read;
     private final String run, chatTopic, observationTopic;
+    private final TransactionTemplate cleanupTx;
     private final Clock clock;
+    private final RetentionWindow retention;
     private final EventCodec codec = new EventCodec();
     public CategoryStore(JdbcTemplate jdbc, TransactionTemplate tx, String run, String chatTopic, String observationTopic, Clock clock) {
-        this.jdbc=jdbc; this.tx=tx; this.run=run; this.chatTopic=chatTopic; this.observationTopic=observationTopic; this.clock=clock;
+        this.jdbc=jdbc; this.tx=tx;cleanupTx=new TransactionTemplate(tx.getTransactionManager());cleanupTx.setTimeout(8); this.run=run; this.chatTopic=chatTopic; this.observationTopic=observationTopic; this.clock=clock;
+        retention=new RetentionWindow(jdbc,"category",run);
         read=new TransactionTemplate(tx.getTransactionManager()); read.setReadOnly(true); read.setTimeout(20);
         read.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_REPEATABLE_READ);
     }
@@ -62,7 +66,7 @@ public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProje
         }
         tx.executeWithoutResult(status -> {
             jdbc.execute("SET LOCAL statement_timeout='5s'"); jdbc.execute("SET LOCAL lock_timeout='3s'");
-            Instant now=clock.instant(), oldest=now.minusSeconds(7*86400);
+            Instant now=clock.instant(), oldest=retention.lock().eventFrom(now.minusSeconds(7*86400));
             // 같은 채널의 서로 다른 입력 토픽/consumer와 지연 보정을 직렬화한다.
             for(String channel:inputs.stream().map(Input::channel).distinct().sorted().toList())
                 jdbc.queryForObject("SELECT pg_advisory_xact_lock(hashtextextended(?,0))",Object.class,"category/"+run+"/"+channel);
@@ -197,13 +201,15 @@ public final class CategoryStore implements io.chatpulse.pipeline.DualTopicProje
                 """,Boolean.class,ts(now.minusSeconds(15)),ts(now),ts(now.minusSeconds(15)),ts(now),ts(now.minusSeconds(10)),ts(to),ts(now),run,chatTopic,observationTopic);
         return new Window(selected,buckets,Map.copyOf(labels),List.copyOf(memberships),revision,channels.size()>20,fresh);
     }
-    public void cleanup() {
-        Instant oldest=clock.instant().minusSeconds(7*86400);
-        tx.executeWithoutResult(status -> {
-            jdbc.execute("SET LOCAL statement_timeout='5s'");
-            jdbc.update("DELETE FROM category_event WHERE ctid IN (SELECT ctid FROM category_event WHERE run_id=? AND event_time<? LIMIT 10000)",run,ts(oldest));
-            jdbc.update("DELETE FROM category_bucket WHERE ctid IN (SELECT ctid FROM category_bucket WHERE run_id=? AND bucket_start<? LIMIT 10000)",run,ts(Instant.ofEpochSecond(Math.floorDiv(oldest.getEpochSecond(),10)*10)));
-            jdbc.update("DELETE FROM category_observation WHERE ctid IN (SELECT ctid FROM category_observation WHERE run_id=? AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120)));
+    public int cleanup() {
+        return cleanupTx.execute(status -> {
+            jdbc.execute("SET LOCAL statement_timeout='1s'");jdbc.execute("SET LOCAL lock_timeout='100ms'");
+            Instant oldest=retention.advance(null,Instant.ofEpochSecond(Math.floorDiv(clock.instant().minusSeconds(7*86400).getEpochSecond(),10)*10)).event();
+            int deleted=0;
+            deleted+=jdbc.update("DELETE FROM category_event WHERE ctid IN (SELECT ctid FROM category_event WHERE run_id=? AND event_time<? LIMIT 10000)",run,ts(oldest));
+            deleted+=jdbc.update("DELETE FROM category_bucket WHERE ctid IN (SELECT ctid FROM category_bucket WHERE run_id=? AND bucket_start<? LIMIT 10000)",run,ts(Instant.ofEpochSecond(Math.floorDiv(oldest.getEpochSecond(),10)*10)));
+            deleted+=jdbc.update("DELETE FROM category_observation WHERE ctid IN (SELECT ctid FROM category_observation WHERE run_id=? AND observed_at<? LIMIT 10000)",run,ts(oldest.minusSeconds(120)));
+            return deleted;
         });
     }
     private static Timestamp ts(Instant at) { return Timestamp.from(at); }

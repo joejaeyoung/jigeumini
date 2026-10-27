@@ -1,0 +1,49 @@
+{
+  "startedAt": "2026-10-26T20:34:16.993090+00:00",
+  "head": "8624c04a7b1daecff77fa97f224bfe8f5abcdbf5",
+  "sourceDirty": "Documentation and extra test assertions only; product source unchanged from 8624c04",
+  "bootstrapIntentionallyUnavailable": true,
+  "steps": [
+    {
+      "command": "./scripts/replay migrate",
+      "exit": 0,
+      "stdoutSha256": "52f80293af6adf8df2db93af9cc9f513f1a265176ff10698f364adfcaf575575"
+    },
+    {
+      "command": "./scripts/ops retention-status",
+      "exit": 0,
+      "stdoutSha256": "270e781f8b61f24b558e9ad79441247696e7c117f723bba924d90f5ccef078df"
+    },
+    {
+      "command": "./scripts/replay cleanup",
+      "exit": 0,
+      "stdoutSha256": "12ca68439e8eec9bfec415a7299cea38bd19956581f4813375be9efc8ab0e5bb"
+    },
+    {
+      "command": "./scripts/replay cleanup",
+      "exit": 0,
+      "stdoutSha256": "c90730ea936320889f53c6995782b10ba5605897d33d375b1785812f39ee8283"
+    }
+  ],
+  "correct": true,
+  "cleanup": true,
+  "jarSha256": "dac2b065431298267e03de3d6b240bbbf20b7bdf70aafdb719937c53ffc51e13",
+  "statusChecks": {
+    "taskCount": 1,
+    "deletedRows": 17,
+    "limited": true,
+    "relationCount": 44,
+    "replayUnchangedByRead": true
+  },
+  "cleanupChecks": {
+    "first": {
+      "metadataDeleted": 0,
+      "limited": false,
+      "deletedRows": 1,
+      "resultSelected": true
+    },
+    "expiredAndPurgedParents": 1,
+    "secondDeletedRows": 0
+  },
+  "finishedAt": "2026-10-26T20:34:22.850916+00:00"
+}

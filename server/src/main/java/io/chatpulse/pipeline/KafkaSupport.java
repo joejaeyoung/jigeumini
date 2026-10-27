@@ -51,6 +51,12 @@ public final class KafkaSupport {
         awaitTopic(admin, topic, KafkaTopicPolicy.local(), timeout, nanoTime, sleeper);
     }
     static void awaitTopic(Admin admin, String topic, KafkaTopicPolicy policy, Duration timeout, LongSupplier nanoTime, Sleeper sleeper) throws Exception {
+        awaitTopic(admin,topic,policy::verify,timeout,nanoTime,sleeper);
+    }
+    // 측정 전용의 짧은 retention 설정도 제품과 같은 조회 기한·예외 분류를 사용한다.
+    static org.apache.kafka.clients.admin.Config awaitTopic(Admin admin,String topic,
+            java.util.function.BiConsumer<org.apache.kafka.clients.admin.TopicDescription,org.apache.kafka.clients.admin.Config> verify,
+            Duration timeout,LongSupplier nanoTime,Sleeper sleeper) throws Exception {
         long deadline = nanoTime.getAsLong() + timeout.toNanos();
         while (true) {
             try {
@@ -60,8 +66,8 @@ public final class KafkaSupport {
                         org.apache.kafka.common.config.ConfigResource.Type.TOPIC, topic);
                 var config = admin.describeConfigs(List.of(resource), new DescribeConfigsOptions().timeoutMs(remainingMillis(deadline,nanoTime)))
                         .all().get(remainingNanos(deadline,nanoTime), TimeUnit.NANOSECONDS).get(resource);
-                policy.verify(actual, config);
-                return;
+                verify.accept(actual, config);
+                return config;
             } catch (KafkaTopicPolicy.NotReady notWritable) {
                 sleeper.sleep(Math.min(50,remainingMillis(deadline,nanoTime)));
             } catch (ExecutionException error) {

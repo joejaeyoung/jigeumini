@@ -67,7 +67,7 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 Kafka는 EC2 또는 이에 해당하는 GCP Compute Engine VM 안의 Docker 컨테이너로 직접 운영한다. 관리형 Kafka는 현재 배포 후보에서 제외한다. VM 공급자·최종 SKU·리전은 실제 운영 전 확정한다. [운영안·비용 항목](../DEPLOYMENT_OPERATIONS.md), [이전 관리형 비교 조사](../research/KAFKA_DEPLOYMENT.md).
 
-2026-10-27에 이 배치를 GCP 서울 Compute Engine VM8대와 `pd-balanced` 1,760GiB로 환산한 [일 비용 초안](../research/GCP_DAILY_COST.md)을 작성했다. VM·할당 디스크 온디맨드 정가 **약 $35.38/일**이며 네트워크·LB·NAT·백업은 제외한다. 역할별 초기 사양과 계산은 해당 문서에 둔다. 실제 공급자·운영 SKU 확정이나 클라우드 처리량 검증을 뜻하지 않는다.
+2026-10-27 [GCP 서울 비용 비교](../research/GCP_DAILY_COST.md)를 재산정했다. 현재 3채널·30분 공개 PoC의 첫 클라우드 시험 후보는 기존 단일 호스트 Compose를 `e2-standard-2` 1대·`pd-balanced` 80GiB에 올리는 안이다. VM·디스크 정가는 **약 $2.41/일**이고 RF1/PG1의 단일 장애 지점을 감수한다. `e2-medium` 한 대는 현재 Docker 6GiB 사전 검사를 충족하지 않는다. VM8대를 모두 `e2-medium`으로 바꿔도 축소 디스크 510GiB에서 **약 $10.43/일**이며 VM당 지속 CPU는 1 vCPU 상당이다. 기존 8대 대형 HA 비교안은 1,760GiB 디스크 포함 **약 $35.38/일**이다. 모두 네트워크·LB·NAT·백업·세금 전 값이고 실제 클라우드 처리량과 장애 복구를 검증하지 않았다.
 
 ## 용량 설계의 기준
 

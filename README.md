@@ -294,7 +294,7 @@ Jira·운영 배포·리뷰 호출 자동화는 이 개인 PoC의 범위에 포�
 
 ## 다중 수집기 배정과 인계
 
-`./scripts/fleet preview <선정.json> <유효초>`는 DB/원천 호출 없는 계획 확인이다. `migrate`, `apply`, `status`, `worker`의 실행 경계·공개 최대3개 제한·소유권 상실·미확인 입력은 [수집기 임대 계약](docs/fleet/README.md)을 따른다. 전체 치지직 수집을 자동 활성화하지 않는다.
+`./scripts/fleet preview <선정.json> <유효초>`는 DB/원천 호출 없는 계획 확인이다. 공개 방송 계획은 별도 활성화 플래그 없이 명시적 `apply`와 `worker` 명령으로 실행한다. `migrate`, `apply`, `status`, `worker`의 실행 경계·공개 최대3개 제한·소유권 상실·미확인 입력은 [수집기 임대 계약](docs/fleet/README.md)을 따른다. 전체 치지직 수집을 자동 활성화하지 않는다.
 
 ## Kafka HA 로컬 장애 리허설
 

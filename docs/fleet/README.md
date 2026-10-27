@@ -4,15 +4,15 @@
 
 ## 활성화 경계
 
-선정 미리보기는 수집을 시작하지 않는다. `fleet preview`는 파일을 검증하며 DB/원천에 접속하지 않는다. `apply`는 명시적으로 배정 계획만 저장하고 `worker`가 임대를 획득해야 연결한다. 공식 채팅 어댑터는 미구현이므로 OFFICIAL_AUTHORIZED 계획을 거부한다. UNOFFICIAL_POC는 `FLEET_LIVE_ENABLED=true`가 있어야 apply/worker를 허용하며 유효 배정 최대3개·각 실행최대30분이다. SYNTHETIC의20채널 상한은 테스트에서만 사용한다. 이를실제전체방송수집권한으로해석하지않는다.
+선정 미리보기는 수집을 시작하지 않는다. `fleet preview`는 파일을 검증하며 DB/원천에 접속하지 않는다. `apply`는 명시적으로 배정 계획만 저장하고 `worker`가 임대를 획득해야 연결한다. 공개 방송 수집에는 별도 환경 플래그를 요구하지 않는다. 공식 채팅 어댑터는 미구현이므로 OFFICIAL_AUTHORIZED 계획을 거부한다. UNOFFICIAL_POC는 유효 배정 최대3개·각 실행최대30분이다. SYNTHETIC의20채널 상한은 테스트에서만 사용한다. 이를실제전체방송수집권한으로해석하지않는다.
 
 ```bash
 ./scripts/fleet migrate
 ./scripts/fleet preview work/selection.json 120
 ./scripts/fleet apply work/selection.json 120
 ./scripts/fleet status
-# 실제 공개 PoC를 별도 실행할 때만 UNOFFICIAL_POC의 최신 선정파일을 apply한다.
-# FLEET_LIVE_ENABLED=true ./scripts/fleet worker 1 60 work/fleet-result.json
+# 실제 공개 PoC를 실행할 때 UNOFFICIAL_POC의 최신 선정파일을 apply한다. worker는 원천에 연결한다.
+./scripts/fleet worker 1 60 work/fleet-result.json
 ```
 
 선정파일 SHA256이 정책/선정 버전이다. 불완전 스캔·유효기간초과·중복/과다 채널을 거부한다. 선정 갱신은 별도 apply이며 자동 원천 순회가 아니다. 팔로워 하한과선정순서는[선정 계약](../discovery/README.md),접근범위는[조사](../research/CHZZK_SCALE.md)를따른다. 선정파일은안전한메타데이터만포함한다.

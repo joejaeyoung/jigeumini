@@ -100,7 +100,8 @@ class FleetRuntimeIntegrationTest {
         var env = builder.environment();
         env.putAll(Map.of("PIPELINE_JDBC_URL", url, "PIPELINE_DB_USER", "chatpulse", "PIPELINE_DB_PASSWORD", "local-chatpulse",
                 "PIPELINE_BOOTSTRAP_SERVERS", "localhost:19092", "PIPELINE_TOPIC", topic, "PIPELINE_RUN_ID", "test-cli",
-                "FLEET_LIVE_ENABLED", "true", "OBSERVATIONS_ENABLED", Boolean.toString(observations), "OBSERVATIONS_TOPIC", observedTopic));
+                "OBSERVATIONS_ENABLED", Boolean.toString(observations), "OBSERVATIONS_TOPIC", observedTopic));
+        env.remove("FLEET_LIVE_ENABLED");
         env.remove("PIPELINE_DB_PASSWORD_FILE");
         env.remove("PIPELINE_SCHEMA_MODE");
         env.put("DEPLOYMENT_ENABLED", "false");

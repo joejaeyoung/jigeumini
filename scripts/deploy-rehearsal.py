@@ -113,11 +113,11 @@ class Rehearsal:
         try:
             status=self.compose('run','--rm','--no-deps','api','fleet','status')
             state=json.loads(status.stdout.strip().splitlines()[-1]);assert state['assigned']==0
-            denied=self.compose('run','--rm','--no-deps','api','fleet','worker','1','10','/tmp/disabled.json',check=False)
+            denied=self.compose('run','--rm','--no-deps','api','fleet','worker','4','10','/tmp/over-limit.json',check=False)
             diagnostic=json.loads(denied.stdout.strip().splitlines()[-1])
-            assert denied.returncode!=0 and diagnostic['error']=='FLEET_COMMAND_FAILED' and 'FLEET_LIVE_DISABLED' in diagnostic['codes']
-            return {'statusReadWithRuntimeSecret':True,'assigned':state['assigned'],'disabledWorkerRejected':True,'diagnosticCode':'FLEET_LIVE_DISABLED',
-                    'sourceMode':'DISABLED_PREFLIGHT','revision':self.candidate['revision']}
+            assert denied.returncode!=0 and diagnostic['error']=='FLEET_COMMAND_FAILED' and 'FLEET_LIVE_LIMIT' in diagnostic['codes']
+            return {'statusReadWithRuntimeSecret':True,'assigned':state['assigned'],'overLimitWorkerRejected':True,'diagnosticCode':'FLEET_LIVE_LIMIT',
+                    'sourceMode':'NO_ASSIGNMENT_PREFLIGHT','revision':self.candidate['revision']}
         finally:self.image(self.baseline)
     def audit(self):
         services={}

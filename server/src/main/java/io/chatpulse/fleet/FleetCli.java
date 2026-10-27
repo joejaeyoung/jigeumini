@@ -24,17 +24,15 @@ public final class FleetCli {
             byte[] bytes;try(var in=Files.newInputStream(path)){bytes=in.readNBytes(1_048_577);}if(bytes.length>1_048_576)throw new IllegalArgumentException("FLEET_INPUT_LIMIT");
             plan=FleetPlan.from(JSON.readValue(bytes,SelectionPolicy.Report.class),HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)),Integer.parseInt(args[2]),Instant.now());
             if(args[0].equals("preview")){System.out.println(JSON.writeValueAsString(Map.of("plan",plan,"activationAllowed",false,"scope","PLAN_ONLY_NO_DATABASE_OR_SOURCE_CALL")));return 0;}
-            if(plan.sourceMode()==SelectionPolicy.SourceMode.UNOFFICIAL_POC&&!"true".equals(env.get("FLEET_LIVE_ENABLED")))throw new IllegalArgumentException("FLEET_LIVE_DISABLED");
         } else if(!(Set.of("migrate","status").contains(args[0])&&args.length==1)&&!(args[0].equals("worker")&&args.length==4))throw new IllegalArgumentException("FLEET_ARGUMENTS");
-        if(args[0].equals("worker")&&!"true".equals(env.get("FLEET_LIVE_ENABLED")))throw new IllegalArgumentException("FLEET_LIVE_DISABLED");
+        var limits=args[0].equals("worker")?CollectorWorker.Limits.defaults(Integer.parseInt(args[1]),Duration.ofSeconds(Long.parseLong(args[2]))):null;
+        if(limits!=null&&limits.capacity()>3)throw new IllegalArgumentException("FLEET_LIVE_LIMIT");
         String url=env.getOrDefault("PIPELINE_JDBC_URL","jdbc:postgresql://localhost:15432/chatpulse"),user=env.getOrDefault("PIPELINE_DB_USER","chatpulse"),password=io.chatpulse.operations.RuntimeEnvironment.password(env);
         if(args[0].equals("migrate")){try(var ds=PostgresSupport.openMigrated(url,user,password)){System.out.println("{\"migrated\":true}");return 0;}}
         try(var ds=args[0].equals("worker")&&"VALIDATE".equals(env.get("PIPELINE_SCHEMA_MODE"))?PostgresSupport.openValidated(url,user,password):PostgresSupport.open(url,user,password,args[0].equals("status"))) {
             var store=new CollectorLeases(ds);
             if(args[0].equals("status")){System.out.println(JSON.writeValueAsString(store.status()));return 0;}
             if(args[0].equals("apply")){store.apply(plan);System.out.println(JSON.writeValueAsString(store.status()));return 0;}
-            var limits=CollectorWorker.Limits.defaults(Integer.parseInt(args[1]),Duration.ofSeconds(Long.parseLong(args[2])));
-            if(limits.capacity()>3)throw new IllegalArgumentException("FLEET_LIVE_LIMIT");
             Path output=Path.of(args[3]).toAbsolutePath();if(!Files.isDirectory(output.getParent()))throw new IllegalArgumentException("FLEET_OUTPUT_PARENT");Files.createFile(output);
             return FleetRuntime.run(store, ds, limits, env, output);
         }

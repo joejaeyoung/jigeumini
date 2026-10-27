@@ -2,7 +2,7 @@
 
 ## 샤딩 도입 판단 #68
 
-`technicaltest/sharding-adoption`, F01/F05/F06/F08/F10 → T02/T04/T06/T07/T08. [도입 판단과 재개 조건](pipeline/SHARDING_DECISION.md)에 현재 공용 P3·S1·group별 consumer 1명 유지 결정을 기록했다. #67의 단순 집계 분산 이득과 #65의 전체 제품 SQL 개선을 구분한다. 전체 제품 S3·혼합 배정·품질/전환/PITR 시험은 미실행이며 T07은 부분 검증을 유지한다. 기술 판단은 완료했고 제품 S3 도입은 보류했다. PR #73의 병합에는 변경 HEAD의 Claude 승인과 push/PR CI 성공을 적용한다.
+`technicaltest/sharding-adoption`, F01/F05/F06/F08/F10 → T02/T04/T06/T07/T08. [도입 판단과 재개 조건](pipeline/SHARDING_DECISION.md)에 현재 공용 P3·S1·group별 consumer 1명 유지 결정을 기록했다. #67의 단순 집계 분산 이득과 #65의 전체 제품 SQL 개선을 구분한다. 전체 제품 S3·혼합 배정·품질/전환/PITR 시험은 미실행이며 T07은 부분 검증을 유지한다. 기술 판단은 완료했고 제품 S3 도입은 보류했다. PR #73에서 변경 HEAD의 Claude 승인과 push/PR CI 성공을 병합 게이트로 적용한다.
 
 #63은 PR #72를 `881c482`로 develop에 병합하고 이슈를 완료했다. #47의 조건부 공식 인증과 #48/#49의 외부 인프라·운영 검증은 남아 있다.
 

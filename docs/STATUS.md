@@ -2,7 +2,7 @@
 
 ## 진행 중: 공개 방송 fleet 활성화 #74
 
-`feat/public-fleet-activation`, F13 → T13/T14/T11. 명시적 `apply`·`worker`에 중복으로 요구하던 `FLEET_LIVE_ENABLED`를 제거했다. [fleet 계약](fleet/README.md)의 공개 3채널·실행 30분·임대·Kafka 준비 경계는 유지한다. 플래그를 제거한 실행 JAR worker의 실제 Kafka/DB 통합 사례와 `./scripts/check` 단위 179·하네스 38, `./scripts/integration` 실제 DB/broker 155개가 로컬에서 통과했다. 공개 목록 자동 순회·전체 방송 포괄률·장기 운영은 이 변경의 검증 범위가 아니다. 최종 HEAD 리뷰와 push/PR CI를 병합 게이트로 남긴다.
+`feat/public-fleet-activation`, [PR #75](https://github.com/joejaeyoung/jigeumini/pull/75), F13 → T13/T14/T11. 명시적 `apply`·`worker`에 중복으로 요구하던 `FLEET_LIVE_ENABLED`를 제거했다. [fleet 계약](fleet/README.md)의 공개 3채널·실행 30분·임대·Kafka 준비 경계는 유지한다. 플래그를 제거한 실행 JAR worker의 실제 Kafka/DB 통합 사례와 로컬 `./scripts/check` 단위 180·하네스 38, `./scripts/integration` 실제 DB/broker 155개가 통과했다. 공개 목록 자동 순회·전체 방송 포괄률·장기 운영은 이 변경의 검증 범위가 아니다. 최종 HEAD 리뷰와 push/PR CI를 병합 게이트로 남긴다.
 
 ## 완료: 샤딩 도입 판단 #68
 

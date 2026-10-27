@@ -151,4 +151,4 @@ F01/F05/F06/F08/F10 → T02/T04/T06/T07/T08. [현재 도입 보류 결정](pipel
 
 ## 2026-10-27 공개 방송 fleet 활성화 #74
 
-F13 → T13/T14/T11. `apply`와 `worker` 자체가 실행 의사를 명시하고, `FleetPlan`·`CollectorLeases`·`CollectorWorker`가 소스 모드·공개 3채널·실행 시간·임대·발행 한도를 검증한다. 같은 의사를 `FLEET_LIVE_ENABLED`로 다시 확인하던 CLI 분기와 쓰이지 않는 진단 허용 코드를 제거한다. 배포 리허설의 안전한 거부 사례는 공개 4채널 요청의 `FLEET_LIVE_LIMIT`로 바꾼다. 새로운 활성화 추상화는 만들지 않는다. 실제 연결 여부는 명령 단계와 결과로 구분한다.
+F13 → T13/T14/T11. `apply`와 `worker` 자체가 실행 의사를 명시하고, `FleetPlan`·`CollectorLeases`·`CollectorWorker`가 소스 모드·공개 3채널·실행 시간·임대·발행 한도를 검증한다. 같은 의사를 `FLEET_LIVE_ENABLED`로 다시 확인하던 CLI 분기와 쓰이지 않는 진단 허용 코드를 제거한다. 배포 리허설의 안전한 거부 사례는 worker 용량 4 요청의 `FLEET_LIVE_LIMIT`로 바꾸고, 용량 검사를 DB 연결보다 앞에 둔다. 새로운 활성화 추상화는 만들지 않는다. 실제 연결 여부는 명령 단계와 결과로 구분한다.

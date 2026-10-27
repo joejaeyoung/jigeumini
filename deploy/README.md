@@ -33,7 +33,7 @@ migrate는 maintenance profile의 명시적 작업이며 API의 dependency에서
 
 ## 운영 구성·용량·검증
 
-[배포·용량·복구 운영안](../docs/DEPLOYMENT_OPERATIONS.md)에 초기/HA/관리형 후보, 역할별 자원 상한·비용 입력식, 경보/확대 중단 조건과 실제 복구 시간의 범위를 기록했다. 수집기는 동일 서버 이미지의 fleet 진입점을 사용하며 공개 원천 호출은 기본 비활성이다. 배포 worker도 schema VALIDATE를 사용하고 SIGTERM 결과 저장 전에 관측/telemetry/producer를 정리한다.
+[배포·용량·복구 운영안](../docs/DEPLOYMENT_OPERATIONS.md)에 초기/HA/관리형 후보, 역할별 자원 상한·비용 입력식, 경보/확대 중단 조건과 실제 복구 시간의 범위를 기록했다. 수집기는 동일 서버 이미지의 fleet 진입점을 사용한다. 공개 선정 계획을 `apply`한 뒤 명시적으로 `worker`를 실행하면 원천에 연결하며, 배포 리허설의 내부망은 외부 egress를 차단한다. 배포 worker도 schema VALIDATE를 사용하고 SIGTERM 결과 저장 전에 관측/telemetry/producer를 정리한다.
 
 ## 공식 근거
 

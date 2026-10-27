@@ -17,6 +17,11 @@ class FleetCliTest {
         var failure=assertThrows(Exception.class,()->FleetCli.execute(new String[]{"worker","1","10",output.toString()},Map.of("PIPELINE_JDBC_URL","invalid")));
         assertNotEquals("FLEET_LIVE_DISABLED",failure.getMessage());assertFalse(Files.exists(output));
     }
+    @Test void overCapacityWorkerIsRejectedBeforeDatabaseOrOutput() {
+        Path output=directory.resolve("over-limit.json");
+        var failure=assertThrows(IllegalArgumentException.class,()->FleetCli.execute(new String[]{"worker","4","10",output.toString()},Map.of("PIPELINE_JDBC_URL","invalid")));
+        assertEquals("FLEET_LIVE_LIMIT",failure.getMessage());assertFalse(Files.exists(output));
+    }
     @Test void previewDoesNotOpenDatabaseOrRequireLiveActivation() throws Exception {
         var now=Instant.now();
         var snapshot=new BroadcastCatalog.Snapshot("SYNTHETIC",now,now,BroadcastCatalog.Result.COMPLETE,1,1,0,List.of());

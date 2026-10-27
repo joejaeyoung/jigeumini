@@ -11,7 +11,7 @@
 ./scripts/fleet preview work/selection.json 120
 ./scripts/fleet apply work/selection.json 120
 ./scripts/fleet status
-# 실제 공개 PoC를 실행할 때 UNOFFICIAL_POC의 최신 선정파일을 apply한다.
+# 실제 공개 PoC를 실행할 때 UNOFFICIAL_POC의 최신 선정파일을 apply한다. worker는 원천에 연결한다.
 ./scripts/fleet worker 1 60 work/fleet-result.json
 ```
 

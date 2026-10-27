@@ -731,3 +731,7 @@ PR #73의 최종 `2416378`에 Claude APPROVE·push40443796765/PR40443800980 SUCC
 `./scripts/check`에서 단위 179·하네스 38과 JAR 빌드·문서/기술 목표 검사가 통과했다. `./scripts/integration`에서 실제 Kafka/PostgreSQL 155개가 7분 15초에 실패·오류·skip 0으로 통과했다. FleetRuntimeIntegrationTest는 자식 환경에서 `FLEET_LIVE_ENABLED`를 제거하고 실행 JAR worker가 정상 종료·진단 저장하는 사례를 포함한다. 검증은 합성 원천과 로컬 단일 broker/DB이며 실제 공개 방송 자동 발견·전체성·장기 안정성은 시험하지 않았다.
 
 배포 리허설의 옛 `FLEET_LIVE_DISABLED` 사전 거부는 플래그 제거 뒤 성립하지 않아 공개 용량 4의 `FLEET_LIVE_LIMIT`로 바꿨다. 로컬 `./scripts/fleet worker 4 10 work/over-limit-test.json`은 exit 2·`FLEET_LIVE_LIMIT`·결과 파일 미생성을 확인했다. 새 이미지의 전체 배포 리허설은 실행하지 않았다.
+
+`be71fac`의 Claude 정적 리뷰는 REQUEST_CHANGES·차단 2건이었다. deploy/README의 옛 기본 비활성 표현과 배포 리허설이 결과 파일 미생성을 검사한다는 과장을 정정했다. 비차단 의견을 반영해 worker 용량 검사를 DB 연결 전에 옮기고 단위 거부 사례를 추가했으며 fleet 과거 검증 문구와 README의 원천 연결 설명도 보완했다. 수정 HEAD는 다시 리뷰·CI를 적용한다.
+
+수정 후 `./scripts/check`에서 단위 180·하네스 38·JAR 빌드·문서/목표 검사가 재통과했다. 155개 Kafka/DB 전체 회귀는 용량 검사 이동 직전 코드에서 통과한 결과이며 수정 HEAD의 재실행은 push/PR CI로 확인한다.

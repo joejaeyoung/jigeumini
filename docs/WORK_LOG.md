@@ -723,3 +723,11 @@ Standards의 d4aa22c delta 검토는 규칙 위반0·판단 지적0이다. Spec�
 재배치 후 코드 리뷰에서 SHARDING_DECISION의 #63 진행 상태가 STATUS와 다른 점을 발견해 병합 완료로 정정했다.
 
 별도 로컬 프리뷰의 이전 develop `cca9877`에서 공개 방송 2채널을 90초 익명 READ로 수집했다. 수집기 PASS·Kafka ACK 완료 뒤 PostgreSQL ranking bucket에 채널별 16/78건, 합계 94건이 반영됐고 웹 API는 두 채널을 조회했다. 이전 합성 10건을 분리해 총 104건을 확인했다. 공개 전체 방송 포괄률이나 장기 수집 안정성을 입증한 실행은 아니다.
+
+## 2026-10-27 공개 방송 fleet 활성화 #74
+
+PR #73의 최종 `2416378`에 Claude APPROVE·push40443796765/PR40443800980 SUCCESS를 확인하고 develop `194f3ed`로 병합했으며 이슈 #68을 닫았다. 이후 새 `feat/public-fleet-activation`을 만들고 #74를 등록했다. F13 → T13/T14/T11. 명시적 `apply`·`worker`에 중복 요구하던 활성화 환경 변수를 제거하고 기존 3채널·30분·임대 한도는 유지한다. 플래그 없는 통합 실행과 전체 검사 결과를 PR에 연결한다.
+
+`./scripts/check`에서 단위 179·하네스 38과 JAR 빌드·문서/기술 목표 검사가 통과했다. `./scripts/integration`에서 실제 Kafka/PostgreSQL 155개가 7분 15초에 실패·오류·skip 0으로 통과했다. FleetRuntimeIntegrationTest는 자식 환경에서 `FLEET_LIVE_ENABLED`를 제거하고 실행 JAR worker가 정상 종료·진단 저장하는 사례를 포함한다. 검증은 합성 원천과 로컬 단일 broker/DB이며 실제 공개 방송 자동 발견·전체성·장기 안정성은 시험하지 않았다.
+
+배포 리허설의 옛 `FLEET_LIVE_DISABLED` 사전 거부는 플래그 제거 뒤 성립하지 않아 공개 용량 4의 `FLEET_LIVE_LIMIT`로 바꿨다. 로컬 `./scripts/fleet worker 4 10 work/over-limit-test.json`은 exit 2·`FLEET_LIVE_LIMIT`·결과 파일 미생성을 확인했다. 새 이미지의 전체 배포 리허설은 실행하지 않았다.

@@ -12,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FleetCliTest {
     @TempDir Path directory;
-    @Test void disabledWorkerIsRejectedBeforeOpeningDatabaseOrOutput() {
+    @Test void workerWithoutActivationFlagReachesDatabaseBeforeCreatingOutput() {
         Path output=directory.resolve("result.json");
-        var failure=assertThrows(IllegalArgumentException.class,()->FleetCli.execute(new String[]{"worker","1","10",output.toString()},Map.of("PIPELINE_JDBC_URL","invalid")));
-        assertEquals("FLEET_LIVE_DISABLED",failure.getMessage());assertFalse(Files.exists(output));
+        var failure=assertThrows(Exception.class,()->FleetCli.execute(new String[]{"worker","1","10",output.toString()},Map.of("PIPELINE_JDBC_URL","invalid")));
+        assertNotEquals("FLEET_LIVE_DISABLED",failure.getMessage());assertFalse(Files.exists(output));
     }
     @Test void previewDoesNotOpenDatabaseOrRequireLiveActivation() throws Exception {
         var now=Instant.now();

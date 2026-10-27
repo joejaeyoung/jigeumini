@@ -40,21 +40,17 @@ flowchart LR
 
 ## 운영 HA 배치 후보
 
+[EC2 호스트와 Docker 컨테이너를 분리한 HTML 배치도](INFRASTRUCTURE.html)는 이 후보와 현재 단일 호스트 구성을 탭으로 보여준다.
+
 ```mermaid
 flowchart TB
   EDGE[도메인·TLS gateway / 정적 웹] --> APP[API·분석 실행 자원]
   FLEET[임대 기반 수집 worker] --> BROKERS
-  subgraph BROKERS[Kafka · 3개 장애 영역]
-    B1[영역 A · broker 1]
-    B2[영역 B · broker 2]
-    B3[영역 C · broker 3]
+  subgraph BROKERS[Kafka · 3개 AZ / AZ별 EC2 1대]
+    B1[영역 A · broker 1 + controller 1 · 별도 컨테이너]
+    B2[영역 B · broker 2 + controller 2 · 별도 컨테이너]
+    B3[영역 C · broker 3 + controller 3 · 별도 컨테이너]
   end
-  subgraph QUORUM[전용 controller · 3개 장애 영역]
-    C1[영역 A · controller 1]
-    C2[영역 B · controller 2]
-    C3[영역 C · controller 3]
-  end
-  QUORUM -. metadata .-> BROKERS
   BROKERS --> APP
   APP --> PG[PostgreSQL primary]
   FLEET --> PG
@@ -67,7 +63,7 @@ flowchart TB
 
 Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다. controller 과반수와 데이터 ISR는 별개다. 한 영역 손실 시 남은 영역의 처리·저장·복구 부하를 따로 시험한다. [HA 계약](../pipeline/KAFKA_HA.md), [로컬 장애](../pipeline/KAFKA_HA_VERIFICATION.md), [디스크 손실](../pipeline/KAFKA_DISK_LOSS_VERIFICATION.md).
 
-여섯 Kafka 프로세스가 여섯 VM 확정을 뜻하지는 않는다. 역할별 자원·재시작 경계와 관리형 선택은 공급자·예산에 따라 정한다. Kafka HA만으로 서비스 전체 HA가 완성되지는 않는다. 현재 API/분석기1·PG1은 단일 장애 지점이다. PG standby/자동 전환, API 조회 역할 분리·다중 인스턴스, scheduler 소유권/관측 집계와 전체 DB pool 예산은 추가 설계·검증이 필요하다. API를 복제하면 소비자와 scheduler도 함께 복제된다.
+자체 운영 후보는 각 AZ의 EC2 한 대에 broker와 전용 controller를 별도 컨테이너로 함께 배치해 Kafka용 EC2를 총3대로 잡는다. 역할별 CPU·메모리·디스크·재시작은 구분하되, 한 호스트 손실은 해당 broker와 controller를 동시에 잃는다. 로컬6컨테이너 검증은 이 결합 장애나 실제 AZ 장애를 재현하지 않았으므로 한 영역 손실·복귀 때 ISR2와 controller2 유지, 복구 부하를 검증해야 한다. Kafka HA만으로 서비스 전체 HA가 완성되지는 않는다. 현재 API/분석기1·PG1은 단일 장애 지점이다. PG standby/자동 전환, API 조회 역할 분리·다중 인스턴스, scheduler 소유권/관측 집계와 전체 DB pool 예산은 추가 설계·검증이 필요하다. API를 복제하면 소비자와 scheduler도 함께 복제된다.
 
 관리형 선택 시 공급자의 복제/백업 책임과 프로젝트의 Kafka 버전·ELR·인증·topic 정책·복원 검사 호환성을 확인한다. 공급자/SKU/리전은 미확정이다. [운영안·비용 항목](../DEPLOYMENT_OPERATIONS.md), [공식 조사](../research/KAFKA_DEPLOYMENT.md).
 

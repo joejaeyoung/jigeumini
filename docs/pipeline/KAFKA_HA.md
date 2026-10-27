@@ -4,7 +4,7 @@
 
 ## 구성 결정과 근거
 
-운영 배치안은 전용 controller3개와 broker3개를 서로 다른3개 장애 도메인에 배치한다. controller와 broker의 CPU/메모리/디스크·재시작을 분리한다. 로컬 리허설은 같은 호스트의6개 컨테이너이므로 실제 AZ·호스트·디스크 손상 내구성을 증명하지 않는다.
+자체 운영 배치안은 3개 AZ에 Kafka용 EC2를 한 대씩 두고, 각 호스트에 broker1개와 전용 controller1개를 별도 컨테이너로 함께 실행한다. 총 broker3개/controller3개이며 프로세스별 CPU·메모리·디스크·재시작은 구분한다. 호스트 한 대 손실 시 broker와 controller가 동시에 사라지므로 두 역할의 결합 장애와 남은 ISR2/quorum2, 복구 부하를 실제 AZ에서 확인해야 한다. 로컬 리허설은 같은 호스트의6개 컨테이너이므로 실제 AZ·호스트·디스크 손상 내구성을 증명하지 않는다.
 
 Kafka4.1은 새 클러스터에서 ELR이 기본 활성화된다. 이 프로젝트의 HA 모드는 finalized `eligible.leader.replicas.version=1`을 검사하고 그 계약으로만 시작한다. unclean election은 false다. ELR을 비활성으로 간주해 결과를 해석하거나, minISR를 변경해 가용성 수치를 맞추지 않는다.
 
@@ -48,7 +48,7 @@ RF·설정 불일치는 실패하고 기존 값을 바꾸지 않는다. 토픽 �
 - 보존 계획은 `이벤트/초 × 실제 직렬화 bytes × 보존초 × RF`에 segment/index·복제·재배치 여유를 더해 계산한다. hot partition의 비율로 개별 디스크/네트워크 상한도 확인한다. 압축률은 실측 전 가정값으로 적는다.
 - partition3개에서 같은 group의4번째 consumer는 할당이 없을 수 있다. #11의 편향·공유DB 결과와 함께 판단하고 partition 증설 시 채널 key 배치·replay manifest가 바뀌는 계약을 따른다.
 - offline partition>0, ISR<minISR, controller 과반 상실은 즉시 수집 중단/미확인 점검 대상이다. under-replicated partition 지속, 디스크70%/85%, lag의 시간 환산이 보존 여유를 잠식하는 경우 경고/중단 기준을 정한다. 이 비율은 초기 운영 제안이며 자동 증설 수치가 아니다.
-- 정상 rolling은 한 번에 broker 또는 controller 한 대, 복귀 후 ISR3/quorum 정상과 소비 진행을 확인한 뒤 다음 대로 넘어간다. 두 역할을 한꺼번에 정지하지 않는다.
+- 정상 rolling은 한 번에 한 프로세스만 재시작하고 ISR3/quorum 정상과 소비 진행을 확인한 뒤 다음으로 넘어간다. 호스트·AZ 정비는 두 역할의 동시 손실로 취급하고 별도 결합 장애 절차와 승인 기준을 적용한다.
 - controller quorum 상실은 metadata 변경을 막는다. 이미 알려진 leader로의 데이터 요청이 언제까지 이어지는지는 별도 관측하며 “즉시 모든 발행 중단”으로 가정하지 않는다.
 
 ## 리팩토링·검증 범위

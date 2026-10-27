@@ -7,7 +7,7 @@
 | 구성 | 실행 단위와 경계 | 선택 기준 |
 |---|---|---|
 | 로컬·단일 호스트 실험 | NGINX 웹1, Spring API/분석기1, 별도 유한 fleet worker, PostgreSQL1, combined Kafka1/RF1 | 현재 이미지·복구 리허설. 호스트 장애 허용 없음 |
-| 자체 운영 HA 후보 | gateway/정적 웹, API/분석기1, fleet worker별 임대·예산, 3 controller+3 broker/RF3/minISR2, PostgreSQL primary+standby·외부 백업 | 3개 장애 영역 배치와 역할별 자원 격리. 여섯 Kafka 프로세스를 반드시 여섯 VM으로 배치해야 한다는 뜻은 아님 |
+| 자체 운영 HA 후보 | gateway/정적 웹, API/분석기1, fleet worker별 임대·예산, AZ별 Kafka EC2 한 대 안에 별도 broker/controller 컨테이너 각1개(RF3/minISR2), PostgreSQL primary+standby·외부 백업 | Kafka용 EC2 총3대·프로세스6개. 한 호스트 손실은 broker와 controller 동시 손실이므로 결합 장애·복구 부하 검증 필요 |
 | 관리형 후보 | 앱 컨테이너/VM, 관리형 Kafka3개 영역, 관리형 PostgreSQL standby·백업 | 운영 인력과 복구 책임 축소 여부를 비용에 포함. 서비스가 지원하는 Kafka 버전·ELR·토픽 설정·인증을 별도 호환성 시험 |
 
 현재 분석기와 HTTP API는 한 JVM이며 scheduler도 포함한다. 트래픽 증가 시 무조건 API 복제 수를 늘리지 않는다. 조회 전용 역할과 scheduler 중복/DB 경합 계약을 분리한 뒤 증설한다. 일반 consumer는 partition3개라 같은 group의 네 번째는 유휴가 될 수 있다. 원천별 worker는 임대가 중복 소유를 제한하며, #28의 검사/send 창·이미 전송한 입력·인계 공백 제한을 그대로 가진다.

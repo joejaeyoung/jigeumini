@@ -32,11 +32,11 @@
         <button class="tab" role="tab" aria-controls="candidate" aria-selected="true" id="tab-candidate">EC2 운영 후보</button>
         <button class="tab" role="tab" aria-controls="local" aria-selected="false" id="tab-local">현재 로컬 구성</button>
       </div>
-      <div class="legend" aria-label="범례"><span><i class="ec2"></i> EC2 호스트 / VM</span><span><i class="docker"></i> Docker 컨테이너</span><span><i class="managed"></i> 관리형 서비스 후보</span></div>
+      <div class="legend" aria-label="범례"><span><i class="ec2"></i> EC2 호스트 / VM</span><span><i class="docker"></i> Docker 컨테이너</span><span><i class="managed"></i> 외부 백업 서비스 후보</span></div>
     </div>
 
     <section class="view active" id="candidate" role="tabpanel" aria-labelledby="tab-candidate">
-      <div class="callout"><strong>설계 후보</strong><span>아래 EC2 배치는 장애 영역과 프로세스 경계를 설명하기 위한 예시입니다. Kafka는 AZ별 EC2 한 대에 broker와 전용 controller를 별도 컨테이너로 함께 둬 Kafka용 EC2가 총 3대입니다. 하단의 GCP 서울 요금은 같은 역할을 VM으로 환산한 임시 사양이며, 외부 배포나 AZ 장애 검증은 수행하지 않았습니다.</span></div>
+      <div class="callout"><strong>설계 후보</strong><span>Kafka는 관리형 서비스를 쓰지 않고 AZ별 EC2 한 대의 Docker 컨테이너에서 직접 운영합니다. 각 호스트에 broker와 전용 controller를 별도 컨테이너로 함께 둬 Kafka용 EC2는 총 3대입니다. 하단의 GCP 서울 요금은 같은 역할을 Compute Engine VM으로 환산한 임시 사양이며, 외부 배포나 AZ 장애 검증은 수행하지 않았습니다.</span></div>
       <div class="flow" aria-label="주요 데이터 흐름">
         <div class="flow-step"><span class="num">01 / SOURCE</span><b>치지직 공개 방송</b><small>HTTP + 익명 READ</small></div>
         <div class="flow-step"><span class="num">02 / INGEST</span><b>Fleet worker</b><small>임대·유한 버퍼</small></div>
@@ -70,7 +70,7 @@
         </div>
       </div>
       <div class="notes"><div class="note"><strong>Kafka HA 범위</strong><p>한 Kafka 호스트 손실은 broker와 controller 동시 손실입니다. 남은 ISR2·controller2와 복구 부하는 실제 AZ에서 검증해야 합니다.</p></div><div class="note"><strong>아직 단일 실행 단위</strong><p>Spring API·분석기·scheduler는 현재 한 JVM입니다. 이를 단순 복제하면 소비와 작업도 중복됩니다.</p></div><div class="note"><strong>미확정 운영 값</strong><p>아래 GCP 사양은 비용 비교용입니다. PG 자동 전환, 중앙 경보, 공급자와 운영 SKU는 #48·#49에서 검증·결정합니다.</p></div></div>
-      <section class="sizing" aria-label="GCP 서울 비용 환산"><h2>GCP 서울 환산 · 24시간 가동</h2><p>위 EC2 역할을 같은 수의 Compute Engine VM으로 옮긴 초기 후보. Linux E2 온디맨드, USD, 2026-10-27 조회.</p><div class="sizing-table-wrap"><table><thead><tr><th>역할</th><th>GCP VM · 메모리</th><th>대수</th><th>VM 일 비용</th></tr></thead><tbody><tr><td>웹</td><td>e2-medium · 공유 코어/4 GiB</td><td>1</td><td>$1.03</td></tr><tr><td>API·분석기</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>1</td><td>$4.13</td></tr><tr><td>수집 fleet</td><td>e2-standard-2 · 2 vCPU/8 GiB</td><td>1</td><td>$2.06</td></tr><tr><td>Kafka broker+controller</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>3</td><td>$12.38</td></tr><tr><td>PostgreSQL primary+standby</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>2</td><td>$8.25</td></tr><tr><td>pd-balanced 할당 디스크</td><td>Kafka 200 GiB×3 · PG 500 GiB×2 · boot 20 GiB×8</td><td>1,760 GiB</td><td>$7.52</td></tr><tr class="total"><td>VM + 디스크 합계</td><td>8 VM · 108 GiB RAM</td><td>24시간</td><td>$35.38/일</td></tr></tbody></table></div><p class="caveat">네트워크·LB·NAT·백업·세금은 제외. 500건/초의 24시간 처리 성능을 검증한 사양이 아닙니다. 계산 근거: docs/research/GCP_DAILY_COST.md.</p></section>
+      <section class="sizing" aria-label="GCP 서울 비용 환산"><h2>GCP 서울 환산 · 24시간 가동</h2><p>위 EC2 역할을 같은 수의 Compute Engine VM으로 옮긴 초기 후보. Kafka는 각 VM에서 자체 운영하며 관리형 Kafka 비용은 없습니다. Linux E2 온디맨드, USD, 2026-10-27 조회.</p><div class="sizing-table-wrap"><table><thead><tr><th>역할</th><th>GCP VM · 메모리</th><th>대수</th><th>VM 일 비용</th></tr></thead><tbody><tr><td>웹</td><td>e2-medium · 공유 코어/4 GiB</td><td>1</td><td>$1.03</td></tr><tr><td>API·분석기</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>1</td><td>$4.13</td></tr><tr><td>수집 fleet</td><td>e2-standard-2 · 2 vCPU/8 GiB</td><td>1</td><td>$2.06</td></tr><tr><td>Kafka broker+controller</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>3</td><td>$12.38</td></tr><tr><td>PostgreSQL primary+standby</td><td>e2-standard-4 · 4 vCPU/16 GiB</td><td>2</td><td>$8.25</td></tr><tr><td>pd-balanced 할당 디스크</td><td>Kafka 200 GiB×3 · PG 500 GiB×2 · boot 20 GiB×8</td><td>1,760 GiB</td><td>$7.52</td></tr><tr class="total"><td>VM + 디스크 합계</td><td>8 VM · 108 GiB RAM</td><td>24시간</td><td>$35.38/일</td></tr></tbody></table></div><p class="caveat">네트워크·LB·NAT·백업·세금은 제외. 500건/초의 24시간 처리 성능을 검증한 사양이 아닙니다. 계산 근거: docs/research/GCP_DAILY_COST.md.</p></section>
     </section>
 
     <section class="view" id="local" role="tabpanel" aria-labelledby="tab-local" hidden>

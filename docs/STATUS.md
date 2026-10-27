@@ -1,19 +1,22 @@
 # 진행 상태
 
-## 진행 중: 보존·용량 상한 #63
+## 샤딩 도입 판단 #68
+
+`technicaltest/sharding-adoption`, F01/F05/F06/F08/F10 → T02/T04/T06/T07/T08. [도입 판단과 재개 조건](pipeline/SHARDING_DECISION.md)에 현재 공용 P3·S1·group별 consumer 1명 유지 결정을 기록했다. #67의 단순 집계 분산 이득과 #65의 전체 제품 SQL 개선을 구분한다. 전체 제품 S3·혼합 배정·품질/전환/PITR 시험은 미실행이며 T07은 부분 검증을 유지한다. 기술 판단은 완료했고 제품 S3 도입은 보류했다. PR #73에서 변경 HEAD의 Claude 승인과 push/PR CI 성공을 병합 게이트로 적용한다.
+
+#63은 PR #72를 `881c482`로 develop에 병합하고 이슈를 완료했다. #47의 조건부 공식 인증과 #48/#49의 외부 인프라·운영 검증은 남아 있다.
+
+## 완료: 보존·용량 상한 #63
 
 `feat/retention-bounds`, [PR #72](https://github.com/joejaeyoung/jigeumini/pull/72). F01/F08/F10/F16 → T02/T04/T08/T16. live 입력 하한·72시간 ledger/8일 bucket, replay 결과 7일/metadata 30일·활성 자료 보호·유한 정리·공간/WAL 진단을 구현했다. [보존 계약](pipeline/RETENTION.md)·[공식 조사](research/DATA_RETENTION.md)·[검증 기록](pipeline/RETENTION_VERIFICATION.md).
 
-단위 179개·하네스 38개·실제 Kafka/DB 155개·웹 29개·Chromium 31개와 추가 보존 경계 13개·CLI 검증이 통과했다. 합성 DB의 각 집계 60,000행×3회·동시 입력 10,000건의 정합/정리와 Kafka 24시간/256MiB 설정의 실제 prefix 삭제를 확인했다. d4aa22c의 전체 제품 100채널·총 500건/s·API 10요청/s·1KiB·80% 편향 5분은 고유 150,000/물리 151,500·전체 대조·최종 24개 lag 0으로 통과했다. 순위/API p95는 236/62ms이며 fresh DB의 회귀 범위다. 로컬 검증을 마쳤으며 최종 HEAD 리뷰·CI는 PR의 병합 게이트로 확인한다. 최종 CI는 GitHub 계정 결제/사용 한도로 runner 시작 전에 차단됐다(push 40395092953/PR 40395103827). 사용자에게 설정 확인을 요청했으며 CI 성공 전에 병합하지 않는다. 보호 자료의 무기한 활성·장기 DB·외부 경보는 검증하지 않았다.
-
-2026-10-27 · 카테고리·리포트 병목 진단 #65
+단위 179개·하네스 38개·실제 Kafka/DB 155개·웹 29개·Chromium 31개와 추가 보존 경계 13개·CLI 검증이 통과했다. 합성 DB의 각 집계 60,000행×3회·동시 입력 10,000건의 정합/정리와 Kafka 24시간/256MiB 설정의 실제 prefix 삭제를 확인했다. d4aa22c의 전체 제품 100채널·총 500건/s·API 10요청/s·1KiB·80% 편향 5분은 고유 150,000/물리 151,500·전체 대조·최종 24개 lag 0으로 통과했다. 순위/API p95는 236/62ms이며 fresh DB의 회귀 범위다. 최종 HEAD `40a2f59` Claude APPROVE와 push [40398396829](https://github.com/joejaeyoung/jigeumini/actions/runs/40398396829)/PR [40398407831](https://github.com/joejaeyoung/jigeumini/actions/runs/40398407831) attempt 2 SUCCESS 뒤 PR #72를 `881c482`로 develop에 병합했다. 첫 실행의 결제 차단은 테스트 실패와 구분해 PR 기록에 보존했다. 보호 자료의 무기한 활성·장기 DB·외부 경보는 검증하지 않았다.
 
 ## 카테고리·리포트 비용 개선 #65
 
 `technicaltest/projection-bottlenecks` · [이슈 #65](https://github.com/joejaeyoung/jigeumini/issues/65) · [PR #71](https://github.com/joejaeyoung/jigeumini/pull/71). F05/F06/F10 및 F01/F13/F14 → T02/T07/T08/T11/T12/T14, F16 → T16.
 
 완료: 최종 `2f5f64d` Claude APPROVE·push40389325212/PR40389332785 SUCCESS 후 PR71을 `cca9877`로 develop에 병합했다. 단위179·실제Kafka/DB142·하네스38·웹29·Chromium31, 실패/오류/skip0을 양쪽 CI에서 확인했다. [최종 게이트](poc/evidence/projection-performance-2026-10-27/final-gates.json). [검증 문서](PROJECTION_PERFORMANCE_VERIFICATION.md)·[전체 실행 근거](poc/evidence/projection-performance-2026-10-27/summary.json)·[공식 조사](research/PROJECTION_PERFORMANCE.md)·[리팩토링](REFACTORING.md)에 범위와 실패 실행을 보존한다.
-
 - 카테고리 진행 UPSERT는 같은 입력에서 181,860→6,653회, 리포트 매 채팅 재귀속 CTE는 20,216→0회다. 새 관측 보정은 유지한다. 제품 V13의 최신 관측 정렬 색인, 멱등성·늦은 관측·품질·offset 원자 저장·별칭/만료 계약을 실제 DB로 확인했다.
 - 총 100건/s·API 10요청/s에서 **600채널 단기 2회와 5분**, 450채널 5분을 통과했다. **1,000채널은 입력 완료·전체 대조·최종 24개 lag 0에도 readiness 503 3회와 watermark 초과로 실패**했다. category 채팅 30.425초, report 채팅 28.410초/관측 29.418초다. 확인한 저부하 하한은 600이며 정확한 최대·600개 인기 방송 수용량은 미확정이다. 중간 구간 반복과 실제 원천/fleet·장기 DB 검증을 재개 조건으로 둔다.
 - 복합 100채널·500건/s·API 10요청/s·1KiB·80% 편향 5분을 재통과했다. 같은 API 10의 1,000건/s는 30초 준비+240초 측정, 고유 255,000/물리 257,550·전체 대조·최종 24개 lag 0으로 통과했다. 단회 4분의 상향 결과를 운영 최대치로 채택하지 않는다.
@@ -42,7 +45,7 @@
 
 `96d2cf4`의 [6회 재검증](poc/evidence/sharding-2026-10-26/report/summary.json)은 각 고유30,000·물리30,300·DB30,000·replay 차이0·정리를 통과했다. hot 물리24,300건을8,047/8,117/8,136건으로 실제 분산했다. 소비자3명 반복의 p95는 기존331/660ms, 명시 분할45/52ms였다. 소비자1명 단회는1,259→3,240ms로 악화됐다. 2,000건/s·15초·20채널 전체S3·단순 bucket/P3/RF1 범위이며 운영 최대치로 환산하지 않는다. [명령·환경·검증](poc/evidence/sharding-2026-10-26/execution.json).
 
-[도입 검토](pipeline/SHARDING_REVIEW.md)에 key·전체 shard 품질·consumer 병렬화·채널 잠금·전환·replay/복구 계약을 정리했다. 제품 후보는 hot S3/일반 S1이며 #65 병목 진단 뒤 [#68 전체 제품 검증](https://github.com/joejaeyoung/jigeumini/issues/68)에서 채택을 판단한다. 제품 샤딩은 활성화하지 않았다. [인프라 아키텍처](design/INFRASTRUCTURE.md)는 현재 배치·HA 후보·용량 근거를 연결하며 운영 사양/비용·서비스 전체 HA와 #48/#49 외부 검증은 미확정이다.
+[도입 검토](pipeline/SHARDING_REVIEW.md)에 key·전체 shard 품질·consumer 병렬화·채널 잠금·전환·replay/복구 계약을 정리했다. 제품 후보는 hot S3/일반 S1이다. #65 뒤 [#68 도입 판단](pipeline/SHARDING_DECISION.md)은 현재 보류이며 재개 문턱·고정 자원 대조·채택 게이트를 남긴다. 제품 샤딩은 활성화하지 않았다. [인프라 아키텍처](design/INFRASTRUCTURE.md)는 현재 배치·HA 후보·용량 근거를 연결하며 운영 사양/비용·서비스 전체 HA와 #48/#49 외부 검증은 미확정이다.
 
 ## 수집·집계·조회 용량 경계 #62
 
@@ -226,7 +229,7 @@ F03/F08 → T01/T02/T04/T08/T11의 기존 계약 보존 작업이며 기술 목�
 | T04 | 검증됨 | [이전 schema 복원·보존 입력 재생](DEPLOYMENT_MIGRATION_VERIFICATION.md), [재처리 후속 진단](pipeline/REPLAY_DIAGNOSTICS_VERIFICATION.md), [리포트 active 보호·정리](api/REPORTS_VERIFICATION.md), [관측7일 보존](api/OBSERVATIONS_VERIFICATION.md), [고정 입력 재처리](pipeline/REPLAY_VERIFICATION.md), [구조 변경 회귀](REFACTORING.md#회귀-검증), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [실제 디스크 유실](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md) , [physical PITR](POSTGRES_PITR_VERIFICATION.md) ; [#63 보존 경계·저장량](pipeline/RETENTION_VERIFICATION.md) | 동일 manifest 2회·알려진 bucket 대조, 고정 end·만료/재생성/증설 거부, 취소·worker 종료·live 불변  #45 단일 replica 삭제/재구성·ISR1 ACK거부·최신tail copy0의 SOURCE_UNAVAILABLE 확인.  #46 named target pause/승격·새6group 재정렬·보존입력10건 재생·선택 snapshot차이0·WAL누락/retention gap 거부. | 보존된 offset만 대상; 삭제 입력·미래 지연 입력·운영 snapshot 재현·HA는 범위 밖 |
 | T05 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [DLQ·DB 장애·재전달](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) | 형식/schema/충돌 격리·정상 입력 진행, ACK 전 차단, ACK 직후 종료·동일 failureId 중복, DB 복구와 원자 rollback | 단일 broker의 발행 거부 범위; #11 실제 단절·대량 오류/장시간 회복, 자동 정리 정책은 별도 |
 | T06 | 검증됨 | [고정/증설·복수 producer·늦은 시각](pipeline/EXPERIMENTS_VERIFICATION.md), [카테고리 결합](api/CATEGORIES_VERIFICATION.md) | 로컬3partition에서 채널 배치·append/eventTime 차이, 동일UUID 재전달·두producer bucket 정합성, 실제3→6증설의 키 이동·기존manifest 거부 | 실방송 전역 순서/외부 원천 중복 제거 보장이 아님; 운영 증설은 별도 이행 |
-| T07 | 부분 검증 | [편향 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md), [샤딩 재검증·도입 검토](pipeline/SHARDING_REVIEW.md), [6회 근거](poc/evidence/sharding-2026-10-26/report/summary.json), [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md); [#65 비용·경계 검증](PROJECTION_PERFORMANCE_VERIFICATION.md) | 기존 suffix의 hot 분산 해석을 철회. 명시 분할 실제3partition·DB/replay 일치. C3 p95 기존331/660ms·분할45/52ms, C1 단회1,259→3,240ms 악화. 전체 제품은2,000건/s 단기 통과에도 category lag 증가. #65: SQL 호출 감소와 80% 편향/균등 비교, FULL/NO_COUNTS 대조 및 역할별 CPU 대조. | 15초 단순 bucket 결과로 운영 채택/최대치를 정하지 않음. #65의 SQL/계측 진단을 반영해 #68에서 전체 shard의 품질·관측·전환/복구 비용을 판단한다. 단순 bucket 개선 배수를 제품에 적용하지 않는다. |
+| T07 | 부분 검증 | [편향 실험 정정](pipeline/EXPERIMENTS_VERIFICATION.md), [샤딩 재검증·도입 검토](pipeline/SHARDING_REVIEW.md), [6회 근거](poc/evidence/sharding-2026-10-26/report/summary.json), [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md), [용량 경계](CAPACITY_VERIFICATION.md); [#65 비용·경계 검증](PROJECTION_PERFORMANCE_VERIFICATION.md) | 기존 suffix의 hot 분산 해석을 철회. 명시 분할 실제3partition·DB/replay 일치. C3 p95 기존331/660ms·분할45/52ms, C1 단회1,259→3,240ms 악화. 전체 제품은2,000건/s 단기 통과에도 category lag 증가. #65: SQL 호출 감소와 80% 편향/균등 비교, FULL/NO_COUNTS 대조 및 역할별 CPU 대조. | 15초 단순 bucket 결과로 운영 채택/최대치를 정하지 않음. [#68 판단·재개 조건](pipeline/SHARDING_DECISION.md)은 현재 S1 유지다. 전체 제품 S3·품질·전환/복구는 미실행이며, 반복 hot partition 병목·새 목표 입력·다른 방송의 회복 지연에서 고정 자원 대조를 재개한다. 단순 bucket 개선 배수를 제품에 적용하지 않는다. |
 | T08 | 검증됨 | [trend 복구](pipeline/TREND_RECOVERY_VERIFICATION.md), [consumer1~4·독립 회복](pipeline/EXPERIMENTS_VERIFICATION.md), [복구 진단](pipeline/DLQ_VERIFICATION.md), [#39 회귀](poc/evidence/refactor-2026-10-26.json) , [전체 제품 부하](PRODUCT_LOAD_VERIFICATION.md); [시작 metadata 경계](research/FLEET_STARTUP.md), [용량 경계](CAPACITY_VERIFICATION.md); [#65 비용·경계 검증](PROJECTION_PERFORMANCE_VERIFICATION.md) ; [#63 보존 경계·저장량](pipeline/RETENTION_VERIFICATION.md) | partition 입력/commit률·lag·DB 지연·버퍼 나이, 4번째 유휴, A60초 중단 중 B진행·최종50000 일치·회복 표본상한  그룹6개·API8경로·30분 지속, STOP 중 양수 lag와 CONT 후 고정 end/ready 회복 확인. #62 6개 group의 지속 증가·watermark와 동시 API 부하로 pass/fail 경계 측정. #65: 유효 시계 600채널 저부하 반복/5분 통과, 1,000채널 readiness/watermark 실패. 미관측 비율과 전체 선택 p95를 분리한다. | 전체 제품 동시 부하는 #43 단일호스트·RF1 범위로 검증. 자동 확장 운영은 미검증. 표본 사이 순간 최대치 미확인. 장기 DB/실제 원천 용량은 별도. #65: 정확한 최대는 600~1,000 사이에서 미확정이며 더 긴 실행·실원천·fleet·장기 DB가 필요하다. |
 | T09 | 검증됨 | [독립 heartbeat/poll/membership 장애](pipeline/EXPERIMENTS_VERIFICATION.md) | 별도JVM STOP/CONT와 재할당/재가입, max.poll6초·처리8초 정지, consumer1→2→4→3의 commit/중복/DB/replay 정합성 | heartbeat A 지연은 부모 표본만 포함. 복구 시각은 최초0lag 표본까지 상한 |
 | T10 | 검증됨 | [ACK·commit 대조](pipeline/ACK_COMMIT.md), [HA 검증](pipeline/KAFKA_HA_VERIFICATION.md) , [실제 디스크 유실](pipeline/KAFKA_DISK_LOSS_VERIFICATION.md) | RF3/minISR2/ELR1에서 ACK0/1/all, ISR1·마지막leader상실/복구 후broker/DB집합차이0; ACK0확인보장없음·all의ISR1거절  #45 단일 replica 삭제/재구성·ISR1 ACK거부·최신tail copy0의 SOURCE_UNAVAILABLE 확인. | 소유 volume 삭제·단일호스트 범위; 물리 정전/bit 손상·AZ 내구성 미검증 |

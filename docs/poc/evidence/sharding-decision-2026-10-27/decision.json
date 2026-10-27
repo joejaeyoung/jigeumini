@@ -1,0 +1,49 @@
+{
+  "recordedDate": "2026-10-27 KST",
+  "base": "cca98772927a5c8e42717c2df3128829e827f83f",
+  "decision": "DEFER_PRODUCT_SHARDING",
+  "productDefault": {
+    "partitions": 3,
+    "shardsPerChannel": 1,
+    "consumersPerGroup": 1
+  },
+  "newLoadExecuted": false,
+  "productShardingCorrectnessExecuted": false,
+  "sources": [
+    {
+      "path": "docs/poc/evidence/sharding-2026-10-26/report/summary.json",
+      "sha256": "cf542617472d285bafd8933c97a7ca07aafec98ced18728b5b87ae9d54409a74",
+      "gitBlob": "a0237b79abfb945ec51777f8fbdfe5b4d06e317d"
+    },
+    {
+      "path": "docs/poc/evidence/projection-performance-2026-10-27/summary.json",
+      "sha256": "5646f764331ad3f91da8683ea161561fffe960fc9e924978f711cc4ad5f0b034",
+      "gitBlob": "b6ab807872b6eb7d40950cca2c02441df77dc83c"
+    },
+    {
+      "path": "docs/PROJECTION_PERFORMANCE_VERIFICATION.md",
+      "sha256": "2bada96c65815ce0fc3a21bbe23ccc3bda2cb558b79d74722ab0e2401299bcdc",
+      "gitBlob": "71f07bcec8a7d48658407468ea9b44cd96fb0b48"
+    },
+    {
+      "path": "docs/pipeline/SHARDING_REVIEW.md",
+      "sha256": "33d009a5e06564da8b478caa8cc50adb3b8b2239a979bd53cd540b6f51683d5d",
+      "gitBlob": "7c4920c8883b0daec303e11ce8239d8a50e98f34"
+    }
+  ],
+  "limitations": [
+    "SIMPLE_BUCKET_C3_BENEFIT_IS_NOT_PRODUCT_BENEFIT",
+    "C1_SINGLE_LAST_RUN_DOES_NOT_ISOLATE_CAUSE",
+    "PRODUCT_MIXED_ROUTING_QUALITY_TRANSITION_PITR_NOT_EXECUTED",
+    "REOPEN_THRESHOLDS_ARE_DESIGN_CHOICES_NOT_MEASUREMENTS",
+    "ADOPTION_THRESHOLDS_20_25_10_PERCENT_ARE_DESIGN_CHOICES_NOT_MEASUREMENTS"
+  ],
+  "sourcesVersion": "CONTENT_SNAPSHOT_IDENTIFIED_BY_GIT_BLOB_AND_SHA256; BASE_IS_THE_DECISION_START_POINT",
+  "technicalIds": [
+    "T02",
+    "T04",
+    "T06",
+    "T07",
+    "T08"
+  ]
+}

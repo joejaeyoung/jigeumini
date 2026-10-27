@@ -89,7 +89,7 @@ Kafka는 RF3/minISR2/acks=all, unclean=false, 프로젝트의 ELR1 계약이다.
 
 | 항목 | 다음 결정·검증 | 추적 |
 |---|---|---|
-| hot 방송 샤딩 | #67 단순 bucket 실제 분산 대조 완료. 전체 제품 품질·관측·replay·전환과 지속 부하 검증 | [도입 검토](../pipeline/SHARDING_REVIEW.md), [#68](https://github.com/joejaeyoung/jigeumini/issues/68), [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |
+| hot 방송 샤딩 | #65 뒤 현재 도입 보류, 공용 P3/S1 유지. 반복 hot partition 병목·새 목표 입력·다른 방송의 회복 지연에서 동일 자원 대조와 전체 제품 품질·전환·복구 검증 재개 | [도입 판단](../pipeline/SHARDING_DECISION.md), [선행 검토](../pipeline/SHARDING_REVIEW.md), [#68](https://github.com/joejaeyoung/jigeumini/issues/68) |
 | 저장·보존/복구 창 | dedup/replay 하한을 지키는 유한 정리, 장기 DB·Kafka 증가/삭제량 | [#63](https://github.com/joejaeyoung/jigeumini/issues/63) |
 | 수집 worker 수 | #64 버퍼·종료 개선 검증.후속 #65의600 저부하와100 복합을 구분하고 fleet/실원천 비용·실패 여유를 확인한 뒤 worker 수 결정 | [수집 메모리 검증](../COLLECTOR_MEMORY_VERIFICATION.md), [#64](https://github.com/joejaeyoung/jigeumini/issues/64) |
 | 처리 자원 | SQL 호출·관측 색인 개선 및 계측/CPU 대조 완료. 실제 GC는 Serial이며 API 증설은 6개 소비 group을 포함한 전체 JVM에 적용. 장기 DB와 외부 환경에서 재산정 | [#65](https://github.com/joejaeyoung/jigeumini/issues/65) |

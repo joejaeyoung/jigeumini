@@ -735,3 +735,5 @@ PR #73의 최종 `2416378`에 Claude APPROVE·push40443796765/PR40443800980 SUCC
 `be71fac`의 Claude 정적 리뷰는 REQUEST_CHANGES·차단 2건이었다. deploy/README의 옛 기본 비활성 표현과 배포 리허설이 결과 파일 미생성을 검사한다는 과장을 정정했다. 비차단 의견을 반영해 worker 용량 검사를 DB 연결 전에 옮기고 단위 거부 사례를 추가했으며 fleet 과거 검증 문구와 README의 원천 연결 설명도 보완했다. 수정 HEAD는 다시 리뷰·CI를 적용한다.
 
 수정 후 `./scripts/check`에서 단위 180·하네스 38·JAR 빌드·문서/목표 검사가 재통과했다. 155개 Kafka/DB 전체 회귀는 용량 검사 이동 직전 코드에서 통과한 결과이며 수정 HEAD의 재실행은 push/PR CI로 확인한다.
+
+최종 `76f8f09`은 Claude APPROVE·차단 0을 받았고 push40446695908/PR40446701299의 서버·웹·기술 목표·브랜치 정책 job이 모두 SUCCESS였다. PR #75를 `0807adc`로 develop에 병합하고 이슈 #74를 닫았다. STATUS의 완료 표기는 이 후속 문서 변경으로 병합 사실과 일치시킨다.

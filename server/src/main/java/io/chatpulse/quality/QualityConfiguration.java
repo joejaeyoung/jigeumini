@@ -1,5 +1,6 @@
 package io.chatpulse.quality;
 
+import io.chatpulse.quality.service.RankingQueryService;
 import com.zaxxer.hikari.HikariDataSource;
 import io.chatpulse.pipeline.*;
 import java.time.Clock;
@@ -19,6 +20,12 @@ class QualityConfiguration {
     CollectionTelemetry collectionTelemetry(HikariDataSource ds,BufferedKafkaPublisher publisher) {
         return new CollectionTelemetry(new JdbcTemplate(ds),transaction(ds),publisher);
     }
+    @Bean
+    @ConditionalOnProperty(name = "pipeline.role", havingValue = "analyzer")
+    RankingQueryService rankingQueryService(RankingStore store) {
+        return new RankingQueryService(store, Clock.systemUTC());
+    }
+
     @Bean
     @ConditionalOnProperty(name="pipeline.role",havingValue="analyzer")
     RankingStore rankingStore(HikariDataSource ds,PipelineProperties p) {

@@ -1,5 +1,7 @@
 package io.chatpulse.quality;
 
+import io.chatpulse.quality.controller.RankingController;
+import io.chatpulse.quality.service.RankingQueryService;
 import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class RankingControllerTest {
     @Test void rejectsInvalidWindowsLimitsCursorsAndUnfinishedActivityBeforeQuery() throws Exception {
-        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(store)).build();
+        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(new RankingQueryService(store, java.time.Clock.systemUTC()))).build();
         mvc.perform(get("/api/v1/rankings").param("window","10")).andExpect(status().isBadRequest());
         mvc.perform(get("/api/v1/rankings").param("limit","101")).andExpect(status().isBadRequest());
         mvc.perform(get("/api/v1/spikes").param("cursor","invalid")).andExpect(status().isBadRequest());
@@ -22,14 +24,14 @@ class RankingControllerTest {
         verifyNoInteractions(store);
     }
     @Test void warmupAndDbUnavailableAreDistinctAndDoNotExposeSql() throws Exception {
-        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(store)).build();
+        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(new RankingQueryService(store, java.time.Clock.systemUTC()))).build();
         when(store.rankings(60,20)).thenReturn(new RankingStore.RankingResponse(Instant.now().toString(),null,null,60,RankingStore.VERSION,"WARMING_UP",List.of(),List.of()));
         mvc.perform(get("/api/v1/rankings")).andExpect(status().isOk()).andExpect(header().string("Cache-Control","no-store")).andExpect(jsonPath("$.status").value("WARMING_UP"));
         when(store.rankings(60,20)).thenThrow(new DataAccessResourceFailureException("SYNTHETIC_PRIVATE_SQL"));
         mvc.perform(get("/api/v1/rankings")).andExpect(status().isServiceUnavailable()).andExpect(content().json("{\"reason\":\"QUERY_UNAVAILABLE\"}"));
     }
     @Test void validFeedCursorIsParsedIntoFixedPosition() throws Exception {
-        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(store)).build();
+        var store=mock(RankingStore.class);var mvc=MockMvcBuilders.standaloneSetup(new RankingController(new RankingQueryService(store, java.time.Clock.systemUTC()))).build();
         var at=Instant.parse("2026-10-25T00:00:00Z");var id=UUID.randomUUID();
         when(store.spikes(at,id,2)).thenReturn(new RankingStore.SpikeResponse(at.toString(),"READY",List.of(),null));
         mvc.perform(get("/api/v1/spikes").param("cursor",at+"|"+id).param("limit","2")).andExpect(status().isOk()).andExpect(jsonPath("$.events").isEmpty());
@@ -39,7 +41,7 @@ class RankingControllerTest {
         var store=mock(RankingStore.class);
         var at=Instant.parse("2026-10-25T12:00:59.999Z");
         var clock=java.time.Clock.fixed(at,java.time.ZoneOffset.UTC);
-        var mvc=MockMvcBuilders.standaloneSetup(new RankingController(store,clock)).build();
+        var mvc=MockMvcBuilders.standaloneSetup(new RankingController(new RankingQueryService(store, clock))).build();
         String id="a".repeat(32), path="/api/v1/channels/"+id+"/activity";
         var end=Instant.parse("2026-10-25T12:00:00Z");
         when(store.activity(id,end.minusSeconds(3600),end)).thenReturn(new RankingStore.ActivityResponse(id,at.toString(),end.minusSeconds(3600).toString(),end.toString(),List.of()));
